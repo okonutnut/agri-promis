@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
+import { GoogleSignInButton } from "./components/google-login";
 
 export default function Home() {
   return (
@@ -24,21 +25,7 @@ export default function Home() {
             <h1 className="text-sm font-medium text-center">
               Sign in to your account
             </h1>
-            <form>
-              <Button
-                type="submit"
-                className="flex items-center gap-2 cursor-pointer my-3 w-full"
-                variant={"outline"}
-              >
-                <Image
-                  src="/google-icon.png"
-                  alt="Google"
-                  width={20}
-                  height={20}
-                />
-                Login with Google
-              </Button>
-            </form>
+            <GoogleSignInButton />
           </CardContent>
           <p className="text-center text-xs text-gray-500">version: 0.0.1</p>
         </Card>

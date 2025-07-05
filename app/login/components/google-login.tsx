@@ -1,9 +1,11 @@
 "use client";
 
-import { useSupabase } from "@/app/supabase-provider";
+import { createClient } from "@/utils/supabase/client";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 export function GoogleSignInButton() {
-  const supabase = useSupabase();
+  const supabase = createClient();
 
   const login = async () => {
     await supabase.auth.signInWithOAuth({
@@ -14,5 +16,15 @@ export function GoogleSignInButton() {
     });
   };
 
-  return <button onClick={login}>Sign in with Google</button>;
+  return (
+    <Button
+      type="submit"
+      className="flex items-center gap-2 cursor-pointer my-3 w-full"
+      variant={"outline"}
+      onClick={login}
+    >
+      <Image src="/google-icon.png" alt="Google" width={20} height={20} />
+      Login with Google
+    </Button>
+  );
 }
