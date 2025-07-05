@@ -1,34 +1,47 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import Image from "next/image";
-import { GoogleSignInButton } from "./components/google-login";
+"use client";
 
-export default function Home() {
+import { GoogleSignInButton } from "./components/google-login";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import LoginCard from "./components/login-card";
+
+export default function LoginPage() {
+  const search = useSearchParams();
+  const [errorMsg, setErrorMsg] = useState("");
+
+  useEffect(() => {
+    // Check both search params and hash fragment
+    const errorCode =
+      search.get("error_code") ||
+      new URLSearchParams(window.location.hash.substring(1)).get("error_code");
+    console.log("Error code:", errorCode);
+
+    if (errorCode === "signup_disabled") {
+      setErrorMsg("Sign-up is disabled — you may only log in.");
+      toast.error("Failed to login");
+    }
+  }, [search]);
+
   return (
     <>
-      <div className="flex flex-col items-center justify-center h-screen gap-2">
-        <Card className="bg-white p-8 rounded-lg shadow-md w-full max-w-md gap-2 mx-4">
-          <CardHeader>
-            <Image
-              src="/logo.png"
-              alt="Agri-ProMIS"
-              width={150}
-              height={150}
-              className="mx-auto"
-            />
-          </CardHeader>
-          <CardContent>
-            <h1 className="text-3xl mb-4 font-bold text-center uppercase text-primary">
-              Agri-ProMIS
+      <div className="grid grid-cols-3 h-screen w-screen gap-2 overflow-hidden">
+        <section className="hidden md:block col-span-2 bg-[url('/farmers-1.png')] bg-cover bg-center relative">
+          <div className="absolute top-0 left-0 w-full h-full bg-black/50 flex flex-col items-center justify-center gap-2">
+            <h1 className="text-white text-4xl font-bold text-center max-w-[80%] mb-4">
+              Agricultural Project Monitoring and Implementation System
+              (Agri-ProMIS)
             </h1>
-            <h1 className="text-sm font-medium text-center">
-              Sign in to your account
-            </h1>
+            <p className="text-white text-md text-center italic">
+              &quot;Enhancing Agricultural Project Management&quot;
+            </p>
+          </div>
+        </section>
+        <section className="col-span-full md:col-span-1 h-screen flex items-center justify-center bg-white">
+          <LoginCard>
             <GoogleSignInButton />
-          </CardContent>
-          <p className="text-center text-xs text-gray-500">version: 0.0.1</p>
-        </Card>
+          </LoginCard>
+        </section>
       </div>
     </>
   );

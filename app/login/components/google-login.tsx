@@ -19,7 +19,7 @@ export function GoogleSignInButton() {
   return (
     <Button
       type="submit"
-      className="flex items-center gap-2 cursor-pointer my-3 w-full"
+      className="flex items-center gap-2 cursor-pointer my-3 min-w-[250px] mx-auto"
       variant={"outline"}
       onClick={login}
     >
