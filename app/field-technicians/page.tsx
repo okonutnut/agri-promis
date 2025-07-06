@@ -14,7 +14,6 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function FieldTechnicianPage() {
-  const panelWidth = "500px";
   const [panelOpen, setPanelOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<Payment | null>(null);
   const [isAddMode, setIsAddMode] = useState(false);
