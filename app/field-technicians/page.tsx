@@ -84,9 +84,12 @@ export default function FieldTechnicianPage() {
         />
       </ResizablePanel>
 
-      <ResizableHandle />
+      <ResizableHandle className={panelOpen ? "block" : "hidden"} />
 
       <ResizablePanel
+        defaultSize={panelOpen ? 30 : 0}
+        minSize={panelOpen ? 20 : 0}
+        maxSize={panelOpen ? 50 : 0}
         className={`${panelOpen ? "block" : "hidden"} overflow-auto`}
       >
         {isAddMode ? (
