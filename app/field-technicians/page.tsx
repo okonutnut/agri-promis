@@ -70,11 +70,8 @@ export default function FieldTechnicianPage() {
   ];
 
   return (
-    <ResizablePanelGroup
-      direction="horizontal"
-      className="min-h-[calc(100vh-64px)]"
-    >
-      <ResizablePanel className="w-full overflow-auto p-3">
+    <ResizablePanelGroup direction="horizontal">
+      <ResizablePanel className="w-full overflow-y-auto overflow-x-auto p-3">
         <DataTable
           columns={columns}
           data={data || []}
@@ -87,10 +84,10 @@ export default function FieldTechnicianPage() {
       <ResizableHandle className={panelOpen ? "block" : "hidden"} />
 
       <ResizablePanel
-        defaultSize={panelOpen ? 30 : 0}
-        minSize={panelOpen ? 20 : 0}
-        maxSize={panelOpen ? 50 : 0}
-        className={`${panelOpen ? "block" : "hidden"} overflow-auto`}
+        defaultSize={panelOpen ? 50 : 0}
+        minSize={panelOpen ? 25 : 0}
+        maxSize={panelOpen ? 95 : 0}
+        className={`${panelOpen ? "block" : "hidden"} overflow-x-auto`}
       >
         {isAddMode ? (
           <div className="flex flex-col h-full">
