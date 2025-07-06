@@ -1,12 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
-import { useEffect } from "react";
 
 export function PropertiesPanel({
+  panelName,
+  panelWidth,
   isOpen,
   onClose,
   children,
 }: {
+  panelName?: string;
+  panelWidth: string;
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
@@ -17,11 +20,13 @@ export function PropertiesPanel({
       <div
         className={`fixed right-0 top-16 h-[calc(100vh-4rem)] z-50 transition-all duration-300 ${
           isOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        } min-w-[${panelWidth ?? "300px"}]`}
       >
-        <div className="h-full min-w-[700px] max-w-[100%] border-l bg-background shadow-lg flex flex-col">
+        <div className="h-full w-full border-l max-w-full bg-background shadow-lg flex flex-col">
           <div className="p-4 border-b flex justify-between items-center">
-            <h3 className="font-semibold">Properties</h3>
+            <h3 className="font-semibold uppercase text-primary text-lg">
+              {panelName ?? "Properties"}
+            </h3>
             <Button variant="ghost" size="sm" onClick={onClose}>
               <X className="h-4 w-4" />
             </Button>
