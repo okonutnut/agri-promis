@@ -2,23 +2,19 @@
 
 import { GoogleSignInButton } from "./components/google-login";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { toast } from "sonner";
 import LoginCard from "./components/login-card";
 
 export default function LoginPage() {
   const search = useSearchParams();
-  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
-    // Check both search params and hash fragment
     const errorCode =
       search.get("error_code") ||
       new URLSearchParams(window.location.hash.substring(1)).get("error_code");
-    console.log("Error code:", errorCode);
 
     if (errorCode === "signup_disabled") {
-      setErrorMsg("Sign-up is disabled — you may only log in.");
       toast.error("Failed to login");
     }
   }, [search]);
