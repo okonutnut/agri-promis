@@ -15,11 +15,13 @@ export default function AdminDashboardLayout({
 }>) {
   return (
     <SidebarProvider>
-      <AppSidebar />
-      <main className="w-full h-screen relative">
-        <Navbar pageTitle="Field Technicians" />
-        {children}
-      </main>
+      <div className="flex h-screen w-full">
+        <AppSidebar />
+        <div className="flex-1 flex flex-col min-w-0">
+          <Navbar pageTitle="Field Technicians" />
+          <main className="flex-1 overflow-hidden">{children}</main>
+        </div>
+      </div>
     </SidebarProvider>
   );
 }

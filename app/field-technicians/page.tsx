@@ -1,7 +1,5 @@
 "use client";
 
-import { ContentWithPanel } from "@/components/custom/layout/content-with-panel";
-import { PropertiesPanel } from "@/components/custom/layout/properties-panel";
 import { useState } from "react";
 import { DataTable } from "./components/data-table";
 import { columns, Payment } from "./components/columns";
@@ -70,113 +68,129 @@ export default function FieldTechnicianPage() {
   ];
 
   return (
-    <ResizablePanelGroup direction="horizontal">
-      <ResizablePanel className="w-full overflow-y-auto overflow-x-auto p-3">
-        <DataTable
-          columns={columns}
-          data={data || []}
-          onRowSelect={handleRowSelect}
-          onAdd={handleAdd}
-          isAddMode={isAddMode}
-        />
-      </ResizablePanel>
+    <div className="relative h-full w-full">
+      <ResizablePanelGroup direction="horizontal" className="h-full">
+        <ResizablePanel
+          defaultSize={100}
+          className="w-full overflow-y-auto overflow-x-auto p-3"
+        >
+          <DataTable
+            columns={columns}
+            data={data || []}
+            onRowSelect={handleRowSelect}
+            onAdd={handleAdd}
+            isAddMode={isAddMode}
+          />
+        </ResizablePanel>
 
-      <ResizableHandle className={panelOpen ? "block" : "hidden"} />
+        <ResizableHandle className={panelOpen ? "block" : "hidden"} />
 
-      <ResizablePanel
-        defaultSize={panelOpen ? 50 : 0}
-        minSize={panelOpen ? 25 : 0}
-        maxSize={panelOpen ? 95 : 0}
-        className={`${panelOpen ? "block" : "hidden"} overflow-x-auto`}
-      >
-        {isAddMode ? (
-          <div className="flex flex-col h-full">
-            <div className="text-sm flex justify-between items-center border-b p-3 text-primary uppercase font-semibold">
-              Add Payment
-              <X
-                className="cursor-pointer text-slate-900"
-                onClick={handlePanelClose}
-              />
-            </div>
-            <form className="p-3 space-y-4">
-              <div>
-                <label className="text-sm font-medium">Email</label>
-                <input
-                  type="email"
-                  className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter email"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Amount</label>
-                <input
-                  type="number"
-                  className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter amount"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Status</label>
-                <select className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option value="pending">Pending</option>
-                  <option value="processing">Processing</option>
-                  <option value="success">Success</option>
-                  <option value="failed">Failed</option>
-                </select>
-              </div>
-            </form>
-            <div className="flex gap-2 border-t p-3">
-              <Button type="submit" className="flex-1 py-2 px-4">
+        <ResizablePanel
+          defaultSize={panelOpen ? 50 : 0}
+          minSize={panelOpen ? 25 : 0}
+          maxSize={panelOpen ? 95 : 0}
+          className={`${panelOpen ? "block" : "hidden"} overflow-x-auto`}
+        >
+          {/* Placeholder for resizable panel space */}
+        </ResizablePanel>
+      </ResizablePanelGroup>
+
+      {/* Absolute positioned right panel */}
+      {panelOpen && (
+        <div className="absolute top-0 right-0 h-full w-[30%] bg-white border-l shadow-lg overflow-x-auto">
+          {isAddMode ? (
+            <div className="flex flex-col h-full">
+              <div className="text-sm flex justify-between items-center border-b p-3 text-primary uppercase font-semibold">
                 Add Payment
-              </Button>
-              <Button
-                type="button"
-                onClick={handlePanelClose}
-                className="flex-1"
-                variant="outline"
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        ) : selectedRow ? (
-          <div className="space-y-4">
-            <div>
-              <div className="text-sm mb-2 flex justify-between items-center border-b p-3 text-primary uppercase font-semibold">
-                Payment Details
                 <X
                   className="cursor-pointer text-slate-900"
                   onClick={handlePanelClose}
                 />
               </div>
-              <div className="space-y-2 p-3">
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">ID</span>
-                  <span className="text-sm">{selectedRow.id}</span>
+              <form className="p-3 space-y-4">
+                <div>
+                  <label className="text-sm font-medium">Email</label>
+                  <input
+                    type="email"
+                    className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter email"
+                  />
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Email</span>
-                  <span className="text-sm">{selectedRow.email}</span>
+                <div>
+                  <label className="text-sm font-medium">Amount</label>
+                  <input
+                    type="number"
+                    className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter amount"
+                  />
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Amount</span>
-                  <span className="text-sm">${selectedRow.amount}</span>
+                <div>
+                  <label className="text-sm font-medium">Status</label>
+                  <select className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="pending">Pending</option>
+                    <option value="processing">Processing</option>
+                    <option value="success">Success</option>
+                    <option value="failed">Failed</option>
+                  </select>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Status</span>
-                  <span className="text-sm capitalize">
-                    {selectedRow.status}
-                  </span>
+              </form>
+              <div className="flex gap-2 border-t p-3">
+                <Button type="submit" className="flex-1 py-2 px-4">
+                  Add Payment
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handlePanelClose}
+                  className="flex-1"
+                  variant="outline"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          ) : selectedRow ? (
+            <div className="space-y-4">
+              <div>
+                <div className="text-sm mb-2 flex justify-between items-center border-b p-3 text-primary uppercase font-semibold">
+                  Payment Details
+                  <X
+                    className="cursor-pointer text-slate-900"
+                    onClick={handlePanelClose}
+                  />
+                </div>
+                <div className="space-y-2 p-3">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">ID</span>
+                    <span className="text-sm">{selectedRow.id}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Email</span>
+                    <span className="text-sm">{selectedRow.email}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      Amount
+                    </span>
+                    <span className="text-sm">${selectedRow.amount}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      Status
+                    </span>
+                    <span className="text-sm capitalize">
+                      {selectedRow.status}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ) : (
-          <div className="text-center text-muted-foreground">
-            Select a row to view details
-          </div>
-        )}
-      </ResizablePanel>
-    </ResizablePanelGroup>
+          ) : (
+            <div className="text-center text-muted-foreground">
+              Select a row to view details
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

@@ -14,7 +14,7 @@ export default function NavbarUserImage() {
         setAvatarUrl(user.user.user_metadata.avatar_url);
       }
     });
-  }, []);
+  }, [avatarUrl]);
 
   return (
     <Image
