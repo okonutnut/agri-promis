@@ -11,8 +11,24 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { BookUser, FileUser, House, MapPin, Plus } from "lucide-react";
-import Image from "next/image";
+import {
+  BookUser,
+  ChevronDown,
+  ChevronsUpDown,
+  ChevronUp,
+  FileUser,
+  House,
+  MapPin,
+  Monitor,
+  Plus,
+  User2,
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 export function AppSidebar() {
   const navigation = [
@@ -36,20 +52,38 @@ export function AppSidebar() {
   const programs = [{ title: "Corn Program", href: "/programs/corn" }];
   return (
     <Sidebar>
-      <SidebarHeader className="flex flex-row items-center justify-center border-b p-2">
-        <span>
-          <Image
-            src="/logo.png"
-            alt="logo"
-            width={80}
-            height={80}
-            className="mx-auto"
-          />
-        </span>
-        <h5 className="text-sm font-medium text-center">
-          Agricultural Project Implementation &amp; Monitoring System
-        </h5>
+      {/* HEADER */}
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton className="h-10 py-6">
+                  <Monitor className="mr-2" />
+                  <div className="text-xs flex flex-col items-start gap-1 font-semibold">
+                    Corn Distribution
+                    <span className="font-normal">Program</span>
+                  </div>
+                  <ChevronsUpDown className="ml-auto" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="min-w-0 w-[var(--radix-popper-anchor-width)]"
+                align="start"
+              >
+                <DropdownMenuItem className="w-full">
+                  <span>Acme Inc</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="w-full">
+                  <span>Acme Corp.</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
+
+      {/* CONTENT */}
       <SidebarContent>
         {/* NAVIGATIONS */}
         <SidebarGroup>
@@ -91,7 +125,38 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter />
+
+      {/* FOOTER */}
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton>
+                  <User2 /> Username
+                  <ChevronUp className="ml-auto" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                side="top"
+                align="start"
+                style={{ width: "var(--radix-popper-anchor-width)" }}
+                className="min-w-0 p-0"
+              >
+                <DropdownMenuItem className="w-full">
+                  <span>Account</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="w-full">
+                  <span>Billing</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="w-full">
+                  <span>Sign out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 }
