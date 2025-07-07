@@ -16,13 +16,6 @@ export default function Navbar({ pageTitle }: NavbarProps) {
           {pageTitle}
         </h1>
       </div>
-      <Button
-        variant="ghost"
-        className="h-10 w-10 p-0 rounded-full cursor-pointer"
-        onClick={() => alert()}
-      >
-        <NavbarUserImage />
-      </Button>
     </nav>
   );
 }

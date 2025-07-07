@@ -29,6 +29,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import NavbarUserImage from "./custom/navbar-user-image";
+import SidebarLogoutButton from "./sidebar/sidebar-logout-button";
 
 export function AppSidebar() {
   const navigation = [
@@ -132,14 +134,13 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton>
-                  <User2 /> Username
+                <SidebarMenuButton className="h-10 py-6">
+                  <NavbarUserImage /> Username
                   <ChevronUp className="ml-auto" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 side="top"
-                align="start"
                 style={{ width: "var(--radix-popper-anchor-width)" }}
                 className="min-w-0 p-0"
               >
@@ -149,9 +150,7 @@ export function AppSidebar() {
                 <DropdownMenuItem className="w-full">
                   <span>Billing</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="w-full">
-                  <span>Sign out</span>
-                </DropdownMenuItem>
+                <SidebarLogoutButton />
               </DropdownMenuContent>
             </DropdownMenu>
           </SidebarMenuItem>
