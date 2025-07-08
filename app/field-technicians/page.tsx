@@ -1,22 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { DataTable } from "./components/data-table";
-import { columns, Payment } from "./components/columns";
+import { DataTable } from "./table/data-table";
+import { columns } from "./table/columns";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useFetchAllFieldTechnician } from "./hook/field-tech.hook";
+import { UserProfile } from "./types";
+import { AddFieldTechnicianForm } from "./components/add-technician-form";
+import { Skeleton } from "@/components/ui/skeleton";
+import ViewTechnicianForm from "./components/view-technician-form";
 
 export default function FieldTechnicianPage() {
   const [panelOpen, setPanelOpen] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<Payment | null>(null);
+  const [selectedRow, setSelectedRow] = useState<UserProfile | null>(null);
   const [isAddMode, setIsAddMode] = useState(false);
 
-  const handleRowSelect = (row: Payment) => {
+  const handleRowSelect = (row: UserProfile) => {
     setSelectedRow(row);
     setIsAddMode(false);
     setPanelOpen(true);
@@ -34,163 +38,78 @@ export default function FieldTechnicianPage() {
     setSelectedRow(null);
   };
 
-  const data: Payment[] = [
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    {
-      id: "a1b2c3d4",
-      amount: 250,
-      status: "success",
-      email: "jane.doe@example.com",
-    },
-    {
-      id: "e5f6g7h8",
-      amount: 75,
-      status: "failed",
-      email: "john.smith@example.com",
-    },
-    {
-      id: "i9j0k1l2",
-      amount: 180,
-      status: "pending",
-      email: "alice.wonder@example.com",
-    },
-    {
-      id: "m3n4o5p6",
-      amount: 320,
-      status: "success",
-      email: "bob.builder@example.com",
-    },
-  ];
+  const data = useFetchAllFieldTechnician();
+  console.log("Data fetched:", data.data);
 
   return (
     <div className="relative h-full w-full">
       <ResizablePanelGroup direction="horizontal" className="h-full">
-        <ResizablePanel
-          defaultSize={100}
-          className="w-full overflow-y-auto overflow-x-auto p-3"
-        >
-          <DataTable
-            columns={columns}
-            data={data || []}
-            onRowSelect={handleRowSelect}
-            onAdd={handleAdd}
-            isAddMode={isAddMode}
-          />
+        <ResizablePanel className="w-full overflow-y-auto overflow-x-auto p-3">
+          {data.isLoading ? (
+            <>
+              <Skeleton className="h-16 w-full mb-4" />
+              <Skeleton className="h-96 w-full" />
+            </>
+          ) : (
+            <DataTable
+              columns={columns}
+              data={data.data || []}
+              onRowSelect={handleRowSelect}
+              onAdd={handleAdd}
+              isAddMode={isAddMode}
+            />
+          )}
         </ResizablePanel>
 
-        <ResizableHandle className={panelOpen ? "block" : "hidden"} />
+        <ResizableHandle
+          className={panelOpen ? "block" : "hidden"}
+          withHandle={panelOpen}
+        />
 
         <ResizablePanel
-          defaultSize={panelOpen ? 50 : 0}
-          minSize={panelOpen ? 25 : 0}
+          minSize={panelOpen ? 50 : 0}
           maxSize={panelOpen ? 95 : 0}
           className={`${panelOpen ? "block" : "hidden"} overflow-x-auto`}
         >
-          {/* Placeholder for resizable panel space */}
-        </ResizablePanel>
-      </ResizablePanelGroup>
-
-      {/* Absolute positioned right panel */}
-      {panelOpen && (
-        <div className="absolute top-0 right-0 h-full w-[30%] bg-white border-l shadow-lg overflow-x-auto">
-          {isAddMode ? (
-            <div className="flex flex-col h-full">
-              <div className="text-sm flex justify-between items-center border-b p-3 text-primary uppercase font-semibold">
-                Add Payment
-                <X
-                  className="cursor-pointer text-slate-900"
-                  onClick={handlePanelClose}
-                />
-              </div>
-              <form className="p-3 space-y-4">
-                <div>
-                  <label className="text-sm font-medium">Email</label>
-                  <input
-                    type="email"
-                    className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter email"
+          {panelOpen && (
+            <div>
+              {isAddMode ? (
+                <div className="flex flex-col h-full">
+                  <div className="text-sm flex justify-between items-center border-b p-3 text-primary uppercase font-semibold">
+                    Add New Field Technician
+                    <X
+                      className="cursor-pointer text-slate-900"
+                      onClick={handlePanelClose}
+                    />
+                  </div>
+                  <AddFieldTechnicianForm
+                    isAddMode={isAddMode}
+                    h-16
+                    onClose={handlePanelClose}
                   />
                 </div>
-                <div>
-                  <label className="text-sm font-medium">Amount</label>
-                  <input
-                    type="number"
-                    className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter amount"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Status</label>
-                  <select className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="pending">Pending</option>
-                    <option value="processing">Processing</option>
-                    <option value="success">Success</option>
-                    <option value="failed">Failed</option>
-                  </select>
-                </div>
-              </form>
-              <div className="flex gap-2 border-t p-3">
-                <Button type="submit" className="flex-1 py-2 px-4">
-                  Add Payment
-                </Button>
-                <Button
-                  type="button"
-                  onClick={handlePanelClose}
-                  className="flex-1"
-                  variant="outline"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          ) : selectedRow ? (
-            <div className="space-y-4">
-              <div>
-                <div className="text-sm mb-2 flex justify-between items-center border-b p-3 text-primary uppercase font-semibold">
-                  Payment Details
-                  <X
-                    className="cursor-pointer text-slate-900"
-                    onClick={handlePanelClose}
-                  />
-                </div>
-                <div className="space-y-2 p-3">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">ID</span>
-                    <span className="text-sm">{selectedRow.id}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Email</span>
-                    <span className="text-sm">{selectedRow.email}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">
-                      Amount
-                    </span>
-                    <span className="text-sm">${selectedRow.amount}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">
-                      Status
-                    </span>
-                    <span className="text-sm capitalize">
-                      {selectedRow.status}
-                    </span>
+              ) : selectedRow ? (
+                <div className="space-y-4">
+                  <div>
+                    <div className="text-sm mb-2 flex justify-between items-center border-b p-3 text-primary uppercase font-semibold">
+                      Field Technician Details
+                      <X
+                        className="cursor-pointer text-slate-900"
+                        onClick={handlePanelClose}
+                      />
+                    </div>
+                    <ViewTechnicianForm selectedRow={selectedRow} />
                   </div>
                 </div>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center text-muted-foreground">
-              Select a row to view details
+              ) : (
+                <div className="text-center text-muted-foreground">
+                  Select a row to view details
+                </div>
+              )}
             </div>
           )}
-        </div>
-      )}
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   );
 }

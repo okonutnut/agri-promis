@@ -13,15 +13,12 @@ import {
 } from "@/components/ui/sidebar";
 import {
   BookUser,
-  ChevronDown,
   ChevronsUpDown,
   ChevronUp,
   FileUser,
   House,
   MapPin,
-  Monitor,
   Plus,
-  User2,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -61,7 +58,6 @@ export function AppSidebar() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton className="h-10 py-6">
-                  <Monitor className="mr-2" />
                   <div className="text-xs flex flex-col items-start gap-1 font-semibold">
                     Corn Distribution
                     <span className="font-normal">Program</span>
@@ -86,7 +82,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       {/* CONTENT */}
-      <SidebarContent>
+      <SidebarContent className="border-y border-slate-200 overflow-y-auto">
         {/* NAVIGATIONS */}
         <SidebarGroup>
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>

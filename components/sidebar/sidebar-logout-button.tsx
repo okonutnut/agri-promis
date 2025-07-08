@@ -12,7 +12,9 @@ export default function SidebarLogoutButton() {
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
-      toast.error("Error logging out");
+      toast.error("Error logging out", {
+        position: "bottom-right",
+      });
       console.error(error);
     } else {
       toast.success("Logged out", {

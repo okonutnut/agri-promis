@@ -1,6 +1,6 @@
 "use client";
 
-import NavbarUserImage from "./navbar-user-image";
+import { BellIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import { SidebarTrigger } from "../ui/sidebar";
 
@@ -16,6 +16,11 @@ export default function Navbar({ pageTitle }: NavbarProps) {
           {pageTitle}
         </h1>
       </div>
+
+      <Button className="h-10 w-10 p-0 relative rounded-full" variant="ghost">
+        <BellIcon className="h-5 w-5" />
+        <span className="sr-only">Notifications</span>
+      </Button>
     </nav>
   );
 }

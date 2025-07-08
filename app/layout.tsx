@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Poppins } from "next/font/google";
 import { Toaster } from "sonner";
+import ReactQueryProvider from "@/components/reactQueryProvider";
 
 export const metadata: Metadata = {
   title: "Agri-ProMIS",
@@ -22,8 +23,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${poppins.variable} antialiased`}>
-        <Toaster richColors position="top-right" />
-        {children}
+        <ReactQueryProvider>
+          <Toaster richColors position="top-right" />
+          {children}
+        </ReactQueryProvider>
       </body>
     </html>
   );
