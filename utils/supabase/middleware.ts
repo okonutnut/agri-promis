@@ -57,6 +57,13 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // If user is authenticated and on agriculturist root, redirect to agriculturist dashboard
+  if (user && request.nextUrl.pathname === "/agriculturist") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/agriculturist/dashboard";
+    return NextResponse.redirect(url);
+  }
+
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
   // If you're creating a new response object with NextResponse.next() make sure to:
   // 1. Pass the request in it, like so:

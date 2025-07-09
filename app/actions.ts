@@ -14,7 +14,13 @@ export async function GetUserRole() {
       .eq("id", user.user?.id)
       .single();
     if (userData) {
-      redirect("/dashboard");
+      if (userData.role === "agriculturist") {
+        redirect("/agriculturist");
+      } else if (userData.role === "field_technician") {
+        redirect("/field-technicians");
+      } else {
+        redirect("/login");
+      }
     }
   } else {
     redirect("/login");

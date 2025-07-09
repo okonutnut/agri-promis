@@ -1,0 +1,37 @@
+{
+  "agriculturist": {
+    "navigations": [
+      {
+        "label": "Dashboard",
+        "icon": "House",
+        "path": "/agriculturist/dashboard"
+      },
+      {
+        "label": "Field Technicians",
+        "icon": "Users",
+        "path": "/agriculturist/field-technicians"
+      },
+      {
+        "label": "Farmers",
+        "icon": "FileUser",
+        "path": "/agriculturist/farmers"
+      },
+      {
+        "label": "Locations",
+        "icon": "MapPin",
+        "path": "/agriculturist/locations"
+      }
+    ],
+    "projects": [
+      {
+        "label": "Corn Project",
+        "path": "/agriculturist/projects/corn"
+      }
+    ]
+  },
+  "field-technicians": {
+    "label": "Field Technicians",
+    "icon": "i-heroicons-user-group-20-solid",
+    "path": "/field-technicians"
+  }
+}
