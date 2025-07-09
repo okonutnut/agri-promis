@@ -4,28 +4,29 @@
       {
         "label": "Dashboard",
         "icon": "House",
-        "path": "/agriculturist/dashboard"
+        "path": "dashboard"
       },
       {
         "label": "Field Technicians",
         "icon": "Users",
-        "path": "/agriculturist/field-technicians"
+        "path": "field-technicians"
       },
       {
         "label": "Farmers",
         "icon": "FileUser",
-        "path": "/agriculturist/farmers"
+        "path": "farmers"
       },
       {
         "label": "Locations",
         "icon": "MapPin",
-        "path": "/agriculturist/locations"
+        "path": "locations"
       }
     ],
-    "projects": [
+    "reports": [
       {
-        "label": "Corn Project",
-        "path": "/agriculturist/projects/corn"
+        "label": "Reports",
+        "icon": "ChartBar",
+        "path": "reports"
       }
     ]
   },

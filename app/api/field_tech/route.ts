@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
-import { UserProfile } from "@/app/agriculturist/field-technicians/types";
+import { UserProfile } from "@/app/agriculturist/[uid]/field-technicians/types";
 import { format } from "date-fns";
 
 export async function GET() {

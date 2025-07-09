@@ -1,6 +1,8 @@
+"use client";
+
 import Navbar from "@/components/custom/navbar";
 
-export default function Home() {
+export default function DashboardPage() {
   return (
     <>
       <Navbar pageTitle="Dashboard" />
