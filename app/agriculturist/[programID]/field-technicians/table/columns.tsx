@@ -2,6 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { UserProfile } from "../types";
+import { format } from "date-fns";
 
 export const columns: ColumnDef<UserProfile>[] = [
   {
@@ -20,7 +21,14 @@ export const columns: ColumnDef<UserProfile>[] = [
     accessorKey: "created_at",
     header: () => <div className="text-end">Date Created</div>,
     cell: ({ getValue }) => (
-      <div className="text-end">{getValue() as string}</div>
+      <div className="text-end">
+        {format(
+          new Date(
+            new Date(getValue() as string).getTime() + 8 * 60 * 60 * 1000
+          ),
+          "MMM dd, yyyy hh:mm a"
+        )}
+      </div>
     ),
   },
 ];

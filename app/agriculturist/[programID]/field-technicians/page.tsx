@@ -9,14 +9,12 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { X } from "lucide-react";
-import { useFetchAllFieldTechnician } from "./hook/field-tech.hook";
 import { UserProfile } from "./types";
 import { FieldTechnicianForm } from "./components/field-technician-form";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useQueryClient } from "@tanstack/react-query";
+import { SelectAllFieldTecnicianHook } from "./hook";
 
 export default function FieldTechnicianPage() {
-  const qc = useQueryClient();
   const [panelOpen, setPanelOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<UserProfile | null>(null);
   const [isAddMode, setIsAddMode] = useState(false);
@@ -37,18 +35,15 @@ export default function FieldTechnicianPage() {
     setPanelOpen(false);
     setIsAddMode(false);
     setSelectedRow(null);
-    qc.invalidateQueries({
-      queryKey: ["field-technicians"],
-    });
   };
 
-  const data = useFetchAllFieldTechnician();
+  const { data, isLoading } = SelectAllFieldTecnicianHook();
 
   return (
     <div className="relative h-full w-full">
       <ResizablePanelGroup direction="horizontal" className="h-full">
         <ResizablePanel className="w-full overflow-y-auto overflow-x-auto p-3">
-          {data.isLoading ? (
+          {isLoading ? (
             <>
               <Skeleton className="h-16 w-full mb-4" />
               <Skeleton className="h-96 w-full" />
@@ -56,7 +51,7 @@ export default function FieldTechnicianPage() {
           ) : (
             <DataTable
               columns={columns}
-              data={data.data || []}
+              data={data || []}
               onRowSelect={handleRowSelect}
               onAdd={handleAdd}
             />
