@@ -47,12 +47,27 @@ export async function SelectAllFieldTechnicianAction() {
     throw new Error(`Failed to fetch field technicians: ${error.message}`);
   }
 
+  // Get user email from auth
+  const userIds = data?.map((item) => item.id).filter(Boolean) || [];
+  const { data: userData, error: emailError } =
+    await supabase.auth.admin.listUsers();
+  if (emailError) {
+    console.error("Error fetching user emails:", emailError);
+    throw new Error(`Failed to fetch user emails: ${emailError.message}`);
+  }
+  const emailMap = new Map(
+    (userData?.users ?? [])
+      .filter((user) => userIds.includes(user.id))
+      .map((user) => [user.id, user.email])
+  );
+
   const result = data?.map((item) => ({
     ...item,
     role: item.role
       .replace(/_/g, " ")
       .toLowerCase()
       .replace(/\b\w/g, (char: string) => char.toUpperCase()),
+    email: emailMap.get(item.id) || "",
   }));
 
   return result as UserProfile[];

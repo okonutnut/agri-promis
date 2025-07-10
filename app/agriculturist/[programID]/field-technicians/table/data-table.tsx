@@ -52,16 +52,12 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      {/* Search Bar and Add Button */}
+      {/* Global Search Bar and Add Button */}
       <div className="flex items-center justify-between py-4 gap-2">
         <Input
-          placeholder="Search name..."
-          value={
-            (table.getColumn("fullname")?.getFilterValue() as string) ?? ""
-          }
-          onChange={(event) =>
-            table.getColumn("fullname")?.setFilterValue(event.target.value)
-          }
+          placeholder="Search..."
+          value={table.getState().globalFilter ?? ""}
+          onChange={(event) => table.setGlobalFilter(event.target.value)}
           className="max-w-sm"
         />
         <Button onClick={onAdd}>Add New</Button>
