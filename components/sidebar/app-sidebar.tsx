@@ -35,6 +35,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import SidebarHeaderItems from "./sidebar-header-items";
 import CreateProjectForm from "../custom/forms/create-project-form";
+import SidebarProjectsItems from "./sidebar-projects-items";
 
 // Icon mapping object
 const iconMap = {
@@ -97,24 +98,9 @@ export function AppSidebar() {
             }
           />
           <SidebarGroupContent>
-            <SidebarMenu>
-              {/* {projects.map((item) => (
-                    <SidebarMenuItem key={item.path}>
-                      <SidebarMenuButton asChild>
-                        <Link href={item.path}>
-                          <span>{item.label}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))} */}
-            </SidebarMenu>
+            <SidebarProjectsItems />
           </SidebarGroupContent>
         </SidebarGroup>
-        <div className="flex items-center justify-center h-full">
-          <p className="text-sm text-center text-gray-500">
-            Please select a program to view navigation.
-          </p>
-        </div>
       </SidebarContent>
 
       {/* FOOTER */}

@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import FormInput from "../input/form-input";
+import { InsertProjectHook } from "@/components/hooks";
+import { useParams } from "next/navigation";
 
 const formSchema = z
   .object({
@@ -17,9 +17,11 @@ const formSchema = z
     start_date: z.string().refine(
       (val) => {
         const date = new Date(val);
-        return !isNaN(date.getTime()) && date >= new Date();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return !isNaN(date.getTime()) && date >= today;
       },
-      { message: "Start date must be in the future" }
+      { message: "Start date cannot be in the past" }
     ),
     end_date: z.string(),
   })
@@ -40,8 +42,7 @@ type CreateProjectFormProps = {
   trigger?: React.ReactNode;
 };
 export default function CreateProjectForm({ trigger }: CreateProjectFormProps) {
-  const router = useRouter();
-  const queryClient = useQueryClient();
+  const { programID } = useParams();
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const form = useForm<FormData>({
@@ -56,7 +57,9 @@ export default function CreateProjectForm({ trigger }: CreateProjectFormProps) {
     },
   });
 
-  const handleSubmit = (data: FormData) => console.log(data);
+  const { mutate, isPending } = InsertProjectHook();
+  const handleSubmit = (data: FormData) =>
+    mutate({ ...data, program_id: programID as string });
 
   return (
     <CreateDialog
@@ -76,8 +79,8 @@ export default function CreateProjectForm({ trigger }: CreateProjectFormProps) {
           form={form}
         />
         <FormInput label="End Date" name="end_date" type="date" form={form} />
-        <Button type="submit" className="w-full px-4 py-2">
-          {"Create Project"}
+        <Button type="submit" className="w-full px-4 py-2" disabled={isPending}>
+          {isPending ? "Creating..." : "Create Project"}
         </Button>
       </form>
     </CreateDialog>
