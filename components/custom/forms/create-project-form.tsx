@@ -2,24 +2,44 @@
 
 import CreateDialog from "@/components/sidebar/create-dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createProgramAction } from "@/app/actions/programs";
-import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import FormInput from "../input/form-input";
 
-const formSchema = z.object({
-  program_name: z.string().min(1, "Program name is required"),
-  description: z.string().min(1, "Description is required"),
-});
+const formSchema = z
+  .object({
+    project_name: z.string().min(1, "Project name is required"),
+    crop_type: z.string().min(1, "Crop type is required"),
+    start_date: z.string().refine(
+      (val) => {
+        const date = new Date(val);
+        return !isNaN(date.getTime()) && date >= new Date();
+      },
+      { message: "Start date must be in the future" }
+    ),
+    end_date: z.string(),
+  })
+  .superRefine((data, ctx) => {
+    const start = new Date(data.start_date);
+    const end = new Date(data.end_date);
+    if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && end <= start) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "End date must be after start date",
+        path: ["end_date"],
+      });
+    }
+  });
 type FormData = z.infer<typeof formSchema>;
 
-export default function CreateProjectForm() {
+type CreateProjectFormProps = {
+  trigger?: React.ReactNode;
+};
+export default function CreateProjectForm({ trigger }: CreateProjectFormProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -27,93 +47,37 @@ export default function CreateProjectForm() {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      program_name: "",
-      description: "",
+      project_name: "",
+      crop_type: "",
+      start_date: new Date().toISOString().slice(0, 10),
+      end_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1))
+        .toISOString()
+        .slice(0, 10), // Default to one year later
     },
   });
 
-  const { mutate, isPending } = useMutation({
-    mutationFn: async (data: FormData) => await createProgramAction(data),
-    onSuccess: (response) => {
-      // Invalidate and refetch programs data
-      queryClient.invalidateQueries({
-        queryKey: ["programsByAgriculturist"],
-      });
-
-      // Reset form and close dialog
-      form.reset();
-      setDialogOpen(false);
-
-      // Show success message
-      toast.success("Program created successfully!");
-
-      // Navigate to the new program dashboard
-      if (response?.data?.id) {
-        router.push(`/agriculturist/${response.data.id}/dashboard`);
-      }
-    },
-    onError: (error) => {
-      toast.error(`Failed to create program: ${error.message}`);
-    },
-  });
-
-  const handleSubmit = (data: FormData) => mutate(data);
+  const handleSubmit = (data: FormData) => console.log(data);
 
   return (
     <CreateDialog
-      title="Create New Program"
-      description="Fill in the details to create a new program."
+      title="Create New Project"
+      description="Fill in the details to create a new project."
       open={dialogOpen}
       onOpenChange={setDialogOpen}
-      trigger={
-        <Button className="w-full text-xs mt-4" variant={"outline"} size={"sm"}>
-          Create new program
-        </Button>
-      }
+      trigger={trigger}
     >
       <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
-        <div>
-          <label
-            htmlFor="program_name"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Program Name
-          </label>
-          <Input
-            {...form.register("program_name")}
-            type="text"
-            placeholder="Enter program name..."
-            required
-            disabled={isPending}
-          />
-          {form.formState.errors.program_name && (
-            <p className="text-red-500 text-xs mt-1">
-              {form.formState.errors.program_name.message}
-            </p>
-          )}
-        </div>
-        <div>
-          <label
-            htmlFor="program_desciption"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Description
-          </label>
-          <Textarea
-            {...form.register("description")}
-            rows={5}
-            placeholder="Enter program description..."
-            required
-            disabled={isPending}
-          />
-          {form.formState.errors.description && (
-            <p className="text-red-500 text-xs mt-1">
-              {form.formState.errors.description.message}
-            </p>
-          )}
-        </div>
-        <Button type="submit" className="w-full px-4 py-2" disabled={isPending}>
-          {isPending ? "Creating..." : "Create Program"}
+        <FormInput label="Project Name" name="project_name" form={form} />
+        <FormInput label="Crop Type" name="crop_type" form={form} />
+        <FormInput
+          label="Start Date"
+          name="start_date"
+          type="date"
+          form={form}
+        />
+        <FormInput label="End Date" name="end_date" type="date" form={form} />
+        <Button type="submit" className="w-full px-4 py-2">
+          {"Create Project"}
         </Button>
       </form>
     </CreateDialog>

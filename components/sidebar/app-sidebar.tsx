@@ -34,6 +34,7 @@ import SidebarLinks from "@/configs/sidebar-link.json";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import SidebarHeaderItems from "./sidebar-header-items";
+import CreateProjectForm from "../custom/forms/create-project-form";
 
 // Icon mapping object
 const iconMap = {
@@ -88,9 +89,13 @@ export function AppSidebar() {
         {/* PROJECTS */}
         <SidebarGroup>
           <SidebarGroupLabel>Projects</SidebarGroupLabel>
-          <SidebarGroupAction title="Add Project">
-            <Plus /> <span className="sr-only">Add Project</span>
-          </SidebarGroupAction>
+          <CreateProjectForm
+            trigger={
+              <SidebarGroupAction title="Add Project">
+                <Plus /> <span className="sr-only">Add Project</span>
+              </SidebarGroupAction>
+            }
+          />
           <SidebarGroupContent>
             <SidebarMenu>
               {/* {projects.map((item) => (
