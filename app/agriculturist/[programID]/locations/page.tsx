@@ -9,18 +9,17 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { X } from "lucide-react";
-import { useFetchAllFieldTechnician } from "./hook/field-tech.hook";
-import { UserProfile } from "./types";
-import { AddFieldTechnicianForm } from "./components/add-technician-form";
+import { LocationType } from "./types";
+import LocationPageForm from "./components/location-form";
 import { Skeleton } from "@/components/ui/skeleton";
-import ViewTechnicianForm from "./components/view-technician-form";
+import { SelectAllLocationHook } from "./hook";
 
-export default function FieldTechnicianPage() {
+export default function LocationPage() {
   const [panelOpen, setPanelOpen] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<UserProfile | null>(null);
+  const [selectedRow, setSelectedRow] = useState<LocationType | null>(null);
   const [isAddMode, setIsAddMode] = useState(false);
 
-  const handleRowSelect = (row: UserProfile) => {
+  const handleRowSelect = (row: LocationType) => {
     setSelectedRow(row);
     setIsAddMode(false);
     setPanelOpen(true);
@@ -38,14 +37,13 @@ export default function FieldTechnicianPage() {
     setSelectedRow(null);
   };
 
-  const data = useFetchAllFieldTechnician();
-  console.log("Data fetched:", data.data);
+  const { data: locationData, isLoading } = SelectAllLocationHook();
 
   return (
     <div className="relative h-full w-full">
       <ResizablePanelGroup direction="horizontal" className="h-full">
         <ResizablePanel className="w-full overflow-y-auto overflow-x-auto p-3">
-          {data.isLoading ? (
+          {isLoading ? (
             <>
               <Skeleton className="h-16 w-full mb-4" />
               <Skeleton className="h-96 w-full" />
@@ -53,7 +51,7 @@ export default function FieldTechnicianPage() {
           ) : (
             <DataTable
               columns={columns}
-              data={data.data || []}
+              data={locationData || []}
               onRowSelect={handleRowSelect}
               onAdd={handleAdd}
               isAddMode={isAddMode}
@@ -76,29 +74,25 @@ export default function FieldTechnicianPage() {
               {isAddMode ? (
                 <div className="flex flex-col h-full">
                   <div className="text-sm flex justify-between items-center border-b p-3 text-primary uppercase font-semibold">
-                    Add New Field Technician
+                    Add New Location
                     <X
                       className="cursor-pointer text-slate-900"
-                      onClick={handlePanelClose}
+                      onClick={() => handlePanelClose()}
                     />
                   </div>
-                  <AddFieldTechnicianForm
-                    isAddMode={isAddMode}
-                    h-16
-                    onClose={handlePanelClose}
-                  />
+                  <LocationPageForm />
                 </div>
               ) : selectedRow ? (
                 <div className="space-y-4">
                   <div>
                     <div className="text-sm mb-2 flex justify-between items-center border-b p-3 text-primary uppercase font-semibold">
-                      Field Technician Details
+                      Location Details
                       <X
                         className="cursor-pointer text-slate-900"
-                        onClick={handlePanelClose}
+                        onClick={() => handlePanelClose()}
                       />
                     </div>
-                    <ViewTechnicianForm selectedRow={selectedRow} />
+                    <LocationPageForm selectedRow={selectedRow} />
                   </div>
                 </div>
               ) : (

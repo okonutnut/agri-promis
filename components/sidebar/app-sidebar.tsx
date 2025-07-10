@@ -53,14 +53,13 @@ const getIcon = (iconName: string) => {
 };
 
 export function AppSidebar() {
-  const { uid: programUID } = useParams();
-  console.log("Sidebar:", programUID);
+  const { programID } = useParams();
 
   const navigation = SidebarLinks["agriculturist"].navigations;
   return (
     <Sidebar>
       {/* HEADER */}
-      <SidebarHeaderItems programUID={programUID as string} />
+      <SidebarHeaderItems programID={programID as string} />
 
       {/* CONTENT */}
       <SidebarContent className="border-y border-slate-200 overflow-y-auto relative">
@@ -86,7 +85,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* PROGRAMS */}
+        {/* PROJECTS */}
         <SidebarGroup>
           <SidebarGroupLabel>Projects</SidebarGroupLabel>
           <SidebarGroupAction title="Add Project">

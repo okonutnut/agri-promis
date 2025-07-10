@@ -4,7 +4,7 @@ import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import Navbar from "@/components/custom/navbar";
 
 export const metadata: Metadata = {
-  title: "Agri-ProMIS - Field Technicians",
+  title: "Agri-ProMIS - Locations",
   description: "Dashboard page for Agri-ProMIS",
 };
 

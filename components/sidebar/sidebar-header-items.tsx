@@ -31,25 +31,24 @@ interface Program {
 }
 
 interface SidebarHeaderItemsProps {
-  programUID: string;
+  programID: string;
 }
 export default function SidebarHeaderItems({
-  programUID,
+  programID,
 }: SidebarHeaderItemsProps) {
   const router = useRouter();
 
   const { data: allProgramsData, isLoading: isLoadingPrograms } = useQuery({
     queryKey: ["programsByAgriculturist"],
-    queryFn: fetchProgramsByAgriculturist,
+    queryFn: async () => await fetchProgramsByAgriculturist(),
   });
 
   const { data: programData, isLoading: isLoadingProgram } = useQuery({
-    queryKey: ["programData", programUID],
-    queryFn: () => fetchProgramById(programUID),
-    enabled: !!programUID,
+    queryKey: ["programData", programID],
+    queryFn: async () => await fetchProgramById(programID),
+    enabled: !!programID,
   });
 
-  // Derive selected program from query data instead of using state
   const selectedProgram = useMemo(() => {
     return programData?.data || null;
   }, [programData?.data]);
@@ -69,9 +68,9 @@ export default function SidebarHeaderItems({
   );
 
   const displayText = useMemo(() => {
-    if (isLoadingProgram && programUID) return "Loading...";
+    if (isLoadingProgram && programID) return "Loading...";
     return selectedProgram?.program_name || "Select Program";
-  }, [selectedProgram?.program_name, isLoadingProgram, programUID]);
+  }, [selectedProgram?.program_name, isLoadingProgram, programID]);
 
   return (
     <SidebarHeader>

@@ -57,13 +57,9 @@ export function DataTable<TData, TValue>({
       {/* Search Bar and Add Button */}
       <div className="flex items-center justify-between py-4 gap-2">
         <Input
-          placeholder="Search name..."
-          value={
-            (table.getColumn("fullname")?.getFilterValue() as string) ?? ""
-          }
-          onChange={(event) =>
-            table.getColumn("fullname")?.setFilterValue(event.target.value)
-          }
+          placeholder="Search..."
+          value={(table.getState().globalFilter as string) ?? ""}
+          onChange={(event) => table.setGlobalFilter(event.target.value)}
           className="max-w-sm"
         />
         <Button onClick={onAdd}>Add New</Button>
@@ -96,14 +92,8 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className={`${
-                    isAddMode
-                      ? "cursor-default"
-                      : "cursor-pointer hover:bg-muted/50"
-                  }`}
-                  onClick={
-                    isAddMode ? undefined : () => onRowSelect?.(row.original)
-                  }
+                  className={"cursor-pointer hover:bg-muted/50"}
+                  onClick={() => onRowSelect?.(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
