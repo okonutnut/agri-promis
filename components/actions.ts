@@ -1,6 +1,6 @@
 "use server";
 
-import { ProgramType, ProjectType } from "@/components/types";
+import { LocationType, ProgramType, ProjectType } from "@/components/types";
 import { createClient } from "@/utils/supabase/server";
 
 // PROGRAM ACTIONS
@@ -136,5 +136,27 @@ export async function SelectAllProjectsByProgramIDAction(programID: string) {
   } catch (error) {
     console.error("Error in SelectAllProjectsByProgramID:", error);
     throw new Error("Failed to fetch projects. Please try again.");
+  }
+}
+
+// LOCATION HOOKS
+export async function SelectLocationByIDAction(locationID: string) {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("locations")
+      .select("*")
+      .eq("id", locationID)
+      .single();
+
+    if (error) {
+      console.error("Error fetching location:", error);
+      throw new Error(error.message);
+    }
+
+    return data as LocationType;
+  } catch (error) {
+    console.error("Error in SelectLocationByLocationIDAction:", error);
+    throw new Error("Failed to fetch location. Please try again.");
   }
 }

@@ -3,128 +3,63 @@
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
-  SidebarGroupAction,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import {
-  BookUser,
-  ChevronsUpDown,
-  ChevronUp,
-  FileUser,
-  House,
-  MapPin,
-  Plus,
-  BarChart,
-  Users,
-} from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import NavbarUserImage from "../custom/navbar-user-image";
-import SidebarLogoutButton from "./sidebar-logout-button";
-import SidebarLinks from "@/configs/sidebar-link.json";
+import { Boxes, Settings, Users } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import SidebarHeaderItems from "./sidebar-header-items";
-import CreateProjectForm from "../custom/forms/create-project-form";
-import SidebarProjectsItems from "./sidebar-projects-items";
-
-// Icon mapping object
-const iconMap = {
-  BookUser,
-  ChevronsUpDown,
-  ChevronUp,
-  FileUser,
-  House,
-  MapPin,
-  Plus,
-  BarChart,
-  Users,
-};
-
-const getIcon = (iconName: string) => {
-  return iconMap[iconName as keyof typeof iconMap] || House;
-};
 
 export function AppSidebar() {
   const { programID } = useParams();
-
-  const navigation = SidebarLinks["agriculturist"].navigations;
   return (
-    <Sidebar>
-      {/* HEADER */}
-      <SidebarHeaderItems programID={programID as string} />
-
+    <Sidebar variant="floating" className="pt-12">
       {/* CONTENT */}
-      <SidebarContent className="border-y border-slate-200 overflow-y-auto relative">
+      <SidebarContent>
         {/* NAVIGATIONS */}
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigation.map((item) => {
-                const IconComponent = getIcon(item.icon);
-                return (
-                  <SidebarMenuItem key={item.path}>
-                    <SidebarMenuButton asChild>
-                      <Link href={item.path}>
-                        <IconComponent className="w-4 h-4" />
-                        <span>{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link
+                    href={"/dashboard/programs/" + programID}
+                    className="font-medium text-sm flex items-center gap-2"
+                  >
+                    <Boxes className="w-10 h-10" />
+                    Projects
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link
+                    href={`/dashboard/programs/${programID}/technicians`}
+                    className="font-medium text-sm flex items-center gap-2"
+                  >
+                    <Users className="w-10 h-10" />
+                    Field Technicians
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link
+                    href={"/dashboard/programs/" + programID}
+                    className="font-medium text-sm flex items-center gap-2"
+                  >
+                    <Settings className="w-10 h-10" />
+                    Program settings
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        {/* PROJECTS */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Projects</SidebarGroupLabel>
-          <CreateProjectForm
-            trigger={
-              <SidebarGroupAction title="Add Project">
-                <Plus /> <span className="sr-only">Add Project</span>
-              </SidebarGroupAction>
-            }
-          />
-          <SidebarGroupContent>
-            <SidebarProjectsItems />
-          </SidebarGroupContent>
-        </SidebarGroup>
       </SidebarContent>
-
-      {/* FOOTER */}
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton className="h-10 py-6">
-                  <NavbarUserImage /> Username
-                  <ChevronUp className="ml-auto" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                side="top"
-                style={{ width: "var(--radix-popper-anchor-width)" }}
-                className="min-w-0 p-0"
-              >
-                <SidebarLogoutButton />
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
     </Sidebar>
   );
 }

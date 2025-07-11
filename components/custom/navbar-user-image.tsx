@@ -20,8 +20,8 @@ export default function NavbarUserImage() {
     <Image
       src={avatarUrl}
       alt="User Avatar"
-      width={35}
-      height={35}
+      width={30}
+      height={30}
       className="rounded-full"
     />
   );

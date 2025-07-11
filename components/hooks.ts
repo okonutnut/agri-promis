@@ -4,6 +4,7 @@ import {
   SelectAllProgramsByAgriculturistAction,
   InsertProjectAction,
   SelectAllProjectsByProgramIDAction,
+  SelectLocationByIDAction,
 } from "@/components/actions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -11,7 +12,7 @@ import { toast } from "sonner";
 import { ProgramType, ProjectType } from "./types";
 
 // PROGRAM HOOKS
-export function SelectProgramByIDHook(programId: string) {
+export function useSelectProgramByIDHook(programId: string) {
   return useQuery({
     queryKey: ["programById", programId],
     queryFn: async () => await SelectProgramByIdAction(programId),
@@ -19,20 +20,23 @@ export function SelectProgramByIDHook(programId: string) {
   });
 }
 
-export function SelectAllProgramsByAgriculturistHook() {
+export function useSelectAllProgramsByAgriculturistHook() {
   return useQuery({
     queryKey: ["allProgramsByAgriculturist"],
     queryFn: async () => await SelectAllProgramsByAgriculturistAction(),
   });
 }
 
-export function InsertProgramHook() {
+export function useInsertProgramHook() {
+  const qc = useQueryClient();
   const router = useRouter();
 
   return useMutation({
     mutationFn: async (data: ProgramType) => await InsertProgramAction(data),
     onSuccess: (data) => {
-      SelectAllProgramsByAgriculturistHook().refetch();
+      qc.invalidateQueries({
+        queryKey: ["allProgramsByAgriculturist"],
+      });
       toast.success("Program created successfully!");
       router.push(`/agriculturist/${data.id}/dashboard`);
     },
@@ -43,15 +47,14 @@ export function InsertProgramHook() {
 }
 
 // PROJECT HOOKS
-export function SelectAllProjectsByProgramIDHook(programId: string) {
+export function useSelectAllProjectsByProgramIDHook(programId: string) {
   return useQuery({
     queryKey: ["allProjectsByProgramId", programId],
     queryFn: async () => await SelectAllProjectsByProgramIDAction(programId),
-    enabled: !!programId,
   });
 }
 
-export function InsertProjectHook() {
+export function useInsertProjectHook() {
   const router = useRouter();
   const qc = useQueryClient();
 
@@ -72,5 +75,13 @@ export function InsertProjectHook() {
         position: "bottom-right",
       });
     },
+  });
+}
+
+// LOCATION HOOKS
+export function useSelectLocationByID(locationID: string) {
+  return useQuery({
+    queryKey: ["locationByProjectId", locationID],
+    queryFn: async () => await SelectLocationByIDAction(locationID),
   });
 }
