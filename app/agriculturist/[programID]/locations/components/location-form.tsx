@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { InsertLocationHook } from "../hook";
 import FormInput from "@/components/custom/input/form-input";
 import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -48,7 +49,13 @@ export default function LocationPageForm({
       <FormInput label="Barangay" name="barangay" form={form} />
       <div className="flex gap-2 justify-end">
         <Button type="submit" disabled={isPending}>
-          {isPending ? "Please wait..." : selectedRow ? "Update" : "Add"}
+          {isPending ? (
+            <Loader2 className="animate-spin h-4 w-4 mx-auto" />
+          ) : selectedRow ? (
+            "Update"
+          ) : (
+            "Create"
+          )}
         </Button>
       </div>
     </form>

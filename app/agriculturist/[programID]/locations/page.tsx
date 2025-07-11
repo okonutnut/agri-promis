@@ -12,7 +12,7 @@ import { X } from "lucide-react";
 import { LocationType } from "./types";
 import LocationPageForm from "./components/location-form";
 import { Skeleton } from "@/components/ui/skeleton";
-import { SelectAllLocationHook } from "./hook";
+import { SelectAllLocationsHook } from "./hook";
 
 export default function LocationPage() {
   const [panelOpen, setPanelOpen] = useState(false);
@@ -37,7 +37,7 @@ export default function LocationPage() {
     setSelectedRow(null);
   };
 
-  const { data: locationData, isLoading } = SelectAllLocationHook();
+  const { data: locationData, isLoading } = SelectAllLocationsHook();
 
   return (
     <div className="relative h-full w-full">

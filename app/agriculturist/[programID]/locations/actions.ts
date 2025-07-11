@@ -2,12 +2,10 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { LocationType } from "./types";
-import { format } from "date-fns";
 
 export async function InsertLocationAction(location: LocationType) {
   try {
     const supabase = await createClient();
-    // Remove 'id' property before insert
     const { id, ...locationWithoutId } = location;
     const { error } = await supabase
       .from("locations")

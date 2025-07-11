@@ -44,8 +44,9 @@ export default function SidebarHeaderItems({
 
   const handleProgramSelect = useCallback(
     (program: ProgramType) => {
-      toast(`Switched to ${program.program_name}`, {
+      toast.info(`Switched to ${program.program_name}`, {
         position: "bottom-right",
+        duration: 2000,
       });
       router.push(`/agriculturist/${program.id}/dashboard`);
     },
