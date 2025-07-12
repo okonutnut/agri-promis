@@ -7,7 +7,7 @@ import { X } from "lucide-react";
 import { UserProfile } from "./types";
 import { FieldTechnicianForm } from "./components/field-technician-form";
 import { SelectAllFieldTecnicianHook } from "./hook";
-import NewNavbar from "@/components/custom/navbar/new-navbar";
+import NewNavbar from "@/components/custom/navbar/navbar";
 import { ProgramSidebar } from "@/components/sidebar/program-sidebar";
 import {
   Sheet,

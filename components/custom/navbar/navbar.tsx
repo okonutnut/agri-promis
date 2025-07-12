@@ -22,12 +22,13 @@ import {
 } from "@/components/hooks";
 import { ProgramType } from "@/components/types";
 import Link from "next/link";
-import NavbarUserImage from "../navbar-user-image";
+import NavbarUserImage from "./navbar-user-image";
 
-export default function NewNavbar() {
+export default function Navbar() {
   const { programID, projectID } = useParams();
   const currentPath =
     typeof window !== "undefined" ? window.location.pathname : "";
+
   const { data: programData } = useSelectProgramByIDHook(programID as string);
   const { data: allProgramsData } = useSelectAllProgramsByAgriculturistHook();
   return (

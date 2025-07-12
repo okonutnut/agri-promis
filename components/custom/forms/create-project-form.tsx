@@ -6,6 +6,7 @@ import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import FormInput from "../input/form-input";
 import { useInsertProjectHook } from "@/components/hooks";
+import { useParams } from "next/navigation";
 
 const formSchema = z
   .object({
@@ -36,6 +37,7 @@ const formSchema = z
 type FormData = z.infer<typeof formSchema>;
 
 export default function CreateProjectForm() {
+  const { programUID } = useParams();
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -49,7 +51,8 @@ export default function CreateProjectForm() {
   });
 
   const { mutate, isPending } = useInsertProjectHook();
-  const handleSubmit = (data: FormData) => mutate(data);
+  const handleSubmit = (data: FormData) =>
+    mutate({ ...data, program_id: programUID as string });
 
   return (
     <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>

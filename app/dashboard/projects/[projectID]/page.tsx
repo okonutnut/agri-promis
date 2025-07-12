@@ -1,7 +1,7 @@
 "use client";
 
 import CardLink from "@/components/custom/link/card-link";
-import NewNavbar from "@/components/custom/navbar/new-navbar";
+import Navbar from "@/components/custom/navbar/navbar";
 import {
   useSelectAllProjectsByProgramIDHook,
   useSelectLocationByID,
@@ -20,7 +20,7 @@ export default function DashboardPage() {
   );
   return (
     <section className="w-full h-screen flex flex-col relative">
-      <NewNavbar />
+      <Navbar />
       <div className="flex">
         <ProgramSidebar />
         <div className="container mx-auto p-4">

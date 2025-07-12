@@ -1,6 +1,6 @@
 "use client";
 
-import NewNavbar from "@/components/custom/navbar/new-navbar";
+import NewNavbar from "@/components/custom/navbar/navbar";
 import { Button } from "@/components/ui/button";
 import { Boxes, Dot, Plus } from "lucide-react";
 import {

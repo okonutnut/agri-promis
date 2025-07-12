@@ -1,7 +1,7 @@
 "use client";
 
 import CardLink from "@/components/custom/link/card-link";
-import NewNavbar from "@/components/custom/navbar/new-navbar";
+import NewNavbar from "@/components/custom/navbar/navbar";
 import {
   useSelectAllProjectsByProgramIDHook,
   useSelectLocationByID,

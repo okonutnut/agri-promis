@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import SidebarLogoutButton from "../sidebar/sidebar-logout-button";
+import SidebarLogoutButton from "../../sidebar/sidebar-logout-button";
 
 export default function NavbarUserImage() {
   const [avatarUrl, setAvatarUrl] = useState("/default-avatar.png");

@@ -105,7 +105,7 @@ export function useInsertProjectHook() {
         queryKey: ["allProjectsByProgramId", data.program_id],
       });
 
-      router.push(`/dashboard/project/${data.id}`);
+      router.push(`/dashboard/projects/${data.id}`);
     },
     onError: (error) => {
       toast.error(`${error.message}`, {

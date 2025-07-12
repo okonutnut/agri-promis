@@ -1,6 +1,6 @@
 "use client";
 
-import NewNavbar from "@/components/custom/navbar/new-navbar";
+import NewNavbar from "@/components/custom/navbar/navbar";
 import { ProgramSidebar } from "@/components/sidebar/program-sidebar";
 import { Card, CardContent } from "@/components/ui/card";
 import { useParams } from "next/navigation";
