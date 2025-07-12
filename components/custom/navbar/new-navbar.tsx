@@ -26,6 +26,8 @@ import NavbarUserImage from "../navbar-user-image";
 
 export default function NewNavbar() {
   const { programID, projectID } = useParams();
+  const currentPath =
+    typeof window !== "undefined" ? window.location.pathname : "";
   const { data: programData } = useSelectProgramByIDHook(programID as string);
   const { data: allProgramsData } = useSelectAllProgramsByAgriculturistHook();
   return (
@@ -42,7 +44,7 @@ export default function NewNavbar() {
             />
           </BreadcrumbItem>
           <BreadcrumbSeparator />
-          {programID ? (
+          {programID || projectID ? (
             <>
               <BreadcrumbItem className="min-w-[170px]">
                 <DropdownMenu>
@@ -81,14 +83,13 @@ export default function NewNavbar() {
                     </Link>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Button
-                        size={"sm"}
-                        variant={"ghost"}
-                        className="text-xs justify-start w-full h-5"
+                      <Link
+                        href={"/dashboard/new"}
+                        className="text-xs font-semibold justify-start w-full h-6"
                       >
                         <Plus />
                         Add new program
-                      </Button>
+                      </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -104,6 +105,8 @@ export default function NewNavbar() {
                 </>
               )}
             </>
+          ) : currentPath === "/dashboard/new" ? (
+            <BreadcrumbItem className="text-black">New Program</BreadcrumbItem>
           ) : (
             <BreadcrumbItem>
               <Link href="/dashboard/programs" className="text-black">

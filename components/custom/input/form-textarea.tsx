@@ -1,4 +1,5 @@
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 import { UseFormReturn } from "react-hook-form";
 
 type FormTextareaType = {
@@ -6,16 +7,18 @@ type FormTextareaType = {
   name: string;
   readonly?: boolean;
   form: UseFormReturn<any>;
+  className?: string;
 };
 export default function FormTextarea({
   label,
   name,
   form,
   readonly,
+  className,
 }: FormTextareaType) {
   return (
-    <div>
-      <label className="text-sm font-medium text">{label}</label>
+    <div className={cn(`w-full`, className)}>
+      <div className="text-xs font-medium text">{label}</div>
       <Textarea
         {...form.register(name)}
         rows={5}

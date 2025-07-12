@@ -15,9 +15,9 @@ export async function GetUserRole() {
       .single();
     if (userData) {
       if (userData.role === "agriculturist") {
-        redirect("/agriculturist");
+        redirect("/dashboard/programs");
       } else if (userData.role === "field_technician") {
-        redirect("/field-technicians");
+        redirect("/field-technicians/projects");
       } else {
         redirect("/login");
       }

@@ -27,7 +27,7 @@ export default function FormInput({
 }: FormInputType) {
   return (
     <div className={cn(`w-full`, className)}>
-      <div className="text-sm font-medium text flex justify-between items-center mb-1">
+      <div className="text-xs font-medium text flex justify-between items-center mb-1">
         {label}
         {copy && (
           <Button

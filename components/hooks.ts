@@ -38,11 +38,17 @@ export function useInsertProgramHook() {
       qc.invalidateQueries({
         queryKey: ["allProgramsByAgriculturist"],
       });
-      toast.success("Program created successfully!");
-      router.push(`/agriculturist/${data.id}/dashboard`);
+      toast.success("Program created successfully!", {
+        position: "bottom-right",
+        duration: 2000,
+      });
+      router.push(`/dashboard/programs/${data.id}/`);
     },
     onError: (error) => {
-      toast.error(`Failed to create program: ${error.message}`);
+      toast.error(`Failed to create program: ${error.message}`, {
+        position: "bottom-right",
+        duration: 2000,
+      });
     },
   });
 }
@@ -99,7 +105,7 @@ export function useInsertProjectHook() {
         queryKey: ["allProjectsByProgramId", data.program_id],
       });
 
-      router.push(`/agriculturist/${data.program_id}/project/${data.id}`);
+      router.push(`/dashboard/project/${data.id}`);
     },
     onError: (error) => {
       toast.error(`${error.message}`, {

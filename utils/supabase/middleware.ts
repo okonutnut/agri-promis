@@ -58,16 +58,25 @@ export async function updateSession(request: NextRequest) {
   }
 
   // If user is authenticated and on agriculturist root, redirect to agriculturist dashboard
-  if (user && request.nextUrl.pathname === "/agriculturist") {
-    const url = request.nextUrl.clone();
-    url.pathname = "/agriculturist/dashboard";
-    return NextResponse.redirect(url);
-  }
-
-  if (user && /^\/agriculturist\/[^/]+$/.test(request.nextUrl.pathname)) {
-    const url = request.nextUrl.clone();
-    url.pathname = `${request.nextUrl.pathname}/dashboard`;
-    return NextResponse.redirect(url);
+  if (user && request.nextUrl.pathname === "/") {
+    const { data } = await supabase
+      .from("user_profile")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (data?.role === "agriculturist") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/dashboard/programs";
+      return NextResponse.redirect(url);
+    } else if (data?.role === "field_technician") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/field-technicians/projects";
+      return NextResponse.redirect(url);
+    } else {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      return NextResponse.redirect(url);
+    }
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.

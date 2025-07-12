@@ -126,6 +126,7 @@ export async function InsertProjectAction({
         start_date: new Date(start_date).toISOString(),
         end_date: new Date(end_date).toISOString(),
         location_id: "862975a3-54ad-495d-8e94-7997af554315",
+        status: 1,
         created_by: userId,
         program_id: program_id,
       })

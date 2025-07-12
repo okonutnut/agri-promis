@@ -1,14 +1,11 @@
 "use client";
 
-import CreateDialog from "@/components/sidebar/create-dialog";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
 import FormInput from "../input/form-input";
-import { InsertProjectHook } from "@/components/hooks";
-import { useParams } from "next/navigation";
+import { useInsertProjectHook } from "@/components/hooks";
 
 const formSchema = z
   .object({
@@ -38,13 +35,7 @@ const formSchema = z
   });
 type FormData = z.infer<typeof formSchema>;
 
-type CreateProjectFormProps = {
-  trigger?: React.ReactNode;
-};
-export default function CreateProjectForm({ trigger }: CreateProjectFormProps) {
-  const { programID } = useParams();
-  const [dialogOpen, setDialogOpen] = useState(false);
-
+export default function CreateProjectForm() {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -57,32 +48,18 @@ export default function CreateProjectForm({ trigger }: CreateProjectFormProps) {
     },
   });
 
-  const { mutate, isPending } = InsertProjectHook();
-  const handleSubmit = (data: FormData) =>
-    mutate({ ...data, program_id: programID as string });
+  const { mutate, isPending } = useInsertProjectHook();
+  const handleSubmit = (data: FormData) => mutate(data);
 
   return (
-    <CreateDialog
-      title="Create New Project"
-      description="Fill in the details to create a new project."
-      open={dialogOpen}
-      onOpenChange={setDialogOpen}
-      trigger={trigger}
-    >
-      <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
-        <FormInput label="Project Name" name="project_name" form={form} />
-        <FormInput label="Crop Type" name="crop_type" form={form} />
-        <FormInput
-          label="Start Date"
-          name="start_date"
-          type="date"
-          form={form}
-        />
-        <FormInput label="End Date" name="end_date" type="date" form={form} />
-        <Button type="submit" className="w-full px-4 py-2" disabled={isPending}>
-          {isPending ? "Creating..." : "Create Project"}
-        </Button>
-      </form>
-    </CreateDialog>
+    <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
+      <FormInput label="Project Name" name="project_name" form={form} />
+      <FormInput label="Crop Type" name="crop_type" form={form} />
+      <FormInput label="Start Date" name="start_date" type="date" form={form} />
+      <FormInput label="End Date" name="end_date" type="date" form={form} />
+      <Button type="submit" className="w-full px-4 py-2" disabled={isPending}>
+        {isPending ? "Creating..." : "Create Project"}
+      </Button>
+    </form>
   );
 }

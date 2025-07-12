@@ -12,7 +12,7 @@ export type ProjectType = {
   crop_type: string;
   start_date: string;
   end_date: string;
-  status: number;
+  status?: number;
   location_id?: string;
   program_id?: string;
   created_by?: string;

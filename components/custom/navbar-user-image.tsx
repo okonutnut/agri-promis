@@ -3,6 +3,15 @@
 import { createClient } from "@/utils/supabase/client";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import SidebarLogoutButton from "../sidebar/sidebar-logout-button";
 
 export default function NavbarUserImage() {
   const [avatarUrl, setAvatarUrl] = useState("/default-avatar.png");
@@ -17,12 +26,21 @@ export default function NavbarUserImage() {
   }, [avatarUrl]);
 
   return (
-    <Image
-      src={avatarUrl}
-      alt="User Avatar"
-      width={30}
-      height={30}
-      className="rounded-full"
-    />
+    <DropdownMenu>
+      <DropdownMenuTrigger>
+        <Image
+          src={avatarUrl}
+          alt="User Avatar"
+          width={30}
+          height={30}
+          className="rounded-full"
+        />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <SidebarLogoutButton />
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
