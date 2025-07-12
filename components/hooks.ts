@@ -5,6 +5,7 @@ import {
   InsertProjectAction,
   SelectAllProjectsByProgramIDAction,
   SelectLocationByIDAction,
+  EditProgramNameAction,
 } from "@/components/actions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -42,6 +43,36 @@ export function useInsertProgramHook() {
     },
     onError: (error) => {
       toast.error(`Failed to create program: ${error.message}`);
+    },
+  });
+}
+
+export function useEditProgramNameHook() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: ProgramType) =>
+      await EditProgramNameAction({
+        program_id: data.id ?? "",
+        program_name: data.program_name,
+      }),
+    onSuccess: (data) => {
+      qc.invalidateQueries({
+        queryKey: ["programById", data.id],
+      });
+      qc.invalidateQueries({
+        queryKey: ["allProgramsByAgriculturist"],
+      });
+      toast.success("Program name updated successfully!", {
+        position: "bottom-right",
+        duration: 2000,
+      });
+    },
+    onError: (error) => {
+      toast.error(`Failed to update program name: ${error.message}`, {
+        position: "bottom-right",
+        duration: 2000,
+      });
     },
   });
 }

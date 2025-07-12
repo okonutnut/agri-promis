@@ -28,7 +28,6 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   onRowSelect?: (row: TData) => void;
   onAdd?: () => void;
-  isAddMode?: boolean;
 }
 
 export function DataTable<TData, TValue>({
@@ -36,7 +35,6 @@ export function DataTable<TData, TValue>({
   data,
   onRowSelect,
   onAdd,
-  isAddMode = false,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
@@ -54,15 +52,17 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      {/* Search Bar and Add Button */}
-      <div className="flex items-center justify-between py-4 gap-2">
+      {/* Global Search Bar and Add Button */}
+      <div className="flex items-center justify-between gap-2">
         <Input
           placeholder="Search..."
-          value={(table.getState().globalFilter as string) ?? ""}
+          value={table.getState().globalFilter ?? ""}
           onChange={(event) => table.setGlobalFilter(event.target.value)}
           className="max-w-sm"
         />
-        <Button onClick={onAdd}>Add New</Button>
+        <Button onClick={onAdd} size={"sm"}>
+          Invite member
+        </Button>
       </div>
 
       {/* Table */}
@@ -92,7 +92,7 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className={"cursor-pointer hover:bg-muted/50"}
+                  className="cursor-pointer hover:bg-accent"
                   onClick={() => onRowSelect?.(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (

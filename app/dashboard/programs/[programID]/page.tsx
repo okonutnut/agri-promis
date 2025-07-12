@@ -6,7 +6,7 @@ import {
   useSelectAllProjectsByProgramIDHook,
   useSelectLocationByID,
 } from "@/components/hooks";
-import { AppSidebar } from "@/components/sidebar/app-sidebar";
+import { ProgramSidebar } from "@/components/sidebar/program-sidebar";
 import { ProjectType } from "@/components/types";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Plus } from "lucide-react";
@@ -17,23 +17,22 @@ export default function DashboardPage() {
   const { data: projectData } = useSelectAllProjectsByProgramIDHook(
     programID as string
   );
-  console.log("Program Data:", projectData);
   return (
     <section className="w-full h-screen flex flex-col relative">
       <NewNavbar />
       <div className="flex">
-        <AppSidebar />
-        <div className="w-full px-4 py-6">
+        <ProgramSidebar />
+        <div className="container mx-auto p-4">
           <Button className="mb-4" size={"sm"}>
             <Plus /> Create new project
           </Button>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="flex flex-wrap justify-start items-center gap-2">
             {Array.isArray(projectData) && projectData.length > 0 ? (
               projectData.map((project: ProjectType) => (
                 <CardLink
                   href={`/dashboard/projects/${project.id}`}
                   key={project.id}
-                  className="h-[120px] flex flex-col justify-between items-start h-full"
+                  className="h-[176px] min-w-[360px] flex flex-col justify-between items-start h-full"
                 >
                   <div className="w-full flex justify-between items-center font-semibold">
                     {project.project_name}
@@ -74,9 +73,8 @@ export function GetLocation({ projectID }: { projectID: string }) {
         ? "Loading location..."
         : isError
         ? "Error fetching location"
-        : `${locationData?.barangay},
-            ${locationData?.municipality},
-            ${locationData?.province}`}
+        : `${locationData?.province} | ${locationData?.barangay},
+            ${locationData?.municipality}`}
     </p>
   );
 }

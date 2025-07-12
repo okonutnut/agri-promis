@@ -31,6 +31,32 @@ export async function InsertProgramAction({
   }
 }
 
+export async function EditProgramNameAction({
+  program_id,
+  program_name,
+}: {
+  program_id: string;
+  program_name: string;
+}) {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("programs")
+      .update({ program_name })
+      .eq("id", program_id)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error("Failed to update program name. Please try again.");
+    }
+    return data as ProgramType;
+  } catch (error) {
+    console.error("Error updating program name:", error);
+    throw new Error("Failed to update program name. Please try again.");
+  }
+}
+
 export async function SelectProgramByIdAction(programId: string) {
   try {
     const supabase = await createClient();

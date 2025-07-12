@@ -13,7 +13,7 @@ import { Boxes, Settings, Users } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
-export function AppSidebar() {
+export function ProgramSidebar() {
   const { programID } = useParams();
   return (
     <Sidebar variant="floating" className="pt-12">
@@ -37,7 +37,7 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <Link
-                    href={`/dashboard/programs/${programID}/technicians`}
+                    href={`/dashboard/programs/${programID}/field-technicians`}
                     className="font-medium text-sm flex items-center gap-2"
                   >
                     <Users className="w-10 h-10" />
@@ -48,7 +48,7 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <Link
-                    href={"/dashboard/programs/" + programID}
+                    href={`/dashboard/programs/${programID}/settings`}
                     className="font-medium text-sm flex items-center gap-2"
                   >
                     <Settings className="w-10 h-10" />

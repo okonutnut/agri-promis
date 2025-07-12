@@ -28,8 +28,6 @@ export default function NewNavbar() {
   const { programID, projectID } = useParams();
   const { data: programData } = useSelectProgramByIDHook(programID as string);
   const { data: allProgramsData } = useSelectAllProgramsByAgriculturistHook();
-  console.log("Program Data:", programData);
-  console.log("All Programs Data:", allProgramsData);
   return (
     <nav className="flex items-center justify-between h-12 px-4 bg-white border-b border-gray-200 overflow-x-auto z-50">
       <Breadcrumb className="min-w-[500px]">

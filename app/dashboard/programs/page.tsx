@@ -15,17 +15,18 @@ export default function DashboardPage() {
     <>
       <NewNavbar />
       <section className="w-full py-10">
-        <div className="mx-auto w-full max-w-[1320px] px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
+        <div className="container mx-auto p-4">
           <h1 className="text-2xl">Your Programs</h1>
           <Button className="my-7" size={"sm"}>
             <Plus className="mr-2 h-4 w-4" />
             Create New Program
           </Button>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="flex flex-wrap gap-4 items-center">
             {programData?.map((program) => (
               <CardLink
                 href={`/dashboard/programs/${program.id}`}
                 key={program.id}
+                className="w-[360px]"
               >
                 <Boxes className="text-gray-500" />
                 {program.program_name}
