@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Agri-ProMIS - Programs",
+  title: "Agri-ProMIS - Field Technician",
   description: "Dashboard page for Agri-ProMIS",
 };
 
-export default function ProgramLayout({
+export default function FieldTechnicianLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <main className="w-full h-screen relative">{children}</main>;
+  return <main className="w-full relative">{children}</main>;
 }

@@ -161,6 +161,6 @@
   }
 }
 
-.font-poppins {
-  font-family: "Poppins", sans-serif;
+body {
+  font-size: 1rem;
 }

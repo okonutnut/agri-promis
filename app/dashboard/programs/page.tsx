@@ -24,14 +24,14 @@ export default function DashboardPage() {
               Create New Program
             </Button>
           </Link>
-          <div className="flex flex-wrap gap-2 items-center">
+          <div className="flex flex-wrap items-center gap-4">
             {programData && programData.length > 0 ? (
               <>
                 {programData?.map((program) => (
                   <CardLink
                     href={`/dashboard/programs/${program.id}`}
                     key={program.id}
-                    className="w-max-lg"
+                    className="basis-3xs w-xs h-[200px] flex flex-col items-center justify-center gap-2 p-4 text-center"
                   >
                     <Boxes className="text-gray-500" />
                     {program.program_name}

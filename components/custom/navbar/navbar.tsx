@@ -1,9 +1,12 @@
+"use client";
+
 import Image from "next/image";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
+  BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import {
@@ -13,28 +16,39 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Boxes, ChevronsUpDown, Plus } from "lucide-react";
+import { Boxes, Check, ChevronsUpDown, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import {
   useSelectAllProgramsByAgriculturistHook,
-  useSelectProgramByIDHook,
+  useSelectProgramAndProjectDetailsByProgjectIDHook,
 } from "@/components/hooks";
 import { ProgramType } from "@/components/types";
 import Link from "next/link";
 import NavbarUserImage from "./navbar-user-image";
+import { useMemo } from "react";
 
 export default function Navbar() {
   const { programID, projectID } = useParams();
-  const currentPath =
-    typeof window !== "undefined" ? window.location.pathname : "";
+  const currentPath = usePathname();
 
-  const { data: programData } = useSelectProgramByIDHook(programID as string);
+  // Program Data
   const { data: allProgramsData } = useSelectAllProgramsByAgriculturistHook();
+  const programData = useMemo(() => {
+    return allProgramsData?.find(
+      (program: ProgramType) => program.id === programID
+    );
+  }, [programID, allProgramsData]);
+
+  // Project Data
+  const { data: programProjectsData } =
+    useSelectProgramAndProjectDetailsByProgjectIDHook(projectID as string);
+  console.log("Program Projects Data:", programProjectsData);
+
   return (
-    <nav className="flex items-center justify-between h-12 px-4 bg-white border-b border-gray-200 overflow-x-auto z-50">
-      <Breadcrumb className="min-w-[500px]">
-        <BreadcrumbList>
+    <nav className="w-full flex items-center justify-between h-12 px-4 bg-white border-b border-gray-200 overflow-x-auto z-50">
+      <Breadcrumb>
+        <BreadcrumbList className="overflow-x-auto flex items-center">
           <BreadcrumbItem>
             <Image
               src={"/logo.png"}
@@ -47,14 +61,18 @@ export default function Navbar() {
           <BreadcrumbSeparator />
           {programID || projectID ? (
             <>
-              <BreadcrumbItem className="min-w-[170px]">
+              <BreadcrumbItem className="min-w-[200px]">
                 <DropdownMenu>
                   <Link
-                    href={`/dashboard/programs/${programID}`}
+                    href={`/dashboard/programs/${
+                      programID ?? programProjectsData?.program_id
+                    }`}
                     className="text-black flex items-center gap-2 text-sm font-medium cursor-pointer"
                   >
                     <Boxes className="mr-1 h-4 w-4" />
-                    {programData?.program_name ?? "Loading..."}
+                    {programData?.program_name ??
+                      programProjectsData?.programs.program_name ??
+                      "Loading..."}
                   </Link>
                   <DropdownMenuTrigger asChild>
                     <Button className="ml-auto h-7 w-4" variant="ghost">
@@ -70,9 +88,7 @@ export default function Navbar() {
                         <DropdownMenuItem className="justify-between w-full h-7 cursor-pointer hover:bg-gray-100 font-medium">
                           {program?.program_name ?? "Loading..."}
                           {program.id === programID && (
-                            <span className="text-green-600 text-xs font-semibold ml-2 uppercase">
-                              Current
-                            </span>
+                            <Check className="ml-2 h-4 w-4" />
                           )}
                         </DropdownMenuItem>
                       </Link>
@@ -98,11 +114,13 @@ export default function Navbar() {
               {projectID && (
                 <>
                   <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/components">
-                      Components
+                  <BreadcrumbPage>
+                    <BreadcrumbLink
+                      href={`/dashboard/projects/${programProjectsData?.id}`}
+                    >
+                      {programProjectsData?.project_name ?? "Loading..."}
                     </BreadcrumbLink>
-                  </BreadcrumbItem>
+                  </BreadcrumbPage>
                 </>
               )}
             </>

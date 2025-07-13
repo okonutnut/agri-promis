@@ -1,33 +1,21 @@
 "use client";
 
-import NewNavbar from "@/components/custom/navbar/navbar";
-import { ProgramSidebar } from "@/components/sidebar/program-sidebar";
 import { Card, CardContent } from "@/components/ui/card";
-import { useParams } from "next/navigation";
-import EditProgramNameForm from "./form/edit-program-name-form";
+import EditProgramNameForm from "./form/edit-project-name-form";
+import CustomPageLayout from "@/components/custom/layout/page-layout";
 
 export default function ProgramSettingsPage() {
-  const { programID } = useParams();
-
   return (
-    <section className="w-full h-screen flex flex-col relative">
-      <NewNavbar />
-      <div className="flex">
-        <ProgramSidebar />
-        <div className="container mx-auto p-4">
-          <h1 className="text-2xl font-semibold text-primary mb-4">
-            Program Settings
-          </h1>
-          <Card className="shadow-xs">
-            <CardContent className="flex justify-between items-start">
-              <div className="text-xs font-semibold w-full">
-                General Settings
-              </div>
-              <EditProgramNameForm />
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </section>
+    <CustomPageLayout>
+      <h1 className="text-2xl font-medium text-primary mb-4">
+        Project Settings
+      </h1>
+      <Card className="shadow-xs">
+        <CardContent className="flex flex-wrap justify-between items-start">
+          <div className="font-semibold w-full mb-4">General Settings</div>
+          <EditProgramNameForm />
+        </CardContent>
+      </Card>
+    </CustomPageLayout>
   );
 }

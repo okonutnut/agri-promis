@@ -28,53 +28,53 @@ export async function updateSession(request: NextRequest) {
       },
     }
   );
-
-  // Do not run code between createServerClient and
-  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
-  // issues with users being randomly logged out.
-
   // IMPORTANT: DO NOT REMOVE auth.getUser()
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // If user is not authenticated and not already on login/auth pages, redirect to login
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth")
-  ) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
-  }
+  const { data: userProfile } = await supabase
+    .from("user_profile")
+    .select("role")
+    .eq("id", user?.id)
+    .single();
 
-  // If user is authenticated and on login page, redirect to dashboard
-  if (user && request.nextUrl.pathname.startsWith("/login")) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/";
-    return NextResponse.redirect(url);
-  }
+  // Ensure consistent role checking and handle null cases
+  const userRole = userProfile?.role;
 
-  // If user is authenticated and on agriculturist root, redirect to agriculturist dashboard
+  // If user is authenticated and on root, redirect based on role
   if (user && request.nextUrl.pathname === "/") {
-    const { data } = await supabase
-      .from("user_profile")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-    if (data?.role === "agriculturist") {
+    if (userRole === "agriculturist") {
       const url = request.nextUrl.clone();
       url.pathname = "/dashboard/programs";
       return NextResponse.redirect(url);
-    } else if (data?.role === "field_technician") {
+    } else if (userRole === "field_technician") {
       const url = request.nextUrl.clone();
-      url.pathname = "/field-technicians/projects";
+      url.pathname = "/field-technician";
       return NextResponse.redirect(url);
     } else {
+      // Handle users with no role or unknown role
       const url = request.nextUrl.clone();
-      url.pathname = "/login";
+      url.pathname = "/access-denied";
+      return NextResponse.redirect(url);
+    }
+  }
+
+  // Protect dashboard routes - only agriculturists allowed
+  if (request.nextUrl.pathname.startsWith("/dashboard")) {
+    if (userRole !== "agriculturist") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/access-denied";
+      return NextResponse.redirect(url);
+    }
+  }
+
+  // Protect field technician routes - only field technicians allowed
+  if (request.nextUrl.pathname.startsWith("/field-technician")) {
+    if (userRole !== "field_technician") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/access-denied";
       return NextResponse.redirect(url);
     }
   }

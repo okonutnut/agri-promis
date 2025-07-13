@@ -1,6 +1,11 @@
 "use server";
 
-import { LocationType, ProgramType, ProjectType } from "@/components/types";
+import {
+  FieldReportType,
+  LocationType,
+  ProgramType,
+  ProjectType,
+} from "@/components/types";
 import { createClient } from "@/utils/supabase/server";
 
 // PROGRAM ACTIONS
@@ -166,6 +171,69 @@ export async function SelectAllProjectsByProgramIDAction(programID: string) {
   }
 }
 
+export async function SelectProgramAndProjectDetailsByProjectIDAction(
+  projectID: string
+) {
+  try {
+    const supabase = await createClient(); // your server-side Supabase client
+    const { data, error } = await supabase
+      .from("projects")
+      .select(
+        `
+        *,
+        programs (
+          id,
+          program_name,
+          description,
+          agriculturist_id
+        )
+      `
+      )
+      .eq("id", projectID)
+      .single();
+
+    if (error) {
+      console.error("Error fetching project details:", error);
+      throw new Error(error.message);
+    }
+
+    return data as ProjectType & { programs: ProgramType };
+  } catch (error) {
+    console.error(
+      "Error in selectProgramAndProjectDetailsByProjectIDAction:",
+      error
+    );
+    throw new Error("Failed to fetch project details. Please try again.");
+  }
+}
+
+export async function EditProjectNameAction({
+  project_id,
+  project_name,
+}: {
+  project_id: string;
+  project_name: string;
+}) {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("projects")
+      .update({ project_name })
+      .eq("id", project_id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error updating project name:", error);
+      throw new Error("Failed to update project name. Please try again.");
+    }
+    return data as ProjectType;
+  } catch (error) {
+    console.error("Error updating project name:", error);
+    throw new Error("Failed to update project name. Please try again.");
+  }
+}
+
 // LOCATION HOOKS
 export async function SelectLocationByIDAction(locationID: string) {
   try {
@@ -185,5 +253,29 @@ export async function SelectLocationByIDAction(locationID: string) {
   } catch (error) {
     console.error("Error in SelectLocationByLocationIDAction:", error);
     throw new Error("Failed to fetch location. Please try again.");
+  }
+}
+
+// FIELD REPORT ACTIONS
+export async function SelectAllFieldReportsByProjectIDAction(
+  projectID: string
+) {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("field_reports")
+      .select("*")
+      .eq("project_id", projectID)
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching field reports:", error);
+      throw new Error(error.message);
+    }
+
+    return data as FieldReportType[];
+  } catch (error) {
+    console.error("Error in SelectAllFieldReportsByProjectIDAction:", error);
+    throw new Error("Failed to fetch field reports. Please try again.");
   }
 }

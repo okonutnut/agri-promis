@@ -26,3 +26,18 @@ export type LocationType = {
   barangay: string;
   created_at?: string;
 };
+
+export type FieldReportType = {
+  id?: string;
+  project_id?: string;
+  reporter_id?: string;
+  report_date?: string;
+  report_time?: string;
+  status_note?: string;
+  remarks?: string;
+  photo_url?: string;
+  latitude?: number;
+  longitude?: number;
+  tag?: string[];
+  created_at?: string;
+};

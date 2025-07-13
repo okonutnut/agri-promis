@@ -24,7 +24,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${poppins.variable} antialiased`}>
         <ReactQueryProvider>
-          <Toaster richColors position="top-right" />
+          <Toaster richColors position="bottom-right" />
           {children}
         </ReactQueryProvider>
       </body>

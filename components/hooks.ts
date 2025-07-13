@@ -6,6 +6,9 @@ import {
   SelectAllProjectsByProgramIDAction,
   SelectLocationByIDAction,
   EditProgramNameAction,
+  SelectProgramAndProjectDetailsByProjectIDAction,
+  EditProjectNameAction,
+  SelectAllFieldReportsByProjectIDAction,
 } from "@/components/actions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -91,6 +94,16 @@ export function useSelectAllProjectsByProgramIDHook(programId: string) {
   });
 }
 
+export function useSelectProgramAndProjectDetailsByProgjectIDHook(
+  projectId: string
+) {
+  return useQuery({
+    queryKey: ["programAndProjectDetailsByProjectId", projectId],
+    queryFn: async () =>
+      await SelectProgramAndProjectDetailsByProjectIDAction(projectId),
+  });
+}
+
 export function useInsertProjectHook() {
   const router = useRouter();
   const qc = useQueryClient();
@@ -115,10 +128,49 @@ export function useInsertProjectHook() {
   });
 }
 
+export function useEditProjectNameHook() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: { id: string; project_name: string }) =>
+      await EditProjectNameAction({
+        project_id: data.id ?? "",
+        project_name: data.project_name,
+      }),
+    onSuccess: (data) => {
+      qc.invalidateQueries({
+        queryKey: ["programAndProjectDetailsByProjectId", data.id],
+      });
+      qc.invalidateQueries({
+        queryKey: ["allProjectsByProgramId", data.program_id],
+      });
+      toast.success("Project name updated successfully!", {
+        position: "bottom-right",
+        duration: 2000,
+      });
+    },
+    onError: (error) => {
+      toast.error(`Failed to update project name: ${error.message}`, {
+        position: "bottom-right",
+
+        duration: 2000,
+      });
+    },
+  });
+}
+
 // LOCATION HOOKS
 export function useSelectLocationByID(locationID: string) {
   return useQuery({
     queryKey: ["locationByProjectId", locationID],
     queryFn: async () => await SelectLocationByIDAction(locationID),
+  });
+}
+
+// FIELD REPORT HOOKS
+export function useSelectAllFieldReportsByProjectIDHook(projectID: string) {
+  return useQuery({
+    queryKey: ["allFieldReportsByProjectId", projectID],
+    queryFn: async () =>
+      await SelectAllFieldReportsByProjectIDAction(projectID),
   });
 }
