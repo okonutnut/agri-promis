@@ -3,10 +3,7 @@
 import { useState } from "react";
 import { DataTable } from "./table/data-table";
 import { columns } from "./table/columns";
-import { X } from "lucide-react";
-import { UserProfile } from "./types";
-import { FieldTechnicianForm } from "./components/field-technician-form";
-import { SelectAllFieldTecnicianHook } from "./hook";
+import { TeamMemberForm } from "./components/team-members-form";
 import NewNavbar from "@/components/custom/navbar/navbar";
 import { ProgramSidebar } from "@/components/sidebar/program-sidebar";
 import {
@@ -15,8 +12,9 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
+import { UserProfile } from "@/components/types";
+import { useSelectAllMembersHook } from "@/components/hooks";
 
 export default function FieldTechnicianPage() {
   const [panelOpen, setPanelOpen] = useState(false);
@@ -41,7 +39,7 @@ export default function FieldTechnicianPage() {
     setSelectedRow(null);
   };
 
-  const { data, isLoading } = SelectAllFieldTecnicianHook();
+  const { data } = useSelectAllMembersHook();
 
   return (
     <section className="w-full h-screen relative">
@@ -49,9 +47,7 @@ export default function FieldTechnicianPage() {
       <div className="flex">
         <ProgramSidebar />
         <div className="container mx-auto p-4 space-y-4">
-          <h1 className="text-2xl font-semibold text-primary">
-            Field Technicians
-          </h1>
+          <h1 className="text-2xl font-semibold text-primary">Team Members</h1>
           <DataTable
             columns={columns}
             data={data || []}
@@ -62,9 +58,7 @@ export default function FieldTechnicianPage() {
             <SheetContent className="min-w-[600px] md:min-w-[600px] min-w-screen sm:min-w-[400px]">
               <SheetHeader>
                 <SheetTitle className="uppercase text-primary">
-                  {isAddMode
-                    ? "Add New Field Technician"
-                    : "View Field Technician"}
+                  {isAddMode ? "Invite New Team Member" : "View Member Details"}
                 </SheetTitle>
                 <SheetDescription>
                   This action cannot be undone. This will permanently delete
@@ -72,7 +66,7 @@ export default function FieldTechnicianPage() {
                 </SheetDescription>
               </SheetHeader>
               <>
-                <FieldTechnicianForm
+                <TeamMemberForm
                   key={isAddMode ? "add-mode" : selectedRow?.id || "view-mode"}
                   data={isAddMode ? null : selectedRow}
                 />

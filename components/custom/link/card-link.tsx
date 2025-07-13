@@ -1,6 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { Boxes } from "lucide-react";
 import Link from "next/link";
 
 type CardLinkProps = {

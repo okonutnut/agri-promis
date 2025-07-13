@@ -2,17 +2,16 @@
 
 import CustomPageLayout from "@/components/custom/layout/page-layout";
 import CardLink from "@/components/custom/link/card-link";
-import NewNavbar from "@/components/custom/navbar/navbar";
 import {
   useSelectAllProjectsByProgramIDHook,
   useSelectLocationByID,
 } from "@/components/hooks";
-import { ProgramSidebar } from "@/components/sidebar/program-sidebar";
 import { ProjectType } from "@/components/types";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Plus } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { GetLocation } from "./get-project-location";
 
 export default function DashboardPage() {
   const { programID } = useParams();
@@ -55,23 +54,5 @@ export default function DashboardPage() {
         )}
       </div>
     </CustomPageLayout>
-  );
-}
-
-export function GetLocation({ projectID }: { projectID: string }) {
-  const {
-    data: locationData,
-    isLoading,
-    isError,
-  } = useSelectLocationByID(projectID);
-  return (
-    <p className="font-mono">
-      {isLoading
-        ? "Loading location..."
-        : isError
-        ? "Error fetching location"
-        : `${locationData?.province} | ${locationData?.barangay},
-            ${locationData?.municipality}`}
-    </p>
   );
 }

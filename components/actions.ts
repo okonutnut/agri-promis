@@ -5,6 +5,7 @@ import {
   LocationType,
   ProgramType,
   ProjectType,
+  UserProfile,
 } from "@/components/types";
 import { createClient } from "@/utils/supabase/server";
 
@@ -118,7 +119,6 @@ export async function InsertProjectAction({
   crop_type,
   start_date,
   end_date,
-  location_id,
 }: ProjectType) {
   try {
     const supabase = await createClient();
@@ -278,4 +278,71 @@ export async function SelectAllFieldReportsByProjectIDAction(
     console.error("Error in SelectAllFieldReportsByProjectIDAction:", error);
     throw new Error("Failed to fetch field reports. Please try again.");
   }
+}
+
+// MEMBERS ACTIONS
+export async function InsertMemberAction(data: UserProfile) {
+  const supabase = await createClient();
+
+  const { data: authData, error: authError } =
+    await supabase.auth.admin.createUser({
+      email: data.email as string,
+      user_metadata: {
+        name: data.fullname as string,
+      },
+    });
+
+  if (authError) {
+    console.error("Error creating user:", authError);
+    throw new Error(`Failed to create user: ${authError.message}`);
+  }
+
+  const { error: userError } = await supabase.from("user_profile").insert({
+    id: authData.user.id,
+    fullname: data.fullname,
+    role: data.role,
+  });
+
+  if (userError) {
+    console.error("Error creating field technician:", userError);
+    throw new Error(`Failed to create field technician: ${userError.message}`);
+  }
+
+  return;
+}
+
+export async function SelectAllMembersAction() {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.from("user_profile").select("*");
+
+  if (error) {
+    console.error("Error fetching members:", error);
+    throw new Error(`Failed to fetch members: ${error.message}`);
+  }
+
+  // Get user email from auth
+  const userIds = data?.map((item) => item.id).filter(Boolean) || [];
+  const { data: userData, error: emailError } =
+    await supabase.auth.admin.listUsers();
+  if (emailError) {
+    console.error("Error fetching user emails:", emailError);
+    throw new Error(`Failed to fetch user emails: ${emailError.message}`);
+  }
+  const emailMap = new Map(
+    (userData?.users ?? [])
+      .filter((user) => userIds.includes(user.id))
+      .map((user) => [user.id, user.email])
+  );
+
+  const result = data?.map((item) => ({
+    ...item,
+    role: item.role
+      .replace(/_/g, " ")
+      .toLowerCase()
+      .replace(/\b\w/g, (char: string) => char.toUpperCase()),
+    email: emailMap.get(item.id) || "",
+  }));
+
+  return result as UserProfile[];
 }

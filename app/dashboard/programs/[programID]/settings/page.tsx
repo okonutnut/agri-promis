@@ -3,12 +3,9 @@
 import NewNavbar from "@/components/custom/navbar/navbar";
 import { ProgramSidebar } from "@/components/sidebar/program-sidebar";
 import { Card, CardContent } from "@/components/ui/card";
-import { useParams } from "next/navigation";
 import EditProgramNameForm from "./form/edit-program-name-form";
 
 export default function ProgramSettingsPage() {
-  const { programID } = useParams();
-
   return (
     <section className="w-full h-screen flex flex-col relative">
       <NewNavbar />

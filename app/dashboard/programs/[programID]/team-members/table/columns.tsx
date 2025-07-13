@@ -1,7 +1,7 @@
 "use client";
 
+import { UserProfile } from "@/components/types";
 import { ColumnDef } from "@tanstack/react-table";
-import { UserProfile } from "../types";
 import { format } from "date-fns";
 
 export const columns: ColumnDef<UserProfile>[] = [

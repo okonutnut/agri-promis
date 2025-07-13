@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { ClipboardIcon } from "lucide-react";
-import { UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
 
 type NonFormInputType = {

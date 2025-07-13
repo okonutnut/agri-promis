@@ -9,11 +9,13 @@ import {
   SelectProgramAndProjectDetailsByProjectIDAction,
   EditProjectNameAction,
   SelectAllFieldReportsByProjectIDAction,
+  InsertMemberAction,
+  SelectAllMembersAction,
 } from "@/components/actions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ProgramType, ProjectType } from "./types";
+import { ProgramType, ProjectType, UserProfile } from "./types";
 
 // PROGRAM HOOKS
 export function useSelectProgramByIDHook(programId: string) {
@@ -172,5 +174,29 @@ export function useSelectAllFieldReportsByProjectIDHook(projectID: string) {
     queryKey: ["allFieldReportsByProjectId", projectID],
     queryFn: async () =>
       await SelectAllFieldReportsByProjectIDAction(projectID),
+  });
+}
+
+export function useInsertMemberHook() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: UserProfile) => await InsertMemberAction(data),
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: ["members"],
+      });
+      toast.success("Member invited successfully!");
+    },
+    onError: () => {
+      console.error("Failed to invite member.");
+      toast.error("Failed to invite member.");
+    },
+  });
+}
+
+export function useSelectAllMembersHook() {
+  return useQuery({
+    queryKey: ["members"],
+    queryFn: async () => await SelectAllMembersAction(),
   });
 }

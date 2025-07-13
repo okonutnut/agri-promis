@@ -7,23 +7,22 @@ import {
 } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
 
+type FormSelectProps = {
+  label: string;
+  name: string;
+  options: { value: string; label: string }[];
+  form: UseFormReturn<any>;
+  defaultValue?: string;
+  onClick?: () => void;
+};
 export default function FormSelect({
   label,
   name,
   options,
   form,
   defaultValue,
-  placeholder = "Select an option",
   onClick,
-}: {
-  label: string;
-  name: string;
-  options: { value: string; label: string }[];
-  form: UseFormReturn<any>;
-  defaultValue?: string;
-  placeholder?: string;
-  onClick?: () => void;
-}) {
+}: FormSelectProps) {
   return (
     <div>
       {label && (
@@ -31,11 +30,12 @@ export default function FormSelect({
           {label}
         </div>
       )}
-      <Select onValueChange={(value) => form.setValue(name, value)}>
+      <Select
+        defaultValue={defaultValue}
+        onValueChange={(value) => form.setValue(name, value)}
+      >
         <SelectTrigger className="w-full">
-          <SelectValue
-            defaultValue={options.find((o) => o.value === defaultValue)?.value}
-          />
+          <SelectValue placeholder={`Select ${label.toLowerCase()}`} />
         </SelectTrigger>
         <SelectContent>
           {options.map((option) => (

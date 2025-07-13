@@ -7,7 +7,6 @@ import { FieldReportsForm } from "./components/field-reports-form";
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
@@ -23,17 +22,14 @@ export default function FieldReportsPage() {
   const { projectID } = useParams();
   const [panelOpen, setPanelOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<FieldReportType | null>(null);
-  const [isAddMode, setIsAddMode] = useState(false);
 
   const handleRowSelect = (row: FieldReportType) => {
     setSelectedRow(row);
-    setIsAddMode(false);
     setPanelOpen(true);
   };
 
   const handlePanelClose = () => {
     setPanelOpen(false);
-    setIsAddMode(false);
     setSelectedRow(null);
   };
 

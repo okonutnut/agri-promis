@@ -9,7 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { ClipboardList, House, Settings, Users } from "lucide-react";
+import { ClipboardList, House, Settings } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 

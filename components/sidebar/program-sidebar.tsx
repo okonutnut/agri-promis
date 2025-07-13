@@ -41,7 +41,7 @@ export function ProgramSidebar() {
                     className="font-medium text-sm flex items-center gap-2"
                   >
                     <Users className="w-10 h-10" />
-                    Field Technicians
+                    Team
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

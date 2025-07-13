@@ -34,7 +34,6 @@ export function DataTable<TData, TValue>({
   columns,
   data,
   onRowSelect,
-  onAdd,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 

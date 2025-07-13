@@ -4,10 +4,8 @@ import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  useEditProgramNameHook,
   useEditProjectNameHook,
   useSelectProgramAndProjectDetailsByProgjectIDHook,
-  useSelectProgramByIDHook,
 } from "@/components/hooks";
 import { CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
