@@ -43,6 +43,12 @@ export async function updateSession(request: NextRequest) {
   // Ensure consistent role checking and handle null cases
   const userRole = userProfile?.role;
 
+  if (!user && request.nextUrl.pathname != "/login") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
+  }
+
   // If user is authenticated and on root, redirect based on role
   if (user && request.nextUrl.pathname === "/") {
     if (userRole === "agriculturist") {
@@ -62,7 +68,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Protect dashboard routes - only agriculturists allowed
-  if (request.nextUrl.pathname.startsWith("/dashboard")) {
+  if (user && request.nextUrl.pathname.startsWith("/dashboard")) {
     if (userRole !== "agriculturist") {
       const url = request.nextUrl.clone();
       url.pathname = "/access-denied";
@@ -71,7 +77,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Protect field technician routes - only field technicians allowed
-  if (request.nextUrl.pathname.startsWith("/field-technician")) {
+  if (user && request.nextUrl.pathname.startsWith("/field-technician")) {
     if (userRole !== "field_technician") {
       const url = request.nextUrl.clone();
       url.pathname = "/access-denied";

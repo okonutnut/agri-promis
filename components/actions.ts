@@ -280,6 +280,60 @@ export async function SelectAllFieldReportsByProjectIDAction(
   }
 }
 
+export async function InsertFieldReportAction({
+  image_file,
+  latitude,
+  longitude,
+  status_note,
+}: FieldReportType) {
+  try {
+    const supabase = await createClient();
+
+    // Upload the image file if provided
+    let photo_url = null;
+    if (image_file) {
+      const { data, error } = await supabase.storage
+        .from("field-reports")
+        .upload(`images/${Date.now()}_${image_file.name}`, image_file);
+
+      if (error) {
+        console.error("Error uploading image:", error);
+        throw new Error("Failed to upload image. Please try again.");
+      }
+      photo_url = `https://aawvhtjwzyxsfyikmeis.supabase.co/storage/v1/object/public/${data.fullPath}`;
+    }
+
+    const now = new Date();
+    const report_date = now.toISOString().split("T")[0]; // YYYY-MM-DD
+    const report_time = now.toTimeString().split(" ")[0]; // HH:MM:SS
+
+    const { data, error } = await supabase
+      .from("field_reports")
+      .insert({
+        project_id: "d579819a-8b04-44f1-b60f-641771a6ac8e",
+        reporter_id: (await supabase.auth.getUser()).data.user?.id,
+        photo_url,
+        latitude,
+        longitude,
+        status_note,
+        report_date,
+        report_time,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error inserting field report:", error);
+      throw new Error("Failed to create field report. Please try again.");
+    }
+
+    return data as FieldReportType;
+  } catch (error) {
+    console.error("Error in InsertFieldReportAction:", error);
+    throw new Error("Failed to create field report. Please try again.");
+  }
+}
+
 // MEMBERS ACTIONS
 export async function InsertMemberAction(data: UserProfile) {
   const supabase = await createClient();

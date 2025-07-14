@@ -11,11 +11,17 @@ import {
   SelectAllFieldReportsByProjectIDAction,
   InsertMemberAction,
   SelectAllMembersAction,
+  InsertFieldReportAction,
 } from "@/components/actions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ProgramType, ProjectType, UserProfile } from "./types";
+import {
+  FieldReportType,
+  ProgramType,
+  ProjectType,
+  UserProfile,
+} from "./types";
 
 // PROGRAM HOOKS
 export function useSelectProgramByIDHook(programId: string) {
@@ -177,6 +183,25 @@ export function useSelectAllFieldReportsByProjectIDHook(projectID: string) {
   });
 }
 
+export function useInsertFieldReportHook() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: FieldReportType) =>
+      await InsertFieldReportAction(data),
+    onSuccess: (data) => {
+      qc.invalidateQueries({
+        queryKey: ["allFieldReportsByProjectId", data.project_id],
+      });
+      toast.success("Field report created successfully!");
+      window.location.reload(); // Reload the page to reflect the new field report
+    },
+    onError: (error) => {
+      toast.error(`Failed to create field report: ${error.message}`);
+    },
+  });
+}
+
+// MEMBER HOOKS
 export function useInsertMemberHook() {
   const qc = useQueryClient();
   return useMutation({

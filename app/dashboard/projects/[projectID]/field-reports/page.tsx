@@ -34,6 +34,7 @@ export default function FieldReportsPage() {
   };
 
   const { data } = useSelectAllFieldReportsByProjectIDHook(projectID as string);
+  console.log("Field Reports Data:", data);
 
   return (
     <CustomPageLayout>
@@ -54,10 +55,10 @@ export default function FieldReportsPage() {
             <Card className="mx-2 shadow-none">
               <CardContent className="min-h-[200px] border-b">
                 <Image
-                  src="/images/field-report.png"
+                  src={selectedRow?.photo_url || "/placeholder.png"}
                   alt="Field Report"
-                  width={100}
-                  height={100}
+                  width={500}
+                  height={500}
                   className="mx-auto mb-4"
                 />
               </CardContent>

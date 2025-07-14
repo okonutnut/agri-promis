@@ -2,10 +2,7 @@
 
 import CustomPageLayout from "@/components/custom/layout/page-layout";
 import CardLink from "@/components/custom/link/card-link";
-import {
-  useSelectAllProjectsByProgramIDHook,
-  useSelectLocationByID,
-} from "@/components/hooks";
+import { useSelectAllProjectsByProgramIDHook } from "@/components/hooks";
 import { ProjectType } from "@/components/types";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Plus } from "lucide-react";

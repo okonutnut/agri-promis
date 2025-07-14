@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import FormInput from "@/components/custom/input/form-input";
 import { FieldReportType } from "@/components/types";
 import NonFormInput from "@/components/custom/input/non-form-input";
+import { Textarea } from "@/components/ui/textarea";
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -29,13 +30,19 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
   const onSubmit = (data: FieldTechType) => console.log(data);
 
   return (
-    <form className="p-3 space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
-      <FormInput label="ID" name="id" form={form} readonly />
-      <NonFormInput label="Reporter ID" defaultValue={data?.reporter_id} />
-      <FormInput label="Remarks" name="remarks" form={form} />
-      <div className="flex gap-2 justify-end">
-        <Button type="submit">Save</Button>
-      </div>
-    </form>
+    <>
+      <form className="p-3 space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+        <div className="text-xs font-medium text flex justify-between items-center mb-1">
+          Status note
+        </div>
+        <Textarea value={data?.status_note} readOnly />
+        <FormInput label="ID" name="id" form={form} readonly />
+        <NonFormInput label="Reporter ID" defaultValue={data?.reporter_id} />
+        <FormInput label="Remarks" name="remarks" form={form} />
+        <div className="flex gap-2 justify-end">
+          <Button type="submit">Save</Button>
+        </div>
+      </form>
+    </>
   );
 }

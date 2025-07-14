@@ -45,6 +45,7 @@ export type FieldReportType = {
   report_time?: string;
   status_note?: string;
   remarks?: string;
+  image_file?: File;
   photo_url?: string;
   latitude?: number;
   longitude?: number;

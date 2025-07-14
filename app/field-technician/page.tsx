@@ -1,44 +1,63 @@
 "use client";
+
 import Navbar from "@/components/custom/navbar/navbar";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import UploadFieldReportForm from "./form/upload-field-report-form";
 
 interface LocationData {
-  latitude: number | null;
-  longitude: number | null;
-  error: string | null;
+  latitude: number | undefined;
+  longitude: number | undefined;
+  locationName: string | undefined;
+  error: string | undefined;
 }
 
 export default function FieldTechnicianPage() {
-  const [imageSrc, setImageSrc] = useState<string>("/placeholder.png");
+  const [imageSrc, setImageSrc] = useState<string>("");
+  const [imageFile, setImageFile] = useState<File | undefined>(undefined);
   const [location, setLocation] = useState<LocationData>({
-    latitude: null,
-    longitude: null,
-    error: null,
+    latitude: undefined,
+    longitude: undefined,
+    locationName: undefined,
+    error: undefined,
   });
   const [isGettingLocation, setIsGettingLocation] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const fileURL = URL.createObjectURL(file);
-      setImageSrc(fileURL);
-    } else {
-      setImageSrc("/placeholder.png");
+  // Function to get location name from coordinates
+  const getLocationName = async (lat: number, lng: number) => {
+    try {
+      const response = await fetch(
+        `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`
+      );
+      const data = await response.json();
+      return (
+        data.locality ||
+        data.city ||
+        data.principalSubdivision ||
+        "Unknown location"
+      );
+    } catch (error) {
+      console.error("Error getting location name:", error);
+      return "Location name unavailable";
     }
   };
 
   const getCurrentLocation = () => {
     setIsGettingLocation(true);
-    setLocation({ latitude: null, longitude: null, error: null });
+    setLocation({
+      latitude: undefined,
+      longitude: undefined,
+      locationName: undefined,
+      error: undefined,
+    });
 
     if (!navigator.geolocation) {
       setLocation({
-        latitude: null,
-        longitude: null,
+        latitude: undefined,
+        longitude: undefined,
+        locationName: undefined,
         error: "Geolocation is not supported by this browser.",
       });
       setIsGettingLocation(false);
@@ -46,11 +65,18 @@ export default function FieldTechnicianPage() {
     }
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        // Get location name
+        const locationName = await getLocationName(lat, lng);
+
         setLocation({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          error: null,
+          latitude: lat,
+          longitude: lng,
+          locationName: locationName,
+          error: undefined,
         });
         setIsGettingLocation(false);
       },
@@ -68,8 +94,9 @@ export default function FieldTechnicianPage() {
             break;
         }
         setLocation({
-          latitude: null,
-          longitude: null,
+          latitude: undefined,
+          longitude: undefined,
+          locationName: undefined,
           error: errorMessage,
         });
         setIsGettingLocation(false);
@@ -87,10 +114,22 @@ export default function FieldTechnicianPage() {
     getCurrentLocation();
   }, []);
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const fileURL = URL.createObjectURL(file);
+      setImageSrc(fileURL);
+      setImageFile(file); // Store the actual file
+    } else {
+      setImageSrc("");
+      setImageFile(undefined); // Clear the file
+    }
+  };
+
   return (
     <>
       <Navbar />
-      <Card className="container mx-auto mt-10 p-5 space-y-4">
+      <div className="container mx-auto mt-10 p-5 space-y-4">
         <div className="space-y-4">
           <Input
             type="file"
@@ -119,7 +158,12 @@ export default function FieldTechnicianPage() {
             )}
 
             {location.latitude && location.longitude && (
-              <div className="bg-gray-50 p-3 rounded-md text-sm">
+              <div className="bg-gray-50 p-3 rounded-md text-sm space-y-1">
+                {location.locationName && (
+                  <p>
+                    <strong>Location:</strong> {location.locationName}
+                  </p>
+                )}
                 <p>
                   <strong>Latitude:</strong> {location.latitude.toFixed(6)}
                 </p>
@@ -131,17 +175,21 @@ export default function FieldTechnicianPage() {
           </div>
         </div>
 
-        <div className="flex justify-center">
-          <Image
-            src={imageSrc}
-            alt="Preview"
-            width={500}
-            height={500}
-            className="rounded-lg object-cover"
-            onError={() => setImageSrc("/placeholder.png")}
-          />
-        </div>
-      </Card>
+        {imageSrc && (
+          <div className="flex justify-center">
+            <Image
+              src={imageSrc}
+              alt="Preview"
+              width={500}
+              height={500}
+              className="rounded-lg object-cover"
+              onError={() => setImageSrc("/placeholder.png")}
+            />
+          </div>
+        )}
+
+        <UploadFieldReportForm image_file={imageFile} location={location} />
+      </div>
     </>
   );
 }
