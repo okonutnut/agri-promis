@@ -37,7 +37,7 @@ export function ProgramSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <Link
-                    href={`/dashboard/programs/${programID}/field-technicians`}
+                    href={`/dashboard/programs/${programID}/team`}
                     className="font-medium text-sm flex items-center gap-2"
                   >
                     <Users className="w-10 h-10" />
