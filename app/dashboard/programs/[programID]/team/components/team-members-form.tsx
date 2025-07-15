@@ -7,6 +7,7 @@ import FormSelect from "@/components/custom/select/form-select";
 import { Loader2 } from "lucide-react";
 import { useInsertMemberHook } from "@/components/hooks";
 import { UserProfile } from "@/components/types";
+import NonFormInput from "@/components/custom/input/non-form-input";
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -69,15 +70,21 @@ export function TeamMemberForm({ data }: TeamMemberFormProps) {
         type="email"
         readonly={data ? true : false}
       />
-      <FormSelect options={roles} label="Role" name="role" form={form} />
+      {!data ? (
+        <FormSelect options={roles} label="Role" name="role" form={form} />
+      ) : (
+        <NonFormInput label="Role" defaultValue={data?.role || ""} />
+      )}
       <div className="flex gap-2 justify-end">
-        <Button
-          type="submit"
-          variant={isPending ? "ghost" : "default"}
-          disabled={isPending}
-        >
-          {isPending ? <Loader2 className="animate-spin" /> : "Save"}
-        </Button>
+        {!data && (
+          <Button
+            type="submit"
+            variant={isPending ? "ghost" : "default"}
+            disabled={isPending}
+          >
+            {isPending ? <Loader2 className="animate-spin" /> : "Save"}
+          </Button>
+        )}
       </div>
     </form>
   );

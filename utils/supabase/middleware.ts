@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { ur } from "zod/v4/locales";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -29,42 +30,58 @@ export async function updateSession(request: NextRequest) {
     }
   );
   // IMPORTANT: DO NOT REMOVE auth.getUser()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const { data: userProfile } = await supabase
+  const { data: user } = await supabase.auth.getUser();
+  const { data } = await supabase
     .from("user_profile")
     .select("role")
-    .eq("id", user?.id)
+    .eq("id", user?.user?.id)
     .single();
+  const userRole = data?.role;
 
-  // Ensure consistent role checking and handle null cases
-  const userRole = userProfile?.role;
-
-  if (!user && request.nextUrl.pathname != "/login") {
+  // If user is authenticated and on login page, redirect based on role
+  if (user && request.nextUrl.pathname === "/login") {
     const url = request.nextUrl.clone();
-    url.pathname = "/login";
+
+    if (userRole === "agriculturist") {
+      url.pathname = "/dashboard/programs";
+    } else if (userRole === "field_technician") {
+      url.pathname = "/field-technician";
+    } else {
+      // If no role or unknown role, redirect to access denied
+      url.pathname = "/access-denied";
+    }
+
     return NextResponse.redirect(url);
   }
 
-  // If user is authenticated and on root, redirect based on role
+  // If user is authenticated and on root path, redirect based on role
   if (user && request.nextUrl.pathname === "/") {
+    const url = request.nextUrl.clone();
+
     if (userRole === "agriculturist") {
-      const url = request.nextUrl.clone();
       url.pathname = "/dashboard/programs";
-      return NextResponse.redirect(url);
     } else if (userRole === "field_technician") {
-      const url = request.nextUrl.clone();
       url.pathname = "/field-technician";
-      return NextResponse.redirect(url);
     } else {
-      // Handle users with no role or unknown role
-      const url = request.nextUrl.clone();
+      // If no role or unknown role, redirect to access denied
       url.pathname = "/access-denied";
-      return NextResponse.redirect(url);
     }
+
+    return NextResponse.redirect(url);
+  }
+
+  // If user is on /dashboard, redirect to /dashboard/programs
+  if (user && request.nextUrl.pathname === "/dashboard") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard/programs";
+    return NextResponse.redirect(url);
+  }
+
+  // If user is not authenticated and not on login page, redirect to login
+  if (!user && request.nextUrl.pathname !== "/login") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
   }
 
   // Protect dashboard routes - only agriculturists allowed

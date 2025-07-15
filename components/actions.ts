@@ -300,7 +300,7 @@ export async function InsertFieldReportAction({
         console.error("Error uploading image:", error);
         throw new Error("Failed to upload image. Please try again.");
       }
-      photo_url = `https://aawvhtjwzyxsfyikmeis.supabase.co/storage/v1/object/public/${data.fullPath}`;
+      photo_url = `${process.env.NEXT_PUBLIC_STORAGE_URL}/${data.fullPath}`;
     }
 
     const now = new Date();
