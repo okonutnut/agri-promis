@@ -3,8 +3,7 @@ import "./globals.css";
 import { Poppins } from "next/font/google";
 import { Toaster } from "sonner";
 import ReactQueryProvider from "@/components/reactQueryProvider";
-import { Suspense } from "react";
-import LoadingPage from "@/components/custom/layout/loading-page";
+import AuthRedirect from "@/components/auth/auth-redirect";
 
 export const metadata: Metadata = {
   title: "Agri-ProMIS",
@@ -27,7 +26,7 @@ export default function RootLayout({
       <body className={`${poppins.variable} antialiased`}>
         <ReactQueryProvider>
           <Toaster richColors position="bottom-right" />
-          <Suspense fallback={<LoadingPage />}>{children}</Suspense>
+          <AuthRedirect>{children}</AuthRedirect>
         </ReactQueryProvider>
       </body>
     </html>

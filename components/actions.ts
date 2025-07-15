@@ -343,6 +343,7 @@ export async function InsertMemberAction(data: UserProfile) {
       email: data.email as string,
       user_metadata: {
         name: data.fullname as string,
+        role: data.role as string,
       },
     });
 

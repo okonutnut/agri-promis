@@ -1,9 +1,5 @@
-import { createClient } from "@/utils/supabase/client";
-import { redirect } from "next/navigation";
-
 export default function RootPage() {
-  // This page should not be reached due to middleware redirects
-  // But just in case, show a loading state
+  console.log("RootPage component rendered");
   return (
     <div className="flex items-center justify-center min-h-screen">
       <div className="text-center">
