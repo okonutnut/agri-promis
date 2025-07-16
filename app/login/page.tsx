@@ -19,6 +19,7 @@ export default function LoginPage() {
     }
   }, [search]);
 
+  console.log("");
   return (
     <>
       <div className="grid grid-cols-3 h-screen w-screen gap-2 overflow-hidden">

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 const poppins = Poppins({
   subsets: ["latin"],
-  variable: "--font-poppines",
+  variable: "--font-poppins",
   weight: ["400", "500", "600", "700"],
 });
 

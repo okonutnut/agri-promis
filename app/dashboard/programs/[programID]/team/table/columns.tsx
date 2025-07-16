@@ -14,6 +14,10 @@ export const columns: ColumnDef<UserProfile>[] = [
     header: "Fullname",
   },
   {
+    accessorKey: "role",
+    header: "Role",
+  },
+  {
     accessorKey: "created_at",
     header: () => <div className="text-end">Date Created</div>,
     cell: ({ getValue }) => (

@@ -47,19 +47,19 @@ export default function FieldReportsPage() {
         onRowSelect={handleRowSelect}
       />
       <Sheet open={panelOpen} onOpenChange={handlePanelClose}>
-        <SheetContent className="min-w-[600px] md:min-w-[600px] min-w-screen sm:min-w-[400px]">
+        <SheetContent className="min-w-[600px] md:min-w-[600px] min-w-screen sm:min-w-[400px] overflow-y-scroll">
           <SheetHeader>
             <SheetTitle className="uppercase text-primary">
               View Field Report
             </SheetTitle>
             <Card className="mx-2 shadow-none">
-              <CardContent className="min-h-[200px] border-b">
+              <CardContent className="border-b p-0">
                 <Image
                   src={selectedRow?.photo_url || "/placeholder.png"}
                   alt="Field Report"
                   width={500}
                   height={500}
-                  className="mx-auto mb-4"
+                  className="mx-auto mb-4 object-cover rounded-lg"
                 />
               </CardContent>
               <CardFooter className="text-xs flex justify-between">

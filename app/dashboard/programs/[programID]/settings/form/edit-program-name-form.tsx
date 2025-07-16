@@ -23,7 +23,7 @@ export default function EditProgramNameForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       id: programID as string,
-      program_name: programData?.program_name || "",
+      program_name: programData?.program_name ?? "",
     },
   });
 

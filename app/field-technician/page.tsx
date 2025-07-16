@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import UploadFieldReportForm from "./form/upload-field-report-form";
+import { X } from "lucide-react";
 
 interface LocationData {
   latitude: number | undefined;
@@ -13,6 +14,72 @@ interface LocationData {
   locationName: string | undefined;
   error: string | undefined;
 }
+
+// Add this function before the component
+const compressImage = (file: File, maxSizeKB: number = 800): Promise<File> => {
+  return new Promise((resolve) => {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d")!;
+    const img = new window.Image();
+
+    img.onload = () => {
+      // Calculate new dimensions
+      const maxWidth = 1200;
+      const maxHeight = 1200;
+      let { width, height } = img;
+
+      if (width > height) {
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+      } else {
+        if (height > maxHeight) {
+          width = (width * maxHeight) / height;
+          height = maxHeight;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      // Draw and compress
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Start with high quality and reduce if needed
+      let quality = 0.8;
+      const tryCompress = () => {
+        canvas.toBlob(
+          (blob) => {
+            if (blob && blob.size <= maxSizeKB * 1024) {
+              const compressedFile = new File([blob], file.name, {
+                type: "image/jpeg",
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            } else if (quality > 0.1) {
+              quality -= 0.1;
+              tryCompress();
+            } else {
+              // If still too large, resolve with current blob
+              const compressedFile = new File([blob!], file.name, {
+                type: "image/jpeg",
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            }
+          },
+          "image/jpeg",
+          quality
+        );
+      };
+
+      tryCompress();
+    };
+
+    img.src = URL.createObjectURL(file);
+  });
+};
 
 export default function FieldTechnicianPage() {
   const [imageSrc, setImageSrc] = useState<string>("");
@@ -24,6 +91,7 @@ export default function FieldTechnicianPage() {
     error: undefined,
   });
   const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
 
   // Function to get location name from coordinates
   const getLocationName = async (lat: number, lng: number) => {
@@ -114,15 +182,36 @@ export default function FieldTechnicianPage() {
     getCurrentLocation();
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const fileURL = URL.createObjectURL(file);
-      setImageSrc(fileURL);
-      setImageFile(file); // Store the actual file
+      setIsCompressing(true);
+
+      try {
+        // Compress the image if it's larger than 800KB
+        const compressedFile =
+          file.size > 800 * 1024 ? await compressImage(file, 800) : file;
+
+        const fileURL = URL.createObjectURL(compressedFile);
+        setImageSrc(fileURL);
+        setImageFile(compressedFile);
+
+        console.log(`Original size: ${(file.size / 1024).toFixed(2)}KB`);
+        console.log(
+          `Compressed size: ${(compressedFile.size / 1024).toFixed(2)}KB`
+        );
+      } catch (error) {
+        console.error("Error compressing image:", error);
+        // Fallback to original file
+        const fileURL = URL.createObjectURL(file);
+        setImageSrc(fileURL);
+        setImageFile(file);
+      } finally {
+        setIsCompressing(false);
+      }
     } else {
       setImageSrc("");
-      setImageFile(undefined); // Clear the file
+      setImageFile(undefined);
     }
   };
 
@@ -131,13 +220,51 @@ export default function FieldTechnicianPage() {
       <Navbar />
       <div className="container mx-auto mt-10 p-5 space-y-4">
         <div className="space-y-4">
-          <Input
-            type="file"
-            accept="image/*"
-            capture="user"
-            onChange={handleInputChange}
-            className="w-full"
-          />
+          {imageSrc ? (
+            <div className="flex justify-center relative">
+              <Image
+                src={imageSrc}
+                alt="Preview"
+                width={500}
+                height={500}
+                className="h-76 w-76 rounded-lg object-cover"
+                onError={() => setImageSrc("/placeholder.png")}
+              />
+              <Button
+                onClick={() => {
+                  setImageSrc("");
+                  setImageFile(undefined);
+                }}
+                variant={"ghost"}
+                className="h-7 w-7 p-0 text-red-500 absolute top-0 right-0 translate-x-1/2 -translate-y-1/2"
+                style={{ zIndex: 10 }}
+                aria-label="Remove image"
+              >
+                <X size={18} />
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handleInputChange}
+                className="w-full"
+                disabled={isCompressing}
+              />
+              {isCompressing && (
+                <p className="text-blue-500 text-sm">Compressing image...</p>
+              )}
+            </div>
+          )}
+
+          {/* Show file size info */}
+          {imageFile && (
+            <p className="text-gray-500 text-xs text-center">
+              File size: {(imageFile.size / 1024).toFixed(2)}KB
+            </p>
+          )}
 
           <div className="space-y-2">
             <div className="flex items-center gap-2">
@@ -174,20 +301,6 @@ export default function FieldTechnicianPage() {
             )}
           </div>
         </div>
-
-        {imageSrc && (
-          <div className="flex justify-center">
-            <Image
-              src={imageSrc}
-              alt="Preview"
-              width={500}
-              height={500}
-              className="rounded-lg object-cover"
-              onError={() => setImageSrc("/placeholder.png")}
-            />
-          </div>
-        )}
-
         <UploadFieldReportForm image_file={imageFile} location={location} />
       </div>
     </>

@@ -73,7 +73,7 @@ export function TeamMemberForm({ data }: TeamMemberFormProps) {
       {!data ? (
         <FormSelect options={roles} label="Role" name="role" form={form} />
       ) : (
-        <NonFormInput label="Role" defaultValue={data?.role || ""} />
+        <NonFormInput label="Role" defaultValue={data?.role || ""} readonly />
       )}
       <div className="flex gap-2 justify-end">
         {!data && (
