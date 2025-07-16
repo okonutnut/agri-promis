@@ -2,37 +2,30 @@
 
 import CustomPageLayout from "@/components/custom/layout/page-layout";
 import { useSelectProgramAndProjectDetailsByProgjectIDHook } from "@/components/hooks";
+import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Dot } from "lucide-react";
 import { useParams } from "next/navigation";
 
 export default function DashboardPage() {
   const { projectID } = useParams();
-  const { data: projectData } =
+  const { data, isLoading, error } =
     useSelectProgramAndProjectDetailsByProgjectIDHook(projectID as string);
   return (
-    <CustomPageLayout>
+    <CustomPageLayout isLoading={isLoading} error={error}>
       <div className="py-16 flex justify-between">
-        {projectData && (
+        {data && (
           <>
-            <span className="text-2xl font-medium">
-              {projectData?.project_name}
-            </span>
-            <span
-              className={`inline-flex items-center px-3 py-1 rounded border text-sm font-medium ${
-                projectData?.status === 0
-                  ? "border-red-400 text-red-500 bg-red-50"
-                  : "border-green-400 text-green-500 bg-green-50"
+            <span className="text-2xl font-medium">{data?.project_name}</span>
+            <Badge
+              variant="outline"
+              className={`px-5 text-xs ${
+                data.status === 0
+                  ? "text-red-500 border-red-500"
+                  : "text-green-500 border-green-500"
               }`}
             >
-              <Dot
-                className="mr-2"
-                color={projectData?.status === 0 ? "#f87171" : "#34d399"}
-                size={24}
-                fill={projectData?.status === 0 ? "#f87171" : "#34d399"}
-              />
-              {projectData?.status === 0 ? "INACTIVE" : "ACTIVE"}
-            </span>
+              {data.status === 0 ? "INACTIVE" : "ACTIVE"}
+            </Badge>
           </>
         )}
       </div>

@@ -1,6 +1,5 @@
 "use client";
 
-import NewNavbar from "@/components/custom/navbar/navbar";
 import { Button } from "@/components/ui/button";
 import { Boxes, Dot, Plus } from "lucide-react";
 import {
@@ -9,29 +8,33 @@ import {
 } from "@/components/hooks";
 import CardLink from "@/components/custom/link/card-link";
 import Link from "next/link";
+import CustomPageLayout from "@/components/custom/layout/page-layout";
 
 export default function DashboardPage() {
-  const { data: programData } = useSelectAllProgramsByAgriculturistHook();
+  const { data, isLoading, error } = useSelectAllProgramsByAgriculturistHook();
   return (
-    <>
-      <NewNavbar />
-      <section className="w-full py-10">
-        <div className="container mx-auto p-4">
-          <h1 className="text-2xl">Your Programs</h1>
+    <CustomPageLayout
+      pageTitle="Your Programs"
+      isLoading={isLoading}
+      error={error}
+      noSidebar={true}
+    >
+      {data && (
+        <>
           <Link href="/dashboard/new/">
             <Button className="my-7" size={"sm"}>
               <Plus className="mr-2 h-4 w-4" />
               Create New Program
             </Button>
           </Link>
-          <div className="flex flex-wrap items-center gap-4">
-            {programData && programData.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-4 relative">
+            {data.length > 0 ? (
               <>
-                {programData?.map((program) => (
+                {data?.map((program) => (
                   <CardLink
                     href={`/dashboard/programs/${program.id}`}
                     key={program.id}
-                    className="basis-3xs w-xs h-[200px] flex flex-col items-center justify-center gap-2 p-4 text-center"
+                    className="h-[200px] w-[92vw] sm:w-[300px] flex flex-col items-center justify-center p-4 text-center"
                   >
                     <Boxes className="text-gray-500" />
                     {program.program_name}
@@ -47,9 +50,9 @@ export default function DashboardPage() {
               <p className="text-center">No programs found</p>
             )}
           </div>
-        </div>
-      </section>
-    </>
+        </>
+      )}
+    </CustomPageLayout>
   );
 }
 

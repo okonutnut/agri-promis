@@ -17,6 +17,7 @@ import { FieldReportType } from "@/components/types";
 import Image from "next/image";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { format } from "date-fns";
 
 export default function FieldReportsPage() {
   const { projectID } = useParams();
@@ -33,14 +34,17 @@ export default function FieldReportsPage() {
     setSelectedRow(null);
   };
 
-  const { data } = useSelectAllFieldReportsByProjectIDHook(projectID as string);
+  const { data, isLoading, error } = useSelectAllFieldReportsByProjectIDHook(
+    projectID as string
+  );
   console.log("Field Reports Data:", data);
 
   return (
-    <CustomPageLayout>
-      <h1 className="text-2xl font-semibold text-primary mb-4">
-        Field Reports
-      </h1>
+    <CustomPageLayout
+      pageTitle="Field Reports"
+      isLoading={isLoading}
+      error={error}
+    >
       <DataTable
         columns={columns}
         data={data || []}
@@ -62,19 +66,15 @@ export default function FieldReportsPage() {
                   className="mx-auto mb-4 object-cover rounded-lg"
                 />
               </CardContent>
-              <CardFooter className="text-xs flex justify-between">
+              <CardFooter className="text-xs flex flex-col items-start gap-2">
+                <span>Location: {selectedRow?.location_name} </span>
+                <span>Longtitude: {selectedRow?.longitude} </span>
+                <span>Latitude: {selectedRow?.latitude} </span>
                 <span>
-                  Longtitude: {selectedRow?.longitude}{" "}
-                  <Separator orientation="vertical" />
-                </span>
-                <span>
-                  Latitude: {selectedRow?.latitude}{" "}
-                  <Separator orientation="vertical" />
-                </span>
-                <span>
-                  Date &amp; Time: {selectedRow?.report_date},{" "}
-                  {selectedRow?.report_time}
-                  <Separator orientation="vertical" />
+                  Date &amp; Time Captured:&nbsp;
+                  {selectedRow?.date_time_captured
+                    ? format(new Date(selectedRow.date_time_captured), "PPpp")
+                    : "N/A"}
                 </span>
               </CardFooter>
             </Card>

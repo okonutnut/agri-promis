@@ -7,13 +7,13 @@ export function GetLocation({ projectID }: { projectID: string }) {
     isError,
   } = useSelectLocationByID(projectID);
   return (
-    <p className="font-mono">
+    <span className="font-mono">
       {isLoading
         ? "Loading location..."
         : isError
         ? "Error fetching location"
         : `${locationData?.province} | ${locationData?.barangay},
             ${locationData?.municipality}`}
-    </p>
+    </span>
   );
 }

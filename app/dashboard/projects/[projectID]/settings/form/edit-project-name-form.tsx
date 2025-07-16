@@ -1,30 +1,29 @@
 import FormInput from "@/components/custom/input/form-input";
-import { useParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  useEditProjectNameHook,
-  useSelectProgramAndProjectDetailsByProgjectIDHook,
-} from "@/components/hooks";
+import { useEditProjectNameHook } from "@/components/hooks";
 import { CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { ProgramType, ProjectType } from "@/components/types";
 
 const formSchema = z.object({
   id: z.string().min(1, "Project ID is required"),
   project_name: z.string().min(1, "Project name is required"),
 });
-export default function EditProjectNameForm() {
-  const { projectID } = useParams();
-  const { data: projectData } =
-    useSelectProgramAndProjectDetailsByProgjectIDHook(projectID as string);
 
+type EditProjectNameFormProps = {
+  project: ProjectType & { programs: ProgramType };
+};
+export default function EditProjectNameForm({
+  project,
+}: EditProjectNameFormProps) {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      id: projectID as string,
-      project_name: projectData?.project_name || "",
+      id: project.id as string,
+      project_name: project.project_name || "",
     },
   });
 

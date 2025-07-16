@@ -1,3 +1,4 @@
+import { SidebarProvider } from "@/components/ui/sidebar";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -10,5 +11,9 @@ export default function FieldTechnicianLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <main className="w-full relative">{children}</main>;
+  return (
+    <main className="w-full relative">
+      <SidebarProvider>{children}</SidebarProvider>
+    </main>
+  );
 }

@@ -41,14 +41,16 @@ export type FieldReportType = {
   id?: string;
   project_id?: string;
   reporter_id?: string;
-  report_date?: string;
-  report_time?: string;
+  date_time_captured?: string;
+  report_level?: number;
   status_note?: string;
   remarks?: string;
   image_file?: File;
   photo_url?: string;
+  location_name?: string;
   latitude?: number;
   longitude?: number;
   tag?: string[];
+  user_profile?: UserProfile;
   created_at?: string;
 };

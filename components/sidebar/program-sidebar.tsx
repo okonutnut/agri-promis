@@ -11,10 +11,12 @@ import {
 } from "@/components/ui/sidebar";
 import { Boxes, Settings, Users } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 
 export function ProgramSidebar() {
   const { programID } = useParams();
+  const pathname = usePathname();
+
   return (
     <Sidebar variant="floating" className="pt-12">
       {/* CONTENT */}
@@ -24,10 +26,13 @@ export function ProgramSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === `/dashboard/programs/${programID}`}
+                >
                   <Link
                     href={"/dashboard/programs/" + programID}
-                    className="font-medium text-sm flex items-center gap-2"
+                    className="font-medium flex items-center gap-2"
                   >
                     <Boxes className="w-10 h-10" />
                     Projects
@@ -35,10 +40,15 @@ export function ProgramSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton
+                  asChild
+                  isActive={
+                    pathname === `/dashboard/programs/${programID}/team`
+                  }
+                >
                   <Link
                     href={`/dashboard/programs/${programID}/team`}
-                    className="font-medium text-sm flex items-center gap-2"
+                    className="font-medium flex items-center gap-2"
                   >
                     <Users className="w-10 h-10" />
                     Team
@@ -46,10 +56,15 @@ export function ProgramSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton
+                  asChild
+                  isActive={
+                    pathname === `/dashboard/programs/${programID}/settings`
+                  }
+                >
                   <Link
                     href={`/dashboard/programs/${programID}/settings`}
-                    className="font-medium text-sm flex items-center gap-2"
+                    className="font-medium flex items-center gap-2"
                   >
                     <Settings className="w-10 h-10" />
                     Program settings

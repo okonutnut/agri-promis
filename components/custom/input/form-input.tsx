@@ -27,7 +27,7 @@ export default function FormInput({
 }: FormInputType) {
   return (
     <div className={cn(`w-full`, className)}>
-      <div className="text-xs font-medium text flex justify-between items-center mb-1">
+      <div className="font-medium text flex justify-between items-center mb-1">
         {label}
         {copy && (
           <Button
@@ -57,7 +57,7 @@ export default function FormInput({
           form.formState.isSubmitting || form.formState.isValidating || readonly
         }
       />
-      <p className="text-red-500 text-xs">
+      <p className="text-red-500">
         {(form.formState.errors[name] as { message?: string })?.message}
       </p>
     </div>

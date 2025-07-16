@@ -10,24 +10,8 @@ export const columns: ColumnDef<FieldReportType>[] = [
     header: "ID",
   },
   {
-    accessorKey: "reporter_id",
-    header: "Reporter ID",
-  },
-  {
-    accessorKey: "report_date",
-    header: "Date Created",
-    cell: ({ getValue }) => {
-      const date = new Date(getValue() as string);
-      return format(date, "MMM dd, yyyy");
-    },
-  },
-  {
-    accessorKey: "report_time",
-    header: "Time Created",
-    cell: ({ getValue }) => {
-      const time = new Date(`1970-01-01T${getValue() as string}`);
-      return format(time, "hh:mm:ss a");
-    },
+    accessorKey: "user_profile.fullname",
+    header: "Reporter Name",
   },
   {
     accessorKey: "created_at",

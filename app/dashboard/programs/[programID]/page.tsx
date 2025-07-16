@@ -12,44 +12,44 @@ import { GetLocation } from "./get-project-location";
 
 export default function DashboardPage() {
   const { programID } = useParams();
-  const { data: projectData } = useSelectAllProjectsByProgramIDHook(
+  const { data, isLoading, error } = useSelectAllProjectsByProgramIDHook(
     programID as string
   );
+
   return (
-    <CustomPageLayout>
-      <Link href={`/dashboard/new/${programID}`}>
-        <Button className="mb-4" size={"sm"}>
-          <Plus /> Create new project
-        </Button>
-      </Link>
-      <div className="flex flex-wrap justify-start items-center gap-2">
-        {Array.isArray(projectData) && projectData.length > 0 ? (
-          projectData.map((project: ProjectType) => (
-            <CardLink
-              href={`/dashboard/projects/${project.id}`}
-              key={project.id}
-              className="h-[176px] min-w-[360px] flex flex-col justify-between items-start h-full"
-            >
-              <div className="w-full flex justify-between items-center font-semibold">
-                {project.project_name}
-                <ChevronRight className="ml-2 h-4 w-4" />
-              </div>
-              <GetLocation projectID={project.location_id ?? ""} />
-              <span
-                className={`text-xs uppercase font-bold ${
-                  project.status == 1 ? "text-green-600" : "text-red-600"
-                }`}
-              >
-                {project.status == 1 ? "active" : "inactive"}
-              </span>
-            </CardLink>
-          ))
-        ) : (
-          <p className="col-span-3 text-sm text-gray-500">
-            No projects found for this program.
-          </p>
-        )}
-      </div>
+    <CustomPageLayout isLoading={isLoading} error={error}>
+      {data && (
+        <>
+          <Link href={`/dashboard/new/${programID}`}>
+            <Button className="mb-4" size={"sm"}>
+              <Plus /> Create new project
+            </Button>
+          </Link>
+          <div className="flex flex-wrap justify-start items-center gap-2">
+            {data.length > 0 &&
+              data.map((project: ProjectType) => (
+                <CardLink
+                  href={`/dashboard/projects/${project.id}`}
+                  key={project.id}
+                  className="h-[176px] min-w-[360px] flex flex-col justify-between items-start h-full"
+                >
+                  <div className="w-full flex justify-between items-center font-semibold">
+                    {project.project_name}
+                    <ChevronRight className="ml-2 h-4 w-4" />
+                  </div>
+                  <GetLocation projectID={project.location_id ?? ""} />
+                  <span
+                    className={`text-xs uppercase font-bold ${
+                      project.status == 1 ? "text-green-600" : "text-red-600"
+                    }`}
+                  >
+                    {project.status == 1 ? "active" : "inactive"}
+                  </span>
+                </CardLink>
+              ))}
+          </div>
+        </>
+      )}
     </CustomPageLayout>
   );
 }

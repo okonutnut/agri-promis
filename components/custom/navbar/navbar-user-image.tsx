@@ -30,8 +30,8 @@ export default function NavbarUserImage() {
         <Image
           src={avatarUrl}
           alt="User Avatar"
-          width={38}
-          height={38}
+          width={33}
+          height={33}
           className="rounded-full"
         />
       </DropdownMenuTrigger>

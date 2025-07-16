@@ -1,12 +1,13 @@
 "use client";
 
-import Navbar from "@/components/custom/navbar/navbar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import UploadFieldReportForm from "./form/upload-field-report-form";
-import { X } from "lucide-react";
+import { XCircle } from "lucide-react";
+import { toast } from "sonner";
+import CustomPageLayout from "@/components/custom/layout/page-layout";
 
 interface LocationData {
   latitude: number | undefined;
@@ -82,8 +83,9 @@ const compressImage = (file: File, maxSizeKB: number = 800): Promise<File> => {
 };
 
 export default function FieldTechnicianPage() {
+  const [dateTimeCaptured, setDateTimeCaptured] = useState<string>("");
   const [imageSrc, setImageSrc] = useState<string>("");
-  const [imageFile, setImageFile] = useState<File | undefined>(undefined);
+  const [imageFile, setImageFile] = useState<File>();
   const [location, setLocation] = useState<LocationData>({
     latitude: undefined,
     longitude: undefined,
@@ -183,24 +185,22 @@ export default function FieldTechnicianPage() {
   }, []);
 
   const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const now = new Date();
+    now.setHours(now.getHours() + 8);
+    setDateTimeCaptured(now.toISOString());
     const file = e.target.files?.[0];
     if (file) {
       setIsCompressing(true);
 
       try {
-        // Compress the image if it's larger than 800KB
         const compressedFile =
           file.size > 800 * 1024 ? await compressImage(file, 800) : file;
 
         const fileURL = URL.createObjectURL(compressedFile);
         setImageSrc(fileURL);
         setImageFile(compressedFile);
-
-        console.log(`Original size: ${(file.size / 1024).toFixed(2)}KB`);
-        console.log(
-          `Compressed size: ${(compressedFile.size / 1024).toFixed(2)}KB`
-        );
       } catch (error) {
+        toast.error("Error compressing image. Please try again.");
         console.error("Error compressing image:", error);
         // Fallback to original file
         const fileURL = URL.createObjectURL(file);
@@ -216,8 +216,7 @@ export default function FieldTechnicianPage() {
   };
 
   return (
-    <>
-      <Navbar />
+    <CustomPageLayout noSidebar>
       <div className="container mx-auto mt-10 p-5 space-y-4">
         <div className="space-y-4">
           {imageSrc ? (
@@ -240,7 +239,7 @@ export default function FieldTechnicianPage() {
                 style={{ zIndex: 10 }}
                 aria-label="Remove image"
               >
-                <X size={18} />
+                <XCircle size={18} />
               </Button>
             </div>
           ) : (
@@ -301,8 +300,12 @@ export default function FieldTechnicianPage() {
             )}
           </div>
         </div>
-        <UploadFieldReportForm image_file={imageFile} location={location} />
+        <UploadFieldReportForm
+          image_file={imageFile}
+          date_time_captured={dateTimeCaptured}
+          location={location}
+        />
       </div>
-    </>
+    </CustomPageLayout>
   );
 }

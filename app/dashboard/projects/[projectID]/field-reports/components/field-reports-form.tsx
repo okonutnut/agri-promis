@@ -2,10 +2,10 @@ import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import FormInput from "@/components/custom/input/form-input";
 import { FieldReportType } from "@/components/types";
 import NonFormInput from "@/components/custom/input/non-form-input";
 import { Textarea } from "@/components/ui/textarea";
+import FormTextarea from "@/components/custom/input/form-textarea";
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -32,13 +32,15 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
   return (
     <>
       <form className="p-3 space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+        <NonFormInput
+          label="Reporter Name"
+          defaultValue={data?.user_profile?.fullname}
+        />
         <div className="text-xs font-medium text flex justify-between items-center mb-1">
           Status note
         </div>
         <Textarea value={data?.status_note} readOnly />
-        <FormInput label="ID" name="id" form={form} readonly />
-        <NonFormInput label="Reporter ID" defaultValue={data?.reporter_id} />
-        <FormInput label="Remarks" name="remarks" form={form} />
+        <FormTextarea label="Remarks" name="remarks" form={form} />
         <div className="flex gap-2 justify-end">
           <Button type="submit">Save</Button>
         </div>

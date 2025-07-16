@@ -1,28 +1,28 @@
 import FormInput from "@/components/custom/input/form-input";
-import { useParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  useEditProgramNameHook,
-  useSelectProgramByIDHook,
-} from "@/components/hooks";
+import { useEditProgramNameHook } from "@/components/hooks";
 import { CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { ProgramType } from "@/components/types";
 
 const formSchema = z.object({
   program_name: z.string().min(1, "Program name is required"),
   id: z.string().min(1, "Program ID is required"),
 });
-export default function EditProgramNameForm() {
-  const { programID } = useParams();
-  const { data: programData } = useSelectProgramByIDHook(programID as string);
 
+type EditProgramNameFormProps = {
+  programData: ProgramType;
+};
+export default function EditProgramNameForm({
+  programData,
+}: EditProgramNameFormProps) {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      id: programID as string,
+      id: programData?.id as string,
       program_name: programData?.program_name ?? "",
     },
   });
@@ -44,7 +44,7 @@ export default function EditProgramNameForm() {
             variant={isPending ? "ghost" : "default"}
             disabled={isPending}
           >
-            {isPending ? <Loader2 className="animate-spin" /> : "Save Changes"}
+            {isPending ? <Loader2 className="animate-spin" /> : "Save"}
           </Button>
         </CardFooter>
       </form>

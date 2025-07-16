@@ -11,10 +11,14 @@ import {
 } from "@/components/ui/sidebar";
 import { ClipboardList, House, Settings } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 
 export function ProjectSidebar() {
   const { projectID } = useParams();
+  const pathname = usePathname();
+
+  const isActive = (href: string) => pathname === href;
+
   return (
     <Sidebar variant="floating" className="pt-12">
       {/* CONTENT */}
@@ -24,10 +28,13 @@ export function ProjectSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive(`/dashboard/projects/${projectID}`)}
+                >
                   <Link
                     href={`/dashboard/projects/${projectID}`}
-                    className="font-medium text-sm flex items-center gap-2"
+                    className="font-medium flex items-center gap-2"
                   >
                     <House className="w-10 h-10" />
                     Project Overview
@@ -35,10 +42,15 @@ export function ProjectSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive(
+                    `/dashboard/projects/${projectID}/field-reports`
+                  )}
+                >
                   <Link
                     href={`/dashboard/projects/${projectID}/field-reports`}
-                    className="font-medium text-sm flex items-center gap-2"
+                    className="font-medium flex items-center gap-2"
                   >
                     <ClipboardList className="w-10 h-10" />
                     Field Reports
@@ -46,10 +58,15 @@ export function ProjectSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive(
+                    `/dashboard/projects/${projectID}/settings`
+                  )}
+                >
                   <Link
                     href={`/dashboard/projects/${projectID}/settings`}
-                    className="font-medium text-sm flex items-center gap-2"
+                    className="font-medium flex items-center gap-2"
                   >
                     <Settings className="w-10 h-10" />
                     Project settings

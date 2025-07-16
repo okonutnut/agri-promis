@@ -6,15 +6,18 @@ import { useForm } from "react-hook-form";
 
 interface UploadFieldReportFormProps {
   image_file: File | undefined;
+  date_time_captured: string;
   location?: {
     latitude: number | undefined;
     longitude: number | undefined;
     error: string | undefined;
+    locationName?: string | undefined;
   };
 }
 
 export default function UploadFieldReportForm({
   image_file,
+  date_time_captured,
   location,
 }: UploadFieldReportFormProps) {
   const form = useForm();
@@ -23,13 +26,17 @@ export default function UploadFieldReportForm({
   const onSubmit = (data: FieldReportType) => {
     console.log({
       ...data,
+      date_time_captured: date_time_captured,
       image_file,
+      location_name: location?.locationName,
       latitude: location?.latitude,
       longitude: location?.longitude,
     });
     mutate({
       ...data,
+      date_time_captured: date_time_captured,
       image_file,
+      location_name: location?.locationName,
       latitude: location?.latitude,
       longitude: location?.longitude,
     });

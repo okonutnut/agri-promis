@@ -29,7 +29,7 @@ export default function SidebarLogoutButton() {
   };
 
   return (
-    <DropdownMenuItem className="w-full text-xs" onClick={handleLogout}>
+    <DropdownMenuItem className="w-full" onClick={handleLogout}>
       <DoorOpen className="mr-2 h-4 w-4" />
       Sign out
     </DropdownMenuItem>

@@ -264,9 +264,9 @@ export async function SelectAllFieldReportsByProjectIDAction(
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("field_reports")
-      .select("*")
+      .select(`*, user_profile (fullname)`)
       .eq("project_id", projectID)
-      .order("created_at", { ascending: true });
+      .order("created_at", { ascending: false });
 
     if (error) {
       console.error("Error fetching field reports:", error);
@@ -282,6 +282,8 @@ export async function SelectAllFieldReportsByProjectIDAction(
 
 export async function InsertFieldReportAction({
   image_file,
+  location_name,
+  date_time_captured,
   latitude,
   longitude,
   status_note,
@@ -303,21 +305,18 @@ export async function InsertFieldReportAction({
       photo_url = `${process.env.NEXT_PUBLIC_STORAGE_URL}/${data.fullPath}`;
     }
 
-    const now = new Date();
-    const report_date = now.toISOString().split("T")[0]; // YYYY-MM-DD
-    const report_time = now.toTimeString().split(" ")[0]; // HH:MM:SS
-
+    // Insert the field report into the database
     const { data, error } = await supabase
       .from("field_reports")
       .insert({
         project_id: "d579819a-8b04-44f1-b60f-641771a6ac8e",
         reporter_id: (await supabase.auth.getUser()).data.user?.id,
         photo_url,
+        location_name,
+        date_time_captured: date_time_captured,
         latitude,
         longitude,
         status_note,
-        report_date,
-        report_time,
       })
       .select()
       .single();

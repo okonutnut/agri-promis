@@ -4,8 +4,6 @@ import { useState } from "react";
 import { DataTable } from "./table/data-table";
 import { columns } from "./table/columns";
 import { TeamMemberForm } from "./components/team-members-form";
-import NewNavbar from "@/components/custom/navbar/navbar";
-import { ProgramSidebar } from "@/components/sidebar/program-sidebar";
 import {
   Sheet,
   SheetContent,
@@ -15,6 +13,7 @@ import {
 } from "@/components/ui/sheet";
 import { UserProfile } from "@/components/types";
 import { useSelectAllMembersHook } from "@/components/hooks";
+import CustomPageLayout from "@/components/custom/layout/page-layout";
 
 export default function FieldTechnicianPage() {
   const [panelOpen, setPanelOpen] = useState(false);
@@ -39,15 +38,16 @@ export default function FieldTechnicianPage() {
     setSelectedRow(null);
   };
 
-  const { data } = useSelectAllMembersHook();
+  const { data, isLoading, error } = useSelectAllMembersHook();
 
   return (
-    <section className="w-full h-screen relative">
-      <NewNavbar />
-      <div className="flex">
-        <ProgramSidebar />
-        <div className="container mx-auto p-4 space-y-4">
-          <h1 className="text-2xl font-semibold text-primary">Team Members</h1>
+    <CustomPageLayout
+      pageTitle="Team Members"
+      isLoading={isLoading}
+      error={error}
+    >
+      {data && (
+        <>
           <DataTable
             columns={columns}
             data={data || []}
@@ -73,8 +73,8 @@ export default function FieldTechnicianPage() {
               </>
             </SheetContent>
           </Sheet>
-        </div>
-      </div>
-    </section>
+        </>
+      )}
+    </CustomPageLayout>
   );
 }

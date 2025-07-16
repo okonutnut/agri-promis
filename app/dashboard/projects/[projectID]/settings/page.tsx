@@ -3,19 +3,27 @@
 import { Card, CardContent } from "@/components/ui/card";
 import EditProgramNameForm from "./form/edit-project-name-form";
 import CustomPageLayout from "@/components/custom/layout/page-layout";
+import { useSelectProgramAndProjectDetailsByProgjectIDHook } from "@/components/hooks";
+import { useParams } from "next/navigation";
 
 export default function ProgramSettingsPage() {
+  const { projectID } = useParams();
+  const { data, isLoading, error } =
+    useSelectProgramAndProjectDetailsByProgjectIDHook(projectID as string);
   return (
-    <CustomPageLayout>
-      <h1 className="text-2xl font-medium text-primary mb-4">
-        Project Settings
-      </h1>
-      <Card className="shadow-xs">
-        <CardContent className="flex flex-wrap justify-between items-start">
-          <div className="font-semibold w-full mb-4">General Settings</div>
-          <EditProgramNameForm />
-        </CardContent>
-      </Card>
+    <CustomPageLayout
+      pageTitle="Project Settings"
+      isLoading={isLoading}
+      error={error}
+    >
+      {data && (
+        <Card className="shadow-xs">
+          <CardContent className="flex flex-wrap justify-between items-start">
+            <div className="font-semibold w-full mb-4">General Settings</div>
+            <EditProgramNameForm project={data} />
+          </CardContent>
+        </Card>
+      )}
     </CustomPageLayout>
   );
 }
