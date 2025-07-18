@@ -3,7 +3,7 @@
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { DropdownMenuItem } from "../ui/dropdown-menu";
+import { DropdownMenuItem } from "../../ui/dropdown-menu";
 import { useQueryClient } from "@tanstack/react-query";
 import { DoorOpen } from "lucide-react";
 

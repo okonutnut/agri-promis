@@ -18,10 +18,11 @@ import { useSelectProgramByIDHook } from "@/components/hooks";
 export default function CreateProgramPage() {
   const { programUID } = useParams();
   const { data } = useSelectProgramByIDHook(programUID as string);
+
   return (
     <>
-      <NewNavbar />
-      <Card className="mx-auto w-[500px] my-5">
+      <NewNavbar noSidebar />
+      <Card className="mx-auto w-full md:w-[500px] my-5 shadow-none border-0 md:shadow-xs md:border">
         <CardHeader>
           <CardTitle className="uppercase text-primary">
             Create new project

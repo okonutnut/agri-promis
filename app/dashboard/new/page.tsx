@@ -16,8 +16,8 @@ import Link from "next/link";
 export default function CreateProgramPage() {
   return (
     <>
-      <NewNavbar />
-      <Card className="mx-auto w-[500px] my-5">
+      <NewNavbar noSidebar />
+      <Card className="mx-auto w-full md:w-[500px] my-5 shadow-none border-0 md:shadow-xs md:border">
         <CardHeader>
           <CardTitle className="uppercase text-primary">
             Create new program

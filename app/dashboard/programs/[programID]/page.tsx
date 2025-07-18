@@ -5,10 +5,11 @@ import CardLink from "@/components/custom/link/card-link";
 import { useSelectAllProjectsByProgramIDHook } from "@/components/hooks";
 import { ProjectType } from "@/components/types";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Plus } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { GetLocation } from "./get-project-location";
+import { Badge } from "@/components/ui/badge";
 
 export default function DashboardPage() {
   const { programID } = useParams();
@@ -22,7 +23,7 @@ export default function DashboardPage() {
         <>
           <Link href={`/dashboard/new/${programID}`}>
             <Button className="mb-4" size={"sm"}>
-              <Plus /> Create new project
+              Create new project
             </Button>
           </Link>
           <div className="flex flex-wrap justify-start items-center gap-2">
@@ -31,20 +32,25 @@ export default function DashboardPage() {
                 <CardLink
                   href={`/dashboard/projects/${project.id}`}
                   key={project.id}
-                  className="h-[176px] min-w-[360px] flex flex-col justify-between items-start h-full"
+                  className="min-h-36 min-w-[360px] flex flex-col items-start h-full p-5 space-y-2 gap-0"
                 >
-                  <div className="w-full flex justify-between items-center font-semibold">
+                  <span className="w-full flex justify-between items-center font-semibold">
                     {project.project_name}
                     <ChevronRight className="ml-2 h-4 w-4" />
-                  </div>
+                  </span>
                   <GetLocation projectID={project.location_id ?? ""} />
-                  <span
-                    className={`text-xs uppercase font-bold ${
+                  <Badge
+                    variant={"outline"}
+                    className={`text-xs uppercase ${
+                      project.status == 1
+                        ? "border-green-600"
+                        : "border-red-600"
+                    } ${
                       project.status == 1 ? "text-green-600" : "text-red-600"
                     }`}
                   >
                     {project.status == 1 ? "active" : "inactive"}
-                  </span>
+                  </Badge>
                 </CardLink>
               ))}
           </div>

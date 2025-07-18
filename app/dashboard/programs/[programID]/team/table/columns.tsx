@@ -6,10 +6,6 @@ import { format } from "date-fns";
 
 export const columns: ColumnDef<UserProfile>[] = [
   {
-    accessorKey: "id",
-    header: "ID",
-  },
-  {
     accessorKey: "fullname",
     header: "Fullname",
   },

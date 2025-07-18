@@ -26,7 +26,7 @@ export default function FormSelect({
   return (
     <div>
       {label && (
-        <div className="text-xs font-medium text flex justify-between items-center mb-1">
+        <div className="text-sm font-medium text flex justify-between items-center mb-1">
           {label}
         </div>
       )}

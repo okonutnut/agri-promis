@@ -2,6 +2,7 @@
 
 import {
   FieldReportType,
+  AssignedProjectsType,
   LocationType,
   ProgramType,
   ProjectType,
@@ -399,4 +400,134 @@ export async function SelectAllMembersAction() {
   }));
 
   return result as UserProfile[];
+}
+
+export async function SelectAllMembersByRoleAction(role: string) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("user_profile")
+    .select("*")
+    .eq("role", role);
+
+  if (error) {
+    console.error("Error fetching members:", error);
+    throw new Error(`Failed to fetch members: ${error.message}`);
+  }
+
+  // Get user email from auth
+  const userIds = data?.map((item) => item.id).filter(Boolean) || [];
+  const { data: userData, error: emailError } =
+    await supabase.auth.admin.listUsers();
+  if (emailError) {
+    console.error("Error fetching user emails:", emailError);
+    throw new Error(`Failed to fetch user emails: ${emailError.message}`);
+  }
+  const emailMap = new Map(
+    (userData?.users ?? [])
+      .filter((user) => userIds.includes(user.id))
+      .map((user) => [user.id, user.email])
+  );
+
+  const result = data?.map((item) => ({
+    ...item,
+    role: item.role
+      .replace(/_/g, " ")
+      .toLowerCase()
+      .replace(/\b\w/g, (char: string) => char.toUpperCase()),
+    email: emailMap.get(item.id) || "",
+  }));
+
+  return result as UserProfile[];
+}
+
+// ASSIGNED PROJECTS ACTIONS
+export async function InsertFieldTechnicianToProjectAction(
+  data: AssignedProjectsType,
+  project_id: string
+) {
+  try {
+    const supabase = await createClient();
+
+    // Try to fetch the assigned_projects row for the user
+    const { data: existingUser, error: selectError } = await supabase
+      .from("assigned_projects")
+      .select("project_ids")
+      .eq("user_id", data.user_id)
+      .maybeSingle();
+
+    if (selectError) {
+      console.error("Error checking existing user:", selectError);
+      throw new Error("Failed to check existing user. Please try again.");
+    }
+
+    if (existingUser) {
+      // Avoid duplicate project_id
+      const currentProjects: string[] = existingUser.project_ids || [];
+      if (!currentProjects.includes(project_id)) {
+        const updatedProjects = [...currentProjects, project_id];
+        const { error: updateError } = await supabase
+          .from("assigned_projects")
+          .update({ project_ids: updatedProjects })
+          .eq("user_id", data.user_id);
+
+        if (updateError) {
+          console.error("Error updating assigned projects:", updateError);
+          throw new Error(
+            "Failed to add project to field technician. Please try again."
+          );
+        }
+      }
+    } else {
+      const { error: insertError } = await supabase
+        .from("assigned_projects")
+        .insert({
+          ...data,
+          project_ids: [project_id],
+        });
+
+      if (insertError) {
+        console.error(
+          "Error inserting field technician to project:",
+          insertError
+        );
+        throw new Error(
+          "Failed to add field technician to project. Please try again."
+        );
+      }
+    }
+
+    return;
+  } catch (error) {
+    console.error("Error inserting field technician to project:", error);
+    throw new Error(
+      "Failed to add field technician to project. Please try again."
+    );
+  }
+}
+
+export async function SelectAllFieldTechniciansByProjectIDAction(
+  projectID: string
+) {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("assigned_projects")
+      .select("*, user_profile (fullname)")
+      .contains("project_ids", [projectID])
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching field technicians:", error);
+      throw new Error(error.message);
+    }
+
+    return data as AssignedProjectsType[];
+  } catch (error) {
+    console.error(
+      "Error in SelectAllFieldTechniciansByProjectIDAction:",
+      error
+    );
+    throw new Error("Failed to fetch field technicians. Please try again.");
+  }
 }

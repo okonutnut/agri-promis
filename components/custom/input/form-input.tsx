@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { ClipboardIcon } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
@@ -27,8 +28,10 @@ export default function FormInput({
 }: FormInputType) {
   return (
     <div className={cn(`w-full`, className)}>
-      <div className="font-medium text flex justify-between items-center mb-1">
-        {label}
+      <div className="text-sm font-medium flex justify-between items-center mb-1">
+        <Label htmlFor={name} className="capitalize">
+          {label}
+        </Label>
         {copy && (
           <Button
             size={"sm"}

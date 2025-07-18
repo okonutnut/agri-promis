@@ -54,3 +54,18 @@ export type FieldReportType = {
   user_profile?: UserProfile;
   created_at?: string;
 };
+
+export type AssignedProjectsType = {
+  id?: string;
+  user_id?: string;
+  fullname?: string;
+  project_ids?: string[];
+  created_at?: string;
+  user_profile?: UserProfile;
+};
+
+export type NavigationItemType = {
+  title: string;
+  href: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+};

@@ -1,4 +1,4 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
@@ -10,12 +10,13 @@ type CardLinkProps = {
 export default function CardLink({ href, children, className }: CardLinkProps) {
   return (
     <Link href={href}>
-      <Card className="shadow-none transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg">
-        <CardContent
-          className={cn("flex items-center gap-2 text-sm", className)}
-        >
-          {children}
-        </CardContent>
+      <Card
+        className={cn(
+          `shadow-none transition-transform duration-200 hover:-translate-y-1 hover:shadow-xs p-0`,
+          className
+        )}
+      >
+        {children}
       </Card>
     </Link>
   );

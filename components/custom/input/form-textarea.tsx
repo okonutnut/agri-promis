@@ -1,3 +1,4 @@
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { UseFormReturn } from "react-hook-form";
@@ -18,9 +19,12 @@ export default function FormTextarea({
 }: FormTextareaType) {
   return (
     <div className={cn(`w-full`, className)}>
-      <div className="text-xs font-medium text">{label}</div>
+      <Label htmlFor={name} className="text-xs font-medium text">
+        {label}
+      </Label>
       <Textarea
         {...form.register(name)}
+        id={name}
         rows={5}
         placeholder={`Enter ${label.toLowerCase()}`}
         readOnly={

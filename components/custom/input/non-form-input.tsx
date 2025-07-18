@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { ClipboardIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -22,8 +23,8 @@ export default function NonFormInput({
 }: NonFormInputType) {
   return (
     <div className={cn(`w-full`, className)}>
-      <div className="text-xs font-medium text flex justify-between items-center mb-1">
-        {label}
+      <div className="text-sm font-medium flex justify-between items-center mb-1">
+        <Label className="capitalized">{label}</Label>
         {copy && (
           <Button
             size={"sm"}

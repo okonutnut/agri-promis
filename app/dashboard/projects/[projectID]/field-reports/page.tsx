@@ -56,17 +56,17 @@ export default function FieldReportsPage() {
             <SheetTitle className="uppercase text-primary">
               View Field Report
             </SheetTitle>
-            <Card className="mx-2 shadow-none">
+            <Card className="mx-2 shadow-none p-0 gap-0">
               <CardContent className="border-b p-0">
                 <Image
                   src={selectedRow?.photo_url || "/placeholder.png"}
                   alt="Field Report"
                   width={500}
                   height={500}
-                  className="mx-auto mb-4 object-cover rounded-lg"
+                  className="w-full mx-auto object-cover"
                 />
               </CardContent>
-              <CardFooter className="text-xs flex flex-col items-start gap-2">
+              <CardFooter className="text-xs flex flex-col items-start gap-2 p-3">
                 <span>Location: {selectedRow?.location_name} </span>
                 <span>Longtitude: {selectedRow?.longitude} </span>
                 <span>Latitude: {selectedRow?.latitude} </span>

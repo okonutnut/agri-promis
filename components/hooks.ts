@@ -12,11 +12,15 @@ import {
   InsertMemberAction,
   SelectAllMembersAction,
   InsertFieldReportAction,
+  InsertFieldTechnicianToProjectAction,
+  SelectAllFieldTechniciansByProjectIDAction,
+  SelectAllMembersByRoleAction,
 } from "@/components/actions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
+  AssignedProjectsType,
   FieldReportType,
   ProgramType,
   ProjectType,
@@ -180,6 +184,7 @@ export function useSelectAllFieldReportsByProjectIDHook(projectID: string) {
     queryKey: ["allFieldReportsByProjectId", projectID],
     queryFn: async () =>
       await SelectAllFieldReportsByProjectIDAction(projectID),
+    enabled: !!projectID,
   });
 }
 
@@ -193,7 +198,7 @@ export function useInsertFieldReportHook() {
         queryKey: ["allFieldReportsByProjectId", data.project_id],
       });
       toast.success("Field report created successfully!");
-      window.location.reload(); // Reload the page to reflect the new field report
+      window.location.reload();
     },
     onError: (error) => {
       toast.error(`Failed to create field report: ${error.message}`);
@@ -223,5 +228,41 @@ export function useSelectAllMembersHook() {
   return useQuery({
     queryKey: ["members"],
     queryFn: async () => await SelectAllMembersAction(),
+  });
+}
+
+export function useSelectAllMembersByRoleHook(role: string) {
+  return useQuery({
+    queryKey: ["members", role],
+    queryFn: async () => await SelectAllMembersByRoleAction(role),
+    enabled: !!role,
+  });
+}
+
+// ASSIGNED PROJECTS HOOKS
+export function useInsertFieldTechnicianToProjectHook(project_id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: AssignedProjectsType) =>
+      await InsertFieldTechnicianToProjectAction(data, project_id),
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: ["fieldTechnicians", project_id],
+      });
+      toast.success("Field technician added to project successfully!");
+    },
+    onError: (error) => {
+      console.error("Failed to add field technician to project:", error);
+      toast.error(`Failed to add field technician: ${error.message}`);
+    },
+  });
+}
+
+export function useSelectFieldTechniciansByProjectIDHook(project_id: string) {
+  return useQuery({
+    queryKey: ["fieldTechnicians", project_id],
+    queryFn: async () =>
+      await SelectAllFieldTechniciansByProjectIDAction(project_id),
+    enabled: !!project_id,
   });
 }

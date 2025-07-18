@@ -1,24 +1,29 @@
 "use client";
 
+import { AssignedProjectsType } from "@/components/types";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { FieldReportType } from "@/components/types";
 
-export const columns: ColumnDef<FieldReportType>[] = [
+export const columns: ColumnDef<AssignedProjectsType>[] = [
+  {
+    id: "count",
+    header: "#",
+    cell: ({ row }) => row.index + 1,
+  },
   {
     accessorKey: "user_profile.fullname",
-    header: "Reporter Name",
+    header: "Fullname",
   },
   {
     accessorKey: "created_at",
-    header: () => <div className="text-end">Date Submitted</div>,
+    header: () => <div className="text-end">Date Assigned</div>,
     cell: ({ getValue }) => (
       <div className="text-end">
         {format(
           new Date(
             new Date(getValue() as string).getTime() + 8 * 60 * 60 * 1000
           ),
-          "PPpp"
+          "PPp"
         )}
       </div>
     ),

@@ -8,7 +8,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Boxes, Check, Slash, ChevronsUpDown, Plus, Box } from "lucide-react";
+import {
+  Boxes,
+  Check,
+  Slash,
+  ChevronsUpDown,
+  Plus,
+  Box,
+  AlignLeft,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useParams, usePathname } from "next/navigation";
 import {
@@ -22,7 +30,7 @@ import NavbarUserImage from "./navbar-user-image";
 import { useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import MobileNavbar from "./mobile-nav";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import AppDrawer from "@/components/sidebar/appDrawer";
 
 type NavbarProps = {
   noSidebar?: boolean;
@@ -51,7 +59,7 @@ export default function Navbar({ noSidebar }: NavbarProps) {
   return (
     <>
       <MobileNavbar />
-      <nav className="w-full flex items-center justify-between min-h-12 px-4 bg-white border-b border-gray-200 z-50 text-xs">
+      <nav className="w-full flex items-center justify-between min-h-12 px-2 border-b z-50">
         <div className="flex items-center gap-4 overflow-x-auto overflow-y-hidden w-full">
           <div className="flex items-center gap-2 min-w-max">
             <span className="hidden sm:inline">
@@ -60,10 +68,19 @@ export default function Navbar({ noSidebar }: NavbarProps) {
                 alt="Logo"
                 width={50}
                 height={50}
-                className="h-8 w-8 flex-shrink-0"
+                className="h-8 w-8 flex-shrink-0 text-[#707070]"
               />
             </span>
-            {!noSidebar && <SidebarTrigger className="md:hidden sm:hidden" />}
+            {/* {!noSidebar && <SidebarTrigger className="md:hidden sm:hidden" />} */}
+            {!noSidebar && (
+              <AppDrawer
+                trigger={
+                  <Button variant={"ghost"} className="md:hidden sm:hidden">
+                    <AlignLeft />
+                  </Button>
+                }
+              />
+            )}
             <span className="text-gray-400">
               <Slash className="h-3 w-3 mx-1" />
             </span>
@@ -77,7 +94,7 @@ export default function Navbar({ noSidebar }: NavbarProps) {
                       }`}
                       className="text-black flex items-center gap-2  cursor-pointer whitespace-nowrap"
                     >
-                      <Boxes className="h-4 w-4 flex-shrink-0" />
+                      <Boxes className="h-4 w-4 flex-shrink-0 text-[#707070]" />
                       <span className="min-w-[150px] truncate">
                         {programData?.program_name ??
                           programProjectsData?.programs.program_name ?? (
@@ -87,7 +104,7 @@ export default function Navbar({ noSidebar }: NavbarProps) {
                     </Link>
                     <DropdownMenuTrigger asChild>
                       <Button
-                        className="ml-2 h-7 w-4 flex-shrink-0"
+                        className="ml-2 h-7 w-4 flex-shrink-0 text-[#707070]"
                         variant="ghost"
                       >
                         <ChevronsUpDown />
@@ -139,7 +156,7 @@ export default function Navbar({ noSidebar }: NavbarProps) {
                         href={`/dashboard/projects/${programProjectsData?.id}`}
                         className="text-black  whitespace-nowrap flex items-center gap-2 h-full"
                       >
-                        <Box className="h-4 w-4 flex-shrink-0" />
+                        <Box className="h-4 w-4 flex-shrink-0 text-[#707070]" />
                         <span className="min-w-[150px] truncate inline-block">
                           {programProjectsData?.project_name ?? (
                             <Skeleton className="w-full h-5" />
@@ -148,7 +165,7 @@ export default function Navbar({ noSidebar }: NavbarProps) {
                       </Link>
                       <DropdownMenuTrigger asChild>
                         <Button
-                          className="ml-2 h-7 w-4 flex-shrink-0"
+                          className="ml-2 h-7 w-4 flex-shrink-0 text-[#707070]"
                           variant="ghost"
                         >
                           <ChevronsUpDown />
@@ -186,7 +203,7 @@ export default function Navbar({ noSidebar }: NavbarProps) {
                             className="font-semibold justify-start w-full h-6"
                           >
                             <Plus />
-                            Add new program
+                            Add new project
                           </Link>
                         </DropdownMenuItem>
                       </DropdownMenuContent>

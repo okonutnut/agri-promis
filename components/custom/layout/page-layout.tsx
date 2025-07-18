@@ -1,10 +1,13 @@
 import { useParams } from "next/navigation";
 import Navbar from "../navbar/navbar";
-import { ProgramSidebar } from "@/components/sidebar/program-sidebar";
-import { ProjectSidebar } from "@/components/sidebar/project-sidebar";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import SkeletonLoading from "./skeleton-loading";
+import { AppSidebar } from "@/components/sidebar/appSidebar";
+import {
+  getProgramNavItems,
+  getProjectNavItems,
+} from "@/components/sidebar/navitems";
 
 type CustomPageLayoutProps = {
   children?: React.ReactNode;
@@ -24,22 +27,27 @@ export default function CustomPageLayout({
 }: CustomPageLayoutProps) {
   const { programID, projectID } = useParams();
   return (
-    <section className="w-full h-screen flex flex-col relative text-xs">
+    <section className="w-full h-screen flex flex-col relative text-sm">
       {error &&
         toast.error(
-          "An error occurred while loading the page. Please try again later."
+          `Error: ${error.message || "An unexpected error occurred"}`
         )}
       <Navbar noSidebar={noSidebar} />
       <div className="flex">
-        <>
-          {programID && <ProgramSidebar />}
-          {projectID && <ProjectSidebar />}
-        </>
+        {!noSidebar && (
+          <AppSidebar
+            navItems={
+              projectID
+                ? getProjectNavItems(projectID as string)
+                : programID
+                ? getProgramNavItems(programID as string)
+                : []
+            }
+          />
+        )}
         <div className={cn(`container mx-auto p-4`, className)}>
-          <h1 className="text-2xl font-medium text-primary mb-4">
-            {pageTitle}
-          </h1>
-          {isLoading ? <SkeletonLoading /> : <>{children}</>}
+          <h1 className="text-2xl font-medium mb-4">{pageTitle}</h1>
+          {isLoading || error ? <SkeletonLoading /> : <>{children}</>}
         </div>
       </div>
     </section>
