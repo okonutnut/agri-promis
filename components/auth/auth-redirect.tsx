@@ -38,6 +38,7 @@ export default function AuthRedirect({
           .single();
 
         const userRole = roleData?.role;
+        console.log("User Role:", userRole);
 
         // Handle missing role
         if (!userRole || error) {
@@ -97,9 +98,6 @@ export default function AuthRedirect({
     checkUserAndRedirect();
   }, [pathname, router, supabase]);
 
-  if (isLoading) {
-    return <LoadingPage />;
-  }
-
+  if (isLoading) return <LoadingPage />;
   return <>{children}</>;
 }

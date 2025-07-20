@@ -110,7 +110,7 @@ export default function Navbar({ noSidebar }: NavbarProps) {
                         <ChevronsUpDown />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start">
+                    <DropdownMenuContent align="start" className="m-1">
                       {allProgramsData?.map((program: ProgramType) => (
                         <Link
                           key={program.id}
@@ -128,21 +128,19 @@ export default function Navbar({ noSidebar }: NavbarProps) {
                           </DropdownMenuItem>
                         </Link>
                       ))}
+                      <DropdownMenuSeparator />
                       <Link href="/dashboard/programs">
                         <DropdownMenuItem className="justify-between w-full h-7 cursor-pointer hover:bg-gray-100">
                           All Programs
                         </DropdownMenuItem>
                       </Link>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild>
-                        <Link
-                          href={"/dashboard/new"}
-                          className="font-semibold justify-start w-full h-6"
-                        >
+                      <Link href={"/dashboard/new"}>
+                        <DropdownMenuItem>
                           <Plus />
                           Add new program
-                        </Link>
-                      </DropdownMenuItem>
+                        </DropdownMenuItem>
+                      </Link>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -171,7 +169,7 @@ export default function Navbar({ noSidebar }: NavbarProps) {
                           <ChevronsUpDown />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start">
+                      <DropdownMenuContent align="start" className="m-1">
                         {allProjectsByProgramIDData?.map(
                           (project: ProjectType) => (
                             <Link
@@ -189,6 +187,7 @@ export default function Navbar({ noSidebar }: NavbarProps) {
                             </Link>
                           )
                         )}
+                        <DropdownMenuSeparator />
                         <Link
                           href={`/dashboard/programs/${programProjectsData?.program_id}`}
                         >
@@ -197,15 +196,14 @@ export default function Navbar({ noSidebar }: NavbarProps) {
                           </DropdownMenuItem>
                         </Link>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                          <Link
-                            href={`/dashboard/new/${programProjectsData?.program_id}`}
-                            className="font-semibold justify-start w-full h-6"
-                          >
+                        <Link
+                          href={`/dashboard/new/${programProjectsData?.program_id}`}
+                        >
+                          <DropdownMenuItem>
                             <Plus />
                             Add new project
-                          </Link>
-                        </DropdownMenuItem>
+                          </DropdownMenuItem>
+                        </Link>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </>

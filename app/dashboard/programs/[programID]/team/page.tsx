@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sheet";
 import { UserProfile } from "@/components/types";
 import { useSelectAllMembersHook } from "@/components/hooks";
-import CustomPageLayout from "@/components/custom/layout/page-layout";
+import CustomPageLayout from "@/components/custom/layout/admin-page-layout";
 
 export default function FieldTechnicianPage() {
   const [panelOpen, setPanelOpen] = useState(false);

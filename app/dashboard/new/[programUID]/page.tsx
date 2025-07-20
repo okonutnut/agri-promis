@@ -1,6 +1,6 @@
 "use client";
 
-import NewNavbar from "@/components/custom/navbar/navbar";
+import NewNavbar from "@/components/custom/navbar/admin-navbar";
 import {
   Card,
   CardContent,

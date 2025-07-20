@@ -6,6 +6,7 @@ import { FieldReportType } from "@/components/types";
 import NonFormInput from "@/components/custom/input/non-form-input";
 import { Textarea } from "@/components/ui/textarea";
 import FormTextarea from "@/components/custom/input/form-textarea";
+import { SheetClose } from "@/components/ui/sheet";
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -35,14 +36,22 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
         <NonFormInput
           label="Reporter Name"
           defaultValue={data?.user_profile?.fullname}
+          readonly
         />
         <div className="text-xs font-medium text flex justify-between items-center mb-1">
           Status note
         </div>
-        <Textarea value={data?.status_note} readOnly />
+        <Textarea value={data?.status_note} readOnly tabIndex={-1} />
         <FormTextarea label="Remarks" name="remarks" form={form} />
         <div className="flex gap-2 justify-end">
-          <Button type="submit">Save</Button>
+          <SheetClose asChild>
+            <Button variant="outline" size={"sm"} type="button">
+              Cancel
+            </Button>
+          </SheetClose>
+          <Button type="submit" size={"sm"}>
+            Save
+          </Button>
         </div>
       </form>
     </>

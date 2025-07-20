@@ -15,6 +15,9 @@ import {
   InsertFieldTechnicianToProjectAction,
   SelectAllFieldTechniciansByProjectIDAction,
   SelectAllMembersByRoleAction,
+  SelectAllAssignedProjectsByFieldTechnicianIDAction,
+  SelectProjectDetailsByProjectIDAction,
+  SelectUserProfileAction,
 } from "@/components/actions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -26,6 +29,15 @@ import {
   ProjectType,
   UserProfile,
 } from "./types";
+
+// USER PROFILE HOOKS
+export function useSelectUserProfileHook() {
+  return useQuery({
+    queryKey: ["userProfile"],
+    queryFn: async () => await SelectUserProfileAction(),
+    refetchOnWindowFocus: false,
+  });
+}
 
 // PROGRAM HOOKS
 export function useSelectProgramByIDHook(programId: string) {
@@ -113,6 +125,14 @@ export function useSelectProgramAndProjectDetailsByProgjectIDHook(
     queryKey: ["programAndProjectDetailsByProjectId", projectId],
     queryFn: async () =>
       await SelectProgramAndProjectDetailsByProjectIDAction(projectId),
+  });
+}
+
+export function useSelectProjectDetailsHook(projectId: string) {
+  return useQuery({
+    queryKey: ["projectDetails", projectId],
+    queryFn: async () => await SelectProjectDetailsByProjectIDAction(projectId),
+    enabled: !!projectId,
   });
 }
 
@@ -264,5 +284,13 @@ export function useSelectFieldTechniciansByProjectIDHook(project_id: string) {
     queryFn: async () =>
       await SelectAllFieldTechniciansByProjectIDAction(project_id),
     enabled: !!project_id,
+  });
+}
+
+export function useSelectAssignedProjectsByFieldTechnicianHook() {
+  return useQuery({
+    queryKey: ["assignedProjectsByFieldTechnician"],
+    queryFn: async () =>
+      await SelectAllAssignedProjectsByFieldTechnicianIDAction(),
   });
 }

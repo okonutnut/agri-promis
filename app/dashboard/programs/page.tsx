@@ -1,14 +1,22 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Boxes } from "lucide-react";
 import {
   useSelectAllProgramsByAgriculturistHook,
   useSelectAllProjectsByProgramIDHook,
 } from "@/components/hooks";
-import CardLink from "@/components/custom/link/card-link";
 import Link from "next/link";
-import CustomPageLayout from "@/components/custom/layout/page-layout";
+import CustomPageLayout from "@/components/custom/layout/admin-page-layout";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableRow,
+} from "@/components/ui/table";
+import { Card } from "@/components/ui/card";
+import { Boxes } from "lucide-react";
 
 export default function DashboardPage() {
   const { data, isLoading, error } = useSelectAllProgramsByAgriculturistHook();
@@ -26,33 +34,41 @@ export default function DashboardPage() {
               Create New Program
             </Button>
           </Link>
-          <div className="flex flex-wrap items-center gap-2 relative">
-            {data.length > 0 ? (
-              <>
-                {data?.map((program) => (
-                  <CardLink
-                    href={`/dashboard/programs/${program.id}`}
-                    key={program.id}
-                    className="min-h-[70px] w-full md:w-[300px] flex flex-row items-center justify-start text-center p-3"
-                  >
-                    <span className="border border-gray-300 rounded-full p-2">
-                      <Boxes className="text-gray-500 h-4 w-4" />
-                    </span>
-                    <span className="text-start text-xs">
-                      <strong>{program.program_name}</strong>
-                      {program.id ? (
-                        <ProjectCount program_id={program.id} />
-                      ) : (
-                        <span className="text-xs text-gray-400">No ID</span>
-                      )}
-                    </span>
-                  </CardLink>
-                ))}
-              </>
-            ) : (
-              <p className="text-center">No programs found</p>
-            )}
-          </div>
+
+          {data.length > 0 ? (
+            <Card className="md:p-2 shadow-none rounded-md py-0">
+              <Table>
+                <TableCaption>Select program to continue</TableCaption>
+                <TableBody>
+                  {data?.map((program) => (
+                    <TableRow
+                      key={program.id}
+                      className="cursor-pointer hover:bg-gray-50"
+                    >
+                      <TableCell>
+                        <Link
+                          href={`/dashboard/programs/${program.id}`}
+                          className="flex items-center gap-2 rounded-md p-2"
+                        >
+                          <span className="flex items-center justify-center w-9 h-9 mx-1 rounded-full bg-gray-100 border">
+                            <Boxes className="h-5 w-5 text-gray-500" />
+                          </span>
+                          <span>
+                            <strong>{program.program_name}</strong>
+                            {program.id && (
+                              <ProjectCount program_id={program.id} />
+                            )}
+                          </span>
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          ) : (
+            <p className="text-center">No programs found</p>
+          )}
         </>
       )}
     </CustomPageLayout>
@@ -60,10 +76,15 @@ export default function DashboardPage() {
 }
 
 function ProjectCount({ program_id }: { program_id: string }) {
-  const { data } = useSelectAllProjectsByProgramIDHook(program_id);
+  const { data, isLoading } = useSelectAllProjectsByProgramIDHook(program_id);
   return (
     <div className="flex items-center gap-2 text-xs font-mono">
-      {data?.length} Projects
+      {isLoading && <Skeleton className="h-3 w-[100px]" />}
+      {data && (
+        <span className="text-gray-500">
+          {data.length} {data.length === 1 ? "Project" : "Projects"}
+        </span>
+      )}
     </div>
   );
 }

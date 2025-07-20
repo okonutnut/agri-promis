@@ -10,7 +10,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import CustomPageLayout from "@/components/custom/layout/page-layout";
+import CustomPageLayout from "@/components/custom/layout/admin-page-layout";
 import { useParams } from "next/navigation";
 import { useSelectAllFieldReportsByProjectIDHook } from "@/components/hooks";
 import { FieldReportType } from "@/components/types";
@@ -63,7 +63,7 @@ export default function FieldReportsPage() {
                   alt="Field Report"
                   width={500}
                   height={500}
-                  className="w-full mx-auto object-cover"
+                  className="w-full mx-auto object-contain max-h-[500px]"
                 />
               </CardContent>
               <CardFooter className="text-xs flex flex-col items-start gap-2 p-3">

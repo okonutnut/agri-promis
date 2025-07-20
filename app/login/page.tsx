@@ -1,25 +1,24 @@
 "use client";
 
-import { GoogleSignInButton } from "./components/google-login";
 import { useSearchParams } from "next/navigation";
+import { GoogleSignInButton } from "./components/google-login";
+import LoginCard from "./components/login-card";
 import { useEffect } from "react";
 import { toast } from "sonner";
-import LoginCard from "./components/login-card";
 
 export default function LoginPage() {
   const search = useSearchParams();
 
   useEffect(() => {
+    const params = new URLSearchParams(search);
     const errorCode =
-      search.get("error_code") ||
+      params.get("error_code") ??
       new URLSearchParams(window.location.hash.substring(1)).get("error_code");
 
     if (errorCode === "signup_disabled") {
       toast.error("Failed to login");
     }
   }, [search]);
-
-  console.log("");
   return (
     <>
       <div className="grid grid-cols-3 h-screen w-screen gap-2 overflow-hidden">
@@ -34,7 +33,7 @@ export default function LoginPage() {
             </p>
           </div>
         </section>
-        <section className="col-span-full md:col-span-1 h-screen flex items-center justify-center bg-white">
+        <section className="col-span-full md:col-span-1 h-screen flex items-center justify-center">
           <LoginCard>
             <GoogleSignInButton />
           </LoginCard>

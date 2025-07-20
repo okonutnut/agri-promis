@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import EditProgramNameForm from "./form/edit-program-name-form";
 import { useParams } from "next/navigation";
 import { useSelectProgramByIDHook } from "@/components/hooks";
-import CustomPageLayout from "@/components/custom/layout/page-layout";
+import CustomPageLayout from "@/components/custom/layout/admin-page-layout";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 

@@ -18,14 +18,15 @@ export default function FormTextarea({
   className,
 }: FormTextareaType) {
   return (
-    <div className={cn(`w-full`, className)}>
-      <Label htmlFor={name} className="text-xs font-medium text">
+    <div className={cn(`w-full mt-2 mb-4`, className)}>
+      <Label htmlFor={name} className="font-medium mb-1">
         {label}
       </Label>
       <Textarea
         {...form.register(name)}
         id={name}
         rows={5}
+        tabIndex={-1}
         placeholder={`Enter ${label.toLowerCase()}`}
         readOnly={
           form.formState.isSubmitting || form.formState.isValidating || readonly

@@ -12,7 +12,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useSelectFieldTechniciansByProjectIDHook } from "@/components/hooks";
-import CustomPageLayout from "@/components/custom/layout/page-layout";
+import CustomPageLayout from "@/components/custom/layout/admin-page-layout";
 import { useParams } from "next/navigation";
 import SelectMembersTable from "./components/members-sheet/select-members-table";
 import { Button } from "@/components/ui/button";

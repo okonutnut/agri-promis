@@ -1,15 +1,12 @@
 import { useParams } from "next/navigation";
-import Navbar from "../navbar/navbar";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import SkeletonLoading from "./skeleton-loading";
 import { AppSidebar } from "@/components/sidebar/appSidebar";
-import {
-  getProgramNavItems,
-  getProjectNavItems,
-} from "@/components/sidebar/navitems";
+import { getFieldTechnicianNavItems } from "@/components/sidebar/navitems";
+import UserNavbar from "../navbar/user-navbar";
 
-type CustomPageLayoutProps = {
+type UserPageLayoutProps = {
   children?: React.ReactNode;
   className?: string;
   pageTitle?: string;
@@ -17,32 +14,26 @@ type CustomPageLayoutProps = {
   error?: Error | null;
   noSidebar?: boolean;
 };
-export default function CustomPageLayout({
+export default function UserPageLayout({
   children,
   className,
   pageTitle,
   isLoading,
   error,
   noSidebar,
-}: CustomPageLayoutProps) {
-  const { programID, projectID } = useParams();
+}: UserPageLayoutProps) {
+  const { projectID } = useParams();
   return (
     <section className="w-full h-screen flex flex-col relative text-sm">
       {error &&
         toast.error(
           `Error: ${error.message || "An unexpected error occurred"}`
         )}
-      <Navbar noSidebar={noSidebar} />
+      <UserNavbar noSidebar={noSidebar} />
       <div className="flex">
         {!noSidebar && (
           <AppSidebar
-            navItems={
-              projectID
-                ? getProjectNavItems(projectID as string)
-                : programID
-                ? getProgramNavItems(programID as string)
-                : []
-            }
+            navItems={getFieldTechnicianNavItems(projectID as string)}
           />
         )}
         <div className={cn(`container mx-auto p-4`, className)}>

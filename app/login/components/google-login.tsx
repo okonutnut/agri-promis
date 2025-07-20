@@ -3,8 +3,10 @@
 import { createClient } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
 export function GoogleSignInButton() {
+  const [state, setState] = useState<"ready" | "loading" | "disabled">("ready");
   const supabase = createClient();
 
   const login = async () => {
@@ -16,10 +18,24 @@ export function GoogleSignInButton() {
     });
   };
 
+  useEffect(() => {
+    async function checkUser() {
+      setState("loading");
+      const user = (await supabase.auth.getUser()).data.user;
+      if (user !== null) {
+        setState("disabled");
+      } else {
+        setState("ready");
+      }
+    }
+    checkUser();
+  }, [supabase.auth]);
+
   return (
     <Button
       type="submit"
       className="flex items-center gap-2 cursor-pointer my-3 min-w-[250px] mx-auto"
+      disabled={state !== "ready"}
       variant={"outline"}
       onClick={login}
     >

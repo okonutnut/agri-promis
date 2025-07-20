@@ -1,17 +1,18 @@
 "use client";
 
-import CustomPageLayout from "@/components/custom/layout/admin-page-layout";
-import { useSelectProgramAndProjectDetailsByProgjectIDHook } from "@/components/hooks";
+import UserPageLayout from "@/components/custom/layout/user-page-layout";
+import { useSelectProjectDetailsHook } from "@/components/hooks";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useParams } from "next/navigation";
 
-export default function DashboardPage() {
+export default function FieldTechnicianPage() {
   const { projectID } = useParams();
-  const { data, isLoading, error } =
-    useSelectProgramAndProjectDetailsByProgjectIDHook(projectID as string);
+  const { data, isLoading, error } = useSelectProjectDetailsHook(
+    projectID as string
+  );
   return (
-    <CustomPageLayout isLoading={isLoading} error={error}>
+    <UserPageLayout isLoading={isLoading} error={error}>
       <div className="py-16 flex justify-between">
         {data && (
           <>
@@ -30,6 +31,6 @@ export default function DashboardPage() {
         )}
       </div>
       <Separator className="fixed left-0" />
-    </CustomPageLayout>
+    </UserPageLayout>
   );
 }

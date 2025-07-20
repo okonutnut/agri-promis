@@ -49,6 +49,8 @@ export default function NonFormInput({
         defaultValue={defaultValue}
         disabled={disabled}
         readOnly={readonly}
+        autoFocus={false}
+        tabIndex={-1}
       />
     </div>
   );

@@ -1,4 +1,11 @@
-import { House, NotebookPen, Settings, UserPen, Users } from "lucide-react";
+import {
+  House,
+  Megaphone,
+  NotebookPen,
+  Settings,
+  UserPen,
+  Users,
+} from "lucide-react";
 
 export function getProgramNavItems(id: string) {
   return [
@@ -41,6 +48,21 @@ export function getProjectNavItems(id: string) {
       title: "Settings",
       href: `/dashboard/projects/${id}/settings`,
       icon: Settings,
+    },
+  ];
+}
+
+export function getFieldTechnicianNavItems(id: string) {
+  return [
+    {
+      title: "Project Overview",
+      href: `/field-technician/${id}/overview`,
+      icon: House,
+    },
+    {
+      title: "Submit Report",
+      href: `/field-technician/${id}/submit-report`,
+      icon: Megaphone,
     },
   ];
 }
