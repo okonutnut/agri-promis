@@ -1,12 +1,12 @@
-import { SidebarProvider } from "@/components/ui/sidebar";
 import type { Metadata } from "next";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 export const metadata: Metadata = {
-  title: "Agri-ProMIS - Overview",
-  description: "Dashboard page for Agri-ProMIS",
+  title: "Agri-ProMIS - Travel Order",
+  description: "Travel Order page for Agri-ProMIS",
 };
 
-export default function ProjectLayout({
+export default function FieldTechnicianLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;

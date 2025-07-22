@@ -5,6 +5,7 @@ import EditProgramNameForm from "./form/edit-project-name-form";
 import CustomPageLayout from "@/components/custom/layout/admin-page-layout";
 import { useSelectProgramAndProjectDetailsByProgjectIDHook } from "@/components/hooks";
 import { useParams } from "next/navigation";
+import { getProjectNavItems } from "@/components/sidebar/navitems";
 
 export default function ProgramSettingsPage() {
   const { projectID } = useParams();
@@ -15,6 +16,7 @@ export default function ProgramSettingsPage() {
       pageTitle="Project Settings"
       isLoading={isLoading}
       error={error}
+      navItems={getProjectNavItems(projectID as string)}
     >
       {data && (
         <Card className="shadow-xs">

@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Agri-ProMIS - Access Denied",
+  title: "Agri-ProMIS - Create Program",
   description: "Dashboard page for Agri-ProMIS",
 };
 
-export default function AccessDeniedLayout({
+export default function CreateProgramLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;

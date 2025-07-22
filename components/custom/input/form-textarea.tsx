@@ -9,6 +9,7 @@ type FormTextareaType = {
   readonly?: boolean;
   form: UseFormReturn<any>;
   className?: string;
+  optinal?: boolean;
 };
 export default function FormTextarea({
   label,
@@ -16,11 +17,12 @@ export default function FormTextarea({
   form,
   readonly,
   className,
+  optinal,
 }: FormTextareaType) {
   return (
     <div className={cn(`w-full mt-2 mb-4`, className)}>
       <Label htmlFor={name} className="font-medium mb-1">
-        {label}
+        {label} {optinal && <span className="text-gray-500">(optional)</span>}
       </Label>
       <Textarea
         {...form.register(name)}

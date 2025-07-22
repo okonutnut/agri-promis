@@ -18,6 +18,7 @@ import Image from "next/image";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
+import { getProjectNavItems } from "@/components/sidebar/navitems";
 
 export default function FieldReportsPage() {
   const { projectID } = useParams();
@@ -37,13 +38,13 @@ export default function FieldReportsPage() {
   const { data, isLoading, error } = useSelectAllFieldReportsByProjectIDHook(
     projectID as string
   );
-  console.log("Field Reports Data:", data);
 
   return (
     <CustomPageLayout
-      pageTitle="Field Reports"
+      pageTitle="Post Activity Reports"
       isLoading={isLoading}
       error={error}
+      navItems={getProjectNavItems(projectID as string)}
     >
       <DataTable
         columns={columns}
@@ -51,7 +52,7 @@ export default function FieldReportsPage() {
         onRowSelect={handleRowSelect}
       />
       <Sheet open={panelOpen} onOpenChange={handlePanelClose}>
-        <SheetContent className="min-w-[600px] md:min-w-[600px] min-w-screen sm:min-w-[400px] overflow-y-scroll">
+        <SheetContent className="md:min-w-[600px] min-w-screen overflow-y-scroll">
           <SheetHeader>
             <SheetTitle className="uppercase text-primary">
               View Field Report

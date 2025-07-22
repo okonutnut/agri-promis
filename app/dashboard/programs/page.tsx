@@ -8,15 +8,10 @@ import {
 import Link from "next/link";
 import CustomPageLayout from "@/components/custom/layout/admin-page-layout";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
 import { Boxes } from "lucide-react";
+import { getDashboardNavItems } from "@/components/sidebar/navitems";
 
 export default function DashboardPage() {
   const { data, isLoading, error } = useSelectAllProgramsByAgriculturistHook();
@@ -25,12 +20,12 @@ export default function DashboardPage() {
       pageTitle="Your Programs"
       isLoading={isLoading}
       error={error}
-      noSidebar={true}
+      navItems={getDashboardNavItems()}
     >
       {data && (
         <>
           <Link href="/dashboard/new/">
-            <Button className="my-7" size={"sm"}>
+            <Button className="mb-4" size={"sm"}>
               Create New Program
             </Button>
           </Link>
@@ -38,7 +33,6 @@ export default function DashboardPage() {
           {data.length > 0 ? (
             <Card className="md:p-2 shadow-none rounded-md py-0">
               <Table>
-                <TableCaption>Select program to continue</TableCaption>
                 <TableBody>
                   {data?.map((program) => (
                     <TableRow

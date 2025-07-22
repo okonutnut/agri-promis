@@ -11,8 +11,13 @@ import NonFormInput from "@/components/custom/input/non-form-input";
 
 const formSchema = z.object({
   id: z.string().optional(),
+  fullname: z
+    .string()
+    .min(1, "Fullname is required")
+    .refine((val) => /^[A-Za-z\s]+$/.test(val), {
+      message: "Fullname must only contain letters and spaces",
+    }),
   email: z.string().email("Invalid email address"),
-  fullname: z.string().min(1, "Fullname is required"),
   role: z.enum(["field_technician", "agriculturist"], {
     errorMap: () => ({ message: "Role is required" }),
   }),
@@ -25,8 +30,8 @@ type TeamMemberFormProps = {
 };
 export function TeamMemberForm({ data }: TeamMemberFormProps) {
   const roles = [
-    { value: "field_technician", label: "Field Technician" },
     { value: "agriculturist", label: "Agriculturist" },
+    { value: "field_technician", label: "Field Technician" },
   ];
 
   // Map role label to value, handle both label and value formats
@@ -75,17 +80,16 @@ export function TeamMemberForm({ data }: TeamMemberFormProps) {
       ) : (
         <NonFormInput label="Role" defaultValue={data?.role || ""} readonly />
       )}
-      <div className="flex gap-2 justify-end">
-        {!data && (
-          <Button
-            type="submit"
-            variant={isPending ? "ghost" : "default"}
-            disabled={isPending}
-          >
-            {isPending ? <Loader2 className="animate-spin" /> : "Save"}
-          </Button>
-        )}
-      </div>
+      {!data && (
+        <Button
+          type="submit"
+          className="absolute bottom-12 right-0 left-0 m-2"
+          variant={isPending ? "ghost" : "default"}
+          disabled={isPending}
+        >
+          {isPending ? <Loader2 className="animate-spin" /> : "Save"}
+        </Button>
+      )}
     </form>
   );
 }

@@ -8,23 +8,24 @@ import {
   EditProgramNameAction,
   SelectProgramAndProjectDetailsByProjectIDAction,
   EditProjectNameAction,
-  SelectAllFieldReportsByProjectIDAction,
   InsertMemberAction,
   SelectAllMembersAction,
-  InsertFieldReportAction,
   InsertFieldTechnicianToProjectAction,
   SelectAllFieldTechniciansByProjectIDAction,
   SelectAllMembersByRoleAction,
   SelectAllAssignedProjectsByFieldTechnicianIDAction,
   SelectProjectDetailsByProjectIDAction,
   SelectUserProfileAction,
+  DeleteProgramAction,
+  SelectAllMonitoringReportsByProjectIDAction,
+  InsertMonitoringReportAction,
 } from "@/components/actions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   AssignedProjectsType,
-  FieldReportType,
+  MonitoringReportType,
   ProgramType,
   ProjectType,
   UserProfile,
@@ -35,7 +36,7 @@ export function useSelectUserProfileHook() {
   return useQuery({
     queryKey: ["userProfile"],
     queryFn: async () => await SelectUserProfileAction(),
-    refetchOnWindowFocus: false,
+    refetchOnMount: true,
   });
 }
 
@@ -45,6 +46,7 @@ export function useSelectProgramByIDHook(programId: string) {
     queryKey: ["programById", programId],
     queryFn: async () => await SelectProgramByIdAction(programId),
     enabled: !!programId,
+    refetchOnMount: true,
   });
 }
 
@@ -52,6 +54,7 @@ export function useSelectAllProgramsByAgriculturistHook() {
   return useQuery({
     queryKey: ["allProgramsByAgriculturist"],
     queryFn: async () => await SelectAllProgramsByAgriculturistAction(),
+    refetchOnMount: true,
   });
 }
 
@@ -65,17 +68,11 @@ export function useInsertProgramHook() {
       qc.invalidateQueries({
         queryKey: ["allProgramsByAgriculturist"],
       });
-      toast.success("Program created successfully!", {
-        position: "bottom-right",
-        duration: 2000,
-      });
+      toast.success("Program created successfully!");
       router.push(`/dashboard/programs/${data.id}/`);
     },
     onError: (error) => {
-      toast.error(`Failed to create program: ${error.message}`, {
-        position: "bottom-right",
-        duration: 2000,
-      });
+      toast.error(`Failed to create program: ${error.message}`);
     },
   });
 }
@@ -96,16 +93,28 @@ export function useEditProgramNameHook() {
       qc.invalidateQueries({
         queryKey: ["allProgramsByAgriculturist"],
       });
-      toast.success("Program name updated successfully!", {
-        position: "bottom-right",
-        duration: 2000,
-      });
+      toast.success("Program name updated successfully!");
     },
     onError: (error) => {
-      toast.error(`Failed to update program name: ${error.message}`, {
-        position: "bottom-right",
-        duration: 2000,
+      toast.error(`Failed to update program name: ${error.message}`);
+    },
+  });
+}
+
+export function useDeleteProgramHook(programId: string) {
+  const qc = useQueryClient();
+  const router = useRouter();
+  return useMutation({
+    mutationFn: async () => await DeleteProgramAction(programId),
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: ["allProgramsByAgriculturist"],
       });
+      toast.success("Program deleted successfully!");
+      router.push("/dashboard/programs");
+    },
+    onError: (error) => {
+      toast.error(`Failed to delete program: ${error.message}`);
     },
   });
 }
@@ -115,6 +124,8 @@ export function useSelectAllProjectsByProgramIDHook(programId: string) {
   return useQuery({
     queryKey: ["allProjectsByProgramId", programId],
     queryFn: async () => await SelectAllProjectsByProgramIDAction(programId),
+    enabled: !!programId,
+    refetchOnMount: true,
   });
 }
 
@@ -125,6 +136,8 @@ export function useSelectProgramAndProjectDetailsByProgjectIDHook(
     queryKey: ["programAndProjectDetailsByProjectId", projectId],
     queryFn: async () =>
       await SelectProgramAndProjectDetailsByProjectIDAction(projectId),
+    enabled: !!projectId,
+    refetchOnMount: true,
   });
 }
 
@@ -133,6 +146,7 @@ export function useSelectProjectDetailsHook(projectId: string) {
     queryKey: ["projectDetails", projectId],
     queryFn: async () => await SelectProjectDetailsByProjectIDAction(projectId),
     enabled: !!projectId,
+    refetchOnMount: true,
   });
 }
 
@@ -143,19 +157,14 @@ export function useInsertProjectHook() {
   return useMutation({
     mutationFn: async (data: ProjectType) => await InsertProjectAction(data),
     onSuccess: (data) => {
-      toast.success("Project created successfully!", {
-        position: "bottom-right",
-      });
       qc.invalidateQueries({
         queryKey: ["allProjectsByProgramId", data.program_id],
       });
-
+      toast.success("Project created successfully!");
       router.push(`/dashboard/projects/${data.id}`);
     },
     onError: (error) => {
-      toast.error(`${error.message}`, {
-        position: "bottom-right",
-      });
+      toast.error(`${error.message}`);
     },
   });
 }
@@ -175,17 +184,10 @@ export function useEditProjectNameHook() {
       qc.invalidateQueries({
         queryKey: ["allProjectsByProgramId", data.program_id],
       });
-      toast.success("Project name updated successfully!", {
-        position: "bottom-right",
-        duration: 2000,
-      });
+      toast.success("Project name updated successfully!");
     },
     onError: (error) => {
-      toast.error(`Failed to update project name: ${error.message}`, {
-        position: "bottom-right",
-
-        duration: 2000,
-      });
+      toast.error(`Failed to update project name: ${error.message}`);
     },
   });
 }
@@ -195,33 +197,38 @@ export function useSelectLocationByID(locationID: string) {
   return useQuery({
     queryKey: ["locationByProjectId", locationID],
     queryFn: async () => await SelectLocationByIDAction(locationID),
+    enabled: !!locationID,
+    refetchOnMount: true,
   });
 }
 
-// FIELD REPORT HOOKS
-export function useSelectAllFieldReportsByProjectIDHook(projectID: string) {
+// MONITORING REPORT HOOKS
+export function useSelectAllMonitoringReportsByProjectIDHook(
+  projectID: string
+) {
   return useQuery({
-    queryKey: ["allFieldReportsByProjectId", projectID],
+    queryKey: ["allMonitoringReportsByProjectId", projectID],
     queryFn: async () =>
-      await SelectAllFieldReportsByProjectIDAction(projectID),
+      await SelectAllMonitoringReportsByProjectIDAction(projectID),
     enabled: !!projectID,
+    refetchOnMount: true,
   });
 }
 
-export function useInsertFieldReportHook() {
+export function useInsertMonitoringReportHook() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (data: FieldReportType) =>
-      await InsertFieldReportAction(data),
+    mutationFn: async (data: MonitoringReportType) =>
+      await InsertMonitoringReportAction(data),
     onSuccess: (data) => {
       qc.invalidateQueries({
-        queryKey: ["allFieldReportsByProjectId", data.project_id],
+        queryKey: ["allMonitoringReportsByProjectId", data.project_id],
       });
-      toast.success("Field report created successfully!");
+      toast.success("Monitoring report created successfully!");
       window.location.reload();
     },
     onError: (error) => {
-      toast.error(`Failed to create field report: ${error.message}`);
+      toast.error(`Failed to create monitoring report: ${error.message}`);
     },
   });
 }
@@ -236,6 +243,7 @@ export function useInsertMemberHook() {
         queryKey: ["members"],
       });
       toast.success("Member invited successfully!");
+      window.location.reload();
     },
     onError: () => {
       console.error("Failed to invite member.");
@@ -248,6 +256,7 @@ export function useSelectAllMembersHook() {
   return useQuery({
     queryKey: ["members"],
     queryFn: async () => await SelectAllMembersAction(),
+    refetchOnMount: true,
   });
 }
 
@@ -256,6 +265,7 @@ export function useSelectAllMembersByRoleHook(role: string) {
     queryKey: ["members", role],
     queryFn: async () => await SelectAllMembersByRoleAction(role),
     enabled: !!role,
+    refetchOnMount: true,
   });
 }
 
@@ -284,6 +294,7 @@ export function useSelectFieldTechniciansByProjectIDHook(project_id: string) {
     queryFn: async () =>
       await SelectAllFieldTechniciansByProjectIDAction(project_id),
     enabled: !!project_id,
+    refetchOnMount: true,
   });
 }
 
@@ -292,5 +303,6 @@ export function useSelectAssignedProjectsByFieldTechnicianHook() {
     queryKey: ["assignedProjectsByFieldTechnician"],
     queryFn: async () =>
       await SelectAllAssignedProjectsByFieldTechnicianIDAction(),
+    refetchOnMount: true,
   });
 }

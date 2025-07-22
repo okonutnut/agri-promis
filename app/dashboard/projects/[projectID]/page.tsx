@@ -2,6 +2,7 @@
 
 import CustomPageLayout from "@/components/custom/layout/admin-page-layout";
 import { useSelectProgramAndProjectDetailsByProgjectIDHook } from "@/components/hooks";
+import { getProjectNavItems } from "@/components/sidebar/navitems";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useParams } from "next/navigation";
@@ -11,7 +12,11 @@ export default function DashboardPage() {
   const { data, isLoading, error } =
     useSelectProgramAndProjectDetailsByProgjectIDHook(projectID as string);
   return (
-    <CustomPageLayout isLoading={isLoading} error={error}>
+    <CustomPageLayout
+      isLoading={isLoading}
+      error={error}
+      navItems={getProjectNavItems(projectID as string)}
+    >
       <div className="py-16 flex justify-between">
         {data && (
           <>

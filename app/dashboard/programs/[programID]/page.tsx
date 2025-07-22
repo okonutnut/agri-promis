@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { GetLocation } from "./get-project-location";
+import { GetLocation } from "./components/get-project-location";
 import { Badge } from "@/components/ui/badge";
+import { getProgramNavItems } from "@/components/sidebar/navitems";
 
 export default function DashboardPage() {
   const { programID } = useParams();
@@ -18,7 +19,11 @@ export default function DashboardPage() {
   );
 
   return (
-    <CustomPageLayout isLoading={isLoading} error={error}>
+    <CustomPageLayout
+      isLoading={isLoading}
+      error={error}
+      navItems={getProgramNavItems(programID as string)}
+    >
       {data && (
         <>
           <Link href={`/dashboard/new/${programID}`}>

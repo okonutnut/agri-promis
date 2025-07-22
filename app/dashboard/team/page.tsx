@@ -6,6 +6,7 @@ import { columns } from "./table/columns";
 import { TeamMemberForm } from "./components/team-members-form";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -14,6 +15,9 @@ import {
 import { UserProfile } from "@/components/types";
 import { useSelectAllMembersHook } from "@/components/hooks";
 import CustomPageLayout from "@/components/custom/layout/admin-page-layout";
+import { getDashboardNavItems } from "@/components/sidebar/navitems";
+import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 
 export default function FieldTechnicianPage() {
   const [panelOpen, setPanelOpen] = useState(false);
@@ -45,6 +49,7 @@ export default function FieldTechnicianPage() {
       pageTitle="Team Members"
       isLoading={isLoading}
       error={error}
+      navItems={getDashboardNavItems()}
     >
       {data && (
         <>
@@ -55,22 +60,27 @@ export default function FieldTechnicianPage() {
             onAdd={handleAdd}
           />
           <Sheet open={panelOpen} onOpenChange={handlePanelClose}>
-            <SheetContent className="min-w-[600px] md:min-w-[600px] min-w-screen sm:min-w-[400px]">
+            <SheetContent className="md:min-w-[600px] w-screen">
               <SheetHeader>
                 <SheetTitle className="uppercase text-primary">
                   {isAddMode ? "Invite New Team Member" : "View Member Details"}
                 </SheetTitle>
-                <SheetDescription>
-                  This action cannot be undone. This will permanently delete
-                  your account and remove your data from our servers.
-                </SheetDescription>
               </SheetHeader>
+              <Separator />
               <>
                 <TeamMemberForm
                   key={isAddMode ? "add-mode" : selectedRow?.id || "view-mode"}
                   data={isAddMode ? null : selectedRow}
                 />
               </>
+              <SheetClose asChild>
+                <Button
+                  variant="outline"
+                  className="absolute bottom-0 right-0 left-0 m-2"
+                >
+                  Close
+                </Button>
+              </SheetClose>
             </SheetContent>
           </Sheet>
         </>

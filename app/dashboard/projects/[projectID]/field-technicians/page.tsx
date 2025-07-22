@@ -18,6 +18,7 @@ import SelectMembersTable from "./components/members-sheet/select-members-table"
 import { Button } from "@/components/ui/button";
 import { AssignedProjectsType } from "@/components/types";
 import ViewFieldTechnicianPanel from "./components/view-field-technician-panel";
+import { getProjectNavItems } from "@/components/sidebar/navitems";
 
 export default function FieldTechnicianPage() {
   const { projectID } = useParams();
@@ -49,14 +50,12 @@ export default function FieldTechnicianPage() {
   const { data, isLoading, error } = useSelectFieldTechniciansByProjectIDHook(
     projectID as string
   );
-  console.log("Field Technicians Data:", data);
-  console.log("Selected Row:", selectedRow);
-
   return (
     <CustomPageLayout
       pageTitle="Assigned Field Technicians"
       isLoading={isLoading}
       error={error}
+      navItems={getProjectNavItems(projectID as string)}
     >
       {data && (
         <>

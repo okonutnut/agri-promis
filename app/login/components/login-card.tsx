@@ -26,7 +26,7 @@ export default function LoginCard({ children }: { children: React.ReactNode }) {
           </h1>
           {children}
         </CardContent>
-        <p className="text-center text-xs text-gray-500">version 0.0.1-dev</p>
+        <p className="text-center text-xs text-gray-500">version 0.1.0-dev</p>
       </Card>
     </>
   );

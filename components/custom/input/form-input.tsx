@@ -14,7 +14,7 @@ type FormInputType = {
   disabled?: boolean;
   form: UseFormReturn<any>;
   className?: string;
-  copy?: boolean; // Optional prop for copy functionality
+  copy?: boolean;
 };
 export default function FormInput({
   label,
@@ -24,7 +24,7 @@ export default function FormInput({
   readonly,
   disabled,
   className,
-  copy = false, // Default to false if not provided
+  copy = false,
 }: FormInputType) {
   return (
     <div className={cn(`w-full`, className)}>
@@ -40,10 +40,7 @@ export default function FormInput({
             onClick={() => {
               if (copy) {
                 navigator.clipboard.writeText(form.getValues(name));
-                toast.info(`Copied ${label} to clipboard`, {
-                  position: "bottom-right",
-                  duration: 2000,
-                });
+                toast.info(`Copied ${label} to clipboard`);
               }
             }}
           >
@@ -56,11 +53,12 @@ export default function FormInput({
         type={type || "text"}
         placeholder={`Enter ${label.toLowerCase()}`}
         disabled={disabled}
+        tabIndex={-1}
         readOnly={
           form.formState.isSubmitting || form.formState.isValidating || readonly
         }
       />
-      <p className="text-red-500">
+      <p className="text-xs text-red-500">
         {(form.formState.errors[name] as { message?: string })?.message}
       </p>
     </div>

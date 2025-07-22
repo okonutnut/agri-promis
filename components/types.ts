@@ -1,3 +1,5 @@
+import { ImageData } from "./interfaces";
+
 export type UserProfile = {
   id?: string;
   fullname: string;
@@ -37,7 +39,7 @@ export type LocationType = {
   created_at?: string;
 };
 
-export type FieldReportType = {
+export type MonitoringReportType = {
   id?: string;
   project_id?: string;
   reporter_id?: string;
@@ -45,8 +47,8 @@ export type FieldReportType = {
   report_level?: number;
   status_note?: string;
   remarks?: string;
-  image_file?: File;
-  photo_url?: string;
+  images?: ImageData[];
+  photo_url?: string[];
   location_name?: string;
   latitude?: number;
   longitude?: number;
@@ -62,6 +64,20 @@ export type AssignedProjectsType = {
   project_ids?: string[];
   created_at?: string;
   user_profile?: UserProfile;
+};
+
+export type TravelOrderType = {
+  id?: string;
+  travel_order_no: string;
+  name: string;
+  office: string;
+  program: string;
+  estimated_cost: number;
+  departure_date: string;
+  return_date: string;
+  destination: string;
+  mode_of_transportation: string;
+  created_at?: string;
 };
 
 export type NavigationItemType = {

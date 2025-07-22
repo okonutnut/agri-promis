@@ -10,8 +10,20 @@ import { useParams } from "next/navigation";
 
 const formSchema = z
   .object({
-    project_name: z.string().min(1, "Project name is required"),
-    crop_type: z.string().min(1, "Crop type is required"),
+    project_name: z
+      .string()
+      .min(1, "Project name is required")
+      .max(20, "Project name cannot exceed 20 characters")
+      .refine((val) => !/\d/.test(val), {
+        message: "Project name cannot contain numbers",
+      }),
+    crop_type: z
+      .string()
+      .min(1, "Crop type is required")
+      .max(20, "Crop type cannot exceed 20 characters")
+      .refine((val) => !/\d/.test(val), {
+        message: "Crop type cannot contain numbers",
+      }),
     start_date: z.string().refine(
       (val) => {
         const date = new Date(val);

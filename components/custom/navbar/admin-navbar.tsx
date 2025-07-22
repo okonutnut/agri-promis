@@ -138,7 +138,7 @@ export default function Navbar({ noSidebar }: NavbarProps) {
                       <Link href={"/dashboard/new"}>
                         <DropdownMenuItem>
                           <Plus />
-                          Add new program
+                          New program
                         </DropdownMenuItem>
                       </Link>
                     </DropdownMenuContent>
@@ -201,7 +201,7 @@ export default function Navbar({ noSidebar }: NavbarProps) {
                         >
                           <DropdownMenuItem>
                             <Plus />
-                            Add new project
+                            New project
                           </DropdownMenuItem>
                         </Link>
                       </DropdownMenuContent>

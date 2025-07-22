@@ -1,4 +1,6 @@
 import {
+  Cctv,
+  ClipboardPen,
   House,
   Megaphone,
   NotebookPen,
@@ -7,20 +9,35 @@ import {
   Users,
 } from "lucide-react";
 
-export function getProgramNavItems(id: string) {
+export function getDashboardNavItems() {
   return [
     {
-      title: "Program Overview",
-      href: `/dashboard/programs/${id}`,
+      title: "All Programs",
+      href: "/dashboard/programs",
       icon: House,
     },
     {
       title: "Team",
-      href: `/dashboard/programs/${id}/team`,
+      href: "/dashboard/team",
       icon: Users,
     },
+  ];
+}
+
+export function getProgramNavItems(id: string) {
+  return [
     {
-      title: "Settings",
+      title: "Overview",
+      href: `/dashboard/programs/${id}`,
+      icon: House,
+    },
+    {
+      title: "Travel Order",
+      href: `/dashboard/programs/${id}/travel-order`,
+      icon: ClipboardPen,
+    },
+    {
+      title: "Program Settings",
       href: `/dashboard/programs/${id}/settings`,
       icon: Settings,
     },
@@ -30,7 +47,7 @@ export function getProgramNavItems(id: string) {
 export function getProjectNavItems(id: string) {
   return [
     {
-      title: "Project Overview",
+      title: "Overview",
       href: `/dashboard/projects/${id}`,
       icon: House,
     },
@@ -40,12 +57,17 @@ export function getProjectNavItems(id: string) {
       icon: UserPen,
     },
     {
-      title: "Field Reports",
-      href: `/dashboard/projects/${id}/field-reports`,
+      title: "Monitoring Reports",
+      href: `/dashboard/projects/${id}/monitoring-reports`,
+      icon: Cctv,
+    },
+    {
+      title: "Post Activity Reports",
+      href: `/dashboard/projects/${id}/post-activity-reports`,
       icon: NotebookPen,
     },
     {
-      title: "Settings",
+      title: "Project Settings",
       href: `/dashboard/projects/${id}/settings`,
       icon: Settings,
     },
@@ -60,9 +82,14 @@ export function getFieldTechnicianNavItems(id: string) {
       icon: House,
     },
     {
-      title: "Submit Report",
-      href: `/field-technician/${id}/submit-report`,
-      icon: Megaphone,
+      title: "Monitoring Report",
+      href: `/field-technician/${id}/monitoring-report`,
+      icon: Cctv,
+    },
+    {
+      title: "Post Activity Report",
+      href: `/field-technician/${id}/post-activity-report`,
+      icon: NotebookPen,
     },
   ];
 }

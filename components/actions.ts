@@ -1,42 +1,37 @@
 "use server";
 
 import {
-  FieldReportType,
   AssignedProjectsType,
   LocationType,
   ProgramType,
   ProjectType,
   UserProfile,
+  MonitoringReportType,
 } from "@/components/types";
 import { createClient } from "@/utils/supabase/server";
 
 // USER PROFILE ACTIONS
 export async function SelectUserProfileAction() {
-  try {
-    const supabase = await createClient();
-    const { data: userData, error: userError } = await supabase.auth.getUser();
+  const supabase = await createClient();
+  const { data: userData, error: userError } = await supabase.auth.getUser();
 
-    if (userError || !userData?.user) {
-      console.error("Error fetching user:", userError);
-      throw new Error(userError?.message || "User not authenticated");
-    }
-
-    const { data: user } = await supabase
-      .from("user_profile")
-      .select("*")
-      .eq("id", userData.user?.id)
-      .single();
-
-    if (!user) {
-      console.error("User profile not found for ID:", userData.user.id);
-      throw new Error("User profile not found");
-    }
-
-    return user.role as UserProfile;
-  } catch (error) {
-    console.error("Error in GetUserRoleAction:", error);
-    throw new Error("Failed to fetch user role. Please try again.");
+  if (userError || !userData?.user) {
+    console.error("Error fetching user:", userError);
+    throw new Error(userError?.message || "User not authenticated");
   }
+
+  const { data: user } = await supabase
+    .from("user_profile")
+    .select("*")
+    .eq("id", userData.user?.id)
+    .single();
+
+  if (!user) {
+    console.error("User profile not found for ID:", userData.user.id);
+    throw new Error("User profile not found");
+  }
+
+  return user.role as UserProfile;
 }
 
 // PROGRAM ACTIONS
@@ -44,27 +39,22 @@ export async function InsertProgramAction({
   program_name,
   description,
 }: ProgramType) {
-  try {
-    const supabase = await createClient();
-    const userId = (await supabase.auth.getUser()).data.user?.id;
-    const { data, error } = await supabase
-      .from("programs")
-      .insert({
-        agriculturist_id: userId,
-        program_name: program_name,
-        description: description,
-      })
-      .select()
-      .single();
+  const supabase = await createClient();
+  const userId = (await supabase.auth.getUser()).data.user?.id;
+  const { data, error } = await supabase
+    .from("programs")
+    .insert({
+      agriculturist_id: userId,
+      program_name: program_name,
+      description: description,
+    })
+    .select()
+    .single();
 
-    if (error) {
-      throw new Error("Failed to create program. Please try again.");
-    }
-    return data as ProgramType;
-  } catch (error) {
-    console.error("Error inserting program:", error);
+  if (error) {
     throw new Error("Failed to create program. Please try again.");
   }
+  return data as ProgramType;
 }
 
 export async function EditProgramNameAction({
@@ -74,72 +64,71 @@ export async function EditProgramNameAction({
   program_id: string;
   program_name: string;
 }) {
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("programs")
-      .update({ program_name })
-      .eq("id", program_id)
-      .select()
-      .single();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("programs")
+    .update({ program_name })
+    .eq("id", program_id)
+    .select()
+    .single();
 
-    if (error) {
-      throw new Error("Failed to update program name. Please try again.");
-    }
-    return data as ProgramType;
-  } catch (error) {
-    console.error("Error updating program name:", error);
+  if (error) {
     throw new Error("Failed to update program name. Please try again.");
   }
+  return data as ProgramType;
 }
 
 export async function SelectProgramByIdAction(programId: string) {
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("programs")
-      .select("*")
-      .eq("id", programId)
-      .single();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("programs")
+    .select("*")
+    .eq("id", programId)
+    .single();
 
-    if (error) {
-      console.error("Error fetching program:", error);
-      throw new Error(error.message);
-    }
-
-    return data as ProgramType;
-  } catch (error) {
-    console.error("Error in SelectProgramByIdAction:", error);
-    throw new Error("Failed to fetch program. Please try again.");
+  if (error) {
+    console.error("Error fetching program:", error);
+    throw new Error(error.message);
   }
+
+  return data as ProgramType;
 }
 
 export async function SelectAllProgramsByAgriculturistAction() {
-  try {
-    const supabase = await createClient();
-    const { data: userData, error: userError } = await supabase.auth.getUser();
+  const supabase = await createClient();
+  const { data: userData, error: userError } = await supabase.auth.getUser();
 
-    if (userError || !userData?.user?.id) {
-      console.error("Error fetching user:", userError);
-      throw new Error(userError?.message || "User not authenticated");
-    }
-
-    const { data, error } = await supabase
-      .from("programs")
-      .select("*")
-      .eq("agriculturist_id", userData.user.id)
-      .order("created_at", { ascending: true });
-
-    if (error) {
-      console.error("Error fetching programs:", error);
-      throw new Error(error.message);
-    }
-
-    return data as ProgramType[];
-  } catch (error) {
-    console.error("Error in SelectAllProgramsByAgriculturistAction:", error);
-    throw new Error("Failed to fetch programs. Please try again.");
+  if (userError || !userData?.user?.id) {
+    console.error("Error fetching user:", userError);
+    throw new Error(userError?.message || "User not authenticated");
   }
+
+  const { data, error } = await supabase
+    .from("programs")
+    .select("*")
+    .eq("agriculturist_id", userData.user.id)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("Error fetching programs:", error);
+    throw new Error(error.message);
+  }
+
+  return data as ProgramType[];
+}
+
+export async function DeleteProgramAction(programID: string) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("programs")
+    .delete()
+    .eq("id", programID);
+
+  if (error) {
+    console.error("Error deleting program:", error);
+    throw new Error(error.code);
+  }
+  return;
 }
 
 // PROJECT ACTIONS
@@ -150,66 +139,55 @@ export async function InsertProjectAction({
   start_date,
   end_date,
 }: ProjectType) {
-  try {
-    const supabase = await createClient();
-    const userId = (await supabase.auth.getUser()).data.user?.id;
-    const { data, error } = await supabase
-      .from("projects")
-      .insert({
-        project_name: project_name,
-        crop_type: crop_type,
-        start_date: new Date(start_date).toISOString(),
-        end_date: new Date(end_date).toISOString(),
-        location_id: "862975a3-54ad-495d-8e94-7997af554315",
-        status: 1,
-        created_by: userId,
-        program_id: program_id,
-      })
-      .select()
-      .single();
+  const supabase = await createClient();
+  const userId = (await supabase.auth.getUser()).data.user?.id;
+  const { data, error } = await supabase
+    .from("projects")
+    .insert({
+      project_name: project_name,
+      crop_type: crop_type,
+      start_date: new Date(start_date).toISOString(),
+      end_date: new Date(end_date).toISOString(),
+      location_id: "862975a3-54ad-495d-8e94-7997af554315",
+      status: 1,
+      created_by: userId,
+      program_id: program_id,
+    })
+    .select()
+    .single();
 
-    if (error) {
-      console.error("Error inserting project:", error);
-      throw new Error(`Failed to create project. ${error.message}`);
-    }
-
-    return data as ProjectType;
-  } catch (error) {
+  if (error) {
     console.error("Error inserting project:", error);
-    throw new Error("Failed to create project. Please try again.");
+    throw new Error(`Failed to create project. ${error.message}`);
   }
+
+  return data as ProjectType;
 }
 
 export async function SelectAllProjectsByProgramIDAction(programID: string) {
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("projects")
-      .select("*")
-      .eq("program_id", programID)
-      .order("created_at", { ascending: true });
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("projects")
+    .select("*")
+    .eq("program_id", programID)
+    .order("created_at", { ascending: true });
 
-    if (error) {
-      console.error("Error fetching projects:", error);
-      throw new Error(error.message);
-    }
-
-    return data as ProjectType[];
-  } catch (error) {
-    console.error("Error in SelectAllProjectsByProgramID:", error);
-    throw new Error("Failed to fetch projects. Please try again.");
+  if (error) {
+    console.error("Error fetching projects:", error);
+    throw new Error(error.message);
   }
+
+  return data as ProjectType[];
 }
 
 export async function SelectProgramAndProjectDetailsByProjectIDAction(
   projectID: string
 ) {
-  try {
-    const supabase = await createClient(); // your server-side Supabase client
-    const { data, error } = await supabase
-      .from("projects")
-      .select(
-        `
+  const supabase = await createClient(); // your server-side Supabase client
+  const { data, error } = await supabase
+    .from("projects")
+    .select(
+      `
         *,
         programs (
           id,
@@ -218,44 +196,32 @@ export async function SelectProgramAndProjectDetailsByProjectIDAction(
           agriculturist_id
         )
       `
-      )
-      .eq("id", projectID)
-      .single();
+    )
+    .eq("id", projectID)
+    .single();
 
-    if (error) {
-      console.error("Error fetching project details:", error);
-      throw new Error(error.message);
-    }
-
-    return data as ProjectType & { programs: ProgramType };
-  } catch (error) {
-    console.error(
-      "Error in selectProgramAndProjectDetailsByProjectIDAction:",
-      error
-    );
-    throw new Error("Failed to fetch project details. Please try again.");
+  if (error) {
+    console.error("Error fetching project details:", error);
+    throw new Error(error.message);
   }
+
+  return data as ProjectType & { programs: ProgramType };
 }
 
 export async function SelectProjectDetailsByProjectIDAction(projectID: string) {
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("projects")
-      .select("*")
-      .eq("id", projectID)
-      .single();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("projects")
+    .select("*")
+    .eq("id", projectID)
+    .single();
 
-    if (error) {
-      console.error("Error fetching project details:", error);
-      throw new Error(error.message);
-    }
-
-    return data as ProjectType;
-  } catch (error) {
-    console.error("Error in SelectProjectDetailsByProjectID:", error);
-    throw new Error("Failed to fetch project details. Please try again.");
+  if (error) {
+    console.error("Error fetching project details:", error);
+    throw new Error(error.message);
   }
+
+  return data as ProjectType;
 }
 
 export async function EditProjectNameAction({
@@ -265,124 +231,110 @@ export async function EditProjectNameAction({
   project_id: string;
   project_name: string;
 }) {
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("projects")
-      .update({ project_name })
-      .eq("id", project_id)
-      .select()
-      .single();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("projects")
+    .update({ project_name })
+    .eq("id", project_id)
+    .select()
+    .single();
 
-    if (error) {
-      console.error("Error updating project name:", error);
-      throw new Error("Failed to update project name. Please try again.");
-    }
-    return data as ProjectType;
-  } catch (error) {
+  if (error) {
     console.error("Error updating project name:", error);
     throw new Error("Failed to update project name. Please try again.");
   }
+  return data as ProjectType;
 }
 
 // LOCATION HOOKS
 export async function SelectLocationByIDAction(locationID: string) {
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("locations")
-      .select("*")
-      .eq("id", locationID)
-      .single();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("locations")
+    .select("*")
+    .eq("id", locationID)
+    .single();
 
-    if (error) {
-      console.error("Error fetching location:", error);
-      throw new Error(error.message);
-    }
-
-    return data as LocationType;
-  } catch (error) {
-    console.error("Error in SelectLocationByLocationIDAction:", error);
-    throw new Error("Failed to fetch location. Please try again.");
+  if (error) {
+    console.error("Error fetching location:", error);
+    throw new Error(error.message);
   }
+
+  return data as LocationType;
 }
 
-// FIELD REPORT ACTIONS
-export async function SelectAllFieldReportsByProjectIDAction(
+// MONITORING REPORT ACTIONS
+export async function SelectAllMonitoringReportsByProjectIDAction(
   projectID: string
 ) {
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("field_reports")
-      .select(`*, user_profile (fullname)`)
-      .eq("project_id", projectID)
-      .order("created_at", { ascending: false });
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("monitoring")
+    .select(`*, user_profile (fullname)`)
+    .eq("project_id", projectID)
+    .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error("Error fetching field reports:", error);
-      throw new Error(error.message);
-    }
-
-    return data as FieldReportType[];
-  } catch (error) {
-    console.error("Error in SelectAllFieldReportsByProjectIDAction:", error);
-    throw new Error("Failed to fetch field reports. Please try again.");
+  if (error) {
+    console.error("Error fetching field reports:", error);
+    throw new Error(error.message);
   }
+
+  return data as MonitoringReportType[];
 }
 
-export async function InsertFieldReportAction({
+export async function InsertMonitoringReportAction({
   project_id,
-  image_file,
+  images,
   location_name,
   date_time_captured,
   latitude,
   longitude,
   status_note,
-}: FieldReportType) {
-  try {
-    const supabase = await createClient();
+}: MonitoringReportType) {
+  const supabase = await createClient();
 
-    // Upload the image file if provided
-    let photo_url = null;
-    if (image_file) {
-      const { data, error } = await supabase.storage
-        .from("field-reports")
-        .upload(`images/${Date.now()}_${image_file.name}`, image_file);
+  // Upload the image file if provided
+  let photo_url: string[] = [];
+  if (images && Array.isArray(images)) {
+    for (const file of images) {
+      if (file instanceof File) {
+        const { data, error } = await supabase.storage
+          .from("monitoring-reports")
+          .upload(`images/${file.lastModified}_${file.name}`, file);
 
-      if (error) {
-        console.error("Error uploading image:", error);
-        throw new Error("Failed to upload image. Please try again.");
+        if (error) {
+          console.error("Error uploading image:", error);
+          throw new Error("Failed to upload image. Please try again.");
+        }
+        photo_url.push(
+          `${process.env.NEXT_PUBLIC_STORAGE_URL}/${data.fullPath}`
+        );
       }
-      photo_url = `${process.env.NEXT_PUBLIC_STORAGE_URL}/${data.fullPath}`;
     }
+  }
 
-    // Insert the field report into the database
-    const { data, error } = await supabase
-      .from("field_reports")
-      .insert({
-        project_id: project_id,
-        reporter_id: (await supabase.auth.getUser()).data.user?.id,
-        photo_url,
-        location_name,
-        date_time_captured: date_time_captured,
-        latitude,
-        longitude,
-        status_note,
-      })
-      .select()
-      .single();
+  // Insert the monitoring report into the database
+  const { data, error } = await supabase
+    .from("monitoring")
+    .insert({
+      project_id: project_id,
+      reporter_id: (await supabase.auth.getUser()).data.user?.id,
+      photo_url,
+      location_name,
+      date_time_captured: date_time_captured,
+      latitude,
+      longitude,
+      status_note,
+    })
+    .select()
+    .single();
 
-    if (error) {
-      console.error("Error inserting field report:", error);
-      throw new Error("Failed to create field report. Please try again.");
-    }
-
-    return data as FieldReportType;
-  } catch (error) {
-    console.error("Error in InsertFieldReportAction:", error);
+  if (error) {
+    console.error("Error inserting field report:", error);
     throw new Error("Failed to create field report. Please try again.");
   }
+
+  return data as MonitoringReportType;
 }
 
 // MEMBERS ACTIONS
@@ -420,7 +372,10 @@ export async function InsertMemberAction(data: UserProfile) {
 export async function SelectAllMembersAction() {
   const supabase = await createClient();
 
-  const { data, error } = await supabase.from("user_profile").select("*");
+  const { data, error } = await supabase
+    .from("user_profile")
+    .select("*")
+    .order("role");
 
   if (error) {
     console.error("Error fetching members:", error);
@@ -497,127 +452,104 @@ export async function InsertFieldTechnicianToProjectAction(
   data: AssignedProjectsType,
   project_id: string
 ) {
-  try {
-    const supabase = await createClient();
+  const supabase = await createClient();
 
-    // Try to fetch the assigned_projects row for the user
-    const { data: existingUser, error: selectError } = await supabase
-      .from("assigned_projects")
-      .select("project_ids")
-      .eq("user_id", data.user_id)
-      .maybeSingle();
+  // Try to fetch the assigned_projects row for the user
+  const { data: existingUser, error: selectError } = await supabase
+    .from("assigned_projects")
+    .select("project_ids")
+    .eq("user_id", data.user_id)
+    .maybeSingle();
 
-    if (selectError) {
-      console.error("Error checking existing user:", selectError);
-      throw new Error("Failed to check existing user. Please try again.");
-    }
-
-    if (existingUser) {
-      // Avoid duplicate project_id
-      const currentProjects: string[] = existingUser.project_ids || [];
-      if (!currentProjects.includes(project_id)) {
-        const updatedProjects = [...currentProjects, project_id];
-        const { error: updateError } = await supabase
-          .from("assigned_projects")
-          .update({ project_ids: updatedProjects })
-          .eq("user_id", data.user_id);
-
-        if (updateError) {
-          console.error("Error updating assigned projects:", updateError);
-          throw new Error(
-            "Failed to add project to field technician. Please try again."
-          );
-        }
-      }
-    } else {
-      const { error: insertError } = await supabase
-        .from("assigned_projects")
-        .insert({
-          ...data,
-          project_ids: [project_id],
-        });
-
-      if (insertError) {
-        console.error(
-          "Error inserting field technician to project:",
-          insertError
-        );
-        throw new Error(
-          "Failed to add field technician to project. Please try again."
-        );
-      }
-    }
-
-    return;
-  } catch (error) {
-    console.error("Error inserting field technician to project:", error);
-    throw new Error(
-      "Failed to add field technician to project. Please try again."
-    );
+  if (selectError) {
+    console.error("Error checking existing user:", selectError);
+    throw new Error("Failed to check existing user. Please try again.");
   }
+
+  if (existingUser) {
+    // Avoid duplicate project_id
+    const currentProjects: string[] = existingUser.project_ids || [];
+    if (!currentProjects.includes(project_id)) {
+      const updatedProjects = [...currentProjects, project_id];
+      const { error: updateError } = await supabase
+        .from("assigned_projects")
+        .update({ project_ids: updatedProjects })
+        .eq("user_id", data.user_id);
+
+      if (updateError) {
+        console.error("Error updating assigned projects:", updateError);
+        throw new Error(
+          "Failed to add project to field technician. Please try again."
+        );
+      }
+    }
+  } else {
+    const { error: insertError } = await supabase
+      .from("assigned_projects")
+      .insert({
+        ...data,
+        project_ids: [project_id],
+      });
+
+    if (insertError) {
+      console.error(
+        "Error inserting field technician to project:",
+        insertError
+      );
+      throw new Error(
+        "Failed to add field technician to project. Please try again."
+      );
+    }
+  }
+
+  return;
 }
 
 export async function SelectAllFieldTechniciansByProjectIDAction(
   projectID: string
 ) {
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("assigned_projects")
-      .select("*, user_profile (fullname)")
-      .contains("project_ids", [projectID])
-      .order("created_at", { ascending: true });
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("assigned_projects")
+    .select("*, user_profile (fullname)")
+    .contains("project_ids", [projectID])
+    .order("created_at", { ascending: true });
 
-    if (error) {
-      console.error("Error fetching field technicians:", error);
-      throw new Error(error.message);
-    }
-
-    return data as AssignedProjectsType[];
-  } catch (error) {
-    console.error(
-      "Error in SelectAllFieldTechniciansByProjectIDAction:",
-      error
-    );
-    throw new Error("Failed to fetch field technicians. Please try again.");
+  if (error) {
+    console.error("Error fetching field technicians:", error);
+    throw new Error(error.message);
   }
+
+  return data as AssignedProjectsType[];
 }
 
 export async function SelectAllAssignedProjectsByFieldTechnicianIDAction() {
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("assigned_projects")
-      .select("*")
-      .eq("user_id", (await supabase.auth.getUser()).data.user?.id)
-      .single();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("assigned_projects")
+    .select("*")
+    .eq("user_id", (await supabase.auth.getUser()).data.user?.id)
+    .single();
 
-    if (error) {
-      console.error("Error fetching assigned projects:", error);
-      throw new Error(error.message);
-    }
-
-    const projectIds: string[] = data?.project_ids || [];
-    if (projectIds.length === 0) {
-      return [];
-    }
-
-    const { data: projectsData, error: projectsError } = await supabase
-      .from("projects")
-      .select("*")
-      .in("id", projectIds);
-
-    if (projectsError) {
-      console.error("Error fetching projects:", projectsError);
-      throw new Error(projectsError.message);
-    }
-
-    return projectsData as ProjectType[];
-  } catch (error) {
-    console.error(
-      "Error in SelectAllAssignedProjectsByFieldTechnicianIDAction:",
-      error
-    );
-    throw new Error("Failed to fetch assigned projects. Please try again.");
+  if (error) {
+    console.error("Error fetching assigned projects:", error);
+    throw new Error(error.message);
   }
+
+  const projectIds: string[] = data?.project_ids || [];
+  if (projectIds.length === 0) {
+    return [];
+  }
+
+  const { data: projectsData, error: projectsError } = await supabase
+    .from("projects")
+    .select("*")
+    .in("id", projectIds);
+
+  if (projectsError) {
+    console.error("Error fetching projects:", projectsError);
+    throw new Error(projectsError.message);
+  }
+
+  return projectsData as ProjectType[];
 }
