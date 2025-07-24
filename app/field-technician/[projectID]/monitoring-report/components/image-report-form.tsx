@@ -113,7 +113,7 @@ export default function MonitoringReportForm({
           Date Submitted: {format(new Date(values.created_at), "PPp")}
         </span>
       )}
-      <div className="space-y-4 m-2">
+      <div className="overflow-y-auto space-y-4 m-2">
         {isAddMode ? (
           <>
             <GetCurrentLocation location={location} setLocation={setLocation} />
