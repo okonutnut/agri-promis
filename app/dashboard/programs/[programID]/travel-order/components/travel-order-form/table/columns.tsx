@@ -1,6 +1,6 @@
 "use client";
 
-import { AssignedProjectsType, UserProfile } from "@/components/types";
+import { AssignedProjectsType, UserProfileType } from "@/components/types";
 import { Button } from "@/components/ui/button";
 import { UseMutateFunction } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
@@ -8,7 +8,7 @@ import { ColumnDef } from "@tanstack/react-table";
 export const columns = (
   mutate: UseMutateFunction<void, Error, AssignedProjectsType, unknown>,
   isPending: boolean
-): ColumnDef<UserProfile>[] => [
+): ColumnDef<UserProfileType>[] => [
   {
     accessorKey: "fullname",
     header: "Name",
