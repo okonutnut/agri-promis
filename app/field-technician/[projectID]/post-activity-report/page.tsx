@@ -10,14 +10,11 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useSelectAllPostActivityReportsByUserHook } from "@/components/hooks";
-import { useParams } from "next/navigation";
 import { PostActivityReportType } from "@/components/types";
 import PostActivityReportForm from "./components/post-activity-report-form";
 import UserPageLayout from "@/components/custom/layout/user-page-layout";
 
-export default function FieldTechnicianPage() {
-  const { projectID } = useParams();
-
+export default function UploadPostActivityReportsPage() {
   const [panelOpen, setPanelOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<PostActivityReportType | null>(
     null

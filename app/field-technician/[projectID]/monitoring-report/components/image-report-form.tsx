@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useState } from "react";
-import UploadFieldReportForm from "../form/monitoring-report-form";
 import { XCircle, ZoomIn } from "lucide-react";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
@@ -16,22 +15,24 @@ import ImageModal from "@/components/ui/image-modal";
 import { MonitoringReportType } from "@/components/types";
 import ImageCarousel from "@/components/custom/images/image-carousel";
 import { format } from "date-fns";
+import { Separator } from "@/components/ui/separator";
 
-type MonitoringReportFormProps = {
+type ImageCaptureFormProps = {
   isAddMode?: boolean;
   values?: MonitoringReportType | null;
+  location: LocationData;
+  setLocation: (location: LocationData) => void;
+  images: ImageData[];
+  setImages: React.Dispatch<React.SetStateAction<ImageData[]>>;
 };
-export default function MonitoringReportForm({
+export default function ImageCaptureForm({
   isAddMode,
   values,
-}: MonitoringReportFormProps) {
-  const [images, setImages] = useState<ImageData[]>([]);
-  const [location, setLocation] = useState<LocationData>({
-    latitude: undefined,
-    longitude: undefined,
-    locationName: undefined,
-    error: undefined,
-  });
+  location,
+  setLocation,
+  images,
+  setImages,
+}: ImageCaptureFormProps) {
   const [isCompressing, setIsCompressing] = useState(false);
   const [fullScreenImage, setFullScreenImage] = useState<ImageData | null>(
     null
@@ -89,7 +90,7 @@ export default function MonitoringReportForm({
   };
 
   const removeImage = (imageId: string) => {
-    setImages((prev) => {
+    setImages((prev: ImageData[]) => {
       const imageToRemove = prev.find((img) => img.id === imageId);
       if (imageToRemove) {
         URL.revokeObjectURL(imageToRemove.src);
@@ -113,14 +114,14 @@ export default function MonitoringReportForm({
           Date Submitted: {format(new Date(values.created_at), "PPp")}
         </span>
       )}
-      <div className="overflow-y-auto space-y-4 m-2">
+      <div className="space-y-4 m-2">
         {isAddMode ? (
           <>
             <GetCurrentLocation location={location} setLocation={setLocation} />
 
             {/* Image Upload */}
             <div className="space-y-2">
-              <Card className="h-40 w-full mx-auto flex flex-col items-center justify-center border-2 border-dashed shadow-none transition-colors cursor-pointer relative overflow-hidden">
+              <Card className="h-32 w-full mx-auto flex flex-col items-center justify-center border-2 border-dashed shadow-none transition-colors cursor-pointer relative overflow-hidden">
                 <Input
                   type="file"
                   accept="image/*"
@@ -148,12 +149,10 @@ export default function MonitoringReportForm({
                 </p>
               )}
             </div>
+            <Separator />
             {/* Image Gallery */}
             {images.length > 0 && (
               <div className="space-y-4">
-                <h3 className="text-lg font-medium">
-                  Captured Images ({images.length})
-                </h3>
                 <div className="flex gap-4 overflow-x-auto pb-2">
                   {images.map((image) => (
                     <div
@@ -194,22 +193,17 @@ export default function MonitoringReportForm({
                 </div>
               </div>
             )}
+            <ImageModal
+              isOpen={!!fullScreenImage}
+              imageSrc={fullScreenImage?.src || ""}
+              imageAlt="Captured image preview"
+              onClose={closeFullScreen}
+            />
           </>
         ) : (
           <ImageCarousel images={values?.photo_url ?? []} />
         )}
       </div>
-      <UploadFieldReportForm
-        values={values}
-        images={images}
-        location={location}
-      />
-      <ImageModal
-        isOpen={!!fullScreenImage}
-        imageSrc={fullScreenImage?.src || ""}
-        imageAlt="Captured image preview"
-        onClose={closeFullScreen}
-      />
     </>
   );
 }

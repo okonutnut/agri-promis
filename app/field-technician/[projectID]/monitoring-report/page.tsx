@@ -9,12 +9,14 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { useSelectAllMonitoringReportsByUserHook } from "@/components/hooks";
+import { useSelectAllMonitoringReportsByProjectIDAndUserHook } from "@/components/hooks";
 import { PostActivityReportType } from "@/components/types";
 import UserPageLayout from "@/components/custom/layout/user-page-layout";
-import MonitoringReportForm from "./components/image-report-form";
+import UploadFieldReportForm from "./form/monitoring-report-form";
+import { useParams } from "next/navigation";
 
 export default function MonitoringReportPage() {
+  const { projectID } = useParams();
   const [panelOpen, setPanelOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<PostActivityReportType | null>(
     null
@@ -39,8 +41,8 @@ export default function MonitoringReportPage() {
     setSelectedRow(null);
   };
 
-  const { data, isLoading, error } = useSelectAllMonitoringReportsByUserHook();
-  console.log("Monitoring Reports Data:", data);
+  const { data, isLoading, error } =
+    useSelectAllMonitoringReportsByProjectIDAndUserHook(projectID as string);
 
   return (
     <UserPageLayout
@@ -57,7 +59,7 @@ export default function MonitoringReportPage() {
             onAdd={handleAdd}
           />
           <Sheet open={panelOpen} onOpenChange={handlePanelClose}>
-            <SheetContent className="flex justify-between w-screen md:max-w-xl">
+            <SheetContent className="w-screen md:max-w-xl">
               <SheetHeader className="border-b">
                 <SheetTitle className="text-primary uppercase">
                   {isAddMode
@@ -65,9 +67,9 @@ export default function MonitoringReportPage() {
                     : "View Post Activity Report Details"}
                 </SheetTitle>
               </SheetHeader>
-              <MonitoringReportForm
-                values={selectedRow}
+              <UploadFieldReportForm
                 isAddMode={isAddMode}
+                values={selectedRow}
               />
             </SheetContent>
           </Sheet>

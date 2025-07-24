@@ -7,7 +7,7 @@ export function GetLocation({ projectID }: { projectID: string }) {
     isError,
   } = useSelectLocationByID(projectID);
   return (
-    <span className="font-mono">
+    <span className="text-xs font-mono">
       {isLoading
         ? "Loading location..."
         : isError

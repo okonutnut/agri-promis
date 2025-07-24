@@ -18,6 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import MobileNavbar from "./mobile-nav";
 import AppDrawer from "@/components/sidebar/appDrawer";
 import { getFieldTechnicianNavItems } from "@/components/sidebar/navitems";
+import { Separator } from "@/components/ui/separator";
 
 type NavbarProps = {
   noSidebar?: boolean;
@@ -81,7 +82,7 @@ export default function UserNavbar({ noSidebar }: NavbarProps) {
                   {data?.map((project: ProjectType) => (
                     <Link
                       key={project.id}
-                      href={`/dashboard/projects/${project.id}`}
+                      href={`/field-technician/${project.id}`}
                     >
                       <DropdownMenuItem className="justify-between w-full h-7 cursor-pointer hover:bg-gray-100">
                         {project?.project_name ?? (
@@ -93,7 +94,8 @@ export default function UserNavbar({ noSidebar }: NavbarProps) {
                       </DropdownMenuItem>
                     </Link>
                   ))}
-                  <Link href={`/field-technician/`}>
+                  <Separator />
+                  <Link href={`/field-technician`}>
                     <DropdownMenuItem className="justify-between w-full h-7 cursor-pointer hover:bg-gray-100">
                       All Projects
                     </DropdownMenuItem>

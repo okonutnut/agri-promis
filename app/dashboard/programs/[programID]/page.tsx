@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { GetLocation } from "./components/get-project-location";
 import { Badge } from "@/components/ui/badge";
 import { getProgramNavItems } from "@/components/sidebar/navitems";
 
@@ -44,7 +43,11 @@ export default function DashboardPage() {
                       {project.project_name}
                       <ChevronRight className="ml-2 h-4 w-4" />
                     </span>
-                    <GetLocation projectID={project.location_id ?? ""} />
+                    <span className="font-mono">
+                      {project.locationData?.barangay},
+                      {project.locationData?.municipality},
+                      {project.locationData?.province}
+                    </span>
                     <Badge
                       variant={"outline"}
                       className={`text-xs uppercase ${

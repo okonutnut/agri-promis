@@ -41,16 +41,18 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
     <>
       <Carousel className="mx-auto" setApi={setApi}>
         {/* Progress indicator lines */}
-        <div className="flex gap-1 mb-4 px-4">
-          {images.map((_, index) => (
-            <div
-              key={index}
-              className={`h-0.5 flex-1 rounded-full transition-colors duration-300 ${
-                index <= current ? "bg-primary" : "bg-gray-200"
-              }`}
-            />
-          ))}
-        </div>
+        {images.length > 1 && (
+          <div className="flex gap-1 mb-4 px-4">
+            {images.map((_, index) => (
+              <div
+                key={index}
+                className={`h-0.5 flex-1 rounded-full transition-colors duration-300 ${
+                  index <= current ? "bg-primary" : "bg-gray-200"
+                }`}
+              />
+            ))}
+          </div>
+        )}
         <CarouselContent>
           {images.map((image, index) => (
             <CarouselItem key={index}>

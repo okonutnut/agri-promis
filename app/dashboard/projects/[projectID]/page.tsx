@@ -12,6 +12,7 @@ export default function DashboardPage() {
   const { projectID } = useParams();
   const { data, isLoading, error } =
     useSelectProgramAndProjectDetailsByProgjectIDHook(projectID as string);
+
   return (
     <CustomPageLayout
       isLoading={isLoading}
@@ -28,6 +29,11 @@ export default function DashboardPage() {
               </span>
               <span className="text-sm text-muted-foreground">
                 Estimated End Date: {format(new Date(data?.end_date), "PP")}
+              </span>
+              <span className="text-sm text-muted-foreground">
+                Location: {data?.locationData?.barangay},{" "}
+                {data?.locationData?.municipality},{" "}
+                {data?.locationData?.province}
               </span>
             </div>
             <Badge

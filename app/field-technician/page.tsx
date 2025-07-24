@@ -44,11 +44,9 @@ export default function FieldTechnicianPage() {
                                 {project.status == 0 ? "INACTIVE" : "ACTIVE"}
                               </Badge>
                             </div>
-                            <span>
-                              <GetLocation
-                                projectID={project.location_id as string}
-                              />
-                            </span>
+                            <GetLocation
+                              projectID={project.location_id as string}
+                            />
                           </div>
                         </Link>
                       </TableCell>

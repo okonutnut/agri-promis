@@ -10,6 +10,8 @@ import { useParams } from "next/navigation";
 import { SheetClose, SheetFooter } from "@/components/ui/sheet";
 import { ImageData, LocationData } from "@/components/interfaces";
 import { MonitoringReportType } from "@/components/types";
+import { useEffect, useRef, useState } from "react";
+import ImageCaptureForm from "../components/image-report-form";
 
 const fieldReportSchema = z.object({
   status_note: z
@@ -17,32 +19,56 @@ const fieldReportSchema = z.object({
     .min(1, "Status note is required")
     .min(5, "Status note must be at least 5 characters")
     .max(500, "Status note must not exceed 500 characters"),
+  remarks: z
+    .string()
+    .optional()
+    .refine(
+      (val: string | undefined) => {
+        // If remarks is provided, require at least 5 characters
+        if (val && val.length < 5) {
+          return false;
+        }
+        return true;
+      },
+      {
+        message: "Remarks must be at least 5 characters when provided",
+      }
+    ),
 });
 
 type FieldReportFormData = z.infer<typeof fieldReportSchema>;
 
 type UploadFieldReportFormProps = {
-  images: ImageData[];
-  location?: LocationData;
+  isAddMode?: boolean;
   values?: MonitoringReportType | null;
 };
 
 export default function UploadFieldReportForm({
-  images,
-  location,
+  isAddMode,
   values,
 }: UploadFieldReportFormProps) {
   const { projectID } = useParams();
+
+  const [location, setLocation] = useState<LocationData>({
+    latitude: undefined,
+    longitude: undefined,
+    locationName: undefined,
+    error: undefined,
+  });
+  const [images, setImages] = useState<ImageData[]>([]);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+
   const form = useForm<FieldReportFormData>({
     resolver: zodResolver(fieldReportSchema),
     defaultValues: {
       status_note: values?.status_note || "",
+      remarks: values?.remarks || "",
     },
   });
 
-  const { mutate, isPending } = useInsertMonitoringReportHook();
-
+  const { mutate, isPending, isSuccess } = useInsertMonitoringReportHook();
   const onSubmit = (data: FieldReportFormData) => {
+    form.setValue("remarks", "");
     // Validate images
     if (!images || images.length === 0) {
       toast.error("At least one image is required");
@@ -86,25 +112,57 @@ export default function UploadFieldReportForm({
     });
   };
 
+  useEffect(() => {
+    if (isSuccess) {
+      form.reset();
+      setImages([]);
+      setLocation({
+        latitude: undefined,
+        longitude: undefined,
+        locationName: undefined,
+        error: undefined,
+      });
+      closeBtnRef.current?.click();
+    }
+  }, [isSuccess, form, closeBtnRef]);
+
   return (
     <>
-      <form
-        className="space-y-4 m-2"
-        id="upload-monitoring-report-form"
-        onSubmit={form.handleSubmit(onSubmit)}
-      >
-        {form.formState.errors.root && (
-          <div className="text-red-500 text-sm">
-            {form.formState.errors.root.message}
-          </div>
-        )}
-        <FormTextarea
-          label="Status Note"
-          name="status_note"
-          form={form}
-          readonly={!!values}
+      <section className="overflow-y-auto">
+        <ImageCaptureForm
+          isAddMode={isAddMode}
+          values={values}
+          location={location}
+          setLocation={setLocation}
+          images={images}
+          setImages={setImages}
         />
-      </form>
+        <form
+          className="space-y-4 m-2"
+          id="upload-monitoring-report-form"
+          onSubmit={form.handleSubmit(onSubmit)}
+        >
+          {form.formState.errors.root && (
+            <div className="text-red-500 text-sm">
+              {form.formState.errors.root.message}
+            </div>
+          )}
+          <FormTextarea
+            label="Status Note"
+            name="status_note"
+            form={form}
+            readonly={!!values}
+          />
+          {!isAddMode && (
+            <FormTextarea
+              label="Remarks"
+              name="remarks"
+              form={form}
+              readonly={!!values}
+            />
+          )}
+        </form>
+      </section>
       <SheetFooter className="border-t">
         {!values && (
           <Button
@@ -116,7 +174,11 @@ export default function UploadFieldReportForm({
           </Button>
         )}
         <SheetClose asChild>
-          <Button variant="outline" className="w-full md:w-auto">
+          <Button
+            variant="outline"
+            ref={closeBtnRef}
+            className="w-full md:w-auto"
+          >
             Close
           </Button>
         </SheetClose>

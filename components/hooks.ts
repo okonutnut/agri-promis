@@ -23,7 +23,7 @@ import {
   InsertRemarksInMonitoringReportAction,
   InsertPostActivityReportAction,
   SelectAllPostActivityReportsByUserID,
-  SelectAllMonitoringReportsByUserAction,
+  SelectAllMonitoringReportsByProjectIDAndUserAction,
   SelectAllPostActivityReportsByProjectIDAction,
   InsertPostActivityRemarksAction,
 } from "@/components/actions";
@@ -280,10 +280,13 @@ export function useInsertRemarksInMonitoringReportHook(reportId: string) {
   });
 }
 
-export function useSelectAllMonitoringReportsByUserHook() {
+export function useSelectAllMonitoringReportsByProjectIDAndUserHook(
+  projectID: string
+) {
   return useQuery({
-    queryKey: ["allMonitoringReportsByUser"],
-    queryFn: async () => await SelectAllMonitoringReportsByUserAction(),
+    queryKey: ["allMonitoringReportsByUser", projectID],
+    queryFn: async () =>
+      await SelectAllMonitoringReportsByProjectIDAndUserAction(projectID),
     refetchOnMount: true,
   });
 }

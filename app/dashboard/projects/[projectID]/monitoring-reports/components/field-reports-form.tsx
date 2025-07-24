@@ -82,7 +82,7 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
             size={"sm"}
             disabled={isPending}
           >
-            {isPending ? <Loader2 className="animate-spin" /> : "Save"}
+            {isPending ? <Loader2 className="animate-spin" /> : "Submit"}
           </Button>
         )}
         <SheetClose asChild>

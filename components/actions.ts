@@ -184,7 +184,7 @@ export async function SelectAllProjectsByProgramIDAction(programID: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("projects")
-    .select("*")
+    .select("*, locationData:locations(barangay, municipality, province)")
     .eq("program_id", programID)
     .order("created_at", { ascending: true });
 
@@ -210,6 +210,11 @@ export async function SelectProgramAndProjectDetailsByProjectIDAction(
           program_name,
           description,
           agriculturist_id
+        ),
+        locationData:locations (
+          province,
+          municipality,
+          barangay
         )
       `
     )
@@ -228,7 +233,7 @@ export async function SelectProjectDetailsByProjectIDAction(projectID: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("projects")
-    .select("*")
+    .select("*, locationData:locations(*)")
     .eq("id", projectID)
     .single();
 
@@ -318,7 +323,9 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
   return data as MonitoringReportType[];
 }
 
-export async function SelectAllMonitoringReportsByUserAction() {
+export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
+  projectID: string
+) {
   const supabase = await createClient();
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
@@ -335,6 +342,7 @@ export async function SelectAllMonitoringReportsByUserAction() {
       reviewedBy:user_profile!monitoring_reviewed_by_id_fkey (fullname)`
     )
     .eq("reporter_id", userData.user.id)
+    .eq("project_id", projectID)
     .order("created_at", { ascending: false });
 
   if (error) {
