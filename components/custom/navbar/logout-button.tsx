@@ -21,9 +21,7 @@ export default function SidebarLogoutButton() {
       console.error(error);
     } else {
       qc.removeQueries();
-      toast.success("You've been logged out", {
-        position: "bottom-right",
-      });
+      toast.success("You've been logged out");
       router.replace("/login");
     }
   };

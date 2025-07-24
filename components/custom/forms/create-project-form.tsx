@@ -38,7 +38,7 @@ const formSchema = z
   .superRefine((data, ctx) => {
     const start = new Date(data.start_date);
     const end = new Date(data.end_date);
-    if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && end <= start) {
+    if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && end < start) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "End date must be after start date",
@@ -71,7 +71,12 @@ export default function CreateProjectForm() {
       <FormInput label="Project Name" name="project_name" form={form} />
       <FormInput label="Crop Type" name="crop_type" form={form} />
       <FormInput label="Start Date" name="start_date" type="date" form={form} />
-      <FormInput label="End Date" name="end_date" type="date" form={form} />
+      <FormInput
+        label="Estimated End Date"
+        name="end_date"
+        type="date"
+        form={form}
+      />
       <Button type="submit" className="w-full px-4 py-2" disabled={isPending}>
         {isPending ? "Creating..." : "Create Project"}
       </Button>

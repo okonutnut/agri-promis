@@ -12,23 +12,18 @@ import {
 } from "@/components/ui/sheet";
 import CustomPageLayout from "@/components/custom/layout/admin-page-layout";
 import { useParams } from "next/navigation";
-import Image from "next/image";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { format } from "date-fns";
 import { getProjectNavItems } from "@/components/sidebar/navitems";
-import { MonitoringReportType } from "@/components/types";
-import { useSelectAllMonitoringReportsByProjectIDHook } from "@/components/hooks";
-import ImageCarousel from "./components/image-carousel";
+import { PostActivityReportType } from "@/components/types";
 
 export default function FieldReportsPage() {
   const { projectID } = useParams();
   const [panelOpen, setPanelOpen] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<MonitoringReportType | null>(
+  const [selectedRow, setSelectedRow] = useState<PostActivityReportType | null>(
     null
   );
 
-  const handleRowSelect = (row: MonitoringReportType) => {
+  const handleRowSelect = (row: PostActivityReportType) => {
     setSelectedRow(row);
     setPanelOpen(true);
   };
@@ -38,29 +33,19 @@ export default function FieldReportsPage() {
     setSelectedRow(null);
   };
 
-  const { data, isLoading, error } =
-    useSelectAllMonitoringReportsByProjectIDHook(projectID as string);
-  console.log("Monitoring Reports Data:", data);
   return (
     <CustomPageLayout
-      pageTitle="Monitoring Reports"
+      pageTitle="Post Activity Reports"
       navItems={getProjectNavItems(projectID as string)}
-      isLoading={isLoading}
-      error={error}
     >
-      <DataTable
-        columns={columns}
-        data={data || []}
-        onRowSelect={handleRowSelect}
-      />
+      <DataTable columns={columns} data={[]} onRowSelect={handleRowSelect} />
       <Sheet open={panelOpen} onOpenChange={handlePanelClose}>
         <SheetContent className="md:min-w-[600px] min-w-screen overflow-y-scroll">
-          <SheetHeader className="border-b">
+          <SheetHeader>
             <SheetTitle className="uppercase text-primary">
               View Field Report
             </SheetTitle>
           </SheetHeader>
-          <ImageCarousel images={selectedRow?.photo_url || []} />
           <Separator />
           <FieldReportsForm key={selectedRow?.id} data={selectedRow} />
         </SheetContent>

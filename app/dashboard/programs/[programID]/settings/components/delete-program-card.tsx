@@ -1,0 +1,72 @@
+import CustomAlertDialog from "@/components/custom/alert/custom-alert";
+import { useDeleteProgramHook } from "@/components/hooks";
+import { ProgramType } from "@/components/types";
+import { AlertDialogAction } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { AlertCircle, Loader2 } from "lucide-react";
+import { useState } from "react";
+
+type DeleteProgramCardProps = {
+  data: ProgramType;
+};
+export default function DeleteProgramCard({ data }: DeleteProgramCardProps) {
+  const [confirm, setConfirm] = useState(false);
+  const { mutate, isPending, isSuccess } = useDeleteProgramHook(
+    data.id as string
+  );
+
+  return (
+    <Card className="shadow-xs bg-red-50 border-red-200">
+      <CardContent className="flex flex-col flex-wrap justify-between items-start space-y-4">
+        <div className="flex gap-2 items-center font-semibold w-full mb-4 text-red-600">
+          <AlertCircle />
+          Danger Zone
+        </div>
+        <span>
+          To remove this program, please delete all the associated projects and
+          data. This action cannot be undone.
+        </span>
+        <CustomAlertDialog
+          trigger={
+            <Button variant={"destructive"} size="sm">
+              Delete Program
+            </Button>
+          }
+          title="Delete Program"
+          description="Are you sure you want to delete this program? This action cannot be undone."
+          onClose={() => {
+            if (isSuccess) {
+              setConfirm(false);
+            }
+            setConfirm(false);
+          }}
+        >
+          <Separator />
+          <center className="text-sm">
+            Type <strong>{data.program_name}</strong> to continue.
+          </center>
+          <Input
+            onChange={(e) =>
+              setConfirm(e.target.value === data.program_name.trim())
+            }
+          />
+          <Separator />
+          <Button
+            variant={isPending ? "ghost" : "destructive"}
+            disabled={!confirm || isPending}
+            onClick={() => mutate()}
+          >
+            {isPending ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              "Confirm Delete"
+            )}
+          </Button>
+        </CustomAlertDialog>
+      </CardContent>
+    </Card>
+  );
+}

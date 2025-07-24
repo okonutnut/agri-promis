@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 export default function FieldTechnicianPage() {
   const { data, isLoading, error } =
     useSelectAssignedProjectsByFieldTechnicianHook();
+  console.log("error: ", error);
 
   return (
     <UserPageLayout
@@ -21,39 +22,48 @@ export default function FieldTechnicianPage() {
       error={error}
     >
       {data && (
-        <Card className="p-0 shadow-none">
-          <Table>
-            <TableBody>
-              {data.map((project) => (
-                <TableRow key={project.id}>
-                  <TableCell>
-                    <Link
-                      href={`/field-technician/${project.id}/overview`}
-                      className="flex justify-start items-center gap-2 p-2"
-                    >
-                      <span className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 border">
-                        <Box className="h-5 w-5 text-gray-500" />
-                      </span>
-                      <div className="w-full flex flex-col gap-1">
-                        <div className="flex w-full justify-between items-center">
-                          <strong>{project.project_name}</strong>
-                          <Badge>
-                            {project.status == 0 ? "INACTIVE" : "ACTIVE"}
-                          </Badge>
-                        </div>
-                        <span>
-                          <GetLocation
-                            projectID={project.location_id as string}
-                          />
-                        </span>
-                      </div>
-                    </Link>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Card>
+        <>
+          {data.length > 0 ? (
+            <Card className="p-0 shadow-none">
+              <Table>
+                <TableBody>
+                  {data.map((project) => (
+                    <TableRow key={project.id}>
+                      <TableCell>
+                        <Link
+                          href={`/field-technician/${project.id}`}
+                          className="flex justify-start items-center gap-2 p-2"
+                        >
+                          <span className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 border">
+                            <Box className="h-5 w-5 text-gray-500" />
+                          </span>
+                          <div className="w-full flex flex-col gap-1">
+                            <div className="flex w-full justify-between items-center">
+                              <strong>{project.project_name}</strong>
+                              <Badge>
+                                {project.status == 0 ? "INACTIVE" : "ACTIVE"}
+                              </Badge>
+                            </div>
+                            <span>
+                              <GetLocation
+                                projectID={project.location_id as string}
+                              />
+                            </span>
+                          </div>
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          ) : (
+            <span>
+              No assigned projects found. <br /> Please contact your admin for
+              assistance.
+            </span>
+          )}
+        </>
       )}
     </UserPageLayout>
   );

@@ -2,9 +2,9 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { FieldReportType } from "@/components/types";
+import { PostActivityReportType } from "@/components/types";
 
-export const columns: ColumnDef<FieldReportType>[] = [
+export const columns: ColumnDef<PostActivityReportType>[] = [
   {
     accessorKey: "user_profile.fullname",
     header: "Reporter Name",

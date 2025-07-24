@@ -19,6 +19,8 @@ import {
   DeleteProgramAction,
   SelectAllMonitoringReportsByProjectIDAction,
   InsertMonitoringReportAction,
+  DeleteProjectAction,
+  InsertRemarksInMonitoringReportAction,
 } from "@/components/actions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -172,10 +174,15 @@ export function useInsertProjectHook() {
 export function useEditProjectNameHook() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (data: { id: string; project_name: string }) =>
+    mutationFn: async (data: {
+      id: string;
+      project_name: string;
+      status: number;
+    }) =>
       await EditProjectNameAction({
         project_id: data.id ?? "",
         project_name: data.project_name,
+        status: data.status,
       }),
     onSuccess: (data) => {
       qc.invalidateQueries({
@@ -184,10 +191,28 @@ export function useEditProjectNameHook() {
       qc.invalidateQueries({
         queryKey: ["allProjectsByProgramId", data.program_id],
       });
-      toast.success("Project name updated successfully!");
+      toast.success("Project updated successfully!");
     },
     onError: (error) => {
       toast.error(`Failed to update project name: ${error.message}`);
+    },
+  });
+}
+
+export function useDeleteProjectHook(projectId: string, programId: string) {
+  const qc = useQueryClient();
+  const router = useRouter();
+  return useMutation({
+    mutationFn: async () => await DeleteProjectAction(projectId),
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: ["allProjectsByProgramId", programId],
+      });
+      toast.success("Project deleted successfully!");
+      router.push("/dashboard/programs/" + programId);
+    },
+    onError: (error) => {
+      toast.error(`Failed to delete project: ${error.message}`);
     },
   });
 }
@@ -225,10 +250,26 @@ export function useInsertMonitoringReportHook() {
         queryKey: ["allMonitoringReportsByProjectId", data.project_id],
       });
       toast.success("Monitoring report created successfully!");
-      window.location.reload();
     },
     onError: (error) => {
       toast.error(`Failed to create monitoring report: ${error.message}`);
+    },
+  });
+}
+
+export function useInsertRemarksInMonitoringReportHook(reportId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: { remarks: string }) =>
+      await InsertRemarksInMonitoringReportAction(reportId, data.remarks),
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: ["allMonitoringReportsByProjectId", reportId],
+      });
+      toast.success("Remarks added successfully!");
+    },
+    onError: (error) => {
+      toast.error(`Failed to add remarks: ${error.message}`);
     },
   });
 }
@@ -243,7 +284,6 @@ export function useInsertMemberHook() {
         queryKey: ["members"],
       });
       toast.success("Member invited successfully!");
-      window.location.reload();
     },
     onError: () => {
       console.error("Failed to invite member.");

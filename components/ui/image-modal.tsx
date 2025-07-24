@@ -10,8 +10,6 @@ interface ImageModalProps {
   imageSrc: string;
   imageAlt?: string;
   onClose: () => void;
-  imageInfo?: string;
-  children?: React.ReactNode;
 }
 
 export default function ImageModal({
@@ -19,8 +17,6 @@ export default function ImageModal({
   imageSrc,
   imageAlt = "Full screen preview",
   onClose,
-  imageInfo,
-  children,
 }: ImageModalProps) {
   // Zoom state
   const [zoom, setZoom] = useState(1);
@@ -29,6 +25,8 @@ export default function ImageModal({
   const [lastTouch, setLastTouch] = useState<{ x: number; y: number } | null>(
     null
   );
+  const [isImageLoading, setIsImageLoading] = useState(true);
+  const [imageLoadError, setImageLoadError] = useState(false);
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -81,7 +79,21 @@ export default function ImageModal({
     setPosition({ x: 0, y: 0 });
     setIsDragging(false);
     setLastTouch(null);
+    setIsImageLoading(true);
+    setImageLoadError(false);
     onClose();
+  };
+
+  // Image load handlers
+  const handleImageLoad = () => {
+    setIsImageLoading(false);
+    setImageLoadError(false);
+  };
+
+  const handleImageError = () => {
+    setIsImageLoading(false);
+    setImageLoadError(true);
+    console.error("Full screen image load error");
   };
 
   // Zoom functions
@@ -237,6 +249,22 @@ export default function ImageModal({
           </Button>
         </div>
 
+        {/* Loading state */}
+        {isImageLoading && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-white text-lg font-medium">Please wait...</div>
+          </div>
+        )}
+
+        {/* Error state */}
+        {imageLoadError && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-white text-lg font-medium">
+              Failed to load image
+            </div>
+          </div>
+        )}
+
         {/* Zoomable image container */}
         <div className="w-full h-full flex items-center justify-center">
           <Image
@@ -245,7 +273,9 @@ export default function ImageModal({
             alt={imageAlt}
             width={1200}
             height={1200}
-            className="max-w-full max-h-full object-contain transition-transform duration-200 select-none"
+            className={`max-w-full max-h-full object-contain transition-transform duration-200 select-none ${
+              isImageLoading ? "opacity-0" : "opacity-100"
+            }`}
             style={{
               transform: `scale(${zoom}) translate(${position.x}px, ${position.y}px)`,
               cursor: zoom > 1 ? (isDragging ? "grabbing" : "grab") : "pointer",
@@ -260,22 +290,11 @@ export default function ImageModal({
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
             onWheel={handleWheel}
+            onLoad={handleImageLoad}
+            onError={handleImageError}
             draggable={false}
-            onError={() => console.error("Full screen image load error")}
           />
         </div>
-
-        {/* Info overlay */}
-        {(imageInfo || children) && (
-          <div className="absolute bottom-4 left-4 right-4 bg-black/70 text-white p-4 rounded-lg z-20">
-            {imageInfo && <p className="text-sm mb-2">{imageInfo}</p>}
-            {children}
-            <p className="text-xs opacity-80">
-              Double tap to zoom • Pinch/scroll to zoom • Drag to pan • Zoom:{" "}
-              {Math.round(zoom * 100)}%
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -78,7 +78,7 @@ export function getFieldTechnicianNavItems(id: string) {
   return [
     {
       title: "Project Overview",
-      href: `/field-technician/${id}/overview`,
+      href: `/field-technician/${id}`,
       icon: House,
     },
     {

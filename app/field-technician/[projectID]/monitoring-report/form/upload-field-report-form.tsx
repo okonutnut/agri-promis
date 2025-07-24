@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useParams } from "next/navigation";
+import { MonitoringReportType } from "@/components/types";
 
 const fieldReportSchema = z.object({
   status_note: z

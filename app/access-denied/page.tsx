@@ -7,9 +7,10 @@ export default function AccessDeniedPage() {
   return (
     <>
       <h1 className="text-4xl font-bold">:&#40; Access Denied</h1>
-      <p></p>
       <Link href={"/"}>
-        <Button variant={"outline"}>Go Back</Button>
+        <Button variant={"outline"} size={"sm"}>
+          Go Back
+        </Button>
       </Link>
     </>
   );

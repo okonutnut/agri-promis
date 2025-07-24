@@ -99,7 +99,7 @@ export default function FieldTechnicianPage() {
 
   return (
     <>
-      <UserPageLayout pageTitle="Submit Monitoring Report">
+      <UserPageLayout pageTitle="My Monitoring Report">
         <div className="space-y-6">
           {/* Location Section */}
           <GetCurrentLocation location={location} setLocation={setLocation} />
@@ -189,13 +189,6 @@ export default function FieldTechnicianPage() {
         imageSrc={fullScreenImage?.src || ""}
         imageAlt="Captured image preview"
         onClose={closeFullScreen}
-        imageInfo={
-          fullScreenImage
-            ? `Captured: ${new Date(
-                fullScreenImage.dateTimeCaptured
-              ).toLocaleString()}`
-            : undefined
-        }
       />
     </>
   );

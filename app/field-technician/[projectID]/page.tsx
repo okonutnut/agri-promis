@@ -4,6 +4,7 @@ import UserPageLayout from "@/components/custom/layout/user-page-layout";
 import { useSelectProjectDetailsHook } from "@/components/hooks";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { format } from "date-fns";
 import { useParams } from "next/navigation";
 
 export default function FieldTechnicianPage() {
@@ -13,13 +14,21 @@ export default function FieldTechnicianPage() {
   );
   return (
     <UserPageLayout isLoading={isLoading} error={error}>
-      <div className="py-16 flex justify-between">
+      <div className="py-16 flex justify-between items-start">
         {data && (
           <>
-            <span className="text-2xl font-medium">{data?.project_name}</span>
+            <div className="flex flex-col gap-1 text-2xl font-medium">
+              {data?.project_name}
+              <span className="text-sm text-muted-foreground mt-4">
+                Start Date: {format(new Date(data?.start_date), "PP")}
+              </span>
+              <span className="text-sm text-muted-foreground">
+                Estimated End Date: {format(new Date(data?.end_date), "PP")}
+              </span>
+            </div>
             <Badge
               variant="outline"
-              className={`px-5 text-xs ${
+              className={`h-7 px-5 text-xs ${
                 data.status === 0
                   ? "text-red-500 border-red-500"
                   : "text-green-500 border-green-500"

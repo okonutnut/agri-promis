@@ -7,10 +7,26 @@ import {
   ProjectType,
   UserProfile,
   MonitoringReportType,
+  PostActivityReportType,
 } from "@/components/types";
 import { createClient } from "@/utils/supabase/server";
 
 // USER PROFILE ACTIONS
+export async function SelectUserProfileByIDAction(userID: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("user_profile")
+    .select("*")
+    .eq("id", userID)
+    .single();
+
+  if (error) {
+    console.error("Error fetching user profile:", error);
+    throw new Error(error.message);
+  }
+
+  return data as UserProfile;
+}
 export async function SelectUserProfileAction() {
   const supabase = await createClient();
   const { data: userData, error: userError } = await supabase.auth.getUser();
@@ -227,14 +243,16 @@ export async function SelectProjectDetailsByProjectIDAction(projectID: string) {
 export async function EditProjectNameAction({
   project_id,
   project_name,
+  status,
 }: {
   project_id: string;
   project_name: string;
+  status: number;
 }) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("projects")
-    .update({ project_name })
+    .update({ project_name, status })
     .eq("id", project_id)
     .select()
     .single();
@@ -244,6 +262,20 @@ export async function EditProjectNameAction({
     throw new Error("Failed to update project name. Please try again.");
   }
   return data as ProjectType;
+}
+
+export async function DeleteProjectAction(projectID: string) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("projects")
+    .delete()
+    .eq("id", projectID);
+
+  if (error) {
+    console.error("Error deleting project:", error);
+    throw new Error(error.code);
+  }
+  return;
 }
 
 // LOCATION HOOKS
@@ -270,7 +302,11 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("monitoring")
-    .select(`*, user_profile (fullname)`)
+    .select(
+      `*, 
+      reporter:user_profile!field_reports_reporter_id_fkey (fullname),
+      remarkBy:user_profile!monitoring_remark_id_fkey (fullname)`
+    )
     .eq("project_id", projectID)
     .order("created_at", { ascending: false });
 
@@ -286,42 +322,44 @@ export async function InsertMonitoringReportAction({
   project_id,
   images,
   location_name,
-  date_time_captured,
   latitude,
   longitude,
   status_note,
 }: MonitoringReportType) {
+  if (!images?.length) throw new Error("No images provided");
+
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("User not authenticated");
 
-  // Upload the image file if provided
-  let photo_url: string[] = [];
-  if (images && Array.isArray(images)) {
-    for (const file of images) {
-      if (file instanceof File) {
-        const { data, error } = await supabase.storage
-          .from("monitoring-reports")
-          .upload(`images/${file.lastModified}_${file.name}`, file);
+  const imageFile = images.map((img) => {
+    return img.file;
+  });
 
-        if (error) {
-          console.error("Error uploading image:", error);
-          throw new Error("Failed to upload image. Please try again.");
-        }
-        photo_url.push(
-          `${process.env.NEXT_PUBLIC_STORAGE_URL}/${data.fullPath}`
-        );
-      }
-    }
-  }
+  const photo_urls = await Promise.all(
+    imageFile.map(async (file) => {
+      if (!(file instanceof File)) throw new Error("Invalid file");
+      const filePath = `images/${Date.now()}-${file.name}`;
+      const { data, error } = await supabase.storage
+        .from("monitoring-reports")
+        .upload(filePath, file, { cacheControl: "3600", upsert: false });
+      if (error) throw error;
+      const { data: publicURL } = supabase.storage
+        .from("monitoring-reports")
+        .getPublicUrl(data.path);
+      return publicURL.publicUrl;
+    })
+  );
 
-  // Insert the monitoring report into the database
-  const { data, error } = await supabase
+  const { data: report, error } = await supabase
     .from("monitoring")
     .insert({
-      project_id: project_id,
-      reporter_id: (await supabase.auth.getUser()).data.user?.id,
-      photo_url,
+      project_id,
+      reporter_id: user.id,
+      photo_url: photo_urls,
       location_name,
-      date_time_captured: date_time_captured,
       latitude,
       longitude,
       status_note,
@@ -329,12 +367,31 @@ export async function InsertMonitoringReportAction({
     .select()
     .single();
 
+  if (error) throw error;
+  return report as MonitoringReportType;
+}
+
+export async function InsertRemarksInMonitoringReportAction(
+  reportId: string,
+  remarks: string
+) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("monitoring")
+    .update({
+      remarks: remarks,
+      remark_id: (await supabase.auth.getUser()).data.user?.id,
+    })
+    .eq("id", reportId)
+    .select()
+    .single();
+
   if (error) {
-    console.error("Error inserting field report:", error);
-    throw new Error("Failed to create field report. Please try again.");
+    console.error("Error inserting remarks:", error);
+    throw new Error("Failed to insert remarks. Please try again.");
   }
 
-  return data as MonitoringReportType;
+  return;
 }
 
 // MEMBERS ACTIONS
@@ -344,6 +401,7 @@ export async function InsertMemberAction(data: UserProfile) {
   const { data: authData, error: authError } =
     await supabase.auth.admin.createUser({
       email: data.email as string,
+      email_confirm: true,
       user_metadata: {
         name: data.fullname as string,
         role: data.role as string,
@@ -358,6 +416,7 @@ export async function InsertMemberAction(data: UserProfile) {
   const { error: userError } = await supabase.from("user_profile").insert({
     id: authData.user.id,
     fullname: data.fullname,
+    email: data.email,
     role: data.role,
   });
 
@@ -532,6 +591,9 @@ export async function SelectAllAssignedProjectsByFieldTechnicianIDAction() {
     .single();
 
   if (error) {
+    if (error.code === "PGRST116") {
+      return [];
+    }
     console.error("Error fetching assigned projects:", error);
     throw new Error(error.message);
   }
@@ -552,4 +614,32 @@ export async function SelectAllAssignedProjectsByFieldTechnicianIDAction() {
   }
 
   return projectsData as ProjectType[];
+}
+
+// POST ACTIVITY REPORTS ACTIONS
+export async function InsertPostActivityReportAction(
+  values: PostActivityReportType
+) {
+  const supabase = await createClient();
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !userData?.user) {
+    console.error("Error fetching user:", userError);
+    throw new Error(userError?.message || "User not authenticated");
+  }
+
+  const { error } = await supabase
+    .from("post_activity_reports")
+    .insert({
+      ...values,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error inserting post activity report:", error);
+    throw new Error(error.message);
+  }
+
+  return;
 }

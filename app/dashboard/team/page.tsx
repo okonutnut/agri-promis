@@ -71,6 +71,7 @@ export default function FieldTechnicianPage() {
                 <TeamMemberForm
                   key={isAddMode ? "add-mode" : selectedRow?.id || "view-mode"}
                   data={isAddMode ? null : selectedRow}
+                  setPanelOpen={setPanelOpen}
                 />
               </>
               <SheetClose asChild>

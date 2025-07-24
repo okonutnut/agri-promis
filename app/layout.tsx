@@ -3,7 +3,6 @@ import "./globals.css";
 import { Outfit } from "next/font/google";
 import { Toaster } from "sonner";
 import ReactQueryProvider from "@/components/reactQueryProvider";
-import AuthRedirect from "@/components/auth/auth-redirect";
 
 export const metadata: Metadata = {
   title: "Agri-ProMIS",
@@ -25,8 +24,8 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${outfit.variable} antialiased`}>
         <ReactQueryProvider>
-          <Toaster richColors position="top-right" />
-          <AuthRedirect>{children}</AuthRedirect>
+          <Toaster richColors position="top-center" />
+          {children}
         </ReactQueryProvider>
       </body>
     </html>

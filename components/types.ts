@@ -43,7 +43,6 @@ export type MonitoringReportType = {
   id?: string;
   project_id?: string;
   reporter_id?: string;
-  date_time_captured?: string;
   report_level?: number;
   status_note?: string;
   remarks?: string;
@@ -53,9 +52,21 @@ export type MonitoringReportType = {
   latitude?: number;
   longitude?: number;
   tag?: string[];
-  user_profile?: UserProfile;
+  reporter?: UserProfile;
+  remarksBy?: UserProfile;
   created_at?: string;
 };
+
+export interface PostActivityReportType {
+  id?: string;
+  travel_order_no?: string;
+  inclusive_date_of_travel?: string;
+  project_places_visited?: string;
+  activities_undertaken?: string;
+  status_notes?: string;
+  remarks?: string;
+  created_at?: string;
+}
 
 export type AssignedProjectsType = {
   id?: string;

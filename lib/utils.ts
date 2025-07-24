@@ -172,7 +172,9 @@ export const addOverlayToImage = (
         // Add location info if available
         if (location.latitude && location.longitude) {
           overlayLines.push(
-            `${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}`
+            `Lat: ${location.latitude.toFixed(
+              6
+            )}, Long: ${location.longitude.toFixed(6)}`
           );
         }
 
@@ -183,7 +185,7 @@ export const addOverlayToImage = (
             location.locationName.length > maxChars
               ? location.locationName.substring(0, maxChars) + "..."
               : location.locationName;
-          overlayLines.push(locationText);
+          overlayLines.push(`Location: ${locationText}`);
         }
 
         // Calculate overlay dimensions with responsive scaling

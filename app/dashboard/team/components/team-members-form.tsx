@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react";
 import { useInsertMemberHook } from "@/components/hooks";
 import { UserProfile } from "@/components/types";
 import NonFormInput from "@/components/custom/input/non-form-input";
+import { Dispatch, SetStateAction, useEffect } from "react";
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -27,8 +28,9 @@ type MemberType = z.infer<typeof formSchema>;
 
 type TeamMemberFormProps = {
   data: UserProfile | null;
+  setPanelOpen: Dispatch<SetStateAction<boolean>>;
 };
-export function TeamMemberForm({ data }: TeamMemberFormProps) {
+export function TeamMemberForm({ data, setPanelOpen }: TeamMemberFormProps) {
   const roles = [
     { value: "agriculturist", label: "Agriculturist" },
     { value: "field_technician", label: "Field Technician" },
@@ -61,8 +63,14 @@ export function TeamMemberForm({ data }: TeamMemberFormProps) {
     },
   });
 
-  const { mutate, isPending } = useInsertMemberHook();
+  const { mutate, isPending, isSuccess } = useInsertMemberHook();
   const onSubmit = (data: MemberType) => mutate(data);
+
+  useEffect(() => {
+    if (isSuccess) {
+      setPanelOpen(false);
+    }
+  }, [isSuccess]);
 
   return (
     <form className="p-3 space-y-4" onSubmit={form.handleSubmit(onSubmit)}>

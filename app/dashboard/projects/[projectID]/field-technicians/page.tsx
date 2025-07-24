@@ -66,7 +66,7 @@ export default function FieldTechnicianPage() {
             onAdd={handleAdd}
           />
           <Sheet open={panelOpen} onOpenChange={handlePanelClose}>
-            <SheetContent className="w-screen md:min-w-[600px] sm:min-w-[400px]">
+            <SheetContent className="w-screen md:min-w-xl">
               <SheetHeader className="border-b">
                 <SheetTitle className="uppercase">
                   {isAddMode
@@ -77,6 +77,7 @@ export default function FieldTechnicianPage() {
               {isAddMode ? (
                 <SelectMembersTable
                   assignedMembers={data.map((d) => d.user_id as string)}
+                  setPanelOpen={setPanelOpen}
                 />
               ) : (
                 <ViewFieldTechnicianPanel />

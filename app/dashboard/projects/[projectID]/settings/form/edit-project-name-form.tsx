@@ -7,11 +7,20 @@ import { CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { ProgramType, ProjectType } from "@/components/types";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 const formSchema = z.object({
   id: z.string().min(1, "Project ID is required"),
   project_name: z.string().min(1, "Project name is required"),
+  status: z
+    .number()
+    .refine(
+      (val) => [0, 1].includes(val),
+      "Status must be either 0 (inactive) or 1 (active)"
+    ),
 });
+type FormSchemaType = z.infer<typeof formSchema>;
 
 type EditProjectNameFormProps = {
   project: ProjectType & { programs: ProgramType };
@@ -19,11 +28,12 @@ type EditProjectNameFormProps = {
 export default function EditProjectNameForm({
   project,
 }: EditProjectNameFormProps) {
-  const form = useForm({
+  const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       id: project.id as string,
       project_name: project.project_name || "",
+      status: project.status || 0,
     },
   });
 
@@ -38,6 +48,15 @@ export default function EditProjectNameForm({
       >
         <FormInput label="Project ID" name="id" form={form} readonly copy />
         <FormInput label="Project name" name="project_name" form={form} />
+        <div className="w-full flex justify-between items-center">
+          <Label>Set Active</Label>
+          <Switch
+            checked={form.watch("status") === 1}
+            onCheckedChange={(checked) =>
+              form.setValue("status", checked ? 1 : 0)
+            }
+          />
+        </div>
         <CardFooter className="w-full justify-end p-0">
           <Button
             type="submit"
