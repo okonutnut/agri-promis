@@ -42,9 +42,8 @@ export default function FieldTechnicianPage() {
     setSelectedRow(null);
   };
 
-  const { data, isLoading, error } = useSelectAllPostActivityReportsByUserHook(
-    projectID as string
-  );
+  const { data, isLoading, error } =
+    useSelectAllPostActivityReportsByUserHook();
 
   return (
     <UserPageLayout

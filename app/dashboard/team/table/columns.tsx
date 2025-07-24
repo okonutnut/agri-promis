@@ -1,10 +1,10 @@
 "use client";
 
-import { UserProfile } from "@/components/types";
+import { UserProfileType } from "@/components/types";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 
-export const columns: ColumnDef<UserProfile>[] = [
+export const columns: ColumnDef<UserProfileType>[] = [
   {
     accessorKey: "fullname",
     header: "Fullname",
