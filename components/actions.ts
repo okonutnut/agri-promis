@@ -5,7 +5,7 @@ import {
   LocationType,
   ProgramType,
   ProjectType,
-  UserProfile,
+  UserProfileType,
   MonitoringReportType,
   PostActivityReportType,
 } from "@/components/types";
@@ -25,7 +25,7 @@ export async function SelectUserProfileByIDAction(userID: string) {
     throw new Error(error.message);
   }
 
-  return data as UserProfile;
+  return data as UserProfileType;
 }
 export async function SelectUserProfileAction() {
   const supabase = await createClient();
@@ -47,7 +47,7 @@ export async function SelectUserProfileAction() {
     throw new Error("User profile not found");
   }
 
-  return user.role as UserProfile;
+  return user.role as UserProfileType;
 }
 
 // PROGRAM ACTIONS
@@ -305,13 +305,40 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
     .select(
       `*, 
       reporter:user_profile!field_reports_reporter_id_fkey (fullname),
-      remarkBy:user_profile!monitoring_remark_id_fkey (fullname)`
+      remarkBy:user_profile!monitoring_reviewed_by_id_fkey (fullname)`
     )
     .eq("project_id", projectID)
     .order("created_at", { ascending: false });
 
   if (error) {
     console.error("Error fetching field reports:", error);
+    throw new Error(error.message);
+  }
+
+  return data as MonitoringReportType[];
+}
+
+export async function SelectAllMonitoringReportsByUserAction() {
+  const supabase = await createClient();
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !userData?.user) {
+    console.error("Error fetching user:", userError);
+    throw new Error(userError?.message || "User not authenticated");
+  }
+
+  const { data, error } = await supabase
+    .from("monitoring")
+    .select(
+      `*, 
+      reporter:user_profile!field_reports_reporter_id_fkey (fullname),
+      reviewedBy:user_profile!monitoring_reviewed_by_id_fkey (fullname)`
+    )
+    .eq("reporter_id", userData.user.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching monitoring reports:", error);
     throw new Error(error.message);
   }
 
@@ -353,7 +380,7 @@ export async function InsertMonitoringReportAction({
     })
   );
 
-  const { data: report, error } = await supabase
+  const { error } = await supabase
     .from("monitoring")
     .insert({
       project_id,
@@ -368,7 +395,7 @@ export async function InsertMonitoringReportAction({
     .single();
 
   if (error) throw error;
-  return report as MonitoringReportType;
+  return;
 }
 
 export async function InsertRemarksInMonitoringReportAction(
@@ -380,7 +407,7 @@ export async function InsertRemarksInMonitoringReportAction(
     .from("monitoring")
     .update({
       remarks: remarks,
-      remark_id: (await supabase.auth.getUser()).data.user?.id,
+      reviewed_by_id: (await supabase.auth.getUser()).data.user?.id,
     })
     .eq("id", reportId)
     .select()
@@ -395,7 +422,7 @@ export async function InsertRemarksInMonitoringReportAction(
 }
 
 // MEMBERS ACTIONS
-export async function InsertMemberAction(data: UserProfile) {
+export async function InsertMemberAction(data: UserProfileType) {
   const supabase = await createClient();
 
   const { data: authData, error: authError } =
@@ -464,7 +491,7 @@ export async function SelectAllMembersAction() {
     email: emailMap.get(item.id) || "",
   }));
 
-  return result as UserProfile[];
+  return result as UserProfileType[];
 }
 
 export async function SelectAllMembersByRoleAction(role: string) {
@@ -503,7 +530,7 @@ export async function SelectAllMembersByRoleAction(role: string) {
     email: emailMap.get(item.id) || "",
   }));
 
-  return result as UserProfile[];
+  return result as UserProfileType[];
 }
 
 // ASSIGNED PROJECTS ACTIONS
@@ -629,9 +656,10 @@ export async function InsertPostActivityReportAction(
   }
 
   const { error } = await supabase
-    .from("post_activity_reports")
+    .from("post_activity")
     .insert({
       ...values,
+      submitted_by_id: userData.user.id,
     })
     .select()
     .single();
@@ -642,4 +670,75 @@ export async function InsertPostActivityReportAction(
   }
 
   return;
+}
+
+export async function InsertPostActivityRemarksAction(
+  values: PostActivityReportType
+) {
+  console.log("Inserting remarks:", values);
+  const supabase = await createClient();
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !userData?.user) {
+    console.error("Error fetching user:", userError);
+    throw new Error(userError?.message || "User not authenticated");
+  }
+
+  const { error } = await supabase
+    .from("post_activity")
+    .update({
+      remarks: values.remarks,
+      reviewed_by_id: userData.user.id,
+    })
+    .eq("id", values.id);
+
+  if (error) {
+    console.error("Error inserting remarks:", error);
+    throw new Error(error.message);
+  }
+
+  return;
+}
+
+export async function SelectAllPostActivityReportsByProjectIDAction(
+  projectID: string
+) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("post_activity")
+    .select(
+      "*, submittedBy:user_profile!post_activity_submitted_by_id_fkey (fullname), reviewedBy:user_profile!post_activity_reviewed_by_id_fkey (fullname)"
+    )
+    .eq("project_id", projectID)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching post activity reports:", error);
+    throw new Error(error.message);
+  }
+
+  return data as PostActivityReportType[];
+}
+
+export async function SelectAllPostActivityReportsByUserID() {
+  const supabase = await createClient();
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !userData?.user) {
+    console.error("Error fetching user:", userError);
+    throw new Error(userError?.message || "User not authenticated");
+  }
+
+  const { data, error } = await supabase
+    .from("post_activity")
+    .select("*")
+    .eq("submitted_by_id", userData.user.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching post activity reports:", error);
+    throw new Error(error.message);
+  }
+
+  return data as PostActivityReportType[];
 }

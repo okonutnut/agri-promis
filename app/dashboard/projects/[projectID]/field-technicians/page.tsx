@@ -27,6 +27,7 @@ export default function FieldTechnicianPage() {
   const [selectedRow, setSelectedRow] = useState<AssignedProjectsType | null>(
     null
   );
+  console.log("Selected Row:", selectedRow);
   const [isAddMode, setIsAddMode] = useState(false);
 
   const handleRowSelect = (row: AssignedProjectsType) => {
@@ -68,7 +69,7 @@ export default function FieldTechnicianPage() {
           <Sheet open={panelOpen} onOpenChange={handlePanelClose}>
             <SheetContent className="w-screen md:min-w-xl">
               <SheetHeader className="border-b">
-                <SheetTitle className="uppercase">
+                <SheetTitle className="text-primary uppercase">
                   {isAddMode
                     ? "Assign New Field Technician"
                     : "View Member Details"}
@@ -82,7 +83,7 @@ export default function FieldTechnicianPage() {
               ) : (
                 <ViewFieldTechnicianPanel />
               )}
-              <SheetFooter>
+              <SheetFooter className="border-t">
                 <SheetClose asChild>
                   <Button variant={"outline"}>Close</Button>
                 </SheetClose>

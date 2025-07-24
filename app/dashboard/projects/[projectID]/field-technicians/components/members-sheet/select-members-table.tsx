@@ -43,7 +43,7 @@ export default function SelectMemberTable({
     if (isSuccess) {
       setPanelOpen(false);
     }
-  }, [isSuccess]);
+  }, [isSuccess, setPanelOpen]);
 
   return (
     <>

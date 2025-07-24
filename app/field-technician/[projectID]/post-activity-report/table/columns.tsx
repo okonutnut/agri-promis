@@ -1,18 +1,17 @@
 "use client";
 
+import { PostActivityReportType } from "@/components/types";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { MonitoringReportType } from "@/components/types";
 
-export const columns: ColumnDef<MonitoringReportType>[] = [
+export const columns: ColumnDef<PostActivityReportType>[] = [
   {
-    accessorKey: "reporter.fullname",
-    header: "Reporter Name",
+    accessorKey: "id",
+    header: "ID",
   },
   {
-    accessorKey: "remarkBy.fullname",
-    header: "Reviewed By",
-    cell: ({ getValue }) => getValue() || "N/A",
+    accessorKey: "travel_order_no",
+    header: "Travel Order No.",
   },
   {
     accessorKey: "created_at",
@@ -23,7 +22,7 @@ export const columns: ColumnDef<MonitoringReportType>[] = [
           new Date(
             new Date(getValue() as string).getTime() + 8 * 60 * 60 * 1000
           ),
-          "PPpp"
+          "PPp"
         )}
       </div>
     ),

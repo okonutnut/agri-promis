@@ -2,7 +2,6 @@ import {
   Cctv,
   ClipboardPen,
   House,
-  Megaphone,
   NotebookPen,
   Settings,
   UserPen,

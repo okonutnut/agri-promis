@@ -7,6 +7,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useParams } from "next/navigation";
+import { SheetClose, SheetFooter } from "@/components/ui/sheet";
+import { ImageData, LocationData } from "@/components/interfaces";
 import { MonitoringReportType } from "@/components/types";
 
 const fieldReportSchema = z.object({
@@ -19,32 +21,22 @@ const fieldReportSchema = z.object({
 
 type FieldReportFormData = z.infer<typeof fieldReportSchema>;
 
-interface ImageData {
-  id: string;
-  src: string;
-  file: File;
-  dateTimeCaptured: string;
-}
-
-interface UploadFieldReportFormProps {
+type UploadFieldReportFormProps = {
   images: ImageData[];
-  location?: {
-    latitude: number | undefined;
-    longitude: number | undefined;
-    error: string | undefined;
-    locationName?: string | undefined;
-  };
-}
+  location?: LocationData;
+  values?: MonitoringReportType | null;
+};
 
 export default function UploadFieldReportForm({
   images,
   location,
+  values,
 }: UploadFieldReportFormProps) {
   const { projectID } = useParams();
   const form = useForm<FieldReportFormData>({
     resolver: zodResolver(fieldReportSchema),
     defaultValues: {
-      status_note: "",
+      status_note: values?.status_note || "",
     },
   });
 
@@ -59,7 +51,7 @@ export default function UploadFieldReportForm({
 
     // Validate each image file
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    const maxSize = 1 * 1024 * 1024; // 1MB in bytes
 
     for (const imageData of images) {
       // Validate image file type
@@ -87,7 +79,7 @@ export default function UploadFieldReportForm({
     mutate({
       ...data,
       project_id: projectID as string,
-      images: images, // Pass all images
+      images: images,
       location_name: location?.locationName,
       latitude: location?.latitude,
       longitude: location?.longitude,
@@ -95,21 +87,40 @@ export default function UploadFieldReportForm({
   };
 
   return (
-    <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
-      {form.formState.errors.root && (
-        <div className="text-red-500 text-sm">
-          {form.formState.errors.root.message}
-        </div>
-      )}
-      <FormTextarea label="Status Note" name="status_note" form={form} />
-      <Button
-        variant={isPending ? "ghost" : "default"}
-        className="w-full md:w-auto"
-        type="submit"
-        disabled={isPending || !images || images.length === 0}
+    <>
+      <form
+        className="space-y-4 m-2"
+        id="upload-monitoring-report-form"
+        onSubmit={form.handleSubmit(onSubmit)}
       >
-        {isPending ? <Loader2 className="animate-spin" /> : "Submit Report"}
-      </Button>
-    </form>
+        {form.formState.errors.root && (
+          <div className="text-red-500 text-sm">
+            {form.formState.errors.root.message}
+          </div>
+        )}
+        <FormTextarea
+          label="Status Note"
+          name="status_note"
+          form={form}
+          readonly={!!values}
+        />
+      </form>
+      <SheetFooter className="border-t">
+        {!values && (
+          <Button
+            variant={isPending ? "ghost" : "default"}
+            form="upload-monitoring-report-form"
+            disabled={isPending || !images || images.length === 0}
+          >
+            {isPending ? <Loader2 className="animate-spin" /> : "Submit Report"}
+          </Button>
+        )}
+        <SheetClose asChild>
+          <Button variant="outline" className="w-full md:w-auto">
+            Close
+          </Button>
+        </SheetClose>
+      </SheetFooter>
+    </>
   );
 }

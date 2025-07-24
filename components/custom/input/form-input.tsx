@@ -15,6 +15,7 @@ type FormInputType = {
   form: UseFormReturn<any>;
   className?: string;
   copy?: boolean;
+  noPlaceholder?: boolean;
 };
 export default function FormInput({
   label,
@@ -25,6 +26,7 @@ export default function FormInput({
   disabled,
   className,
   copy = false,
+  noPlaceholder = false,
 }: FormInputType) {
   return (
     <div className={cn(`w-full`, className)}>
@@ -51,7 +53,7 @@ export default function FormInput({
       <Input
         {...form.register(name)}
         type={type || "text"}
-        placeholder={`Enter ${label.toLowerCase()}`}
+        placeholder={noPlaceholder ? "" : `Enter ${label.toLowerCase()}`}
         disabled={disabled}
         tabIndex={-1}
         readOnly={

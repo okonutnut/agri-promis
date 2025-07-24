@@ -5,7 +5,6 @@ import FormTextarea from "@/components/custom/input/form-textarea";
 import FormSelect from "@/components/custom/select/form-select";
 import { Button } from "@/components/ui/button";
 import { SheetClose } from "@/components/ui/sheet";
-import { useParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 
 type IssueTravelOrderFormProps = {
@@ -14,7 +13,6 @@ type IssueTravelOrderFormProps = {
 export default function IssueTravelOrderForm({
   assignedMembers,
 }: IssueTravelOrderFormProps) {
-  const { projectID } = useParams();
   const form = useForm({
     defaultValues: {
       travel_order_no: "",

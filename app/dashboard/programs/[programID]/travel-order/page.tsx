@@ -5,16 +5,13 @@ import { DataTable } from "./table/data-table";
 import { columns } from "./table/columns";
 import {
   Sheet,
-  SheetClose,
   SheetContent,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
 import CustomPageLayout from "@/components/custom/layout/admin-page-layout";
 import { useParams } from "next/navigation";
 import SelectMembersTable from "./components/travel-order-form/travel-order-form";
-import { Button } from "@/components/ui/button";
 import { AssignedProjectsType } from "@/components/types";
 import { getProgramNavItems } from "@/components/sidebar/navitems";
 
@@ -25,6 +22,7 @@ export default function FieldTechnicianPage() {
   const [selectedRow, setSelectedRow] = useState<AssignedProjectsType | null>(
     null
   );
+  console.log("Selected Row:", selectedRow);
   const [isAddMode, setIsAddMode] = useState(false);
 
   const handleRowSelect = (row: AssignedProjectsType) => {

@@ -12,14 +12,11 @@ import {
 } from "@/components/ui/sheet";
 import CustomPageLayout from "@/components/custom/layout/admin-page-layout";
 import { useParams } from "next/navigation";
-import Image from "next/image";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { format } from "date-fns";
 import { getProjectNavItems } from "@/components/sidebar/navitems";
 import { MonitoringReportType } from "@/components/types";
 import { useSelectAllMonitoringReportsByProjectIDHook } from "@/components/hooks";
-import ImageCarousel from "./components/image-carousel";
+import ImageCarousel from "@/components/custom/images/image-carousel";
 
 export default function FieldReportsPage() {
   const { projectID } = useParams();
@@ -62,7 +59,7 @@ export default function FieldReportsPage() {
           </SheetHeader>
           <ImageCarousel images={selectedRow?.photo_url || []} />
           <Separator />
-          <FieldReportsForm key={selectedRow?.id} data={selectedRow} />
+          <FieldReportsForm data={selectedRow} />
         </SheetContent>
       </Sheet>
     </CustomPageLayout>

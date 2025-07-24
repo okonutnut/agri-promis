@@ -10,6 +10,7 @@ type FormTextareaType = {
   form: UseFormReturn<any>;
   className?: string;
   optinal?: boolean;
+  rows?: number;
 };
 export default function FormTextarea({
   label,
@@ -18,6 +19,7 @@ export default function FormTextarea({
   readonly,
   className,
   optinal,
+  rows = 5,
 }: FormTextareaType) {
   return (
     <div className={cn(`w-full mt-2 mb-4`, className)}>
@@ -27,7 +29,7 @@ export default function FormTextarea({
       <Textarea
         {...form.register(name)}
         id={name}
-        rows={5}
+        rows={rows || 7}
         tabIndex={-1}
         placeholder={`Enter ${label.toLowerCase()}`}
         readOnly={

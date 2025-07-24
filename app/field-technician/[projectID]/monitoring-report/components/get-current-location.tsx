@@ -1,7 +1,7 @@
 import { LocationData } from "@/components/interfaces";
 import { Button } from "@/components/ui/button";
 import { getLocationName } from "@/lib/utils";
-import { Locate, LocateOff, MapPin, MapPinCheck, MapPinX } from "lucide-react";
+import { MapPin, MapPinCheck, MapPinX } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type GetCurrentLocationProps = {
@@ -81,7 +81,7 @@ export default function GetCurrentLocation({
 
   useEffect(() => {
     getCurrentLocation();
-  }, [setLocation]);
+  }, []);
 
   return (
     <div className="space-y-2">

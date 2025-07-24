@@ -6,7 +6,7 @@ import FormInput from "@/components/custom/input/form-input";
 import FormSelect from "@/components/custom/select/form-select";
 import { Loader2 } from "lucide-react";
 import { useInsertMemberHook } from "@/components/hooks";
-import { UserProfile } from "@/components/types";
+import { UserProfileType } from "@/components/types";
 import NonFormInput from "@/components/custom/input/non-form-input";
 import { Dispatch, SetStateAction, useEffect } from "react";
 
@@ -27,7 +27,7 @@ const formSchema = z.object({
 type MemberType = z.infer<typeof formSchema>;
 
 type TeamMemberFormProps = {
-  data: UserProfile | null;
+  data: UserProfileType | null;
   setPanelOpen: Dispatch<SetStateAction<boolean>>;
 };
 export function TeamMemberForm({ data, setPanelOpen }: TeamMemberFormProps) {
@@ -70,7 +70,7 @@ export function TeamMemberForm({ data, setPanelOpen }: TeamMemberFormProps) {
     if (isSuccess) {
       setPanelOpen(false);
     }
-  }, [isSuccess]);
+  }, [isSuccess, setPanelOpen]);
 
   return (
     <form className="p-3 space-y-4" onSubmit={form.handleSubmit(onSubmit)}>

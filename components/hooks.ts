@@ -21,6 +21,11 @@ import {
   InsertMonitoringReportAction,
   DeleteProjectAction,
   InsertRemarksInMonitoringReportAction,
+  InsertPostActivityReportAction,
+  SelectAllPostActivityReportsByUserID,
+  SelectAllMonitoringReportsByUserAction,
+  SelectAllPostActivityReportsByProjectIDAction,
+  InsertPostActivityRemarksAction,
 } from "@/components/actions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -28,9 +33,10 @@ import { toast } from "sonner";
 import {
   AssignedProjectsType,
   MonitoringReportType,
+  PostActivityReportType,
   ProgramType,
   ProjectType,
-  UserProfile,
+  UserProfileType,
 } from "./types";
 
 // USER PROFILE HOOKS
@@ -232,7 +238,7 @@ export function useSelectAllMonitoringReportsByProjectIDHook(
   projectID: string
 ) {
   return useQuery({
-    queryKey: ["allMonitoringReportsByProjectId", projectID],
+    queryKey: ["allMonitoringReportsByProjectId"],
     queryFn: async () =>
       await SelectAllMonitoringReportsByProjectIDAction(projectID),
     enabled: !!projectID,
@@ -245,9 +251,9 @@ export function useInsertMonitoringReportHook() {
   return useMutation({
     mutationFn: async (data: MonitoringReportType) =>
       await InsertMonitoringReportAction(data),
-    onSuccess: (data) => {
+    onSuccess: () => {
       qc.invalidateQueries({
-        queryKey: ["allMonitoringReportsByProjectId", data.project_id],
+        queryKey: ["allMonitoringReportsByUser"],
       });
       toast.success("Monitoring report created successfully!");
     },
@@ -264,7 +270,7 @@ export function useInsertRemarksInMonitoringReportHook(reportId: string) {
       await InsertRemarksInMonitoringReportAction(reportId, data.remarks),
     onSuccess: () => {
       qc.invalidateQueries({
-        queryKey: ["allMonitoringReportsByProjectId", reportId],
+        queryKey: ["allMonitoringReportsByProjectId"],
       });
       toast.success("Remarks added successfully!");
     },
@@ -274,11 +280,19 @@ export function useInsertRemarksInMonitoringReportHook(reportId: string) {
   });
 }
 
+export function useSelectAllMonitoringReportsByUserHook() {
+  return useQuery({
+    queryKey: ["allMonitoringReportsByUser"],
+    queryFn: async () => await SelectAllMonitoringReportsByUserAction(),
+    refetchOnMount: true,
+  });
+}
+
 // MEMBER HOOKS
 export function useInsertMemberHook() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (data: UserProfile) => await InsertMemberAction(data),
+    mutationFn: async (data: UserProfileType) => await InsertMemberAction(data),
     onSuccess: () => {
       qc.invalidateQueries({
         queryKey: ["members"],
@@ -343,6 +357,61 @@ export function useSelectAssignedProjectsByFieldTechnicianHook() {
     queryKey: ["assignedProjectsByFieldTechnician"],
     queryFn: async () =>
       await SelectAllAssignedProjectsByFieldTechnicianIDAction(),
+    refetchOnMount: true,
+  });
+}
+
+// POST ACTIVITY REPORT HOOKS
+export function useInsertPostActivityReportHook() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: PostActivityReportType) =>
+      await InsertPostActivityReportAction(data),
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: ["postActivityReport"],
+      });
+      toast.success("Post activity report submitted successfully!");
+    },
+    onError: (error) => {
+      toast.error(`Failed to submit post activity report: ${error.message}`);
+    },
+  });
+}
+
+export function useInsertPostActivityRemarksHook() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: PostActivityReportType) =>
+      await InsertPostActivityRemarksAction(data),
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: ["postActivityReport"],
+      });
+      toast.success("Remarks submitted successfully!");
+    },
+    onError: (error) => {
+      toast.error(`Failed to submit remarks: ${error.message}`);
+    },
+  });
+}
+
+export function useSelectAllPostActivityReportsByProjectIDHook(
+  projectID: string
+) {
+  return useQuery({
+    queryKey: ["postActivityReport"],
+    queryFn: async () =>
+      await SelectAllPostActivityReportsByProjectIDAction(projectID),
+    enabled: !!projectID,
+    refetchOnMount: true,
+  });
+}
+
+export function useSelectAllPostActivityReportsByUserHook() {
+  return useQuery({
+    queryKey: ["postActivityReport"],
+    queryFn: async () => await SelectAllPostActivityReportsByUserID(),
     refetchOnMount: true,
   });
 }

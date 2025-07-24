@@ -1,6 +1,6 @@
 import CustomAlertDialog from "@/components/custom/alert/custom-alert";
-import { useDeleteProgramHook, useDeleteProjectHook } from "@/components/hooks";
-import { ProgramType, ProjectType } from "@/components/types";
+import { useDeleteProjectHook } from "@/components/hooks";
+import { ProjectType } from "@/components/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";

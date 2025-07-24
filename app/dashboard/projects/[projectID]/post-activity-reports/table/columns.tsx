@@ -6,8 +6,19 @@ import { PostActivityReportType } from "@/components/types";
 
 export const columns: ColumnDef<PostActivityReportType>[] = [
   {
-    accessorKey: "user_profile.fullname",
+    accessorKey: "submittedBy.fullname",
     header: "Reporter Name",
+  },
+  {
+    accessorKey: "travel_order_no",
+    header: "Travel Order No.",
+  },
+  {
+    accessorKey: "reviewedBy.fullname",
+    header: "Reviewed By",
+    cell: ({ getValue }) => {
+      return getValue() ? (getValue() as string) : "Not Reviewed";
+    },
   },
   {
     accessorKey: "created_at",

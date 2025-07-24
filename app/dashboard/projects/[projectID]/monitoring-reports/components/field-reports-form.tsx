@@ -5,10 +5,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import NonFormInput from "@/components/custom/input/non-form-input";
 import { Textarea } from "@/components/ui/textarea";
 import FormTextarea from "@/components/custom/input/form-textarea";
-import { SheetClose } from "@/components/ui/sheet";
+import { SheetClose, SheetFooter } from "@/components/ui/sheet";
 import { useInsertRemarksInMonitoringReportHook } from "@/components/hooks";
 import { MonitoringReportType } from "@/components/types";
 import { Loader2 } from "lucide-react";
+import { format } from "date-fns";
+import { useEffect, useRef } from "react";
 
 const formSchema = z.object({
   id: z.string().min(1, "ID is required"),
@@ -24,6 +26,7 @@ type FieldReportsFormProps = {
   data: MonitoringReportType | null;
 };
 export function FieldReportsForm({ data }: FieldReportsFormProps) {
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const form = useForm<FieldTechType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -32,14 +35,29 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
     },
   });
 
-  const { mutate, isPending } = useInsertRemarksInMonitoringReportHook(
-    data?.id as string
-  );
+  const { mutate, isPending, isSuccess } =
+    useInsertRemarksInMonitoringReportHook(data?.id as string);
   const onSubmit = (data: FieldTechType) => mutate(data);
+
+  useEffect(() => {
+    if (isSuccess) {
+      form.reset();
+      closeButtonRef.current?.click();
+    }
+  }, [isSuccess, form]);
 
   return (
     <>
-      <form className="p-3 space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+      {data?.created_at && (
+        <span className="italic text-xs text-muted-foreground mx-2">
+          Date Submitted: {format(new Date(data.created_at), "PPp")}
+        </span>
+      )}
+      <form
+        className="p-3 space-y-4"
+        id="remarks-form"
+        onSubmit={form.handleSubmit(onSubmit)}
+      >
         <NonFormInput
           label="Reporter Name"
           defaultValue={data?.reporter?.fullname}
@@ -55,24 +73,29 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
           form={form}
           readonly={data?.remarks ? true : false}
         />
-        <div className="flex gap-2 justify-end">
-          <SheetClose asChild>
-            <Button variant="outline" size={"sm"} type="button">
-              Close
-            </Button>
-          </SheetClose>
-          {!data?.remarks && (
-            <Button
-              type="submit"
-              variant={isPending ? "ghost" : "default"}
-              size={"sm"}
-              disabled={isPending}
-            >
-              {isPending ? <Loader2 className="animate-spin" /> : "Save"}
-            </Button>
-          )}
-        </div>
       </form>
+      <SheetFooter className="border-t ">
+        {!data?.remarks && (
+          <Button
+            form="remarks-form"
+            variant={isPending ? "ghost" : "default"}
+            size={"sm"}
+            disabled={isPending}
+          >
+            {isPending ? <Loader2 className="animate-spin" /> : "Save"}
+          </Button>
+        )}
+        <SheetClose asChild>
+          <Button
+            variant="outline"
+            ref={closeButtonRef}
+            size={"sm"}
+            className="w-full"
+          >
+            Close
+          </Button>
+        </SheetClose>
+      </SheetFooter>
     </>
   );
 }

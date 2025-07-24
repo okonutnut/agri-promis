@@ -2,8 +2,6 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from "@/components/ui/carousel";
 import Image from "next/image";
 import { useState, useEffect } from "react";
@@ -71,8 +69,6 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
       </Carousel>
 
       {selectedImage && (

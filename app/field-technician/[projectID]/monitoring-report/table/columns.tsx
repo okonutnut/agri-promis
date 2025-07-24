@@ -1,18 +1,17 @@
 "use client";
 
+import { MonitoringReportType } from "@/components/types";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { MonitoringReportType } from "@/components/types";
 
 export const columns: ColumnDef<MonitoringReportType>[] = [
   {
-    accessorKey: "reporter.fullname",
-    header: "Reporter Name",
+    accessorKey: "id",
+    header: "ID",
   },
   {
-    accessorKey: "remarkBy.fullname",
+    accessorKey: "reviewedBy.fullname",
     header: "Reviewed By",
-    cell: ({ getValue }) => getValue() || "Not Reviewed",
   },
   {
     accessorKey: "created_at",
@@ -23,7 +22,7 @@ export const columns: ColumnDef<MonitoringReportType>[] = [
           new Date(
             new Date(getValue() as string).getTime() + 8 * 60 * 60 * 1000
           ),
-          "PPpp"
+          "PPp"
         )}
       </div>
     ),

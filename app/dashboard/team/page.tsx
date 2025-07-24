@@ -8,11 +8,10 @@ import {
   Sheet,
   SheetClose,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { UserProfile } from "@/components/types";
+import { UserProfileType } from "@/components/types";
 import { useSelectAllMembersHook } from "@/components/hooks";
 import CustomPageLayout from "@/components/custom/layout/admin-page-layout";
 import { getDashboardNavItems } from "@/components/sidebar/navitems";
@@ -21,10 +20,10 @@ import { Button } from "@/components/ui/button";
 
 export default function FieldTechnicianPage() {
   const [panelOpen, setPanelOpen] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<UserProfile | null>(null);
+  const [selectedRow, setSelectedRow] = useState<UserProfileType | null>(null);
   const [isAddMode, setIsAddMode] = useState(false);
 
-  const handleRowSelect = (row: UserProfile) => {
+  const handleRowSelect = (row: UserProfileType) => {
     setSelectedRow(row);
     setIsAddMode(false);
     setPanelOpen(true);

@@ -1,195 +1,78 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import { useState } from "react";
-import UploadFieldReportForm from "./form/upload-field-report-form";
-import { XCircle, ZoomIn } from "lucide-react";
-import { toast } from "sonner";
+import { DataTable } from "./table/data-table";
+import { columns } from "./table/columns";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { useSelectAllMonitoringReportsByUserHook } from "@/components/hooks";
+import { PostActivityReportType } from "@/components/types";
 import UserPageLayout from "@/components/custom/layout/user-page-layout";
-import { Card } from "@/components/ui/card";
-import { Camera } from "lucide-react";
-import { ImageData, LocationData } from "@/components/interfaces";
-import { addOverlayToImage, compressImage } from "@/lib/utils";
-import GetCurrentLocation from "./components/get-current-location";
-import ImageModal from "@/components/ui/image-modal";
+import MonitoringReportForm from "./components/image-report-form";
 
-export default function FieldTechnicianPage() {
-  const [images, setImages] = useState<ImageData[]>([]);
-  const [location, setLocation] = useState<LocationData>({
-    latitude: undefined,
-    longitude: undefined,
-    locationName: undefined,
-    error: undefined,
-  });
-  const [isCompressing, setIsCompressing] = useState(false);
-  const [fullScreenImage, setFullScreenImage] = useState<ImageData | null>(
+export default function MonitoringReportPage() {
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [selectedRow, setSelectedRow] = useState<PostActivityReportType | null>(
     null
   );
+  const [isAddMode, setIsAddMode] = useState(false);
 
-  const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-
-    if (files.length === 0) return;
-
-    setIsCompressing(true);
-
-    try {
-      const processedImages: ImageData[] = [];
-
-      for (const file of files) {
-        const dateTimeCaptured = new Date().toLocaleDateString("en-PH", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
-        });
-
-        const overlayedFile = await addOverlayToImage(
-          file,
-          dateTimeCaptured,
-          location
-        );
-
-        const compressedFile =
-          overlayedFile.size > 800 * 1024
-            ? await compressImage(overlayedFile, 800)
-            : overlayedFile;
-
-        const fileURL = URL.createObjectURL(compressedFile);
-        const imageData: ImageData = {
-          id: `${Date.now()}-${Math.random()}`,
-          src: fileURL,
-          file: compressedFile,
-          dateTimeCaptured: dateTimeCaptured,
-        };
-
-        processedImages.push(imageData);
-      }
-
-      setImages((prev) => [...prev, ...processedImages]);
-    } catch (error) {
-      toast.error("Error processing images. Please try again.");
-      console.error("Error processing images:", error);
-    } finally {
-      setIsCompressing(false);
-      e.target.value = "";
-    }
+  const handleRowSelect = (row: PostActivityReportType) => {
+    setSelectedRow(row);
+    setIsAddMode(false);
+    setPanelOpen(true);
   };
 
-  const removeImage = (imageId: string) => {
-    setImages((prev) => {
-      const imageToRemove = prev.find((img) => img.id === imageId);
-      if (imageToRemove) {
-        URL.revokeObjectURL(imageToRemove.src);
-      }
-      return prev.filter((img) => img.id !== imageId);
-    });
+  const handleAdd = () => {
+    setSelectedRow(null);
+    setIsAddMode(true);
+    setPanelOpen(true);
   };
 
-  const openFullScreen = (image: ImageData) => {
-    setFullScreenImage(image);
+  const handlePanelClose = () => {
+    setPanelOpen(false);
+    setIsAddMode(false);
+    setSelectedRow(null);
   };
 
-  const closeFullScreen = () => {
-    setFullScreenImage(null);
-  };
+  const { data, isLoading, error } = useSelectAllMonitoringReportsByUserHook();
+  console.log("Monitoring Reports Data:", data);
 
   return (
-    <>
-      <UserPageLayout pageTitle="My Monitoring Report">
-        <div className="space-y-6">
-          {/* Location Section */}
-          <GetCurrentLocation location={location} setLocation={setLocation} />
-
-          {/* Camera Input */}
-          <div className="space-y-2">
-            <Card className="h-40 w-full mx-auto flex flex-col items-center justify-center border-2 border-dashed shadow-none transition-colors cursor-pointer relative overflow-hidden">
-              <Input
-                type="file"
-                accept="image/*"
-                capture="environment"
-                multiple
-                onChange={handleInputChange}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                disabled={isCompressing}
+    <UserPageLayout
+      pageTitle="My Monitoring Reports"
+      isLoading={isLoading}
+      error={error}
+    >
+      {data && (
+        <>
+          <DataTable
+            columns={columns}
+            data={data}
+            onRowSelect={handleRowSelect}
+            onAdd={handleAdd}
+          />
+          <Sheet open={panelOpen} onOpenChange={handlePanelClose}>
+            <SheetContent className="flex justify-between w-screen md:max-w-xl">
+              <SheetHeader className="border-b">
+                <SheetTitle className="text-primary uppercase">
+                  {isAddMode
+                    ? "Upload New Post Activity Report"
+                    : "View Post Activity Report Details"}
+                </SheetTitle>
+              </SheetHeader>
+              <MonitoringReportForm
+                values={selectedRow}
+                isAddMode={isAddMode}
               />
-              <div className="flex flex-col items-center justify-center space-y-3">
-                <Camera size={48} className="text-gray-400" />
-                <div className="text-center">
-                  <p className="text-lg font-medium">Take Photos</p>
-                  <p className="text-sm text-gray-400">
-                    {images.length > 0
-                      ? "Add more photos"
-                      : "Tap to open camera"}
-                  </p>
-                </div>
-              </div>
-            </Card>
-            {isCompressing && (
-              <p className="text-blue-500 text-sm text-center">
-                Processing images and adding overlay...
-              </p>
-            )}
-          </div>
-
-          {/* Image Gallery */}
-          {images.length > 0 && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">
-                Captured Images ({images.length})
-              </h3>
-              <div className="flex gap-4 overflow-x-auto pb-2">
-                {images.map((image) => (
-                  <div
-                    key={image.id}
-                    className="relative min-w-[128px] max-w-[200px] group"
-                  >
-                    <div
-                      className="relative cursor-pointer"
-                      onClick={() => openFullScreen(image)}
-                    >
-                      <Image
-                        src={image.src}
-                        alt="Preview"
-                        width={200}
-                        height={200}
-                        className="h-40 w-full rounded-sm object-cover transition-opacity group-hover:opacity-80"
-                      />
-                      <div className="absolute inset-0 bg-black/5 bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-sm flex items-center justify-center">
-                        <ZoomIn
-                          size={24}
-                          className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                        />
-                      </div>
-                    </div>
-                    <Button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removeImage(image.id);
-                      }}
-                      variant="ghost"
-                      className="h-6 w-6 p-0 text-red-500 absolute top-1 right-1 bg-white/80 hover:bg-white/90 rounded-full z-10"
-                      aria-label="Remove image"
-                    >
-                      <XCircle size={16} />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-        <UploadFieldReportForm images={images} location={location} />
-      </UserPageLayout>
-      <ImageModal
-        isOpen={!!fullScreenImage}
-        imageSrc={fullScreenImage?.src || ""}
-        imageAlt="Captured image preview"
-        onClose={closeFullScreen}
-      />
-    </>
+            </SheetContent>
+          </Sheet>
+        </>
+      )}
+    </UserPageLayout>
   );
 }
