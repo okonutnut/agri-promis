@@ -50,7 +50,7 @@ export default function FieldReportsPage() {
         onRowSelect={handleRowSelect}
       />
       <Sheet open={panelOpen} onOpenChange={handlePanelClose}>
-        <SheetContent className="w-full md:min-w-xl">
+        <SheetContent className="w-full md:min-w-2xl overflow-y-auto">
           <SheetHeader className="border-b">
             <SheetTitle className="uppercase text-primary">
               View Post Activity Report

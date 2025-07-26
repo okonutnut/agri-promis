@@ -146,6 +146,7 @@ export default function PostActivityReportForm({
           label="Remarks"
           name="remarks"
           readonly={!isAdmin || !!values?.remarks}
+          noPlaceholder
         />
       </form>
       <SheetFooter className="border-t">

@@ -60,9 +60,9 @@ export default function FormInput({
           form.formState.isSubmitting || form.formState.isValidating || readonly
         }
       />
-      <p className="text-xs text-red-500">
+      <span className="text-xs text-red-500">
         {(form.formState.errors[name] as { message?: string })?.message}
-      </p>
+      </span>
     </div>
   );
 }

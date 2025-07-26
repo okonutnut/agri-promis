@@ -25,8 +25,6 @@ type NavbarProps = {
 };
 export default function UserNavbar({ noSidebar }: NavbarProps) {
   const { projectID } = useParams();
-
-  // Project Data
   const { data } = useSelectAssignedProjectsByFieldTechnicianHook();
 
   return (
@@ -37,7 +35,7 @@ export default function UserNavbar({ noSidebar }: NavbarProps) {
           <div className="flex items-center gap-2 min-w-max">
             <span className="hidden sm:inline">
               <Image
-                src={"/favicon.svg"}
+                src={"/logo.png"}
                 alt="app-logo"
                 width={50}
                 height={50}
@@ -46,7 +44,7 @@ export default function UserNavbar({ noSidebar }: NavbarProps) {
             </span>
             {!noSidebar && (
               <AppDrawer
-                options={getFieldTechnicianNavItems(projectID as string)}
+                sidebarOptions={getFieldTechnicianNavItems(projectID as string)}
                 trigger={
                   <Button variant={"ghost"} className="md:hidden sm:hidden">
                     <AlignLeft />

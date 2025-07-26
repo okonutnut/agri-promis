@@ -67,7 +67,7 @@ export default function FieldTechnicianPage() {
             onAdd={handleAdd}
           />
           <Sheet open={panelOpen} onOpenChange={handlePanelClose}>
-            <SheetContent className="w-screen md:min-w-xl">
+            <SheetContent className="w-screen md:min-w-2xl overflow-y-auto">
               <SheetHeader className="border-b">
                 <SheetTitle className="text-primary uppercase">
                   {isAddMode

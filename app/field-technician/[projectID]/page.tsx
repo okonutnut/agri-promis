@@ -12,7 +12,7 @@ export default function FieldTechnicianPage() {
   const { data, isLoading, error } = useSelectProjectDetailsHook(
     projectID as string
   );
-  console.log("Project Data:", data);
+
   return (
     <UserPageLayout isLoading={isLoading} error={error}>
       <div className="py-16 flex justify-between items-start">
@@ -27,9 +27,7 @@ export default function FieldTechnicianPage() {
                 Estimated End Date: {format(new Date(data?.end_date), "PP")}
               </span>
               <span className="text-sm text-muted-foreground">
-                Location: {data?.locationData?.barangay},{" "}
-                {data?.locationData?.municipality},{" "}
-                {data?.locationData?.province}
+                Location: {data?.location}
               </span>
             </div>
             <Badge

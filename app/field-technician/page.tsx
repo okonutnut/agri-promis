@@ -5,7 +5,6 @@ import { useSelectAssignedProjectsByFieldTechnicianHook } from "@/components/hoo
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import Link from "next/link";
-import { GetLocation } from "../dashboard/programs/[programID]/components/get-project-location";
 import { Box } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -44,9 +43,9 @@ export default function FieldTechnicianPage() {
                                 {project.status == 0 ? "INACTIVE" : "ACTIVE"}
                               </Badge>
                             </div>
-                            <GetLocation
-                              projectID={project.location_id as string}
-                            />
+                            <span className="font-mono text-xs">
+                              {project.location}
+                            </span>
                           </div>
                         </Link>
                       </TableCell>

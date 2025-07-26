@@ -31,7 +31,7 @@ export default function CustomPageLayout({
         toast.error(
           `Error: ${error.message || "An unexpected error occurred"}`
         )}
-      <Navbar noSidebar={noSidebar} />
+      <Navbar sidebarOptions={navItems || []} noSidebar={noSidebar} />
       <div className="flex">
         {!noSidebar && <AppSidebar navItems={navItems || []} />}
         <div className={cn(`container mx-auto p-4`, className)}>

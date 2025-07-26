@@ -33,6 +33,8 @@ export default function NavbarUserImage() {
           width={33}
           height={33}
           className="rounded-full"
+          priority
+          fetchPriority="high"
         />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">

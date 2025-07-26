@@ -11,6 +11,7 @@ type FormTextareaType = {
   className?: string;
   optinal?: boolean;
   rows?: number;
+  noPlaceholder?: boolean;
 };
 export default function FormTextarea({
   label,
@@ -20,6 +21,7 @@ export default function FormTextarea({
   className,
   optinal,
   rows = 5,
+  noPlaceholder = false,
 }: FormTextareaType) {
   return (
     <div className={cn(`w-full mt-2 mb-4`, className)}>
@@ -31,7 +33,7 @@ export default function FormTextarea({
         id={name}
         rows={rows || 7}
         tabIndex={-1}
-        placeholder={`Enter ${label.toLowerCase()}`}
+        placeholder={noPlaceholder ? undefined : `Enter ${label.toLowerCase()}`}
         readOnly={
           form.formState.isSubmitting || form.formState.isValidating || readonly
         }

@@ -3,7 +3,6 @@
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarMenu,
@@ -22,9 +21,7 @@ export function AppSidebar({ navItems }: AppSidebarProps) {
 
   return (
     <Sidebar variant="floating" className="pt-12">
-      {/* CONTENT */}
       <SidebarContent>
-        {/* NAVIGATIONS */}
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -45,7 +42,6 @@ export function AppSidebar({ navItems }: AppSidebarProps) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter></SidebarFooter>
     </Sidebar>
   );
 }

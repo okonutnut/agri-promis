@@ -43,10 +43,8 @@ export default function DashboardPage() {
                       {project.project_name}
                       <ChevronRight className="ml-2 h-4 w-4" />
                     </span>
-                    <span className="font-mono">
-                      {project.locationData?.barangay},
-                      {project.locationData?.municipality},
-                      {project.locationData?.province}
+                    <span className="font-mono text-xs">
+                      {project.location}
                     </span>
                     <Badge
                       variant={"outline"}

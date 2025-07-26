@@ -31,9 +31,7 @@ export default function DashboardPage() {
                 Estimated End Date: {format(new Date(data?.end_date), "PP")}
               </span>
               <span className="text-sm text-muted-foreground">
-                Location: {data?.locationData?.barangay},{" "}
-                {data?.locationData?.municipality},{" "}
-                {data?.locationData?.province}
+                Location: {data.location ?? "Not specified"}
               </span>
             </div>
             <Badge

@@ -26,6 +26,7 @@ export type ProjectType = {
   end_date: string;
   status?: number;
   location_id?: string;
+  location?: string;
   locationData?: LocationType;
   program_id?: string;
   created_by?: string;

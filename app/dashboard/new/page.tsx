@@ -1,6 +1,5 @@
 "use client";
 
-import NewNavbar from "@/components/custom/navbar/admin-navbar";
 import {
   Card,
   CardContent,
@@ -8,35 +7,26 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import CreateProgramForm from "@/components/custom/forms/create-program-form";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import CustomPageLayout from "@/components/custom/layout/admin-page-layout";
 
 export default function CreateProgramPage() {
   return (
-    <>
-      <NewNavbar noSidebar />
-      <Card className="mx-auto w-full md:w-[500px] my-5 shadow-none border-0 md:shadow-xs md:border">
-        <CardHeader>
-          <CardTitle className="uppercase text-primary">
-            Create new program
-          </CardTitle>
-          <CardDescription>
-            This is where you can create a new program to manage your
-            agricultural projects.
-          </CardDescription>
-          <Separator className="mt-6 mb-3" />
-          <CardContent className="p-0">
-            <CreateProgramForm />
-          </CardContent>
-          <Link href={"/dashboard/programs"}>
-            <Button variant={"outline"} size={"sm"} className="w-full">
-              Cancel
-            </Button>
-          </Link>
-        </CardHeader>
+    <CustomPageLayout noSidebar className="p-0">
+      <Card className="mx-auto w-full md:w-lg shadow-none md:shadow-xs border-0 md:border">
+        <CardContent className="p-0">
+          <CardHeader className="border-b space-y-2">
+            <CardTitle className="uppercase text-primary">
+              Create new program
+            </CardTitle>
+            <CardDescription>
+              This is where you can create a new program to manage your
+              agricultural projects.
+            </CardDescription>
+          </CardHeader>
+          <CreateProgramForm />
+        </CardContent>
       </Card>
-    </>
+    </CustomPageLayout>
   );
 }

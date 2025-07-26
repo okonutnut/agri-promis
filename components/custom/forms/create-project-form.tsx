@@ -7,6 +7,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import FormInput from "../input/form-input";
 import { useInsertProjectHook } from "@/components/hooks";
 import { useParams } from "next/navigation";
+import { CardFooter } from "@/components/ui/card";
+import Link from "next/link";
+import { Loader2 } from "lucide-react";
+import LocationSelector from "@/components/custom/location-selector";
 
 const formSchema = z
   .object({
@@ -24,6 +28,7 @@ const formSchema = z
       .refine((val) => !/\d/.test(val), {
         message: "Crop type cannot contain numbers",
       }),
+    location: z.string().min(1, "Location is required"),
     start_date: z.string().refine(
       (val) => {
         const date = new Date(val);
@@ -55,10 +60,11 @@ export default function CreateProjectForm() {
     defaultValues: {
       project_name: "",
       crop_type: "",
+      location: "",
       start_date: new Date().toISOString().slice(0, 10),
       end_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1))
         .toISOString()
-        .slice(0, 10), // Default to one year later
+        .slice(0, 10),
     },
   });
 
@@ -67,19 +73,47 @@ export default function CreateProjectForm() {
     mutate({ ...data, program_id: programUID as string });
 
   return (
-    <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
-      <FormInput label="Project Name" name="project_name" form={form} />
-      <FormInput label="Crop Type" name="crop_type" form={form} />
-      <FormInput label="Start Date" name="start_date" type="date" form={form} />
-      <FormInput
-        label="Estimated End Date"
-        name="end_date"
-        type="date"
-        form={form}
-      />
-      <Button type="submit" className="w-full px-4 py-2" disabled={isPending}>
-        {isPending ? "Creating..." : "Create Project"}
-      </Button>
-    </form>
+    <>
+      <form
+        className="space-y-4 p-4"
+        id="create-project-form"
+        onSubmit={form.handleSubmit(handleSubmit)}
+      >
+        <FormInput label="Project Name" name="project_name" form={form} />
+        <FormInput label="Crop Type" name="crop_type" form={form} />
+        <LocationSelector
+          onChange={(location) => form.setValue("location", location)}
+        />
+        <p className="text-xs text-red-500">
+          {(form.formState.errors["location"] as { message?: string })?.message}
+        </p>
+        <FormInput
+          label="Start Date"
+          name="start_date"
+          type="date"
+          form={form}
+        />
+        <FormInput
+          label="Estimated End Date"
+          name="end_date"
+          type="date"
+          form={form}
+        />
+      </form>
+      <CardFooter className="flex-col gap-2 border-t px-4">
+        <Button
+          form="create-project-form"
+          className="w-full"
+          disabled={isPending}
+        >
+          {isPending ? <Loader2 className="animate-spin" /> : "Create Project"}
+        </Button>
+        <Link href={`/dashboard/programs/${programUID}`} className="w-full">
+          <Button variant={"outline"} className="w-full">
+            Cancel
+          </Button>
+        </Link>
+      </CardFooter>
+    </>
   );
 }

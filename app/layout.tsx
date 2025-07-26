@@ -3,6 +3,7 @@ import "./globals.css";
 import { Outfit } from "next/font/google";
 import { Toaster } from "sonner";
 import ReactQueryProvider from "@/components/reactQueryProvider";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 export const metadata: Metadata = {
   title: "Agri-ProMIS",
@@ -35,7 +36,7 @@ export default function RootLayout({
       <body className={`${outfit.variable} antialiased`}>
         <ReactQueryProvider>
           <Toaster richColors position="top-center" />
-          {children}
+          <SidebarProvider>{children}</SidebarProvider>
         </ReactQueryProvider>
       </body>
     </html>

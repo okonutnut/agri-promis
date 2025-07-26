@@ -9,6 +9,7 @@ import { useInsertMemberHook } from "@/components/hooks";
 import { UserProfileType } from "@/components/types";
 import NonFormInput from "@/components/custom/input/non-form-input";
 import { Dispatch, SetStateAction, useEffect } from "react";
+import { SheetClose, SheetFooter } from "@/components/ui/sheet";
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -73,31 +74,42 @@ export function TeamMemberForm({ data, setPanelOpen }: TeamMemberFormProps) {
   }, [isSuccess, setPanelOpen]);
 
   return (
-    <form className="p-3 space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
-      {data?.id && <FormInput label="ID" name="id" form={form} readonly />}
-      <FormInput label="Fullname" name="fullname" form={form} />
-      <FormInput
-        label="Email"
-        name="email"
-        form={form}
-        type="email"
-        readonly={data ? true : false}
-      />
-      {!data ? (
-        <FormSelect options={roles} label="Role" name="role" form={form} />
-      ) : (
-        <NonFormInput label="Role" defaultValue={data?.role || ""} readonly />
-      )}
-      {!data && (
-        <Button
-          type="submit"
-          className="absolute bottom-12 right-0 left-0 m-2"
-          variant={isPending ? "ghost" : "default"}
-          disabled={isPending}
-        >
-          {isPending ? <Loader2 className="animate-spin" /> : "Save"}
-        </Button>
-      )}
-    </form>
+    <>
+      <form
+        className="p-3 space-y-4"
+        id="team-member-form"
+        onSubmit={form.handleSubmit(onSubmit)}
+      >
+        {data?.id && <FormInput label="ID" name="id" form={form} readonly />}
+        <FormInput label="Fullname" name="fullname" form={form} />
+        <FormInput
+          label="Email"
+          name="email"
+          form={form}
+          type="email"
+          readonly={data ? true : false}
+        />
+        {!data ? (
+          <FormSelect options={roles} label="Role" name="role" form={form} />
+        ) : (
+          <NonFormInput label="Role" defaultValue={data?.role || ""} readonly />
+        )}
+      </form>
+      <SheetFooter className="border-t">
+        {!data && (
+          <Button
+            type="submit"
+            form="team-member-form"
+            variant={isPending ? "ghost" : "default"}
+            disabled={isPending}
+          >
+            {isPending ? <Loader2 className="animate-spin" /> : "Save"}
+          </Button>
+        )}
+        <SheetClose asChild>
+          <Button variant={"outline"}>Close</Button>
+        </SheetClose>
+      </SheetFooter>
+    </>
   );
 }

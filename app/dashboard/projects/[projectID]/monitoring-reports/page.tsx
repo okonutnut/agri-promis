@@ -51,7 +51,7 @@ export default function FieldReportsPage() {
         onRowSelect={handleRowSelect}
       />
       <Sheet open={panelOpen} onOpenChange={handlePanelClose}>
-        <SheetContent className="md:min-w-[600px] min-w-screen overflow-y-scroll">
+        <SheetContent className="w-screen md:min-w-2xl overflow-y-scroll">
           <SheetHeader className="border-b">
             <SheetTitle className="uppercase text-primary">
               View Field Report

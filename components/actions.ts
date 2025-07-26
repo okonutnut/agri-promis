@@ -154,6 +154,7 @@ export async function InsertProjectAction({
   crop_type,
   start_date,
   end_date,
+  location,
 }: ProjectType) {
   const supabase = await createClient();
   const userId = (await supabase.auth.getUser()).data.user?.id;
@@ -164,7 +165,7 @@ export async function InsertProjectAction({
       crop_type: crop_type,
       start_date: new Date(start_date).toISOString(),
       end_date: new Date(end_date).toISOString(),
-      location_id: "862975a3-54ad-495d-8e94-7997af554315",
+      location: location,
       status: 1,
       created_by: userId,
       program_id: program_id,
@@ -184,7 +185,7 @@ export async function SelectAllProjectsByProgramIDAction(programID: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("projects")
-    .select("*, locationData:locations(barangay, municipality, province)")
+    .select("*")
     .eq("program_id", programID)
     .order("created_at", { ascending: true });
 
@@ -210,11 +211,6 @@ export async function SelectProgramAndProjectDetailsByProjectIDAction(
           program_name,
           description,
           agriculturist_id
-        ),
-        locationData:locations (
-          province,
-          municipality,
-          barangay
         )
       `
     )
@@ -233,7 +229,7 @@ export async function SelectProjectDetailsByProjectIDAction(projectID: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("projects")
-    .select("*, locationData:locations(*)")
+    .select("*")
     .eq("id", projectID)
     .single();
 

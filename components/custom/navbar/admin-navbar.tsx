@@ -24,7 +24,11 @@ import {
   useSelectAllProjectsByProgramIDHook,
   useSelectProgramAndProjectDetailsByProgjectIDHook,
 } from "@/components/hooks";
-import { ProgramType, ProjectType } from "@/components/types";
+import {
+  NavigationItemType,
+  ProgramType,
+  ProjectType,
+} from "@/components/types";
 import Link from "next/link";
 import NavbarUserImage from "./navbar-user-image";
 import { useMemo } from "react";
@@ -34,8 +38,9 @@ import AppDrawer from "@/components/sidebar/appDrawer";
 
 type NavbarProps = {
   noSidebar?: boolean;
+  sidebarOptions?: NavigationItemType[];
 };
-export default function Navbar({ noSidebar }: NavbarProps) {
+export default function Navbar({ noSidebar, sidebarOptions }: NavbarProps) {
   const { programID, projectID } = useParams();
   const currentPath = usePathname();
 
@@ -50,7 +55,6 @@ export default function Navbar({ noSidebar }: NavbarProps) {
   // Project Data
   const { data: programProjectsData } =
     useSelectProgramAndProjectDetailsByProgjectIDHook(projectID as string);
-
   const { data: allProjectsByProgramIDData } =
     useSelectAllProjectsByProgramIDHook(
       programProjectsData?.program_id as string
@@ -64,15 +68,16 @@ export default function Navbar({ noSidebar }: NavbarProps) {
           <div className="flex items-center gap-2 min-w-max">
             <span className="hidden sm:inline">
               <Image
-                src={"/favicon.svg"}
+                src={"/logo.png"}
                 alt="app-logo"
-                width={50}
-                height={50}
+                width={100}
+                height={100}
                 className="h-8 w-8 flex-shrink-0 text-[#707070]"
               />
             </span>
             {!noSidebar && (
               <AppDrawer
+                sidebarOptions={sidebarOptions}
                 trigger={
                   <Button variant={"ghost"} className="md:hidden sm:hidden">
                     <AlignLeft />
@@ -210,13 +215,15 @@ export default function Navbar({ noSidebar }: NavbarProps) {
               </>
             ) : currentPath === "/dashboard/new" ? (
               <span className="text-black whitespace-nowrap ">New Program</span>
-            ) : (
+            ) : currentPath === "/dashboard/programs" ? (
               <Link
                 href="/dashboard/programs"
                 className="text-black whitespace-nowrap "
               >
                 Programs
               </Link>
+            ) : (
+              <span className="text-black whitespace-nowrap ">New Project</span>
             )}
           </div>
         </div>
