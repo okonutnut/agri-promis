@@ -7,11 +7,13 @@ export default function LoginCard({ children }: { children: React.ReactNode }) {
       <Card className="p-8 w-full gap-2 mx-4 border-none shadow-none">
         <CardHeader>
           <Image
-            src="/logo.png"
-            alt="Agri-ProMIS"
+            src="/favicon.svg"
+            alt="app-logo"
             width={200}
             height={200}
             className="mx-auto"
+            priority
+            fetchPriority="high"
           />
         </CardHeader>
         <CardContent>

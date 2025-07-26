@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Agricultural Project Monitoring and Implementation System",
+    name: "Agri-ProMIS",
     short_name: "Agri-ProMIS",
     description:
       "A Progressive Web App built for Agricultural Project Monitoring and Implementation",
@@ -12,12 +12,17 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#ffffff",
     icons: [
       {
-        src: "/web-app-manifest-192x192.png",
+        src: "/icons/favicon-96x96.png",
+        sizes: "96x96",
+        type: "image/png",
+      },
+      {
+        src: "/icons/web-app-manifest-192x192.png",
         sizes: "192x192",
         type: "image/png",
       },
       {
-        src: "/web-app-manifest-512x512.png",
+        src: "/icons/web-app-manifest-512x512.png",
         sizes: "512x512",
         type: "image/png",
       },

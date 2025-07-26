@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Outfit } from "next/font/google";
 import { Toaster } from "sonner";
@@ -7,6 +7,16 @@ import ReactQueryProvider from "@/components/reactQueryProvider";
 export const metadata: Metadata = {
   title: "Agri-ProMIS",
   description: "Login page for Agri-ProMIS",
+  manifest: "/manifest",
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/icons/web-app-manifest-512x512.png",
+    apple: "/icons/apple-touch-icon.png",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#ffffff",
 };
 
 const outfit = Outfit({
