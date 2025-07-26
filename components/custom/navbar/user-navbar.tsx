@@ -37,8 +37,8 @@ export default function UserNavbar({ noSidebar }: NavbarProps) {
           <div className="flex items-center gap-2 min-w-max">
             <span className="hidden sm:inline">
               <Image
-                src={"/logo.png"}
-                alt="Logo"
+                src={"/favicon.svg"}
+                alt="app-logo"
                 width={50}
                 height={50}
                 className="h-8 w-8 flex-shrink-0 text-[#707070]"

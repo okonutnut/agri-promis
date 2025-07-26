@@ -1,6 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { use } from "react";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -58,11 +57,9 @@ export async function updateSession(request: NextRequest) {
 
   // User is authenticated - get user role from database or metadata
   let userRole = user.user_metadata?.role;
-  console.log("User role detected:", userRole);
 
   // Handle missing role - redirect to access denied
   if (!userRole) {
-    console.log("No role found, redirecting to access denied");
     if (pathname !== "/access-denied") {
       const url = request.nextUrl.clone();
       url.pathname = "/access-denied";
@@ -76,17 +73,13 @@ export async function updateSession(request: NextRequest) {
 
   // Redirect from login page based on role
   if (pathname === "/login") {
-    console.log("Redirecting from login page based on role:", userRole);
     if (userRole === "agriculturist") {
       url.pathname = "/dashboard/programs";
-      console.log("Redirecting agriculturist to dashboard");
       return NextResponse.redirect(url);
     } else if (userRole === "field_technician") {
       url.pathname = "/field-technician";
-      console.log("Redirecting field technician to field-technician");
       return NextResponse.redirect(url);
     } else {
-      console.log("Unknown role, redirecting to access denied");
       url.pathname = "/access-denied";
       return NextResponse.redirect(url);
     }
@@ -94,7 +87,6 @@ export async function updateSession(request: NextRequest) {
 
   // Redirect from root path based on role
   if (pathname === "/") {
-    console.log("Redirecting from root based on role:", userRole);
     if (userRole === "agriculturist") {
       url.pathname = "/dashboard/programs";
       return NextResponse.redirect(url);
@@ -115,7 +107,6 @@ export async function updateSession(request: NextRequest) {
 
   // Protect dashboard routes - only agriculturists allowed
   if (pathname.startsWith("/dashboard") && userRole !== "agriculturist") {
-    console.log("Non-agriculturist trying to access dashboard");
     url.pathname = "/access-denied";
     return NextResponse.redirect(url);
   }
@@ -125,14 +116,10 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith("/field-technician") &&
     userRole !== "field_technician"
   ) {
-    console.log(
-      "Non-field-technician trying to access field technician routes"
-    );
     url.pathname = "/access-denied";
     return NextResponse.redirect(url);
   }
 
-  console.log("Access allowed for:", pathname, "with role:", userRole);
   // Allow access if all checks pass
   return supabaseResponse;
 }

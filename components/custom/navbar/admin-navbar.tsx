@@ -64,14 +64,13 @@ export default function Navbar({ noSidebar }: NavbarProps) {
           <div className="flex items-center gap-2 min-w-max">
             <span className="hidden sm:inline">
               <Image
-                src={"/logo.png"}
-                alt="Logo"
+                src={"/favicon.svg"}
+                alt="app-logo"
                 width={50}
                 height={50}
                 className="h-8 w-8 flex-shrink-0 text-[#707070]"
               />
             </span>
-            {/* {!noSidebar && <SidebarTrigger className="md:hidden sm:hidden" />} */}
             {!noSidebar && (
               <AppDrawer
                 trigger={
