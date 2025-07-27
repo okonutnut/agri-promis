@@ -19,6 +19,7 @@ import MobileNavbar from "./mobile-nav";
 import AppDrawer from "@/components/sidebar/appDrawer";
 import { getFieldTechnicianNavItems } from "@/components/sidebar/navitems";
 import { Separator } from "@/components/ui/separator";
+import NotificationsPanel from "./notifications/notification-panel";
 
 type NavbarProps = {
   noSidebar?: boolean;
@@ -105,7 +106,8 @@ export default function UserNavbar({ noSidebar }: NavbarProps) {
             )}
           </div>
         </div>
-        <span className="hidden sm:inline">
+        <span className="hidden sm:flex items-center gap-2">
+          <NotificationsPanel />
           <NavbarUserImage />
         </span>
       </nav>
