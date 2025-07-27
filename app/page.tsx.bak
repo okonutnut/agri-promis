@@ -2,19 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { subscribeUser, unsubscribeUser, sendNotification } from "./actions";
-
-function urlBase64ToUint8Array(base64String: string) {
-  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
-
-  const rawData = window.atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-
-  for (let i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i);
-  }
-  return outputArray;
-}
+import { Button } from "@/components/ui/button";
+import { urlBase64ToUint8Array } from "@/lib/utils";
 
 function PushNotificationManager() {
   const [isSupported, setIsSupported] = useState(false);
@@ -22,6 +11,7 @@ function PushNotificationManager() {
     null
   );
   const [message, setMessage] = useState("");
+  console.log("Subscription:", subscription);
 
   useEffect(() => {
     if ("serviceWorker" in navigator && "PushManager" in window) {
@@ -55,7 +45,7 @@ function PushNotificationManager() {
   async function unsubscribeFromPush() {
     await subscription?.unsubscribe();
     setSubscription(null);
-    await unsubscribeUser();
+    await unsubscribeUser(subscription?.endpoint);
   }
 
   async function sendTestNotification() {
@@ -87,7 +77,7 @@ function PushNotificationManager() {
       ) : (
         <>
           <p>You are not subscribed to push notifications.</p>
-          <button onClick={subscribeToPush}>Subscribe</button>
+          <Button onClick={subscribeToPush}>Subscribe</Button>
         </>
       )}
     </div>
@@ -113,7 +103,7 @@ function InstallPrompt() {
   return (
     <div>
       <h3>Install App</h3>
-      <button>Add to Home Screen</button>
+      <Button>Add to Home Screen</Button>
       {isIOS && (
         <p>
           To install this app on your iOS device, tap the share button

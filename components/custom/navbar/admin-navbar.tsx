@@ -35,6 +35,7 @@ import { useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import MobileNavbar from "./mobile-nav";
 import AppDrawer from "@/components/sidebar/appDrawer";
+import NotificationsPanel from "./notifications/notification-panel";
 
 type NavbarProps = {
   noSidebar?: boolean;
@@ -227,7 +228,8 @@ export default function Navbar({ noSidebar, sidebarOptions }: NavbarProps) {
             )}
           </div>
         </div>
-        <span className="hidden sm:inline">
+        <span className="hidden sm:flex items-center gap-2">
+          <NotificationsPanel />
           <NavbarUserImage />
         </span>
       </nav>

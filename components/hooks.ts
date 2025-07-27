@@ -4,7 +4,6 @@ import {
   SelectAllProgramsByAgriculturistAction,
   InsertProjectAction,
   SelectAllProjectsByProgramIDAction,
-  SelectLocationByIDAction,
   EditProgramNameAction,
   SelectProgramAndProjectDetailsByProjectIDAction,
   EditProjectNameAction,
@@ -220,16 +219,6 @@ export function useDeleteProjectHook(projectId: string, programId: string) {
     onError: (error) => {
       toast.error(`Failed to delete project: ${error.message}`);
     },
-  });
-}
-
-// LOCATION HOOKS
-export function useSelectLocationByID(locationID: string) {
-  return useQuery({
-    queryKey: ["locationByProjectId", locationID],
-    queryFn: async () => await SelectLocationByIDAction(locationID),
-    enabled: !!locationID,
-    refetchOnMount: true,
   });
 }
 

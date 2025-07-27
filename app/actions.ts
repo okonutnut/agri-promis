@@ -1,9 +1,13 @@
 "use server";
 
+import {
+  DeleteSubscriptionAction,
+  InsertSubscriptionAction,
+} from "@/components/actions";
 import webpush from "web-push";
 
 webpush.setVapidDetails(
-  "<mailto:darlitocabalse.acad@gmail.com>",
+  "mailto:darlitocabalse.acad@gmail.com",
   process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
   process.env.VAPID_PRIVATE_KEY!
 );
@@ -14,15 +18,21 @@ let subscription: WebPushSubscription | null = null;
 
 export async function subscribeUser(sub: WebPushSubscription) {
   subscription = sub;
-  // In a production environment, you would want to store the subscription in a database
-  // For example: await db.subscriptions.create({ data: sub })
+  const res = await InsertSubscriptionAction(sub);
+  if (!res) {
+    console.error("Failed to insert subscription");
+    return { success: false, error: "Failed to insert subscription" };
+  }
   return { success: true };
 }
 
-export async function unsubscribeUser() {
+export async function unsubscribeUser(endpoint?: string) {
   subscription = null;
-  // In a production environment, you would want to remove the subscription from the database
-  // For example: await db.subscriptions.delete({ where: { ... } })
+  const res = await DeleteSubscriptionAction(endpoint);
+  if (!res) {
+    console.error("Failed to delete subscription");
+    return { success: false, error: "Failed to delete subscription" };
+  }
   return { success: true };
 }
 
@@ -35,9 +45,9 @@ export async function sendNotification(message: string) {
     await webpush.sendNotification(
       subscription,
       JSON.stringify({
-        title: "Test Notification",
+        title: "Agri-Promis Notification",
         body: message,
-        icon: "/icon.png",
+        icon: "/icons/favicon-96x96.png",
       })
     );
     return { success: true };

@@ -2,7 +2,6 @@
 
 import {
   AssignedProjectsType,
-  LocationType,
   ProgramType,
   ProjectType,
   UserProfileType,
@@ -10,6 +9,8 @@ import {
   PostActivityReportType,
 } from "@/components/types";
 import { createClient } from "@/utils/supabase/server";
+import webpush from "web-push";
+import type { PushSubscription as WebPushSubscription } from "web-push";
 
 // USER PROFILE ACTIONS
 export async function SelectUserProfileByIDAction(userID: string) {
@@ -27,6 +28,7 @@ export async function SelectUserProfileByIDAction(userID: string) {
 
   return data as UserProfileType;
 }
+
 export async function SelectUserProfileAction() {
   const supabase = await createClient();
   const { data: userData, error: userError } = await supabase.auth.getUser();
@@ -70,6 +72,10 @@ export async function InsertProgramAction({
   if (error) {
     throw new Error("Failed to create program. Please try again.");
   }
+
+  // Send push notification to all subscribers
+  await SendPushNotificationToAllAction("New program created: " + program_name);
+
   return data as ProgramType;
 }
 
@@ -144,6 +150,7 @@ export async function DeleteProgramAction(programID: string) {
     console.error("Error deleting program:", error);
     throw new Error(error.code);
   }
+
   return;
 }
 
@@ -177,6 +184,9 @@ export async function InsertProjectAction({
     console.error("Error inserting project:", error);
     throw new Error(`Failed to create project. ${error.message}`);
   }
+
+  // Send push notification to all subscribers
+  await SendPushNotificationToAllAction(`New project created: ${project_name}`);
 
   return data as ProjectType;
 }
@@ -277,23 +287,6 @@ export async function DeleteProjectAction(projectID: string) {
     throw new Error(error.code);
   }
   return;
-}
-
-// LOCATION HOOKS
-export async function SelectLocationByIDAction(locationID: string) {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("locations")
-    .select("*")
-    .eq("id", locationID)
-    .single();
-
-  if (error) {
-    console.error("Error fetching location:", error);
-    throw new Error(error.message);
-  }
-
-  return data as LocationType;
 }
 
 // MONITORING REPORT ACTIONS
@@ -407,7 +400,7 @@ export async function InsertRemarksInMonitoringReportAction(
   remarks: string
 ) {
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("monitoring")
     .update({
       remarks: remarks,
@@ -421,6 +414,12 @@ export async function InsertRemarksInMonitoringReportAction(
     console.error("Error inserting remarks:", error);
     throw new Error("Failed to insert remarks. Please try again.");
   }
+
+  // Send push notification to user
+  await SendPushNotificationToUserAction(
+    data.reporter_id,
+    "Your monitoring report has been reviewed."
+  );
 
   return;
 }
@@ -745,4 +744,127 @@ export async function SelectAllPostActivityReportsByUserID() {
   }
 
   return data as PostActivityReportType[];
+}
+
+// NOTIFICATION ACTIONS
+export async function InsertSubscriptionAction(
+  subscription: WebPushSubscription
+) {
+  const supabase = await createClient();
+  const serializedSub = JSON.parse(JSON.stringify(subscription));
+
+  const { error } = await supabase.from("push_subscriptions").insert({
+    ...serializedSub,
+    user_id: (await supabase.auth.getUser()).data.user?.id,
+  });
+
+  if (error) {
+    console.error("Error inserting subscription:", error);
+    return false;
+  }
+
+  return true;
+}
+
+export async function DeleteSubscriptionAction(endpoint?: string) {
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("push_subscriptions")
+    .delete()
+    .eq("endpoint", endpoint)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error deleting subscription:", error);
+    return false;
+  }
+
+  return true;
+}
+
+export async function SelectIfSubscribedAction(endpoint?: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("push_subscriptions")
+    .select("created_at")
+    .eq("endpoint", endpoint);
+
+  if (error) {
+    console.error("Error checking subscription:", error);
+    return false;
+  }
+
+  return data ? true : false;
+}
+
+export async function SendPushNotificationToAllAction(message: string) {
+  const supabase = await createClient();
+  const { data: subscriptions, error: subError } = await supabase
+    .from("push_subscriptions")
+    .select("*");
+
+  if (subError) {
+    console.error("Error fetching subscriptions:", subError);
+    throw new Error("Failed to fetch subscriptions");
+  }
+  if (!subscriptions || subscriptions.length === 0) {
+    console.warn("No subscriptions found for push notifications");
+    return;
+  }
+
+  await Promise.all(
+    subscriptions.map((subscription) =>
+      webpush.sendNotification(
+        subscription,
+        JSON.stringify({
+          title: "Agri-Promis Notification",
+          body: message,
+          icon: "/icons/favicon-96x96.png",
+        })
+      )
+    )
+  );
+}
+
+export async function SendPushNotificationToUserAction(
+  user_id: string,
+  message: string
+) {
+  if (!user_id) {
+    console.warn("Invalid user ID for push notification");
+    return;
+  }
+  const supabase = await createClient();
+  const { data: subscriptions, error: subError } = await supabase
+    .from("push_subscriptions")
+    .select("*")
+    .eq("user_id", user_id);
+
+  if (subError) {
+    console.error("Error fetching user subscription:", subError);
+    throw new Error("Failed to fetch user subscription");
+  }
+  if (!subscriptions || subscriptions.length === 0) {
+    console.warn("No subscription found for user:", user_id);
+    return;
+  }
+  if (!subscriptions) {
+    console.warn("No valid subscription found for user:", user_id);
+    return;
+  }
+
+  await Promise.all(
+    subscriptions.map((subscription) =>
+      webpush.sendNotification(
+        subscription,
+        JSON.stringify({
+          title: "Agri-Promis Notification",
+          body: message,
+          icon: "/icons/favicon-96x96.png",
+        })
+      )
+    )
+  );
 }
