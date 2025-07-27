@@ -11,7 +11,6 @@ import { Badge } from "@/components/ui/badge";
 export default function FieldTechnicianPage() {
   const { data, isLoading, error } =
     useSelectAssignedProjectsByFieldTechnicianHook();
-  console.log("error: ", error);
 
   return (
     <UserPageLayout
