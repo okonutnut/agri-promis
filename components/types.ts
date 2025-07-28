@@ -100,3 +100,13 @@ export type NavigationItemType = {
   href: string;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 };
+
+export type NotificationType = {
+  id?: string;
+  user_id?: string;
+  title?: string;
+  message?: string;
+  public?: number;
+  is_read?: number;
+  created_at?: string;
+};

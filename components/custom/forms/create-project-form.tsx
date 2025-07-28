@@ -6,9 +6,8 @@ import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import FormInput from "../input/form-input";
 import { useInsertProjectHook } from "@/components/hooks";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { CardFooter } from "@/components/ui/card";
-import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import LocationSelector from "@/components/custom/location-selector";
 
@@ -55,6 +54,7 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function CreateProjectForm() {
   const { programUID } = useParams();
+  const router = useRouter();
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -104,15 +104,19 @@ export default function CreateProjectForm() {
         <Button
           form="create-project-form"
           className="w-full"
+          variant={isPending ? "ghost" : "default"}
           disabled={isPending}
         >
           {isPending ? <Loader2 className="animate-spin" /> : "Create Project"}
         </Button>
-        <Link href={`/dashboard/programs/${programUID}`} className="w-full">
-          <Button variant={"outline"} className="w-full">
-            Cancel
-          </Button>
-        </Link>
+        <Button
+          variant={"outline"}
+          className="w-full"
+          disabled={isPending}
+          onClick={() => router.push(`/dashboard/programs/${programUID}`)}
+        >
+          Cancel
+        </Button>
       </CardFooter>
     </>
   );

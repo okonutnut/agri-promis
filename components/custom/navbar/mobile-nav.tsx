@@ -1,7 +1,7 @@
 import Image from "next/image";
 import NavbarUserImage from "./navbar-user-image";
 import Link from "next/link";
-import NotificationsPanel from "./notifications/notification-panel";
+import NotificationsPanel from "../notifications/notification-panel";
 
 export default function MobileNavbar() {
   return (

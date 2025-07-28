@@ -35,7 +35,7 @@ import { useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import MobileNavbar from "./mobile-nav";
 import AppDrawer from "@/components/sidebar/appDrawer";
-import NotificationsPanel from "./notifications/notification-panel";
+import NotificationsPanel from "../notifications/notification-panel";
 
 type NavbarProps = {
   noSidebar?: boolean;

@@ -19,7 +19,7 @@ import MobileNavbar from "./mobile-nav";
 import AppDrawer from "@/components/sidebar/appDrawer";
 import { getFieldTechnicianNavItems } from "@/components/sidebar/navitems";
 import { Separator } from "@/components/ui/separator";
-import NotificationsPanel from "./notifications/notification-panel";
+import NotificationsPanel from "../notifications/notification-panel";
 
 type NavbarProps = {
   noSidebar?: boolean;

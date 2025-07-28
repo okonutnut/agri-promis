@@ -8,8 +8,8 @@ import { useInsertProgramHook } from "../../hooks";
 import FormInput from "../input/form-input";
 import FormTextarea from "../input/form-textarea";
 import { CardFooter } from "@/components/ui/card";
-import Link from "next/link";
 import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   program_name: z
@@ -24,6 +24,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function CreateProgramForm() {
+  const router = useRouter();
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -54,15 +55,19 @@ export default function CreateProgramForm() {
         <Button
           form="create-program-form"
           className="w-full px-4 py-2"
+          variant={isPending ? "ghost" : "default"}
           disabled={isPending}
         >
           {isPending ? <Loader2 className="animate-spin" /> : "Create Program"}
         </Button>
-        <Link href={"/dashboard/programs"} className="w-full">
-          <Button variant={"outline"} className="w-full">
-            Cancel
-          </Button>
-        </Link>
+        <Button
+          variant={"outline"}
+          className="w-full"
+          disabled={isPending}
+          onClick={() => router.push("/dashboard/programs")}
+        >
+          Cancel
+        </Button>
       </CardFooter>
     </>
   );

@@ -74,7 +74,7 @@ export async function InsertProgramAction({
   }
 
   // Send push notification to all subscribers
-  await SendPushNotificationToAllAction("New program created: " + program_name);
+  await SendPushNotificationToAllAction("New program created");
 
   return data as ProgramType;
 }
@@ -186,7 +186,7 @@ export async function InsertProjectAction({
   }
 
   // Send push notification to all subscribers
-  await SendPushNotificationToAllAction(`New project created: ${project_name}`);
+  await SendPushNotificationToAllAction("New project created");
 
   return data as ProjectType;
 }
@@ -388,7 +388,7 @@ export async function InsertMonitoringReportAction({
       longitude,
       status_note,
     })
-    .select()
+    .select("")
     .single();
 
   if (error) throw error;
@@ -753,7 +753,7 @@ export async function InsertSubscriptionAction(
   const supabase = await createClient();
   const serializedSub = JSON.parse(JSON.stringify(subscription));
 
-  const { error } = await supabase.from("push_subscriptions").insert({
+  const { error } = await supabase.from("push_subscriptions").upsert({
     ...serializedSub,
     user_id: (await supabase.auth.getUser()).data.user?.id,
   });
@@ -803,7 +803,7 @@ export async function SendPushNotificationToAllAction(message: string) {
   const supabase = await createClient();
   const { data: subscriptions, error: subError } = await supabase
     .from("push_subscriptions")
-    .select("*");
+    .select("endpoint, expirationTime, keys");
 
   if (subError) {
     console.error("Error fetching subscriptions:", subError);
@@ -811,7 +811,7 @@ export async function SendPushNotificationToAllAction(message: string) {
   }
   if (!subscriptions || subscriptions.length === 0) {
     console.warn("No subscriptions found for push notifications");
-    return;
+    throw new Error("No subscriptions found");
   }
 
   await Promise.all(
@@ -826,6 +826,14 @@ export async function SendPushNotificationToAllAction(message: string) {
       )
     )
   );
+
+  await supabase.from("notifications").insert({
+    title: "Agri-Promis Notification",
+    message: message,
+    public: 1,
+  });
+
+  return;
 }
 
 export async function SendPushNotificationToUserAction(
@@ -867,4 +875,13 @@ export async function SendPushNotificationToUserAction(
       )
     )
   );
+
+  await supabase.from("notifications").insert({
+    user_id: user_id,
+    title: "Agri-Promis Notification",
+    message: message,
+    public: 0,
+  });
+
+  return;
 }

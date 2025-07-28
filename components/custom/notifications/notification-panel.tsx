@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { urlBase64ToUint8Array } from "@/lib/utils";
 import { Bell } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function NotificationsPanel() {
   const [isEnabled, setIsEnabled] = useState(false);
@@ -62,7 +63,13 @@ export default function NotificationsPanel() {
   }
 
   useEffect(() => {
-    isSubscribed().then(setIsEnabled);
+    isSubscribed()
+      .then(setIsEnabled)
+      .catch((error) => {
+        console.error("Error checking subscription status:", error);
+        toast.error("Failed to check subscription status.");
+        setIsEnabled(false);
+      });
   }, [subscription, isSubscribed]);
 
   return (
