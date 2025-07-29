@@ -29,7 +29,6 @@ export default function CustomPageLayout({
   useEffect(() => {
     const interval = setInterval(() => {
       updateUserLocation();
-      console.log("User location updated");
     }, 5000);
 
     return () => clearInterval(interval);

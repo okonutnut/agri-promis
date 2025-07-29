@@ -1,10 +1,11 @@
 import { useParams } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { cn, updateUserLocation } from "@/lib/utils";
 import { toast } from "sonner";
 import SkeletonLoading from "./skeleton-loading";
 import { AppSidebar } from "@/components/sidebar/appSidebar";
 import { getFieldTechnicianNavItems } from "@/components/sidebar/navitems";
 import UserNavbar from "../navbar/user-navbar";
+import { useEffect } from "react";
 
 type UserPageLayoutProps = {
   children?: React.ReactNode;
@@ -23,6 +24,14 @@ export default function UserPageLayout({
   noSidebar,
 }: UserPageLayoutProps) {
   const { projectID } = useParams();
+  useEffect(() => {
+    const interval = setInterval(() => {
+      updateUserLocation();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <section className="w-full h-screen flex flex-col relative text-sm">
       {error &&
