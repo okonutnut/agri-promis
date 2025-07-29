@@ -307,9 +307,13 @@ export async function getLongtitudeLatitudeFromGPS(): Promise<LocationData> {
 
 export async function updateUserLocation() {
   const supabase = createClient();
-  const { data: user } = await supabase.auth.getUser();
   const locationData = await getLongtitudeLatitudeFromGPS();
   const ipAddress = await getClientIpFromHeaders();
+  const { data: user } = await supabase.auth.getUser();
+
+  if (!user?.user?.id) {
+    return;
+  }
 
   return await supabase.from("user_session").upsert(
     {
