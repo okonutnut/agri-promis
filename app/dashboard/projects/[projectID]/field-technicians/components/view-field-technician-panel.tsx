@@ -1,17 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import FTGPSCard from "./gps/gps-card";
+import { AssignedProjectsType } from "@/components/types";
 
-export default function ViewFieldTechnicianPanel() {
+type ViewFieldTechnicianPanelProps = {
+  selectedRow: AssignedProjectsType | null;
+};
+export default function ViewFieldTechnicianPanel({
+  selectedRow,
+}: ViewFieldTechnicianPanelProps) {
+  console.log("Selected Row:", selectedRow);
   return (
     <section className="p-2 space-y-4 overflow-y-auto">
-      <div>
-        <Label htmlFor="gps-card" className="mb-1">
-          Geolocation:
-        </Label>
-        <div id="gps-card" className="w-full border rounded-md h-64 mb-4">
-          GPS
-        </div>
-      </div>
+      <FTGPSCard user_id={selectedRow?.user_id as string} />
       <div>
         <Label htmlFor="recent-activities" className="mb-1">
           Recent Activities:

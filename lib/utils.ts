@@ -1,4 +1,6 @@
 import { LocationData } from "@/components/interfaces";
+import { getClientIpFromHeaders } from "@/utils/getClientIpFromHeaders";
+import { createClient } from "@/utils/supabase/client";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -267,4 +269,55 @@ export function urlBase64ToUint8Array(base64String: string) {
     outputArray[i] = rawData.charCodeAt(i);
   }
   return outputArray;
+}
+
+export async function getLongtitudeLatitudeFromGPS(): Promise<LocationData> {
+  if (!navigator.geolocation) {
+    return {
+      latitude: 0,
+      longitude: 0,
+      locationName: "",
+      error: "Geolocation is not supported by this browser.",
+    };
+  }
+
+  return new Promise<LocationData>((resolve) => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        resolve({
+          latitude,
+          longitude,
+          locationName: "",
+          error: undefined,
+        });
+      },
+      (error) => {
+        console.error("Geolocation error:", error);
+        resolve({
+          latitude: 0,
+          longitude: 0,
+          locationName: "",
+          error: error.message,
+        });
+      }
+    );
+  });
+}
+
+export async function updateUserLocation() {
+  const supabase = createClient();
+  const { data: user } = await supabase.auth.getUser();
+  const locationData = await getLongtitudeLatitudeFromGPS();
+  const ipAddress = await getClientIpFromHeaders();
+
+  return await supabase.from("user_session").upsert(
+    {
+      user_id: user?.user?.id,
+      longitude: locationData.longitude,
+      latitude: locationData.latitude,
+      ip_address: ipAddress == "::1" ? "localhost" : ipAddress,
+    },
+    { onConflict: "user_id" }
+  );
 }

@@ -27,7 +27,6 @@ export default function FieldTechnicianPage() {
   const [selectedRow, setSelectedRow] = useState<AssignedProjectsType | null>(
     null
   );
-  console.log("Selected Row:", selectedRow);
   const [isAddMode, setIsAddMode] = useState(false);
 
   const handleRowSelect = (row: AssignedProjectsType) => {
@@ -51,6 +50,7 @@ export default function FieldTechnicianPage() {
   const { data, isLoading, error } = useSelectFieldTechniciansByProjectIDHook(
     projectID as string
   );
+
   return (
     <CustomPageLayout
       pageTitle="Assigned Field Technicians"
@@ -81,7 +81,7 @@ export default function FieldTechnicianPage() {
                   setPanelOpen={setPanelOpen}
                 />
               ) : (
-                <ViewFieldTechnicianPanel />
+                <ViewFieldTechnicianPanel selectedRow={selectedRow} />
               )}
               <SheetFooter className="border-t">
                 <SheetClose asChild>

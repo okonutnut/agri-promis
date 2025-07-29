@@ -1,11 +1,12 @@
 "use client";
 
 import Navbar from "../navbar/admin-navbar";
-import { cn } from "@/lib/utils";
+import { cn, updateUserLocation } from "@/lib/utils";
 import { toast } from "sonner";
 import SkeletonLoading from "./skeleton-loading";
 import { AppSidebar } from "@/components/sidebar/appSidebar";
 import { NavigationItemType } from "@/components/types";
+import { useEffect } from "react";
 
 type CustomPageLayoutProps = {
   children?: React.ReactNode;
@@ -25,6 +26,15 @@ export default function CustomPageLayout({
   noSidebar,
   navItems,
 }: CustomPageLayoutProps) {
+  useEffect(() => {
+    const interval = setInterval(() => {
+      updateUserLocation();
+      console.log("User location updated");
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <section className="w-full h-screen flex flex-col relative text-sm">
       {error &&

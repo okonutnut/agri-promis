@@ -8,6 +8,7 @@ import {
   MonitoringReportType,
   PostActivityReportType,
 } from "@/components/types";
+import { decodeSupabaseJWT } from "@/utils/decodeSupabaseJwt";
 import { createClient } from "@/utils/supabase/server";
 import webpush from "web-push";
 import type { PushSubscription as WebPushSubscription } from "web-push";
@@ -884,4 +885,41 @@ export async function SendPushNotificationToUserAction(
   });
 
   return;
+}
+
+// SESSION ACTIONS
+export async function SelectUserCurrentLocationAction(user_id: string) {
+  console.log("Fetching user location for user_id:", user_id);
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("user_session")
+    .select("latitude, longitude")
+    .eq("user_id", user_id)
+    .single();
+
+  if (error) {
+    console.error("Error fetching user location:", error);
+    return null;
+  }
+
+  return data;
+}
+
+export async function DeleteUserSessionAction() {
+  const supabase = await createClient();
+  const { data: session } = await supabase.auth.getSession();
+  const { error } = await supabase
+    .from("user_session")
+    .delete()
+    .eq(
+      "session_id",
+      decodeSupabaseJWT(session?.session?.access_token || "")?.session_id
+    );
+
+  if (error) {
+    console.error("Error deleting user session:", error);
+    return false;
+  }
+
+  return true;
 }

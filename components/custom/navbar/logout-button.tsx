@@ -14,16 +14,29 @@ export default function SidebarLogoutButton() {
   const qc = useQueryClient();
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast.error("Error logging out", {
-        position: "bottom-right",
-      });
-      console.error(error);
-    } else {
+    try {
+      // Get the current user
+      const { data: user, error: userError } = await supabase.auth.getUser();
+      if (userError) throw new Error("Error fetching user data");
+
+      // Delete the user session from the database
+      const { error: sessionError } = await supabase
+        .from("user_session")
+        .delete()
+        .eq("user_id", user?.user?.id);
+      if (sessionError) throw new Error("Error deleting user session");
+
+      // Sign out the user
+      const { error } = await supabase.auth.signOut();
+      if (error) throw new Error("Error logging out");
+
+      // Clean up and redirect
       qc.removeQueries();
       toast.success("You've been logged out");
       router.replace("/login");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "An error occurred");
+      console.error(error);
     }
   };
 

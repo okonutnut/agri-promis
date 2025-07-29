@@ -25,6 +25,7 @@ import {
   SelectAllMonitoringReportsByProjectIDAndUserAction,
   SelectAllPostActivityReportsByProjectIDAction,
   InsertPostActivityRemarksAction,
+  SelectUserCurrentLocationAction,
 } from "@/components/actions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -404,6 +405,15 @@ export function useSelectAllPostActivityReportsByUserHook() {
   return useQuery({
     queryKey: ["postActivityReport"],
     queryFn: async () => await SelectAllPostActivityReportsByUserID(),
+    refetchOnMount: true,
+  });
+}
+
+// LOCATION HOOKS
+export function useSelectUserLocationHook(user_id: string) {
+  return useQuery({
+    queryKey: ["userLocation", user_id],
+    queryFn: async () => await SelectUserCurrentLocationAction(user_id),
     refetchOnMount: true,
   });
 }
