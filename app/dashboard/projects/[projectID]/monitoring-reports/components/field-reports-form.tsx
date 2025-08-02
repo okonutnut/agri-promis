@@ -11,6 +11,9 @@ import { MonitoringReportType } from "@/components/types";
 import { Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { useEffect, useRef } from "react";
+import { Label } from "@/components/ui/label";
+import FormMultiInput from "@/components/custom/input/form-multi-input";
+import NonFormMultiInput from "@/components/custom/input/non-form-multi-input";
 
 const formSchema = z.object({
   id: z.string().min(1, "ID is required"),
@@ -63,10 +66,14 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
           defaultValue={data?.reporter?.fullname}
           readonly
         />
-        <div className="text-xs font-medium text flex justify-between items-center mb-1">
-          Status note
-        </div>
-        <Textarea value={data?.status_note} readOnly tabIndex={-1} />
+        <NonFormInput label="Purpose" defaultValue={data?.purpose} readonly />
+        <NonFormMultiInput label="Findings" values={data?.findings} />
+        <Label className="capitalized">Observation</Label>
+        <Textarea value={data?.observation} readOnly tabIndex={-1} />
+        <NonFormMultiInput
+          label="Issues / Concern"
+          values={data?.issues_concern}
+        />
         <FormTextarea
           label="Remarks"
           name="remarks"

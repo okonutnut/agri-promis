@@ -1,4 +1,5 @@
 import FormTextarea from "@/components/custom/input/form-textarea";
+import FormMultiInput from "@/components/custom/input/form-multi-input";
 import { useInsertMonitoringReportHook } from "@/components/hooks";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
@@ -12,19 +13,22 @@ import { ImageData, LocationData } from "@/components/interfaces";
 import { MonitoringReportType } from "@/components/types";
 import { useEffect, useRef, useState } from "react";
 import ImageCaptureForm from "../components/image-report-form";
+import FormInput from "@/components/custom/input/form-input";
 
 const fieldReportSchema = z.object({
-  status_note: z
+  purpose: z.string().min(1, "Purpose is required"),
+  findings: z.array(z.string()).min(1, "At least one finding is required"),
+  observation: z
     .string()
-    .min(1, "Status note is required")
-    .min(5, "Status note must be at least 5 characters")
-    .max(500, "Status note must not exceed 500 characters"),
+    .min(1, "Observation is required")
+    .min(5, "Observation must be at least 5 characters")
+    .max(500, "Observation must not exceed 500 characters"),
+  issues_concern: z.array(z.string()).min(1, "At least one issue is required"),
   remarks: z
     .string()
     .optional()
     .refine(
       (val: string | undefined) => {
-        // If remarks is provided, require at least 5 characters
         if (val && val.length < 5) {
           return false;
         }
@@ -61,7 +65,7 @@ export default function UploadFieldReportForm({
   const form = useForm<FieldReportFormData>({
     resolver: zodResolver(fieldReportSchema),
     defaultValues: {
-      status_note: values?.status_note || "",
+      observation: values?.observation || "",
       remarks: values?.remarks || "",
     },
   });
@@ -106,9 +110,6 @@ export default function UploadFieldReportForm({
       ...data,
       project_id: projectID as string,
       images: images,
-      location_name: location?.locationName,
-      latitude: location?.latitude,
-      longitude: location?.longitude,
     });
   };
 
@@ -138,7 +139,7 @@ export default function UploadFieldReportForm({
           setImages={setImages}
         />
         <form
-          className="space-y-4 m-2"
+          className="space-y-4 m-2 border-t pt-4"
           id="upload-monitoring-report-form"
           onSubmit={form.handleSubmit(onSubmit)}
         >
@@ -147,11 +148,26 @@ export default function UploadFieldReportForm({
               {form.formState.errors.root.message}
             </div>
           )}
+          <FormInput label="Purpose" name="purpose" form={form} />
+          {/* Findings */}
+          <FormMultiInput
+            label="Findings"
+            name="findings"
+            form={form}
+            values={values?.findings || []}
+          />
           <FormTextarea
-            label="Status Note"
-            name="status_note"
+            label="Observation"
+            name="observation"
             form={form}
             readonly={!!values}
+          />
+          {/* Issues and Concerns */}
+          <FormMultiInput
+            label="Issues & Concern"
+            name="issues_concern"
+            form={form}
+            values={values?.issues_concern || []}
           />
           {!isAddMode && (
             <FormTextarea
@@ -159,6 +175,7 @@ export default function UploadFieldReportForm({
               name="remarks"
               form={form}
               readonly={!!values}
+              noPlaceholder
             />
           )}
         </form>

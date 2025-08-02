@@ -2,7 +2,6 @@ import {
   Cctv,
   ClipboardPen,
   House,
-  NotebookPen,
   Settings,
   UserPen,
   Users,
@@ -60,11 +59,11 @@ export function getProjectNavItems(id: string) {
       href: `/dashboard/projects/${id}/monitoring-reports`,
       icon: Cctv,
     },
-    {
-      title: "Post Activity Reports",
-      href: `/dashboard/projects/${id}/post-activity-reports`,
-      icon: NotebookPen,
-    },
+    // {
+    //   title: "Post Activity Reports",
+    //   href: `/dashboard/projects/${id}/post-activity-reports`,
+    //   icon: NotebookPen,
+    // },
     {
       title: "Project Settings",
       href: `/dashboard/projects/${id}/settings`,
@@ -85,10 +84,10 @@ export function getFieldTechnicianNavItems(id: string) {
       href: `/field-technician/${id}/monitoring-report`,
       icon: Cctv,
     },
-    {
-      title: "Post Activity Report",
-      href: `/field-technician/${id}/post-activity-report`,
-      icon: NotebookPen,
-    },
+    // {
+    //   title: "Post Activity Report",
+    //   href: `/field-technician/${id}/post-activity-report`,
+    //   icon: NotebookPen,
+    // },
   ];
 }

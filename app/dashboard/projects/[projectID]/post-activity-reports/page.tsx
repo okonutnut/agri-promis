@@ -14,7 +14,7 @@ import { useParams } from "next/navigation";
 import { getProjectNavItems } from "@/components/sidebar/navitems";
 import { PostActivityReportType } from "@/components/types";
 import { useSelectAllPostActivityReportsByProjectIDHook } from "@/components/hooks";
-import PostActivityReportForm from "@/app/field-technician/[projectID]/post-activity-report/components/post-activity-report-form";
+import PostActivityReportForm from "@/app/field-technician/[projectID]/post-activity-report.DEPR/components/post-activity-report-form";
 
 export default function FieldReportsPage() {
   const { projectID } = useParams();

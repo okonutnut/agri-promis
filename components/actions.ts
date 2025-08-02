@@ -345,11 +345,11 @@ export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
 
 export async function InsertMonitoringReportAction({
   project_id,
+  purpose,
+  findings,
+  observation,
+  issues_concern,
   images,
-  location_name,
-  latitude,
-  longitude,
-  status_note,
 }: MonitoringReportType) {
   if (!images?.length) throw new Error("No images provided");
 
@@ -378,19 +378,15 @@ export async function InsertMonitoringReportAction({
     })
   );
 
-  const { error } = await supabase
-    .from("monitoring")
-    .insert({
-      project_id,
-      reporter_id: user.id,
-      photo_url: photo_urls,
-      location_name,
-      latitude,
-      longitude,
-      status_note,
-    })
-    .select("")
-    .single();
+  const { error } = await supabase.from("monitoring").insert({
+    project_id,
+    purpose,
+    findings,
+    issues_concern,
+    reporter_id: user.id,
+    observation,
+    photo_url: photo_urls,
+  });
 
   if (error) throw error;
   return;

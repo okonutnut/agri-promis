@@ -76,55 +76,28 @@ export const compressImage = (
   });
 };
 
-export const getLocationName = async (lat: number, lng: number) => {
+export const getLocationName = async (
+  lat: number,
+  lng: number
+): Promise<string> => {
   try {
-    // Using BigDataCloud API - no CORS issues
     const response = await fetch(
-      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`
     );
     const data = await response.json();
 
-    console.log("BigDataCloud data:", data); // For debugging
+    // Extract barangay (village), municipality (city/town), and province (state)
+    const barangay = data.address.village || data.address.neighbourhood;
+    const municipality = data.address.city || data.address.town;
+    const province = data.address.state;
+    const country = data.address.country;
 
-    const addressParts = [];
-
-    // Street/Road
-    if (data.localityInfo?.informative?.[0]?.name) {
-      addressParts.push(data.localityInfo.informative[0].name);
-    }
-
-    // Barangay/Village
-    if (data.localityInfo?.administrative?.[4]?.name) {
-      addressParts.push(data.localityInfo.administrative[4].name);
-    }
-
-    // Municipality/City
-    if (data.localityInfo?.administrative?.[3]?.name) {
-      addressParts.push(data.localityInfo.administrative[3].name);
-    } else if (data.city) {
-      addressParts.push(data.city);
-    } else if (data.locality) {
-      addressParts.push(data.locality);
-    }
-
-    // Province/State
-    if (data.localityInfo?.administrative?.[1]?.name) {
-      addressParts.push(data.localityInfo.administrative[1].name);
-    } else if (data.principalSubdivision) {
-      addressParts.push(data.principalSubdivision);
-    }
-
-    // Country
-    if (data.countryName) {
-      addressParts.push(data.countryName);
-    }
-
-    return addressParts.length > 0
-      ? addressParts.join(", ")
-      : "Unknown location";
+    return [barangay, municipality, province, country]
+      .filter(Boolean) // Remove undefined/null
+      .join(", ");
   } catch (error) {
-    console.error("Error getting location name:", error);
-    return "Location name unavailable";
+    console.error("Error fetching from OpenStreetMap:", error);
+    return "Location unavailable";
   }
 };
 
@@ -137,124 +110,125 @@ export const addOverlayToImage = (
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     const img = new window.Image();
+    const logo = new window.Image();
 
     if (!ctx) {
       reject(new Error("Canvas context not available"));
       return;
     }
 
-    img.onload = () => {
-      try {
-        canvas.width = img.width;
-        canvas.height = img.height;
+    Promise.all([
+      new Promise<void>((res) => {
+        img.onload = () => res();
+        img.src = URL.createObjectURL(file);
+      }),
+      new Promise<void>((res) => {
+        logo.onload = () => res();
+        logo.src = "/logo.png";
+      }),
+    ])
+      .then(() => {
+        try {
+          canvas.width = img.width;
+          canvas.height = img.height;
 
-        // Draw the original image first
-        ctx.drawImage(img, 0, 0);
+          ctx.drawImage(img, 0, 0);
 
-        // Calculate font size based on both width and height for better scaling
-        const minDimension = Math.min(img.width, img.height);
-        const maxDimension = Math.max(img.width, img.height);
+          // Increased size factors
+          const minDimension = Math.min(img.width, img.height);
+          const maxDimension = Math.max(img.width, img.height);
+          const baseFontSize = Math.min(minDimension / 20, maxDimension / 45); // Increased from 25/60
+          const fontSize = Math.max(22, Math.min(38, baseFontSize)); // Increased from 18/32
 
-        // Use a combination of both dimensions for more balanced scaling
-        const baseFontSize = Math.min(minDimension / 25, maxDimension / 60);
-        const fontSize = Math.max(18, Math.min(32, baseFontSize));
+          ctx.font = `bold ${fontSize}px Arial, sans-serif`;
+          ctx.textAlign = "left";
+          ctx.textBaseline = "top";
 
-        ctx.font = `bold ${fontSize}px Arial, sans-serif`;
-        ctx.textAlign = "left";
-        ctx.textBaseline = "top";
+          const date = new Date(timestamp);
+          const formattedDate = date.toLocaleDateString();
+          const formattedTime = date.toLocaleTimeString();
+          const overlayLines = [`${formattedDate} ${formattedTime}`];
 
-        // Format timestamp
-        const date = new Date(timestamp);
-        const formattedDate = date.toLocaleDateString();
-        const formattedTime = date.toLocaleTimeString();
+          if (location.latitude && location.longitude) {
+            overlayLines.push(
+              `Lat: ${location.latitude.toFixed(
+                6
+              )}, Long: ${location.longitude.toFixed(6)}`
+            );
+          }
 
-        // Prepare overlay text
-        const overlayLines = [`${formattedDate} ${formattedTime}`];
+          if (location.locationName) {
+            const maxChars = Math.floor(img.width / (fontSize * 0.55)); // Adjusted for larger text
+            const locationText =
+              location.locationName.length > maxChars
+                ? location.locationName.substring(0, maxChars) + "..."
+                : location.locationName;
+            overlayLines.push(`Location: ${locationText}`);
+          }
 
-        // Add location info if available
-        if (location.latitude && location.longitude) {
-          overlayLines.push(
-            `Lat: ${location.latitude.toFixed(
-              6
-            )}, Long: ${location.longitude.toFixed(6)}`
+          // Increased padding and dimensions
+          const padding = fontSize * 1.0; // Increased from 0.8
+          const lineHeight = fontSize * 1.5; // Increased from 1.4
+          const overlayHeight = overlayLines.length * lineHeight + padding * 2;
+          const textWidths = overlayLines.map(
+            (line) => ctx.measureText(line).width
           );
+          const maxTextWidth = Math.max(...textWidths);
+
+          const logoHeight = overlayHeight - padding * 1.8; // Slightly adjusted
+          const logoWidth = (logo.width / logo.height) * logoHeight;
+
+          const margin = Math.max(12, fontSize * 0.7); // Increased from 10/0.6
+          const overlayY = img.height - overlayHeight - margin;
+          const totalWidth = logoWidth + maxTextWidth + padding * 4;
+
+          ctx.fillStyle = "rgba(0, 0, 0, 0.7)"; // Slightly more opaque
+          ctx.fillRect(margin, overlayY, totalWidth, overlayHeight);
+
+          ctx.drawImage(
+            logo,
+            margin + padding,
+            overlayY + padding,
+            logoWidth,
+            logoHeight
+          );
+
+          ctx.fillStyle = "white";
+          ctx.strokeStyle = "black";
+          ctx.lineWidth = Math.max(1.2, fontSize / 14); // Increased from 1/16
+
+          overlayLines.forEach((line, index) => {
+            const textX = margin + logoWidth + padding * 2;
+            const textY = overlayY + padding + index * lineHeight;
+            ctx.strokeText(line, textX, textY);
+            ctx.fillText(line, textX, textY);
+          });
+
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                const overlayedFile = new File([blob], file.name, {
+                  type: "image/jpeg",
+                  lastModified: Date.now(),
+                });
+                resolve(overlayedFile);
+              } else {
+                console.warn("Blob creation failed, using original file");
+                resolve(file);
+              }
+            },
+            "image/jpeg",
+            0.9
+          );
+        } catch (error) {
+          console.error("Error in overlay creation:", error);
+          resolve(file);
         }
-
-        if (location.locationName) {
-          // Adjust max characters based on image width and font size
-          const maxChars = Math.floor(img.width / (fontSize * 0.6));
-          const locationText =
-            location.locationName.length > maxChars
-              ? location.locationName.substring(0, maxChars) + "..."
-              : location.locationName;
-          overlayLines.push(`Location: ${locationText}`);
-        }
-
-        // Calculate overlay dimensions with responsive scaling
-        const padding = fontSize * 0.8;
-        const lineHeight = fontSize * 1.4;
-        const overlayHeight = overlayLines.length * lineHeight + padding * 2;
-
-        // Calculate max text width
-        const textWidths = overlayLines.map(
-          (line) => ctx.measureText(line).width
-        );
-        const maxTextWidth = Math.max(...textWidths);
-        const overlayWidth = maxTextWidth + padding * 2;
-
-        // Position overlay at bottom-left with responsive margins
-        const margin = Math.max(10, fontSize * 0.6);
-        const overlayX = margin;
-        const overlayY = img.height - overlayHeight - margin;
-
-        // Draw semi-transparent background with rounded corners
-        ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
-        ctx.fillRect(overlayX, overlayY, overlayWidth, overlayHeight);
-
-        // Draw text with improved styling
-        ctx.fillStyle = "white";
-        ctx.strokeStyle = "black";
-        ctx.lineWidth = Math.max(1, fontSize / 16);
-
-        overlayLines.forEach((line, index) => {
-          const textX = overlayX + padding;
-          const textY = overlayY + padding + index * lineHeight;
-
-          // Add stroke for better readability
-          ctx.strokeText(line, textX, textY);
-          ctx.fillText(line, textX, textY);
-        });
-
-        // Convert canvas to blob
-        canvas.toBlob(
-          (blob) => {
-            if (blob) {
-              const overlayedFile = new File([blob], file.name, {
-                type: "image/jpeg",
-                lastModified: Date.now(),
-              });
-              resolve(overlayedFile);
-            } else {
-              // If blob creation fails, return original file
-              console.warn("Blob creation failed, using original file");
-              resolve(file);
-            }
-          },
-          "image/jpeg",
-          0.9
-        );
-      } catch (error) {
-        console.error("Error in overlay creation:", error);
-        resolve(file); // Return original file on error
-      }
-    };
-
-    img.onerror = () => {
-      console.error("Image load error in overlay function");
-      resolve(file); // Return original file on error
-    };
-
-    img.src = URL.createObjectURL(file);
+      })
+      .catch(() => {
+        console.error("Error loading images");
+        resolve(file);
+      });
   });
 };
 

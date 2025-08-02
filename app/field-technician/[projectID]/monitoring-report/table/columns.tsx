@@ -6,8 +6,8 @@ import { format } from "date-fns";
 
 export const columns: ColumnDef<MonitoringReportType>[] = [
   {
-    accessorKey: "id",
-    header: "ID",
+    accessorKey: "purpose",
+    header: "Purpose",
   },
   {
     accessorKey: "reviewedBy.fullname",
