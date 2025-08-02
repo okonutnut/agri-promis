@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 
 export function GoogleSignInButton() {
   const [state, setState] = useState<"ready" | "loading" | "disabled">("ready");
@@ -33,14 +34,20 @@ export function GoogleSignInButton() {
 
   return (
     <Button
-      type="submit"
       className="flex items-center gap-2 cursor-pointer my-3 min-w-[250px] mx-auto"
+      type="submit"
       disabled={state !== "ready"}
-      variant={"outline"}
+      variant={state === "loading" ? "ghost" : "outline"}
       onClick={login}
     >
-      <Image src="/google-icon.png" alt="Google" width={20} height={20} />
-      Login with Google
+      {state === "loading" ? (
+        <Loader2 className="animate-spin" size={20} />
+      ) : (
+        <>
+          <Image src="/google-icon.png" alt="Google" width={20} height={20} />
+          Login with Google
+        </>
+      )}
     </Button>
   );
 }

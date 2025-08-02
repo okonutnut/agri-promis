@@ -1,14 +1,11 @@
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 
-type NonFormMultiInputProps = {
+type FormMultiInputProps = {
   label: string;
   values?: any | null;
 };
-export default function NonFormMultiInput({
-  values,
-  label,
-}: NonFormMultiInputProps) {
+export default function FormMultiInput({ values, label }: FormMultiInputProps) {
   return (
     <div className="space-y-2">
       <Label>{label}</Label>

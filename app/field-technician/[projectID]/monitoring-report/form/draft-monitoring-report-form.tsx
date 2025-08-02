@@ -15,7 +15,6 @@ import { useEffect, useRef, useState } from "react";
 import ImageCaptureForm from "./image-report-form";
 import FormInput from "@/components/custom/input/form-input";
 import SaveDraftButton from "../components/draft-button";
-import { deleteDraft } from "@/hooks/use-draft";
 
 const fieldReportSchema = z.object({
   purpose: z.string().min(1, "Purpose is required"),
@@ -61,15 +60,12 @@ export default function UploadFieldReportForm({
     error: undefined,
   });
   const [isDrafted, setIsDrafted] = useState(false);
-  const [images, setImages] = useState<ImageData[]>(values?.images || []);
+  const [images, setImages] = useState<ImageData[]>([]);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
 
   const form = useForm<FieldReportFormData>({
     resolver: zodResolver(fieldReportSchema),
     defaultValues: {
-      purpose: values?.purpose || "",
-      findings: values?.findings || [],
-      issues_concern: values?.issues_concern || [],
       observation: values?.observation || "",
       remarks: values?.remarks || "",
     },
@@ -77,7 +73,7 @@ export default function UploadFieldReportForm({
 
   // Hook for inserting monitoring report
   const { mutate, isPending, isSuccess } = useInsertMonitoringReportHook();
-  const onSubmit = async (data: FieldReportFormData) => {
+  const onSubmit = (data: FieldReportFormData) => {
     form.setValue("remarks", "");
     // Validate images
     if (!images || images.length === 0) {
@@ -111,8 +107,6 @@ export default function UploadFieldReportForm({
       toast.error("Total images size must be less than 20MB");
       return;
     }
-
-    await deleteDraft(values?.key as string);
 
     mutate({
       ...data,
@@ -164,13 +158,12 @@ export default function UploadFieldReportForm({
             name="findings"
             form={form}
             values={values?.findings || null}
-            readOnly={!isAddMode}
           />
           <FormTextarea
             label="Observation"
             name="observation"
             form={form}
-            readonly={!isAddMode}
+            readonly={!!values}
           />
           {/* Issues and Concerns */}
           <FormMultiInput
@@ -178,7 +171,6 @@ export default function UploadFieldReportForm({
             name="issues_concern"
             form={form}
             values={values?.issues_concern || null}
-            readOnly={!isAddMode}
           />
           {!isAddMode && (
             <FormTextarea
@@ -211,7 +203,7 @@ export default function UploadFieldReportForm({
             setIsDrafted={setIsDrafted}
           />
         )}
-        {isAddMode && (
+        {!values && (
           <Button
             variant={isPending ? "ghost" : "default"}
             form="upload-monitoring-report-form"

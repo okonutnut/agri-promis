@@ -9,22 +9,24 @@ type FormMultiInputProps = {
   name: string;
   form: UseFormReturn<any>;
   values?: any | null;
+  readOnly?: boolean;
 };
 export default function FormMultiInput({
   form,
   values,
   label,
   name,
+  readOnly,
 }: FormMultiInputProps) {
   return (
     <div className="space-y-2">
-      {!values ? (
+      {!readOnly ? (
         <div className="flex items-end gap-2">
           <FormInput
             label={label}
             name={`${name}.0`}
             form={form}
-            readonly={!!values}
+            readonly={readOnly}
             className="flex-1"
           />
           <Button
@@ -37,7 +39,7 @@ export default function FormMultiInput({
                 form.setValue(`${name}.0`, "");
               }
             }}
-            disabled={!form.watch(`${name}`)?.[0] || !!values}
+            disabled={!form.watch(`${name}`)?.[0] || readOnly}
             className="mb-[1.5px] min-w-[20px]"
           >
             +
@@ -56,7 +58,7 @@ export default function FormMultiInput({
               className="flex items-center gap-1 bg-secondary rounded-full px-3 py-1"
             >
               <span className="text-sm">{issue}</span>
-              {!values && (
+              {!readOnly && (
                 <button
                   type="button"
                   className="text-sm hover:text-destructive"

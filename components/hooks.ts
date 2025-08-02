@@ -38,12 +38,25 @@ import {
   ProjectType,
   UserProfileType,
 } from "./types";
+import { createClient } from "@/utils/supabase/client";
 
 // USER PROFILE HOOKS
 export function useSelectUserProfileHook() {
   return useQuery({
     queryKey: ["userProfile"],
     queryFn: async () => await SelectUserProfileAction(),
+    refetchOnMount: true,
+  });
+}
+
+export function useSelectCurrentUserSessionHook() {
+  const supabase = createClient();
+  return useQuery({
+    queryKey: ["currentUserSession"],
+    queryFn: async () => {
+      const { session } = (await supabase.auth.getSession()).data;
+      return session;
+    },
     refetchOnMount: true,
   });
 }

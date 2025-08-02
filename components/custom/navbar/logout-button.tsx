@@ -15,17 +15,6 @@ export default function SidebarLogoutButton() {
 
   const handleLogout = async () => {
     try {
-      // Get the current user
-      const { data: user, error: userError } = await supabase.auth.getUser();
-      if (userError) throw new Error("Error fetching user data");
-
-      // Delete the user session from the database
-      const { error: sessionError } = await supabase
-        .from("user_session")
-        .delete()
-        .eq("user_id", user?.user?.id);
-      if (sessionError) throw new Error("Error deleting user session");
-
       // Sign out the user
       const { error } = await supabase.auth.signOut();
       if (error) throw new Error("Error logging out");

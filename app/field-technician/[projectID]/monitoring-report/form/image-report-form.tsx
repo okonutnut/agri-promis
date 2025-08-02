@@ -4,18 +4,15 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useState } from "react";
-import { XCircle, ZoomIn } from "lucide-react";
+import { Plus, XCircle, ZoomIn } from "lucide-react";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
-import { Camera } from "lucide-react";
 import { ImageData, LocationData } from "@/components/interfaces";
 import { addOverlayToImage, compressImage } from "@/lib/utils";
-import GetCurrentLocation from "./get-current-location";
+import GetCurrentLocation from "../components/get-current-location";
 import ImageModal from "@/components/ui/image-modal";
 import { MonitoringReportType } from "@/components/types";
 import ImageCarousel from "@/components/custom/images/image-carousel";
-import { format } from "date-fns";
-import { Separator } from "@/components/ui/separator";
 
 type ImageCaptureFormProps = {
   isAddMode?: boolean;
@@ -109,11 +106,11 @@ export default function ImageCaptureForm({
 
   return (
     <>
-      {values?.created_at && (
+      {/* {values?.created_at && (
         <span className="italic text-xs text-muted-foreground mx-2">
           Date Submitted: {format(new Date(values.created_at), "PPp")}
         </span>
-      )}
+      )} */}
       <div className="space-y-4 m-2">
         {isAddMode ? (
           <>
@@ -140,12 +137,7 @@ export default function ImageCaptureForm({
                       disabled={isCompressing}
                     />
                     <div className="flex flex-col items-center justify-center space-y-2">
-                      <Camera size={36} className="text-gray-400" />
-                      <p className="text-sm font-medium text-center">
-                        {images.length === 0
-                          ? "Take Photos to Start"
-                          : "Take Photos"}
-                      </p>
+                      <Plus className="text-gray-400" />
                     </div>
                   </Card>
                 </div>

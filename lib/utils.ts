@@ -1,5 +1,5 @@
 import { LocationData } from "@/components/interfaces";
-import { getClientIpFromHeaders } from "@/utils/getClientIpFromHeaders";
+// import { getClientIpFromHeaders } from "@/utils/getClientIpFromHeaders";
 import { createClient } from "@/utils/supabase/client";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -282,7 +282,7 @@ export async function getLongtitudeLatitudeFromGPS(): Promise<LocationData> {
 export async function updateUserLocation() {
   const supabase = createClient();
   const locationData = await getLongtitudeLatitudeFromGPS();
-  const ipAddress = await getClientIpFromHeaders();
+  // const ipAddress = await getClientIpFromHeaders();
   const { data: user } = await supabase.auth.getUser();
 
   if (!user?.user?.id) {
@@ -294,7 +294,6 @@ export async function updateUserLocation() {
       user_id: user?.user?.id,
       longitude: locationData.longitude,
       latitude: locationData.latitude,
-      ip_address: ipAddress == "::1" ? "localhost" : ipAddress,
     },
     { onConflict: "user_id" }
   );

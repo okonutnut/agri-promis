@@ -43,6 +43,7 @@ export type LocationType = {
 
 export type MonitoringReportType = {
   id?: string;
+  key?: string;
   project_id?: string;
   reporter_id?: string;
   purpose?: string;

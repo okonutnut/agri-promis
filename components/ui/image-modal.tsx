@@ -93,7 +93,6 @@ export default function ImageModal({
   const handleImageError = () => {
     setIsImageLoading(false);
     setImageLoadError(true);
-    console.error("Full screen image load error");
   };
 
   // Zoom functions

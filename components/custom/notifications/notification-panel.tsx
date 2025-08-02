@@ -12,7 +12,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { urlBase64ToUint8Array } from "@/lib/utils";
 import { Bell } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function NotificationsPanel() {
@@ -51,10 +51,10 @@ export default function NotificationsPanel() {
     await subscribeUser(serializedSub);
   }
 
-  async function isSubscribed() {
+  const isSubscribed = useCallback(async () => {
     if (!subscription) return false;
     return await SelectIfSubscribedAction(subscription.endpoint);
-  }
+  }, [subscription]);
 
   async function unsubscribeFromPush() {
     await subscription?.unsubscribe();
@@ -70,7 +70,7 @@ export default function NotificationsPanel() {
         toast.error("Failed to check subscription status.");
         setIsEnabled(false);
       });
-  }, [subscription, isSubscribed]);
+  }, [isSubscribed]);
 
   return (
     <DropdownMenu>

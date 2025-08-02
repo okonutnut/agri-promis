@@ -50,7 +50,7 @@ export async function SelectUserProfileAction() {
     throw new Error("User profile not found");
   }
 
-  return user.role as UserProfileType;
+  return user as UserProfileType;
 }
 
 // PROGRAM ACTIONS
@@ -891,6 +891,8 @@ export async function SelectUserCurrentLocationAction(user_id: string) {
     .from("user_session")
     .select("latitude, longitude")
     .eq("user_id", user_id)
+    .order("created_at", { ascending: false })
+    .limit(1)
     .single();
 
   if (error) {

@@ -10,20 +10,22 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useSelectAllMonitoringReportsByProjectIDAndUserHook } from "@/components/hooks";
-import { PostActivityReportType } from "@/components/types";
+import { MonitoringReportType } from "@/components/types";
 import UserPageLayout from "@/components/custom/layout/user-page-layout";
 import UploadFieldReportForm from "./form/monitoring-report-form";
 import { useParams } from "next/navigation";
+import ViewDraftsSheet from "./components/view-drafts-sheet";
 
 export default function MonitoringReportPage() {
   const { projectID } = useParams();
+
   const [panelOpen, setPanelOpen] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<PostActivityReportType | null>(
+  const [selectedRow, setSelectedRow] = useState<MonitoringReportType | null>(
     null
   );
   const [isAddMode, setIsAddMode] = useState(false);
 
-  const handleRowSelect = (row: PostActivityReportType) => {
+  const handleRowSelect = (row: MonitoringReportType) => {
     setSelectedRow(row);
     setIsAddMode(false);
     setPanelOpen(true);
@@ -31,6 +33,12 @@ export default function MonitoringReportPage() {
 
   const handleAdd = () => {
     setSelectedRow(null);
+    setIsAddMode(true);
+    setPanelOpen(true);
+  };
+
+  const handleModify = (row: MonitoringReportType | null) => {
+    setSelectedRow(row);
     setIsAddMode(true);
     setPanelOpen(true);
   };
@@ -49,32 +57,26 @@ export default function MonitoringReportPage() {
       pageTitle="My Monitoring Reports"
       isLoading={isLoading}
       error={error}
+      topRightComponent={<ViewDraftsSheet handleModify={handleModify} />}
     >
-      {data && (
-        <>
-          <DataTable
-            columns={columns}
-            data={data}
-            onRowSelect={handleRowSelect}
-            onAdd={handleAdd}
-          />
-          <Sheet open={panelOpen} onOpenChange={handlePanelClose}>
-            <SheetContent className="w-screen md:max-w-xl">
-              <SheetHeader className="border-b">
-                <SheetTitle className="text-primary uppercase">
-                  {isAddMode
-                    ? "Upload New Post Activity Report"
-                    : "View Post Activity Report Details"}
-                </SheetTitle>
-              </SheetHeader>
-              <UploadFieldReportForm
-                isAddMode={isAddMode}
-                values={selectedRow}
-              />
-            </SheetContent>
-          </Sheet>
-        </>
-      )}
+      <DataTable
+        columns={columns}
+        data={data || []}
+        onRowSelect={handleRowSelect}
+        onAdd={handleAdd}
+      />
+      <Sheet open={panelOpen} onOpenChange={handlePanelClose}>
+        <SheetContent className="w-screen md:max-w-xl">
+          <SheetHeader className="border-b">
+            <SheetTitle className="text-primary uppercase">
+              {isAddMode
+                ? "Upload New Post Activity Report"
+                : "View Post Activity Report Details"}
+            </SheetTitle>
+          </SheetHeader>
+          <UploadFieldReportForm isAddMode={isAddMode} values={selectedRow} />
+        </SheetContent>
+      </Sheet>
     </UserPageLayout>
   );
 }

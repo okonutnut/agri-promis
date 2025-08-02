@@ -14,6 +14,7 @@ type UserPageLayoutProps = {
   isLoading?: boolean;
   error?: Error | null;
   noSidebar?: boolean;
+  topRightComponent?: React.ReactNode;
 };
 export default function UserPageLayout({
   children,
@@ -22,8 +23,10 @@ export default function UserPageLayout({
   isLoading,
   error,
   noSidebar,
+  topRightComponent,
 }: UserPageLayoutProps) {
   const { projectID } = useParams();
+
   useEffect(() => {
     const interval = setInterval(() => {
       updateUserLocation();
@@ -46,8 +49,11 @@ export default function UserPageLayout({
           />
         )}
         <div className={cn(`container mx-auto p-4`, className)}>
-          <h1 className="text-2xl font-medium mb-4">{pageTitle}</h1>
-          {isLoading || error ? <SkeletonLoading /> : <>{children}</>}
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-2xl font-medium mb-4">{pageTitle}</h1>
+            {!isLoading && !error && topRightComponent}
+          </div>
+          {isLoading || error ? <SkeletonLoading /> : children}
         </div>
       </div>
     </section>

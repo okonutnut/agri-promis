@@ -12,7 +12,6 @@ import { Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { useEffect, useRef } from "react";
 import { Label } from "@/components/ui/label";
-import FormMultiInput from "@/components/custom/input/form-multi-input";
 import NonFormMultiInput from "@/components/custom/input/non-form-multi-input";
 
 const formSchema = z.object({
@@ -57,7 +56,7 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
         </span>
       )}
       <form
-        className="p-3 space-y-4"
+        className="p-3 space-y-4 overflow-y-auto h-[calc(100vh-200px)]"
         id="remarks-form"
         onSubmit={form.handleSubmit(onSubmit)}
       >
@@ -81,27 +80,28 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
           readonly={data?.remarks ? true : false}
         />
       </form>
-      <SheetFooter className="border-t ">
-        {!data?.remarks && (
-          <Button
-            form="remarks-form"
-            variant={isPending ? "ghost" : "default"}
-            size={"sm"}
-            disabled={isPending}
-          >
-            {isPending ? <Loader2 className="animate-spin" /> : "Submit"}
-          </Button>
-        )}
+      <SheetFooter className="border-t flex-row justify-end">
         <SheetClose asChild>
           <Button
             variant="outline"
             ref={closeButtonRef}
             size={"sm"}
-            className="w-full"
+            className="w-1/2"
           >
             Close
           </Button>
         </SheetClose>
+        {!data?.remarks && (
+          <Button
+            form="remarks-form"
+            variant={isPending ? "ghost" : "default"}
+            size={"sm"}
+            className="w-1/2"
+            disabled={isPending}
+          >
+            {isPending ? <Loader2 className="animate-spin" /> : "Submit"}
+          </Button>
+        )}
       </SheetFooter>
     </>
   );
