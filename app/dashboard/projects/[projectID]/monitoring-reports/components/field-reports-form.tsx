@@ -5,7 +5,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import NonFormInput from "@/components/custom/input/non-form-input";
 import { Textarea } from "@/components/ui/textarea";
 import FormTextarea from "@/components/custom/input/form-textarea";
-import { SheetClose, SheetFooter } from "@/components/ui/sheet";
+import {
+  SheetClose,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { useInsertRemarksInMonitoringReportHook } from "@/components/hooks";
 import { MonitoringReportType } from "@/components/types";
 import { Loader2 } from "lucide-react";
@@ -13,6 +18,8 @@ import { format } from "date-fns";
 import { useEffect, useRef } from "react";
 import { Label } from "@/components/ui/label";
 import NonFormMultiInput from "@/components/custom/input/non-form-multi-input";
+import ImageCarousel from "@/components/custom/images/image-carousel";
+import PrintMonitoringButton from "@/app/field-technician/[projectID]/monitoring-report/components/print-monitoring";
 
 const formSchema = z.object({
   id: z.string().min(1, "ID is required"),
@@ -50,44 +57,48 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
 
   return (
     <>
-      {data?.created_at && (
-        <span className="italic text-xs text-muted-foreground mx-2">
-          Date Submitted: {format(new Date(data.created_at), "PPp")}
-        </span>
-      )}
-      <form
-        className="p-3 space-y-4 overflow-y-auto h-[calc(100vh-200px)]"
-        id="remarks-form"
-        onSubmit={form.handleSubmit(onSubmit)}
-      >
-        <NonFormInput
-          label="Reporter Name"
-          defaultValue={data?.reporter?.fullname}
-          readonly
-        />
-        <NonFormInput label="Purpose" defaultValue={data?.purpose} readonly />
-        <NonFormMultiInput label="Findings" values={data?.findings} />
-        <Label className="capitalized">Observation</Label>
-        <Textarea value={data?.observation} readOnly tabIndex={-1} />
-        <NonFormMultiInput
-          label="Issues / Concern"
-          values={data?.issues_concern}
-        />
-        <FormTextarea
-          label="Remarks"
-          name="remarks"
-          form={form}
-          readonly={data?.remarks ? true : false}
-        />
-      </form>
-      <SheetFooter className="border-t flex-row justify-end">
+      <SheetHeader className="border-b flex-row justify-between items-start">
+        <SheetTitle className="uppercase text-primary">
+          View Field Report
+        </SheetTitle>
+        <PrintMonitoringButton data={data} />
+      </SheetHeader>
+      <section className="space-y-4 h-[calc(100vh)] overflow-y-auto">
+        <ImageCarousel images={data?.photo_url || []} />
+        <form
+          className="px-2 space-y-4 border-t"
+          id="remarks-form"
+          onSubmit={form.handleSubmit(onSubmit)}
+        >
+          {data?.created_at && (
+            <span className="italic text-xs text-muted-foreground my-2">
+              Date Submitted: {format(new Date(data.created_at), "PPp")}
+            </span>
+          )}
+          <NonFormInput
+            label="Reporter Name"
+            defaultValue={data?.reporter?.fullname}
+            readonly
+          />
+          <NonFormInput label="Purpose" defaultValue={data?.purpose} readonly />
+          <NonFormMultiInput label="Findings" values={data?.findings} />
+          <Label className="capitalized">Observation</Label>
+          <Textarea value={data?.observation} readOnly tabIndex={-1} />
+          <NonFormMultiInput
+            label="Issues / Concern"
+            values={data?.issues_concern}
+          />
+          <FormTextarea
+            label="Remarks"
+            name="remarks"
+            form={form}
+            readonly={data?.remarks ? true : false}
+          />
+        </form>
+      </section>
+      <SheetFooter className="border-t flex-row justify-end p-2">
         <SheetClose asChild>
-          <Button
-            variant="outline"
-            ref={closeButtonRef}
-            size={"sm"}
-            className="w-1/2"
-          >
+          <Button variant="outline" ref={closeButtonRef} size={"sm"}>
             Close
           </Button>
         </SheetClose>
@@ -96,7 +107,6 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
             form="remarks-form"
             variant={isPending ? "ghost" : "default"}
             size={"sm"}
-            className="w-1/2"
             disabled={isPending}
           >
             {isPending ? <Loader2 className="animate-spin" /> : "Submit"}

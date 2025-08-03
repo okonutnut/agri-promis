@@ -15,7 +15,7 @@ const formSchema = z.object({
   program_name: z
     .string()
     .min(1, "Program name is required")
-    .max(20, "Program name cannot exceed 20 characters")
+    .max(50, "Program name cannot exceed 20 characters")
     .refine((val) => !/\d/.test(val), {
       message: "Program name cannot contain numbers",
     }),

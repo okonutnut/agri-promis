@@ -9,9 +9,8 @@ type ViewFieldTechnicianPanelProps = {
 export default function ViewFieldTechnicianPanel({
   selectedRow,
 }: ViewFieldTechnicianPanelProps) {
-  console.log("Selected Row:", selectedRow);
   return (
-    <section className="p-2 space-y-4 overflow-y-auto">
+    <section className="p-2 space-y-4 overflow-y-auto h-[calc(100vh)]">
       <FTGPSCard user_id={selectedRow?.user_id as string} />
       <div>
         <Label htmlFor="recent-activities" className="mb-1">

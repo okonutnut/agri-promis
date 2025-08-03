@@ -45,7 +45,7 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className="space-y-4 m-2">
+    <div className="space-y-4 m-2 h-[calc(100vh)]">
       <Input
         placeholder="Search..."
         value={table.getState().globalFilter ?? ""}

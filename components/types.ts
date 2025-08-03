@@ -15,6 +15,7 @@ export type ProgramType = {
   agriculturist_id?: string;
   program_name: string;
   description?: string;
+  project_count: { count: number }[];
   created_at?: string;
 };
 
@@ -84,15 +85,22 @@ export type AssignedProjectsType = {
 
 export type TravelOrderType = {
   id?: string;
-  travel_order_no: string;
-  name: string;
-  office: string;
-  program: string;
-  estimated_cost: number;
-  departure_date: string;
-  return_date: string;
-  destination: string;
-  mode_of_transportation: string;
+  user_id?: string;
+  travel_order_no?: string;
+  purpose?: string;
+  user?: { fullname?: string };
+  createdBy?: { fullname?: string };
+  office?: string;
+  program_id?: string;
+  project_id?: string;
+  project?: string;
+  fund?: number;
+  estimated_cost?: number;
+  departure_date?: string;
+  return_date?: string;
+  destination?: string;
+  mode_of_transport?: string;
+  is_active?: number;
   created_at?: string;
 };
 

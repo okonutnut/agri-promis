@@ -57,7 +57,7 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
           {images.map((image, index) => (
             <CarouselItem key={index}>
               <div
-                className="cursor-pointer hover:opacity-80 transition-opacity"
+                className="cursor-pointer hover:opacity-80 transition-opacity max-h-min"
                 onClick={() => handleImageClick(image)}
               >
                 <Image

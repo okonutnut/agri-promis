@@ -83,9 +83,11 @@ export default function FieldTechnicianPage() {
               ) : (
                 <ViewFieldTechnicianPanel selectedRow={selectedRow} />
               )}
-              <SheetFooter className="border-t">
+              <SheetFooter className="border-t flex-row justify-end p-2">
                 <SheetClose asChild>
-                  <Button variant={"outline"}>Close</Button>
+                  <Button variant={"outline"} size={"sm"}>
+                    Close
+                  </Button>
                 </SheetClose>
               </SheetFooter>
             </SheetContent>

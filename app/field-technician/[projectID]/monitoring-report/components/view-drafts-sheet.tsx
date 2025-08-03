@@ -46,7 +46,7 @@ export default function ViewDraftsSheet({
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button variant={"outline"}>
+        <Button variant={"outline"} className="cursor-pointer">
           <FileInput />
           Drafts
         </Button>
@@ -89,7 +89,9 @@ export default function ViewDraftsSheet({
         </Table>
         <SheetFooter className="border-t flex-row justify-end p-2">
           <SheetClose asChild>
-            <Button variant={"outline"}>Close</Button>
+            <Button variant={"outline"} size={"sm"} className="cursor-pointer">
+              Close
+            </Button>
           </SheetClose>
         </SheetFooter>
       </SheetContent>

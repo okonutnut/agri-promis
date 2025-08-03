@@ -3,12 +3,7 @@
 import { useState } from "react";
 import { DataTable } from "./table/data-table";
 import { columns } from "./table/columns";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useSelectAllMonitoringReportsByProjectIDAndUserHook } from "@/components/hooks";
 import { MonitoringReportType } from "@/components/types";
 import UserPageLayout from "@/components/custom/layout/user-page-layout";
@@ -67,13 +62,6 @@ export default function MonitoringReportPage() {
       />
       <Sheet open={panelOpen} onOpenChange={handlePanelClose}>
         <SheetContent className="w-screen md:max-w-xl">
-          <SheetHeader className="border-b">
-            <SheetTitle className="text-primary uppercase">
-              {isAddMode
-                ? "Upload New Post Activity Report"
-                : "View Post Activity Report Details"}
-            </SheetTitle>
-          </SheetHeader>
           <UploadFieldReportForm isAddMode={isAddMode} values={selectedRow} />
         </SheetContent>
       </Sheet>

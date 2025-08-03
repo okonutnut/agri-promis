@@ -16,6 +16,7 @@ type CustomPageLayoutProps = {
   error?: Error | null;
   noSidebar?: boolean;
   navItems?: NavigationItemType[];
+  topRightComponent?: React.ReactNode;
 };
 export default function CustomPageLayout({
   children,
@@ -25,6 +26,7 @@ export default function CustomPageLayout({
   error,
   noSidebar,
   navItems,
+  topRightComponent,
 }: CustomPageLayoutProps) {
   useEffect(() => {
     const interval = setInterval(() => {
@@ -44,7 +46,10 @@ export default function CustomPageLayout({
       <div className="flex">
         {!noSidebar && <AppSidebar navItems={navItems || []} />}
         <div className={cn(`container mx-auto p-4`, className)}>
-          <h1 className="text-2xl font-medium mb-4">{pageTitle}</h1>
+          <div className="w-full flex justify-between items-start">
+            <h1 className="text-2xl font-medium mb-4">{pageTitle}</h1>
+            {topRightComponent}
+          </div>
           {isLoading || error ? <SkeletonLoading /> : <>{children}</>}
         </div>
       </div>

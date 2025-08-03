@@ -1,3 +1,5 @@
+"use client";
+
 import FormTextarea from "@/components/custom/input/form-textarea";
 import FormMultiInput from "@/components/custom/input/form-multi-input";
 import { useInsertMonitoringReportHook } from "@/components/hooks";
@@ -8,7 +10,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useParams } from "next/navigation";
-import { SheetClose, SheetFooter } from "@/components/ui/sheet";
+import {
+  SheetClose,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { ImageData, LocationData } from "@/components/interfaces";
 import { MonitoringReportType } from "@/components/types";
 import { useEffect, useRef, useState } from "react";
@@ -16,6 +23,7 @@ import ImageCaptureForm from "./image-report-form";
 import FormInput from "@/components/custom/input/form-input";
 import SaveDraftButton from "../components/draft-button";
 import { deleteDraft } from "@/hooks/use-draft";
+import PrintMonitoringButton from "../components/print-monitoring";
 
 const fieldReportSchema = z.object({
   purpose: z.string().min(1, "Purpose is required"),
@@ -138,6 +146,14 @@ export default function UploadFieldReportForm({
 
   return (
     <>
+      <SheetHeader className="border-b flex-row justify-between items-start">
+        <SheetTitle className="text-primary uppercase">
+          {isAddMode
+            ? "Upload New Post Activity Report"
+            : "View Post Activity Report Details"}
+        </SheetTitle>
+        {!isAddMode && <PrintMonitoringButton data={values ?? null} />}
+      </SheetHeader>
       <section className="overflow-y-auto">
         <ImageCaptureForm
           isAddMode={isAddMode}
@@ -191,12 +207,13 @@ export default function UploadFieldReportForm({
           )}
         </form>
       </section>
-      <SheetFooter className="border-t flex-row justify-end">
+      <SheetFooter className="border-t flex-row justify-end p-2">
         <SheetClose asChild>
           <Button
             variant="outline"
+            disabled={isPending}
             ref={closeBtnRef}
-            className="w-full md:w-auto"
+            size={"sm"}
           >
             Close
           </Button>
@@ -215,6 +232,7 @@ export default function UploadFieldReportForm({
           <Button
             variant={isPending ? "ghost" : "default"}
             form="upload-monitoring-report-form"
+            size={"sm"}
             disabled={isPending || !images || images.length === 0}
           >
             {isPending ? <Loader2 className="animate-spin" /> : "Submit Report"}

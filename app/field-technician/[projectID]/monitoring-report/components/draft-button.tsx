@@ -81,12 +81,9 @@ export default function SaveDraftButton({
       disabled={isPending || isSaving || !isFetched}
       onClick={handleSaveDraft}
       type="button"
+      size={"sm"}
     >
-      {isPending || isSaving ? (
-        <Loader2 className="animate-spin" />
-      ) : (
-        "Save as Draft"
-      )}
+      {isSaving ? <Loader2 className="animate-spin" /> : "Save as Draft"}
     </Button>
   );
 }

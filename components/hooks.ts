@@ -26,6 +26,9 @@ import {
   SelectAllPostActivityReportsByProjectIDAction,
   InsertPostActivityRemarksAction,
   SelectUserCurrentLocationAction,
+  SelectAllUserProfilesAction,
+  InsertTravelOrderAction,
+  SelectAllTravelOrdersByProgramIDAction,
 } from "@/components/actions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -36,11 +39,20 @@ import {
   PostActivityReportType,
   ProgramType,
   ProjectType,
+  TravelOrderType,
   UserProfileType,
 } from "./types";
 import { createClient } from "@/utils/supabase/client";
 
 // USER PROFILE HOOKS
+export function useSelectAllUserProfilesHook() {
+  return useQuery({
+    queryKey: ["userProfiles"],
+    queryFn: async () => await SelectAllUserProfilesAction(),
+    refetchOnMount: true,
+  });
+}
+
 export function useSelectUserProfileHook() {
   return useQuery({
     queryKey: ["userProfile"],
@@ -233,6 +245,34 @@ export function useDeleteProjectHook(projectId: string, programId: string) {
     onError: (error) => {
       toast.error(`Failed to delete project: ${error.message}`);
     },
+  });
+}
+
+// TRAVEL ORDER HOOKS
+export function useInsertTravelOrderHook() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: TravelOrderType) =>
+      await InsertTravelOrderAction(data),
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: ["travelOrders"],
+      });
+      toast.success("Travel order issued successfully!");
+    },
+    onError: (error) => {
+      toast.error(`Failed to issue travel order: ${error.message}`);
+    },
+  });
+}
+
+export function useSelectAllTravelOrdersByProgramIDHook(programID: string) {
+  return useQuery({
+    queryKey: ["travelOrders"],
+    queryFn: async () =>
+      await SelectAllTravelOrdersByProgramIDAction(programID),
+    enabled: !!programID,
+    refetchOnMount: true,
   });
 }
 

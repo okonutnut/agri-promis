@@ -16,7 +16,7 @@ const formSchema = z
     project_name: z
       .string()
       .min(1, "Project name is required")
-      .max(20, "Project name cannot exceed 20 characters")
+      .max(50, "Project name cannot exceed 20 characters")
       .refine((val) => !/\d/.test(val), {
         message: "Project name cannot contain numbers",
       }),

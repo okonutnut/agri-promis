@@ -171,3 +171,20 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+.font-times-new-roman {
+  font-family: 'Times New Roman', serif;
+}
+
+.print-only {
+  display: none; /* Hidden on screen */
+}
+
+@media print {
+  .print-only {
+    display: block !important; /* Visible when printing */
+  }
+  .no-print {
+    display: none !important; /* Hide non-print elements */
+  }
+}

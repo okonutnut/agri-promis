@@ -7,6 +7,7 @@ import {
   UserProfileType,
   MonitoringReportType,
   PostActivityReportType,
+  TravelOrderType,
 } from "@/components/types";
 import { decodeSupabaseJWT } from "@/utils/decodeSupabaseJwt";
 import { createClient } from "@/utils/supabase/server";
@@ -14,6 +15,18 @@ import webpush from "web-push";
 import type { PushSubscription as WebPushSubscription } from "web-push";
 
 // USER PROFILE ACTIONS
+export async function SelectAllUserProfilesAction() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("user_profile")
+    .select("*")
+    .order("fullname", { ascending: true });
+  if (error) {
+    console.error("Error fetching user profiles:", error);
+    throw new Error(error.message);
+  }
+  return data as UserProfileType[];
+}
 export async function SelectUserProfileByIDAction(userID: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -128,7 +141,7 @@ export async function SelectAllProgramsByAgriculturistAction() {
 
   const { data, error } = await supabase
     .from("programs")
-    .select("*")
+    .select("*, project_count:projects(count)")
     .eq("agriculturist_id", userData.user.id)
     .order("created_at", { ascending: true });
 
@@ -288,6 +301,54 @@ export async function DeleteProjectAction(projectID: string) {
     throw new Error(error.code);
   }
   return;
+}
+
+// TRAVEL ORDER ACTIONS
+export async function InsertTravelOrderAction(data: TravelOrderType) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user?.id) {
+    console.error("Error fetching user:", userError);
+    throw new Error(userError?.message || "User not authenticated");
+  }
+
+  const { error } = await supabase.from("travel_order").insert({
+    ...data,
+    is_active: 1,
+    created_by: user?.id,
+  });
+
+  if (error) {
+    console.error("Error inserting travel order:", error);
+    throw new Error(`Failed to create travel order. ${error.message}`);
+  }
+
+  return;
+}
+
+export async function SelectAllTravelOrdersByProgramIDAction(
+  programID: string
+) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("travel_order")
+    .select(
+      `*, projects (id, project_name), user:user_profile!travel_order_user_id_fkey (fullname),
+      createdBy:user_profile!travel_order_created_by_fkey (fullname)`
+    )
+    .eq("projects.id", programID)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("Error fetching travel orders:", error);
+    throw new Error(error.message);
+  }
+
+  return data as TravelOrderType[];
 }
 
 // MONITORING REPORT ACTIONS
@@ -889,7 +950,7 @@ export async function SelectUserCurrentLocationAction(user_id: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("user_session")
-    .select("latitude, longitude")
+    .select("latitude, longitude, created_at")
     .eq("user_id", user_id)
     .order("created_at", { ascending: false })
     .limit(1)

@@ -11,21 +11,22 @@ import {
 } from "@/components/ui/sheet";
 import CustomPageLayout from "@/components/custom/layout/admin-page-layout";
 import { useParams } from "next/navigation";
-import SelectMembersTable from "./components/travel-order-form/travel-order-form";
-import { AssignedProjectsType } from "@/components/types";
+import IssueTravelOrderForm from "./components/travel-order-form";
+import { TravelOrderType } from "@/components/types";
 import { getProgramNavItems } from "@/components/sidebar/navitems";
+import { useSelectAllTravelOrdersByProgramIDHook } from "@/components/hooks";
 
 export default function FieldTechnicianPage() {
   const { programID } = useParams();
+  const { data, isLoading, error } = useSelectAllTravelOrdersByProgramIDHook(
+    programID as string
+  );
 
   const [panelOpen, setPanelOpen] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<AssignedProjectsType | null>(
-    null
-  );
-  console.log("Selected Row:", selectedRow);
+  const [selectedRow, setSelectedRow] = useState<TravelOrderType | null>(null);
   const [isAddMode, setIsAddMode] = useState(false);
 
-  const handleRowSelect = (row: AssignedProjectsType) => {
+  const handleRowSelect = (row: TravelOrderType) => {
     setSelectedRow(row);
     setIsAddMode(false);
     setPanelOpen(true);
@@ -46,22 +47,24 @@ export default function FieldTechnicianPage() {
   return (
     <CustomPageLayout
       pageTitle="Issued Travel Orders"
+      isLoading={isLoading}
+      error={error}
       navItems={getProgramNavItems(programID as string)}
     >
       <DataTable
         columns={columns}
-        data={[]}
+        data={data || []}
         onRowSelect={handleRowSelect}
         onAdd={handleAdd}
       />
       <Sheet open={panelOpen} onOpenChange={handlePanelClose}>
-        <SheetContent className="w-screen md:min-w-[600px] sm:min-w-[400px]">
+        <SheetContent className="w-screen md:min-w-[600px]">
           <SheetHeader className="border-b">
             <SheetTitle className="uppercase">
               {isAddMode ? "Issue Travel Order" : "View Travel Order Details"}
             </SheetTitle>
           </SheetHeader>
-          <SelectMembersTable assignedMembers={[]} />
+          <IssueTravelOrderForm isAddMode={isAddMode} values={selectedRow} />
         </SheetContent>
       </Sheet>
     </CustomPageLayout>

@@ -1,5 +1,6 @@
 import {
   Cctv,
+  ChartBar,
   ClipboardPen,
   House,
   Settings,
@@ -13,6 +14,11 @@ export function getDashboardNavItems() {
       title: "All Programs",
       href: "/dashboard/programs",
       icon: House,
+    },
+    {
+      title: "Schedules",
+      href: "/dashboard/schedules",
+      icon: ChartBar,
     },
     {
       title: "Team",

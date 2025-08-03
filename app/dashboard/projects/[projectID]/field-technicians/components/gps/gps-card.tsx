@@ -5,6 +5,7 @@ import { Icon } from "leaflet";
 import { useSelectUserLocationHook } from "@/components/hooks";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { format } from "date-fns";
 
 type FTGPSCardProps = {
   user_id: string;
@@ -31,6 +32,11 @@ export default function FTGPSCard({ user_id }: FTGPSCardProps) {
     <section className="p-2 space-y-4">
       <Label htmlFor="gps-card" className="mb-1">
         Current Location:
+        {data && (
+          <span className="italic text-xs text-gray-500">
+            Last update: {format(data?.created_at, "PPp")}
+          </span>
+        )}
       </Label>
       {!showMap ? (
         <Button
@@ -38,7 +44,7 @@ export default function FTGPSCard({ user_id }: FTGPSCardProps) {
           onClick={() => setShowMap(true)}
           className="w-full px-4 py-2"
         >
-          Get Current Location
+          Get Current Location{" "}
         </Button>
       ) : isLoading ? (
         <div className="w-full h-[40vh] flex items-center justify-center border rounded-lg">
@@ -64,7 +70,9 @@ export default function FTGPSCard({ user_id }: FTGPSCardProps) {
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
                 <Marker position={[data.latitude, data.longitude]} icon={icon}>
-                  <Popup>Last known location of the user.</Popup>
+                  <Popup>
+                    Last known location as of {format(data.created_at, "PPp")}.
+                  </Popup>
                 </Marker>
               </MapContainer>
             </div>

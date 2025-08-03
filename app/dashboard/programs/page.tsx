@@ -1,13 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  useSelectAllProgramsByAgriculturistHook,
-  useSelectAllProjectsByProgramIDHook,
-} from "@/components/hooks";
+import { useSelectAllProgramsByAgriculturistHook } from "@/components/hooks";
 import Link from "next/link";
 import CustomPageLayout from "@/components/custom/layout/admin-page-layout";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
 import { Boxes } from "lucide-react";
@@ -48,9 +44,11 @@ export default function DashboardPage() {
                             <Boxes className="h-5 w-5 text-gray-500" />
                           </span>
                           <span>
-                            <strong>{program.program_name}</strong>
-                            {program.id && (
-                              <ProjectCount program_id={program.id} />
+                            <strong>{program.program_name}</strong> <br />
+                            {program.project_count && (
+                              <span className="text-xs text-gray-500 font-mono">
+                                {program.project_count[0].count} Projects
+                              </span>
                             )}
                           </span>
                         </Link>
@@ -66,19 +64,5 @@ export default function DashboardPage() {
         </>
       )}
     </CustomPageLayout>
-  );
-}
-
-function ProjectCount({ program_id }: { program_id: string }) {
-  const { data, isLoading } = useSelectAllProjectsByProgramIDHook(program_id);
-  return (
-    <div className="flex items-center gap-2 text-xs font-mono">
-      {isLoading && <Skeleton className="h-3 w-[100px]" />}
-      {data && (
-        <span className="text-gray-500">
-          {data.length} {data.length === 1 ? "Project" : "Projects"}
-        </span>
-      )}
-    </div>
   );
 }

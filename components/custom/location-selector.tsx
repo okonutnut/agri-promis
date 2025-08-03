@@ -52,10 +52,10 @@ export default function LocationSelector({ onChange }: LocationSelectorProps) {
         <Popover open={openMuni} onOpenChange={setOpenMuni}>
           <PopoverTrigger asChild>
             <Button
-              variant="outline"
+              variant="secondary"
               role="combobox"
               aria-expanded={openMuni}
-              className="w-full justify-between"
+              className="w-full justify-between shadow-xs font-normal"
             >
               {municipality
                 ? muniData.find((m) => m.municipality === municipality)
@@ -64,7 +64,7 @@ export default function LocationSelector({ onChange }: LocationSelectorProps) {
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-full p-0 ">
+          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 ">
             <Command>
               <CommandInput placeholder="Search municipality..." />
               <CommandList>
@@ -99,10 +99,10 @@ export default function LocationSelector({ onChange }: LocationSelectorProps) {
         <Popover open={openBarangay} onOpenChange={setOpenBarangay}>
           <PopoverTrigger asChild>
             <Button
-              variant="outline"
+              variant="secondary"
               role="combobox"
               aria-expanded={openBarangay}
-              className="w-full justify-between"
+              className="w-full justify-between shadow-xs font-normal"
               disabled={!municipality}
             >
               {barangay
@@ -111,7 +111,7 @@ export default function LocationSelector({ onChange }: LocationSelectorProps) {
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-full p-0">
+          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
             <Command>
               <CommandInput placeholder="Search barangay..." />
               <CommandList>

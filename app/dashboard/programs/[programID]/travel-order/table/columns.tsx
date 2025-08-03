@@ -6,16 +6,16 @@ import { format } from "date-fns";
 
 export const columns: ColumnDef<TravelOrderType>[] = [
   {
-    accessorKey: "name",
-    header: "Fullname",
+    accessorKey: "travel_order_no",
+    header: "Travel Order No",
+  },
+  {
+    accessorKey: "user.fullname",
+    header: "Issued To",
   },
   {
     accessorKey: "destination",
     header: "Destination",
-  },
-  {
-    accessorKey: "program",
-    header: "Program",
   },
   {
     accessorKey: "created_at",
