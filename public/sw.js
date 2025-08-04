@@ -1,6 +1,112 @@
+importScripts('https://storage.googleapis.com/workbox-cdn/releases/6.5.4/workbox-sw.js');
+
+// Force update of service worker on page load
+workbox.core.clientsClaim();
+workbox.precaching.cleanupOutdatedCaches();
+
+// Pre-cache important routes and assets
+workbox.precaching.precacheAndRoute([
+  { url: '/', revision: null },
+  { url: '/login', revision: null },
+  { url: '/dashboard/programs', revision: null },
+  { url: '/dashboard/schedules', revision: null },
+  { url: '/dashboard/team', revision: null },
+  { url: '/dashboard/activity-logs', revision: null },
+  { url: '/manifest.webmanifest', revision: null },
+  { url: '/icons/favicon-96x96.png', revision: null },
+  { url: '/icons/web-app-manifest-192x192.png', revision: null },
+  { url: '/icons/web-app-manifest-512x512.png', revision: null },
+]);
+
+// Offline fallback page
+const offlineResponse = ({ url }) => {
+  if (url.pathname.startsWith('/api/')) {
+    return Response.error();
+  }
+  return caches.match('/offline');
+};
+
+// Navigation routes with offline support
+const navigationRoute = new workbox.routing.NavigationRoute(
+  new workbox.strategies.NetworkFirst({
+    cacheName: 'navigation-cache',
+    plugins: [
+      new workbox.cacheableResponse.CacheableResponsePlugin({
+        statuses: [0, 200],
+      }),
+      {
+        handlerDidError: offlineResponse
+      }
+    ],
+  })
+);
+workbox.routing.registerRoute(navigationRoute);
+
+// Cache static assets
+workbox.routing.registerRoute(
+  ({request}) => request.destination === 'script' ||
+                 request.destination === 'style',
+  new workbox.strategies.StaleWhileRevalidate({
+    cacheName: 'static-resources',
+    plugins: [
+      new workbox.expiration.ExpirationPlugin({
+        maxEntries: 100,
+        maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
+      }),
+    ],
+  })
+);
+
+// Cache images
+workbox.routing.registerRoute(
+  ({request}) => request.destination === 'image',
+  new workbox.strategies.CacheFirst({
+    cacheName: 'image-cache',
+    plugins: [
+      new workbox.cacheableResponse.CacheableResponsePlugin({
+        statuses: [0, 200],
+      }),
+      new workbox.expiration.ExpirationPlugin({
+        maxEntries: 100,
+        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
+      }),
+    ],
+  })
+);
+
+// Cache Workbox CDN and other external resources
+workbox.routing.registerRoute(
+  ({url}) => url.origin === 'https://storage.googleapis.com',
+  new workbox.strategies.CacheFirst({
+    cacheName: 'cdn-cache',
+    plugins: [
+      new workbox.expiration.ExpirationPlugin({
+        maxEntries: 10,
+        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
+      }),
+    ],
+  })
+);
+
+// Cache .webp images (same-origin)
+workbox.routing.registerRoute(
+  ({request, url}) =>
+    request.destination === 'image' &&
+    url.pathname.endsWith('.webp'),
+  new workbox.strategies.CacheFirst({
+    cacheName: 'webp-images',
+    plugins: [
+      new workbox.expiration.ExpirationPlugin({
+        maxEntries: 50,
+        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
+      }),
+    ],
+  })
+);
+
 self.addEventListener('push', function (event) {
   if (event.data) {
-    const data = event.data.json()
+    const data = event.data.json();
     const options = {
       body: data.body,
       icon: data.icon || '/icon.png',
@@ -10,13 +116,13 @@ self.addEventListener('push', function (event) {
         dateOfArrival: Date.now(),
         primaryKey: '2',
       },
-    }
-    event.waitUntil(self.registration.showNotification(data.title, options))
+    };
+    event.waitUntil(self.registration.showNotification(data.title, options));
   }
-})
- 
+});
+
 self.addEventListener('notificationclick', function (event) {
-  console.log('Notification click received.')
-  event.notification.close()
-  event.waitUntil(clients.openWindow('https://agri-promis.vercel.app/'))
-})
+  console.log('Notification click received.');
+  event.notification.close();
+  event.waitUntil(clients.openWindow('https://agri-promis.vercel.app/'));
+});

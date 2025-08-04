@@ -52,6 +52,7 @@ export function useSelectAllUserProfilesHook() {
     queryKey: ["userProfiles"],
     queryFn: async () => await SelectAllUserProfilesAction(),
     refetchOnMount: true,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -61,6 +62,7 @@ export function useSelectUserProfileHook() {
     queryKey: ["userProfile"],
     queryFn: async () => await SelectUserProfileAction(),
     refetchOnMount: true,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -74,6 +76,7 @@ export function useSelectCurrentUserSessionHook() {
       return session;
     },
     refetchOnMount: true,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -85,6 +88,7 @@ export function useSelectProgramByIDHook(programId: string) {
     queryFn: async () => await SelectProgramByIdAction(programId),
     enabled: !!programId,
     refetchOnMount: true,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -94,6 +98,7 @@ export function useSelectAllProgramsByAgriculturistHook() {
     queryKey: ["allProgramsByAgriculturist"],
     queryFn: async () => await SelectAllProgramsByAgriculturistAction(),
     refetchOnMount: true,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -108,11 +113,12 @@ export function useInsertProgramHook() {
       qc.invalidateQueries({
         queryKey: ["allProgramsByAgriculturist"],
       });
-      toast.success("Program created successfully!");
+      toast("Program created successfully!");
       router.push(`/dashboard/programs/${data.id}/`);
     },
     onError: (error) => {
       toast.error(`Failed to create program: ${error.message}`);
+      router.push("/dashboard/programs/");
     },
   });
 }
@@ -133,7 +139,7 @@ export function useEditProgramNameHook() {
       qc.invalidateQueries({
         queryKey: ["allProgramsByAgriculturist"],
       });
-      toast.success("Program name updated successfully!");
+      toast("Program name updated successfully!");
     },
     onError: (error) => {
       toast.error(`Failed to update program name: ${error.message}`);
@@ -150,7 +156,7 @@ export function useDeleteProgramHook(programId: string) {
       qc.invalidateQueries({
         queryKey: ["allProgramsByAgriculturist"],
       });
-      toast.success("Program deleted successfully!");
+      toast("Program deleted successfully!");
       router.push("/dashboard/programs");
     },
     onError: (error) => {
@@ -166,6 +172,7 @@ export function useSelectAllProjectsByProgramIDHook(programId: string) {
     queryFn: async () => await SelectAllProjectsByProgramIDAction(programId),
     enabled: !!programId,
     refetchOnMount: true,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -179,6 +186,7 @@ export function useSelectProgramAndProjectDetailsByProgjectIDHook(
       await SelectProgramAndProjectDetailsByProjectIDAction(projectId),
     enabled: !!projectId,
     refetchOnMount: true,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -189,6 +197,7 @@ export function useSelectProjectDetailsHook(projectId: string) {
     queryFn: async () => await SelectProjectDetailsByProjectIDAction(projectId),
     enabled: !!projectId,
     refetchOnMount: true,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -203,11 +212,12 @@ export function useInsertProjectHook() {
       qc.invalidateQueries({
         queryKey: ["allProjectsByProgramId", data.program_id],
       });
-      toast.success("Project created successfully!");
+      toast("Project created successfully!");
       router.push(`/dashboard/projects/${data.id}`);
     },
     onError: (error) => {
       toast.error(`${error.message}`);
+      router.push(`/dashboard/projects/`);
     },
   });
 }
@@ -232,7 +242,7 @@ export function useEditProjectNameHook() {
       qc.invalidateQueries({
         queryKey: ["allProjectsByProgramId", data.program_id],
       });
-      toast.success("Project updated successfully!");
+      toast("Project updated successfully!");
     },
     onError: (error) => {
       toast.error(`Failed to update project name: ${error.message}`);
@@ -249,7 +259,7 @@ export function useDeleteProjectHook(projectId: string, programId: string) {
       qc.invalidateQueries({
         queryKey: ["allProjectsByProgramId", programId],
       });
-      toast.success("Project deleted successfully!");
+      toast("Project deleted successfully!");
       router.push("/dashboard/programs/" + programId);
     },
     onError: (error) => {
@@ -268,7 +278,7 @@ export function useInsertTravelOrderHook() {
       qc.invalidateQueries({
         queryKey: ["travelOrders"],
       });
-      toast.success("Travel order issued successfully!");
+      toast("Travel order issued successfully!");
     },
     onError: (error) => {
       toast.error(`Failed to issue travel order: ${error.message}`);
@@ -283,6 +293,7 @@ export function useSelectAllTravelOrdersByProgramIDHook(programID: string) {
       await SelectAllTravelOrdersByProgramIDAction(programID),
     enabled: !!programID,
     refetchOnMount: true,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -296,7 +307,7 @@ export function useSelectAllMonitoringReportsByProjectIDHook(
     queryFn: async () =>
       await SelectAllMonitoringReportsByProjectIDAction(projectID),
     enabled: !!projectID,
-    refetchInterval: 5000,
+    refetchInterval: 3000,
     refetchOnMount: true,
     networkMode: "online",
   });
@@ -311,7 +322,7 @@ export function useInsertMonitoringReportHook() {
       qc.invalidateQueries({
         queryKey: ["allMonitoringReportsByUser"],
       });
-      toast.success("Monitoring report created successfully!");
+      toast("Monitoring report created successfully!");
     },
     onError: (error) => {
       toast.error(`Failed to create monitoring report: ${error.message}`);
@@ -328,7 +339,7 @@ export function useInsertRemarksInMonitoringReportHook(reportId: string) {
       qc.invalidateQueries({
         queryKey: ["allMonitoringReportsByProjectId"],
       });
-      toast.success("Remarks added successfully!");
+      toast("Remarks added successfully!");
     },
     onError: (error) => {
       toast.error(`Failed to add remarks: ${error.message}`);
@@ -343,7 +354,7 @@ export function useSelectAllMonitoringReportsByProjectIDAndUserHook(
     queryKey: ["allMonitoringReportsByUser", projectID],
     queryFn: async () =>
       await SelectAllMonitoringReportsByProjectIDAndUserAction(projectID),
-    refetchInterval: 5000,
+    refetchInterval: 3000,
     refetchOnMount: true,
     networkMode: "online",
   });
@@ -358,7 +369,7 @@ export function useInsertMemberHook() {
       qc.invalidateQueries({
         queryKey: ["members"],
       });
-      toast.success("Member invited successfully!");
+      toast("Member invited successfully!");
     },
     onError: () => {
       console.error("Failed to invite member.");
@@ -372,6 +383,7 @@ export function useSelectAllMembersHook() {
     queryKey: ["members"],
     queryFn: async () => await SelectAllMembersAction(),
     refetchOnMount: true,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -382,6 +394,7 @@ export function useSelectAllMembersByRoleHook(role: string) {
     queryFn: async () => await SelectAllMembersByRoleAction(role),
     enabled: !!role,
     refetchOnMount: true,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -396,7 +409,7 @@ export function useInsertFieldTechnicianToProjectHook(project_id: string) {
       qc.invalidateQueries({
         queryKey: ["fieldTechnicians", project_id],
       });
-      toast.success("Field technician added to project successfully!");
+      toast("Field technician added to project successfully!");
     },
     onError: (error) => {
       console.error("Failed to add field technician to project:", error);
@@ -412,6 +425,7 @@ export function useSelectFieldTechniciansByProjectIDHook(project_id: string) {
       await SelectAllFieldTechniciansByProjectIDAction(project_id),
     enabled: !!project_id,
     refetchOnMount: true,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -422,6 +436,7 @@ export function useSelectAssignedProjectsByFieldTechnicianHook() {
     queryFn: async () =>
       await SelectAllAssignedProjectsByFieldTechnicianIDAction(),
     refetchOnMount: true,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -436,7 +451,7 @@ export function useInsertPostActivityReportHook() {
       qc.invalidateQueries({
         queryKey: ["postActivityReport"],
       });
-      toast.success("Post activity report submitted successfully!");
+      toast("Post activity report submitted successfully!");
     },
     onError: (error) => {
       toast.error(`Failed to submit post activity report: ${error.message}`);
@@ -453,7 +468,7 @@ export function useInsertPostActivityRemarksHook() {
       qc.invalidateQueries({
         queryKey: ["postActivityReport"],
       });
-      toast.success("Remarks submitted successfully!");
+      toast("Remarks submitted successfully!");
     },
     onError: (error) => {
       toast.error(`Failed to submit remarks: ${error.message}`);
@@ -470,6 +485,7 @@ export function useSelectAllPostActivityReportsByProjectIDHook(
       await SelectAllPostActivityReportsByProjectIDAction(projectID),
     enabled: !!projectID,
     refetchOnMount: true,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -479,6 +495,7 @@ export function useSelectAllPostActivityReportsByUserHook() {
     queryKey: ["postActivityReport"],
     queryFn: async () => await SelectAllPostActivityReportsByUserID(),
     refetchOnMount: true,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -490,6 +507,7 @@ export function useSelectUserLocationHook(user_id: string) {
     queryFn: async () => await SelectUserCurrentLocationAction(user_id),
 
     refetchOnMount: true,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -500,6 +518,7 @@ export function useSelectActivityLogsByUserIDHook(user_id: string) {
     queryKey: ["activity-logs"],
     queryFn: async () => await SelectActivityLogsByUserIDAction(user_id),
     refetchOnMount: true,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -508,7 +527,7 @@ export function useSelectAllActivityLogsHook() {
   return useQuery({
     queryKey: ["activity-logs"],
     queryFn: async () => await SelectAllActivityLogsAction(),
-    refetchInterval: 5000,
+    refetchInterval: 3000,
     refetchOnMount: true,
     networkMode: "online",
   });

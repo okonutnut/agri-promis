@@ -902,18 +902,11 @@ export async function SelectIfSubscribedAction(endpoint?: string) {
 
 export async function SendPushNotificationToAllAction(message: string) {
   const supabase = await createClient();
-  const { data: subscriptions, error: subError } = await supabase
+  const { data: subscriptions } = await supabase
     .from("push_subscriptions")
     .select("endpoint, expirationTime, keys");
 
-  if (subError) {
-    console.error("Error fetching subscriptions:", subError);
-    throw new Error("Failed to fetch subscriptions");
-  }
-  if (!subscriptions || subscriptions.length === 0) {
-    console.warn("No subscriptions found for push notifications");
-    throw new Error("No subscriptions found");
-  }
+  if (!subscriptions || subscriptions.length === 0) return;
 
   await Promise.all(
     subscriptions.map((subscription) =>
@@ -940,23 +933,12 @@ export async function SendPushNotificationToUserAction(
     return;
   }
   const supabase = await createClient();
-  const { data: subscriptions, error: subError } = await supabase
+  const { data: subscriptions } = await supabase
     .from("push_subscriptions")
     .select("*")
     .eq("user_id", user_id);
 
-  if (subError) {
-    console.error("Error fetching user subscription:", subError);
-    throw new Error("Failed to fetch user subscription");
-  }
-  if (!subscriptions || subscriptions.length === 0) {
-    console.error("No subscription found for user:", user_id);
-    return;
-  }
-  if (!subscriptions) {
-    console.error("No valid subscription found for user:", user_id);
-    return;
-  }
+  if (!subscriptions || subscriptions.length === 0) return;
 
   await Promise.all(
     subscriptions.map((subscription) =>

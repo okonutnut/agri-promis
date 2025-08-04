@@ -77,12 +77,12 @@ export default function NotificationsPanel() {
         if (isEnabled) {
           unsubscribeFromPush().then(() => {
             setIsEnabled(false);
-            toast.success("Unsubscribed from notifications.");
+            toast("Unsubscribed from notifications.");
           });
         } else {
           subscribeToPush().then(() => {
             setIsEnabled(true);
-            toast.success("Subscribed to notifications.");
+            toast("Subscribed to notifications.");
           });
         }
       }}
