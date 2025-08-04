@@ -15,7 +15,6 @@ export default function ActivityLogsPage() {
       isLoading={isLoading}
       error={error}
       navItems={getDashboardNavItems()}
-      realtimeKey="activity-logs"
     >
       <DataTable columns={columns} data={data || []} />
     </CustomPageLayout>
