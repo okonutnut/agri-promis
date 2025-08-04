@@ -34,7 +34,8 @@ export default function CreateProgramForm() {
   });
 
   const { mutate, isPending } = useInsertProgramHook();
-  const handleSubmit = (data: FormData) => mutate(data);
+  const handleSubmit = (data: FormData) =>
+    mutate({ ...data, project_count: [] });
 
   return (
     <>

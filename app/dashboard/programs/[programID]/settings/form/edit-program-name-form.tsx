@@ -28,7 +28,8 @@ export default function EditProgramNameForm({
   });
 
   const { mutate, isPending } = useEditProgramNameHook();
-  const handleSubmit = (data: z.infer<typeof formSchema>) => mutate(data);
+  const handleSubmit = (data: z.infer<typeof formSchema>) =>
+    mutate({ ...data, project_count: programData.project_count });
 
   return (
     <>
