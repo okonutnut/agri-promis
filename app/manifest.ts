@@ -7,7 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description:
       "A Progressive Web App built for Agricultural Project Monitoring and Implementation",
     start_url: "/",
-    display: "standalone",
+    display: "minimal-ui",
     background_color: "#ffffff",
     theme_color: "#ffffff",
     icons: [
@@ -27,5 +27,8 @@ export default function manifest(): MetadataRoute.Manifest {
         type: "image/png",
       },
     ],
+    lang: "en",
+    orientation: "portrait",
+    display_override: ["window-controls-overlay", "minimal-ui", "standalone"],
   };
 }
