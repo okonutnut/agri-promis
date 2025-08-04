@@ -1,6 +1,7 @@
 import {
   Cctv,
   ChartBar,
+  ChartLine,
   ClipboardPen,
   House,
   Settings,
@@ -24,6 +25,11 @@ export function getDashboardNavItems() {
       title: "Team",
       href: "/dashboard/team",
       icon: Users,
+    },
+    {
+      title: "Activity Logs",
+      href: "/dashboard/activity-logs",
+      icon: ChartLine,
     },
   ];
 }

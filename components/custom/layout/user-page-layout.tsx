@@ -26,8 +26,8 @@ export default function UserPageLayout({
   topRightComponent,
 }: UserPageLayoutProps) {
   const { projectID } = useParams();
-
   useEffect(() => {
+    updateUserLocation();
     const interval = setInterval(() => {
       updateUserLocation();
     }, 5000);

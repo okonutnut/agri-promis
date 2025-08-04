@@ -8,6 +8,7 @@ import {
   MonitoringReportType,
   PostActivityReportType,
   TravelOrderType,
+  ActivityLogType,
 } from "@/components/types";
 import { decodeSupabaseJWT } from "@/utils/decodeSupabaseJwt";
 import { createClient } from "@/utils/supabase/server";
@@ -89,6 +90,12 @@ export async function InsertProgramAction({
 
   // Send push notification to all subscribers
   await SendPushNotificationToAllAction("New program created");
+
+  // Log the activity
+  await InsertActivityLogAction(
+    "Created a Program",
+    `Program ${program_name} created on ${new Date().toLocaleDateString()}`
+  );
 
   return data as ProgramType;
 }
@@ -201,6 +208,12 @@ export async function InsertProjectAction({
 
   // Send push notification to all subscribers
   await SendPushNotificationToAllAction("New project created");
+
+  // Log the activity
+  await InsertActivityLogAction(
+    "Created a Project",
+    `Project ${project_name} created on ${new Date().toLocaleDateString()}`
+  );
 
   return data as ProjectType;
 }
@@ -327,6 +340,14 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
     throw new Error(`Failed to create travel order. ${error.message}`);
   }
 
+  // Log the activity
+  await InsertActivityLogAction(
+    "Created a Travel Order",
+    `Travel order created for ${
+      data.purpose
+    } on ${new Date().toLocaleDateString()}`
+  );
+
   return;
 }
 
@@ -450,6 +471,26 @@ export async function InsertMonitoringReportAction({
   });
 
   if (error) throw error;
+
+  const { data: projectData, error: projectError } = await supabase
+    .from("projects")
+    .select()
+    .eq("id", project_id)
+    .single();
+
+  if (projectError) {
+    console.error("Error fetching project data:", projectError);
+    throw new Error("Failed to fetch project data. Please try again.");
+  }
+
+  // Log the activity
+  await InsertActivityLogAction(
+    "Submitted a Monitoring Report",
+    `Monitoring report created for project ${
+      projectData.project_name
+    } on ${new Date().toLocaleDateString()}`
+  );
+
   return;
 }
 
@@ -981,4 +1022,66 @@ export async function DeleteUserSessionAction() {
   }
 
   return true;
+}
+
+// ACTIVITY LOG ACTIONS
+export async function InsertActivityLogAction(
+  code: string,
+  description: string
+) {
+  const supabase = await createClient();
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !userData?.user) {
+    console.error("Error fetching user:", userError);
+    throw new Error(userError?.message || "User not authenticated");
+  }
+  const response = await fetch("https://api.ipify.org?format=json");
+  const data = await response.json();
+
+  const { error } = await supabase.from("activity_logs").insert({
+    user_id: userData.user.id,
+    ip_address: data.ip,
+    code,
+    description,
+  });
+
+  if (error) {
+    console.error("Error inserting activity log:", error);
+    throw new Error("Failed to insert activity log");
+  }
+
+  return;
+}
+
+export async function SelectActivityLogsByUserIDAction(user_id: string) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("activity_logs")
+    .select("*")
+    .eq("user_id", user_id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching activity logs:", error);
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+export async function SelectAllActivityLogsAction() {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("activity_logs")
+    .select("*, user:user_profile (fullname)")
+    .order("created_at", { ascending: false });
+  if (error) {
+    console.error("Error fetching activity logs:", error);
+    throw new Error(error.message);
+  }
+
+  return data as ActivityLogType[];
 }

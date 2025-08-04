@@ -36,7 +36,7 @@ export default function LoginPage() {
   return (
     <>
       <div className="grid grid-cols-3 h-screen w-screen gap-2 overflow-hidden">
-        <section className="hidden md:block col-span-2 bg-[url('/farmers-1.png')] bg-cover bg-center relative">
+        <section className="hidden md:block col-span-2 bg-[url('/login-bg.jpg')] bg-cover bg-center relative">
           <div className="absolute top-0 left-0 w-full h-full bg-black/50 flex flex-col items-center justify-center gap-2">
             <h1 className="text-white text-4xl font-bold text-center max-w-[80%] mb-4">
               Agricultural Project Monitoring and Implementation System

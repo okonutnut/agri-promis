@@ -48,8 +48,8 @@ const MonitoringTemplate = forwardRef<HTMLDivElement, Props>(
                 src={photo}
                 alt={`Photo ${index + 1}`}
                 className="w-full h-full object-cover"
-                width={100}
-                height={100}
+                width={200}
+                height={200}
               />
             </div>
           ))}

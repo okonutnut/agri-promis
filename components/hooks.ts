@@ -29,6 +29,8 @@ import {
   SelectAllUserProfilesAction,
   InsertTravelOrderAction,
   SelectAllTravelOrdersByProgramIDAction,
+  SelectActivityLogsByUserIDAction,
+  SelectAllActivityLogsAction,
 } from "@/components/actions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -285,6 +287,7 @@ export function useSelectAllMonitoringReportsByProjectIDHook(
     queryFn: async () =>
       await SelectAllMonitoringReportsByProjectIDAction(projectID),
     enabled: !!projectID,
+    refetchInterval: 5000,
     refetchOnMount: true,
   });
 }
@@ -330,6 +333,7 @@ export function useSelectAllMonitoringReportsByProjectIDAndUserHook(
     queryKey: ["allMonitoringReportsByUser", projectID],
     queryFn: async () =>
       await SelectAllMonitoringReportsByProjectIDAndUserAction(projectID),
+    refetchInterval: 5000,
     refetchOnMount: true,
   });
 }
@@ -467,6 +471,25 @@ export function useSelectUserLocationHook(user_id: string) {
   return useQuery({
     queryKey: ["userLocation", user_id],
     queryFn: async () => await SelectUserCurrentLocationAction(user_id),
+
+    refetchOnMount: true,
+  });
+}
+
+// ACTIVITY LOG HOOKS
+export function useSelectActivityLogsByUserIDHook(user_id: string) {
+  return useQuery({
+    queryKey: ["activity-logs"],
+    queryFn: async () => await SelectActivityLogsByUserIDAction(user_id),
+    refetchOnMount: true,
+  });
+}
+
+export function useSelectAllActivityLogsHook() {
+  return useQuery({
+    queryKey: ["activity-logs"],
+    queryFn: async () => await SelectAllActivityLogsAction(),
+    refetchInterval: 5000,
     refetchOnMount: true,
   });
 }

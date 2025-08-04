@@ -29,6 +29,7 @@ export default function CustomPageLayout({
   topRightComponent,
 }: CustomPageLayoutProps) {
   useEffect(() => {
+    updateUserLocation();
     const interval = setInterval(() => {
       updateUserLocation();
     }, 5000);

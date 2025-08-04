@@ -10,6 +10,15 @@ export type UserProfileType = {
   created_at?: string;
 };
 
+export type ActivityLogType = {
+  id?: string;
+  user_id?: string;
+  code?: string;
+  description?: string;
+  ip_address?: string;
+  created_at?: string;
+};
+
 export type ProgramType = {
   id?: string;
   agriculturist_id?: string;

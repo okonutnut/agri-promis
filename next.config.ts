@@ -1,6 +1,33 @@
+// @ts-check
+// next.config.ts
 import type { NextConfig } from "next";
-const withBundleAnalyzer = require("@next/bundle-analyzer")({
-  enabled: process.env.ANALYZE === "true",
+import withBundleAnalyzer from "@next/bundle-analyzer";
+
+const withPWA = require("@ducanh2912/next-pwa").default({
+  dest: "public",
+  register: true,
+  skipWaiting: true,
+  disable: false,
+  cacheOnFrontEndNav: true,
+  aggressiveFrontEndNavCaching: true,
+  reloadOnOnline: true,
+  runtimeCaching: [
+    {
+      urlPattern: /^https?.*/,
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "offlineCache",
+        expiration: {
+          maxEntries: 200,
+        },
+      },
+    },
+    // Add this to exclude Supabase auth endpoints
+    {
+      urlPattern: /^https:\/\/.*\.supabase\.co\/auth\/v1\/.*/,
+      handler: "NetworkOnly",
+    },
+  ],
 });
 
 const nextConfig: NextConfig = {
@@ -12,17 +39,12 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "lh3.googleusercontent.com",
-        pathname: "/a/**", // Adjust based on your needs
+        pathname: "/a/**",
       },
-      {
-        protocol: "https",
-        hostname: "aawvhtjwzyxsfyikmeis.supabase.co",
-      },
+      { protocol: "https", hostname: "aawvhtjwzyxsfyikmeis.supabase.co" },
     ],
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  eslint: { ignoreDuringBuilds: true },
   async headers() {
     return [
       {
@@ -63,4 +85,6 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withBundleAnalyzer(nextConfig);
+export default withBundleAnalyzer({ enabled: !!process.env.ANALYZE })(
+  withPWA(nextConfig)
+);
