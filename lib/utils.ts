@@ -86,15 +86,7 @@ export const getLocationName = async (
     );
     const data = await response.json();
 
-    // Extract barangay (village), municipality (city/town), and province (state)
-    const barangay = data.address.village || data.address.neighbourhood;
-    const municipality = data.address.city || data.address.town;
-    const province = data.address.state;
-    const country = data.address.country;
-
-    return [barangay, municipality, province, country]
-      .filter(Boolean) // Remove undefined/null
-      .join(", ");
+    return data.display_name || "Location unavailable";
   } catch (error) {
     console.error("Error fetching from OpenStreetMap:", error);
     return "Location unavailable";
