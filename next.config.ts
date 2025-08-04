@@ -5,29 +5,12 @@ import withBundleAnalyzer from "@next/bundle-analyzer";
 
 const withPWA = require("@ducanh2912/next-pwa").default({
   dest: "public",
+  sw: "sw.js",
   register: true,
   skipWaiting: true,
-  disable: false,
+  disable: process.env.NODE_ENV === "development",
   cacheOnFrontEndNav: true,
   aggressiveFrontEndNavCaching: true,
-  reloadOnOnline: true,
-  runtimeCaching: [
-    {
-      urlPattern: /^https?.*/,
-      handler: "NetworkFirst",
-      options: {
-        cacheName: "offlineCache",
-        expiration: {
-          maxEntries: 200,
-        },
-      },
-    },
-    // Add this to exclude Supabase auth endpoints
-    {
-      urlPattern: /^https:\/\/.*\.supabase\.co\/auth\/v1\/.*/,
-      handler: "NetworkOnly",
-    },
-  ],
 });
 
 const nextConfig: NextConfig = {

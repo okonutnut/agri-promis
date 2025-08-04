@@ -289,12 +289,21 @@ export async function updateUserLocation() {
     return;
   }
 
-  return await supabase.from("user_session").upsert(
+  const { error } = await supabase.from("user_session").upsert(
     {
       user_id: user?.user?.id,
       longitude: locationData.longitude,
       latitude: locationData.latitude,
+      created_at: new Date(),
     },
-    { onConflict: "user_id" }
+    {
+      onConflict: "user_id",
+    }
   );
+
+  if (error) {
+    console.error("Error updating user location:", error);
+  }
+
+  return;
 }

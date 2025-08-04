@@ -10,7 +10,7 @@ export function FTRecentActivities({ user_id }: RecentActivitiesProps) {
   const { data, isLoading } = useSelectActivityLogsByUserIDHook(
     user_id as string
   );
-  console.log("Recent Activities Data:", data);
+
   return (
     <>
       <Label className="mb-1">Recent Activities:</Label>
