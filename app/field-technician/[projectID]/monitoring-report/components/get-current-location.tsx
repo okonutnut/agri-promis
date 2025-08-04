@@ -1,3 +1,5 @@
+"use client";
+
 import { LocationData } from "@/components/interfaces";
 import { Button } from "@/components/ui/button";
 import { getLocationName } from "@/lib/utils";

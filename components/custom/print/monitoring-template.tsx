@@ -1,4 +1,3 @@
-// components/PrintableComponent.tsx
 "use client";
 
 import { MonitoringReportType } from "@/components/types";

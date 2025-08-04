@@ -1,3 +1,5 @@
+"use client";
+
 import FormTextarea from "@/components/custom/input/form-textarea";
 import FormMultiInput from "@/components/custom/input/form-multi-input";
 import { useInsertMonitoringReportHook } from "@/components/hooks";

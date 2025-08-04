@@ -1,3 +1,5 @@
+"use client";
+
 import SkeletonLoading from "@/components/custom/layout/skeleton-loading";
 import { useSelectActivityLogsByUserIDHook } from "@/components/hooks";
 import { Label } from "@/components/ui/label";

@@ -1,3 +1,5 @@
+"use client";
+
 import CustomAlertDialog from "@/components/custom/alert/custom-alert";
 import { useDeleteProjectHook } from "@/components/hooks";
 import { ProjectType } from "@/components/types";

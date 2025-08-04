@@ -1,3 +1,5 @@
+"use client";
+
 import { useParams } from "next/navigation";
 import { cn, updateUserLocation } from "@/lib/utils";
 import { toast } from "sonner";

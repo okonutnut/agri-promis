@@ -1,3 +1,5 @@
+"use client";
+
 import { useSelectCurrentUserSessionHook } from "@/components/hooks";
 import { MonitoringReportType } from "@/components/types";
 import { Button } from "@/components/ui/button";

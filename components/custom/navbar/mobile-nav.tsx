@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import NavbarUserImage from "./navbar-user-image";
 import Link from "next/link";

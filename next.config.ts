@@ -3,16 +3,6 @@
 import type { NextConfig } from "next";
 import withBundleAnalyzer from "@next/bundle-analyzer";
 
-const withPWA = require("@ducanh2912/next-pwa").default({
-  dest: "public",
-  sw: "sw.js",
-  register: true,
-  skipWaiting: true,
-  disable: process.env.NODE_ENV === "development",
-  cacheOnFrontEndNav: true,
-  aggressiveFrontEndNavCaching: true,
-});
-
 const nextConfig: NextConfig = {
   productionBrowserSourceMaps: true,
   output: "standalone",
@@ -28,46 +18,46 @@ const nextConfig: NextConfig = {
     ],
   },
   eslint: { ignoreDuringBuilds: true },
-  async headers() {
-    return [
-      {
-        source: "/(.*)",
-        headers: [
-          {
-            key: "X-Content-Type-Options",
-            value: "nosniff",
-          },
-          {
-            key: "X-Frame-Options",
-            value: "DENY",
-          },
-          {
-            key: "Referrer-Policy",
-            value: "strict-origin-when-cross-origin",
-          },
-        ],
-      },
-      {
-        source: "/sw.js",
-        headers: [
-          {
-            key: "Content-Type",
-            value: "application/javascript; charset=utf-8",
-          },
-          {
-            key: "Cache-Control",
-            value: "no-cache, no-store, must-revalidate",
-          },
-          {
-            key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self'",
-          },
-        ],
-      },
-    ];
-  },
+  // async headers() {
+  //   return [
+  //     {
+  //       source: "/(.*)",
+  //       headers: [
+  //         {
+  //           key: "X-Content-Type-Options",
+  //           value: "nosniff",
+  //         },
+  //         {
+  //           key: "X-Frame-Options",
+  //           value: "DENY",
+  //         },
+  //         {
+  //           key: "Referrer-Policy",
+  //           value: "strict-origin-when-cross-origin",
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       source: "/sw.js",
+  //       headers: [
+  //         {
+  //           key: "Content-Type",
+  //           value: "application/javascript; charset=utf-8",
+  //         },
+  //         {
+  //           key: "Cache-Control",
+  //           value: "no-cache, no-store, must-revalidate",
+  //         },
+  //         {
+  //           key: "Content-Security-Policy",
+  //           value: "default-src 'self'; script-src 'self'",
+  //         },
+  //       ],
+  //     },
+  //   ];
+  // },
 };
 
 export default withBundleAnalyzer({ enabled: !!process.env.ANALYZE })(
-  withPWA(nextConfig)
+  nextConfig
 );

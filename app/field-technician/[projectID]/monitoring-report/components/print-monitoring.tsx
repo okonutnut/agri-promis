@@ -1,4 +1,3 @@
-// app/page.tsx
 "use client";
 
 import MonitoringTemplate from "@/components/custom/print/monitoring-template";

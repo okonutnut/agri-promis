@@ -94,7 +94,9 @@ export async function InsertProgramAction({
   // Log the activity
   await InsertActivityLogAction(
     "Created a Program",
-    `Program ${program_name} created on ${new Date().toLocaleDateString()}`
+    `Program ${
+      program_name as string
+    } created on ${new Date().toLocaleDateString()}`
   );
 
   return data as ProgramType;
@@ -487,7 +489,7 @@ export async function InsertMonitoringReportAction({
   await InsertActivityLogAction(
     "Submitted a Monitoring Report",
     `Monitoring report created for project ${
-      projectData.project_name
+      projectData.project_name as string
     } on ${new Date().toLocaleDateString()}`
   );
 
@@ -926,12 +928,6 @@ export async function SendPushNotificationToAllAction(message: string) {
     )
   );
 
-  await supabase.from("notifications").insert({
-    title: "Agri-Promis Notification",
-    message: message,
-    public: 1,
-  });
-
   return;
 }
 
@@ -940,7 +936,7 @@ export async function SendPushNotificationToUserAction(
   message: string
 ) {
   if (!user_id) {
-    console.warn("Invalid user ID for push notification");
+    console.error("Invalid user ID for push notification");
     return;
   }
   const supabase = await createClient();
@@ -954,11 +950,11 @@ export async function SendPushNotificationToUserAction(
     throw new Error("Failed to fetch user subscription");
   }
   if (!subscriptions || subscriptions.length === 0) {
-    console.warn("No subscription found for user:", user_id);
+    console.error("No subscription found for user:", user_id);
     return;
   }
   if (!subscriptions) {
-    console.warn("No valid subscription found for user:", user_id);
+    console.error("No valid subscription found for user:", user_id);
     return;
   }
 
@@ -974,13 +970,6 @@ export async function SendPushNotificationToUserAction(
       )
     )
   );
-
-  await supabase.from("notifications").insert({
-    user_id: user_id,
-    title: "Agri-Promis Notification",
-    message: message,
-    public: 0,
-  });
 
   return;
 }

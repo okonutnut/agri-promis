@@ -1,3 +1,5 @@
+"use client";
+
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { Button } from "../ui/button";

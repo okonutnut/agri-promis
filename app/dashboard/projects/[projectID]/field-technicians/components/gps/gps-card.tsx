@@ -1,4 +1,6 @@
-import { Suspense, useEffect, useState } from "react";
+"use client";
+
+import { Suspense } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { Icon } from "leaflet";
