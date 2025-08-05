@@ -434,6 +434,7 @@ export async function InsertMonitoringReportAction({
   observation,
   issues_concern,
   images,
+  remarks,
 }: MonitoringReportType) {
   if (!images?.length) throw new Error("No images provided");
 
@@ -470,6 +471,7 @@ export async function InsertMonitoringReportAction({
     reporter_id: user.id,
     observation,
     photo_url: photo_urls,
+    remarks,
   });
 
   if (error) throw error;
@@ -496,15 +498,11 @@ export async function InsertMonitoringReportAction({
   return;
 }
 
-export async function InsertRemarksInMonitoringReportAction(
-  reportId: string,
-  remarks: string
-) {
+export async function InsertRemarksInMonitoringReportAction(reportId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("monitoring")
     .update({
-      remarks: remarks,
       reviewed_by_id: (await supabase.auth.getUser()).data.user?.id,
     })
     .eq("id", reportId)

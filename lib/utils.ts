@@ -86,7 +86,10 @@ export const getLocationName = async (
     );
     const data = await response.json();
 
-    return data.display_name || "Location unavailable";
+    return (
+      `${data.address.village}, ${data.address.city}, ${data.address.city}` ||
+      "Location unavailable"
+    );
   } catch (error) {
     console.error("Error fetching from OpenStreetMap:", error);
     return "Location unavailable";
@@ -102,125 +105,109 @@ export const addOverlayToImage = (
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     const img = new window.Image();
-    const logo = new window.Image();
 
     if (!ctx) {
       reject(new Error("Canvas context not available"));
       return;
     }
 
-    Promise.all([
-      new Promise<void>((res) => {
-        img.onload = () => res();
-        img.src = URL.createObjectURL(file);
-      }),
-      new Promise<void>((res) => {
-        logo.onload = () => res();
-        logo.src = "/logo.png";
-      }),
-    ])
-      .then(() => {
-        try {
-          canvas.width = img.width;
-          canvas.height = img.height;
+    img.onload = () => {
+      try {
+        canvas.width = img.width;
+        canvas.height = img.height;
 
-          ctx.drawImage(img, 0, 0);
+        ctx.drawImage(img, 0, 0);
 
-          // Increased size factors
-          const minDimension = Math.min(img.width, img.height);
-          const maxDimension = Math.max(img.width, img.height);
-          const baseFontSize = Math.min(minDimension / 20, maxDimension / 45); // Increased from 25/60
-          const fontSize = Math.max(22, Math.min(38, baseFontSize)); // Increased from 18/32
+        const minDimension = Math.min(img.width, img.height);
+        const maxDimension = Math.max(img.width, img.height);
+        const baseFontSize = Math.min(minDimension / 20, maxDimension / 45);
+        const fontSize = Math.max(22, Math.min(38, baseFontSize));
 
-          ctx.font = `bold ${fontSize}px Arial, sans-serif`;
-          ctx.textAlign = "left";
-          ctx.textBaseline = "top";
+        ctx.font = `bold ${fontSize}px Arial, sans-serif`;
+        ctx.textAlign = "left";
+        ctx.textBaseline = "top";
 
-          const date = new Date(timestamp);
-          const formattedDate = date.toLocaleDateString();
-          const formattedTime = date.toLocaleTimeString();
-          const overlayLines = [`${formattedDate} ${formattedTime}`];
+        const date = new Date(timestamp);
+        const formattedDate = date.toLocaleDateString();
+        const formattedTime = date.toLocaleTimeString();
+        const overlayLines = [`${formattedDate} ${formattedTime}`];
 
-          if (location.latitude && location.longitude) {
-            overlayLines.push(
-              `Lat: ${location.latitude.toFixed(
-                6
-              )}, Long: ${location.longitude.toFixed(6)}`
-            );
-          }
-
-          if (location.locationName) {
-            const maxChars = Math.floor(img.width / (fontSize * 0.55)); // Adjusted for larger text
-            const locationText =
-              location.locationName.length > maxChars
-                ? location.locationName.substring(0, maxChars) + "..."
-                : location.locationName;
-            overlayLines.push(`Location: ${locationText}`);
-          }
-
-          // Increased padding and dimensions
-          const padding = fontSize * 1.0; // Increased from 0.8
-          const lineHeight = fontSize * 1.5; // Increased from 1.4
-          const overlayHeight = overlayLines.length * lineHeight + padding * 2;
-          const textWidths = overlayLines.map(
-            (line) => ctx.measureText(line).width
+        if (location.latitude && location.longitude) {
+          overlayLines.push(
+            `Lat: ${location.latitude.toFixed(
+              6
+            )}, Long: ${location.longitude.toFixed(6)}`
           );
-          const maxTextWidth = Math.max(...textWidths);
-
-          const logoHeight = overlayHeight - padding * 1.8; // Slightly adjusted
-          const logoWidth = (logo.width / logo.height) * logoHeight;
-
-          const margin = Math.max(12, fontSize * 0.7); // Increased from 10/0.6
-          const overlayY = img.height - overlayHeight - margin;
-          const totalWidth = logoWidth + maxTextWidth + padding * 4;
-
-          ctx.fillStyle = "rgba(0, 0, 0, 0.7)"; // Slightly more opaque
-          ctx.fillRect(margin, overlayY, totalWidth, overlayHeight);
-
-          ctx.drawImage(
-            logo,
-            margin + padding,
-            overlayY + padding,
-            logoWidth,
-            logoHeight
-          );
-
-          ctx.fillStyle = "white";
-          ctx.strokeStyle = "black";
-          ctx.lineWidth = Math.max(1.2, fontSize / 14); // Increased from 1/16
-
-          overlayLines.forEach((line, index) => {
-            const textX = margin + logoWidth + padding * 2;
-            const textY = overlayY + padding + index * lineHeight;
-            ctx.strokeText(line, textX, textY);
-            ctx.fillText(line, textX, textY);
-          });
-
-          canvas.toBlob(
-            (blob) => {
-              if (blob) {
-                const overlayedFile = new File([blob], file.name, {
-                  type: "image/jpeg",
-                  lastModified: Date.now(),
-                });
-                resolve(overlayedFile);
-              } else {
-                console.warn("Blob creation failed, using original file");
-                resolve(file);
-              }
-            },
-            "image/jpeg",
-            0.9
-          );
-        } catch (error) {
-          console.error("Error in overlay creation:", error);
-          resolve(file);
         }
-      })
-      .catch(() => {
-        console.error("Error loading images");
+
+        if (location.locationName) {
+          const maxChars = Math.floor(img.width / (fontSize * 0.55));
+          const words = location.locationName.split(" ");
+          let currentLine = "Location: ";
+          let locationLines = [];
+
+          words.forEach((word) => {
+            const testLine = currentLine + word + " ";
+            if (testLine.length > maxChars) {
+              locationLines.push(currentLine.trim());
+              currentLine = word + " ";
+            } else {
+              currentLine = testLine;
+            }
+          });
+          if (currentLine) locationLines.push(currentLine.trim());
+          overlayLines.push(...locationLines);
+        }
+
+        const padding = fontSize * 1.0;
+        const lineHeight = fontSize * 1.5;
+        const overlayHeight = overlayLines.length * lineHeight + padding * 2;
+        const textWidths = overlayLines.map(
+          (line) => ctx.measureText(line).width
+        );
+        const maxTextWidth = Math.max(...textWidths);
+
+        const margin = Math.max(12, fontSize * 0.7);
+        const overlayY = img.height - overlayHeight - margin;
+        const totalWidth = maxTextWidth + padding * 2;
+
+        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+        ctx.fillRect(margin, overlayY, totalWidth, overlayHeight);
+
+        ctx.fillStyle = "white";
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = Math.max(1.2, fontSize / 14);
+
+        overlayLines.forEach((line, index) => {
+          const textX = margin + padding;
+          const textY = overlayY + padding + index * lineHeight;
+          ctx.strokeText(line, textX, textY);
+          ctx.fillText(line, textX, textY);
+        });
+
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const overlayedFile = new File([blob], file.name, {
+                type: "image/jpeg",
+                lastModified: Date.now(),
+              });
+              resolve(overlayedFile);
+            } else {
+              console.warn("Blob creation failed, using original file");
+              resolve(file);
+            }
+          },
+          "image/jpeg",
+          0.9
+        );
+      } catch (error) {
+        console.error("Error in overlay creation:", error);
         resolve(file);
-      });
+      }
+    };
+
+    img.src = URL.createObjectURL(file);
   });
 };
 

@@ -12,6 +12,7 @@ export const columns: ColumnDef<MonitoringReportType>[] = [
   {
     accessorKey: "reviewedBy.fullname",
     header: "Reviewed By",
+    cell: ({ getValue }) => <div>{(getValue() as string) || "N/A"}</div>,
   },
   {
     accessorKey: "created_at",

@@ -306,7 +306,6 @@ export function useSelectAllMonitoringReportsByProjectIDHook(
     queryKey: ["allMonitoringReportsByProjectId"],
     queryFn: async () =>
       await SelectAllMonitoringReportsByProjectIDAction(projectID),
-    enabled: !!projectID,
     refetchInterval: 3000,
     refetchOnMount: true,
     networkMode: "online",
@@ -333,8 +332,8 @@ export function useInsertMonitoringReportHook() {
 export function useInsertRemarksInMonitoringReportHook(reportId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (data: { remarks: string }) =>
-      await InsertRemarksInMonitoringReportAction(reportId, data.remarks),
+    mutationFn: async () =>
+      await InsertRemarksInMonitoringReportAction(reportId),
     onSuccess: () => {
       qc.invalidateQueries({
         queryKey: ["allMonitoringReportsByProjectId"],

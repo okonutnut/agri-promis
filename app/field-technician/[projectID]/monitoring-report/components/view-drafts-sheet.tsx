@@ -17,11 +17,10 @@ import {
   TableBody,
   TableCaption,
   TableCell,
-  TableHead,
-  TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import { loadDrafts } from "@/hooks/use-draft";
+import { format } from "date-fns";
 import { FileInput } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -58,21 +57,18 @@ export default function ViewDraftsSheet({
           <SheetTitle>My Drafts</SheetTitle>
         </SheetHeader>
         <Table>
-          <TableCaption>A list of your recent drafts.</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead className="text-end"></TableHead>
-            </TableRow>
-          </TableHeader>
+          <TableCaption>Note: All drafts are only saved locally.</TableCaption>
           <TableBody>
             {drafts.map((draft) => (
               <TableRow key={`${draft.key}-${draft.created_at}`}>
                 <TableCell>
-                  {draft.purpose || "Untitled"} -{" "}
-                  {new Date(
-                    draft.created_at ?? new Date()
-                  ).toLocaleDateString()}
+                  <span className="truncate block max-w-md">
+                    {draft.purpose || "Untitled"}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    Date:
+                    {format(new Date(draft.created_at ?? new Date()), "PPp")}
+                  </span>
                 </TableCell>
                 <TableCell className="text-end">
                   <Button

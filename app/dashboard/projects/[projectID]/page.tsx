@@ -19,7 +19,7 @@ export default function DashboardPage() {
       error={error}
       navItems={getProjectNavItems(projectID as string)}
     >
-      <div className="py-16 flex justify-between items-start">
+      <div className="py-14 flex justify-between items-start">
         {data && (
           <>
             <div className="flex flex-col gap-1 text-2xl font-medium">

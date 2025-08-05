@@ -1,6 +1,5 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import FormInput from "./form-input";
 import { UseFormReturn } from "react-hook-form";
@@ -21,7 +20,7 @@ export default function FormMultiInput({
   readOnly,
 }: FormMultiInputProps) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 relative">
       {!readOnly ? (
         <div className="flex items-end gap-2">
           <FormInput
@@ -50,36 +49,42 @@ export default function FormMultiInput({
       ) : (
         <Label>{label}</Label>
       )}
-      <div className="flex flex-wrap gap-2">
-        {(form.watch(`${name}`) || values)
-          ?.slice(1)
-          .map((issue: string, index: number) => (
-            <Badge
-              key={index}
-              variant={"outline"}
-              className="flex items-center gap-1 bg-secondary rounded-full px-3 py-1"
-            >
-              <span className="text-sm">{issue}</span>
-              {!readOnly && (
-                <button
-                  type="button"
-                  className="text-sm hover:text-destructive"
-                  onClick={() => {
-                    const currentIssues = form.getValues("issues_concern");
-                    form.setValue("issues_concern", [
-                      currentIssues[0],
-                      ...currentIssues
-                        .slice(1)
-                        .filter((_: string, i: number) => i !== index),
-                    ]);
-                  }}
-                >
-                  ×
-                </button>
-              )}
-            </Badge>
-          ))}
-      </div>
+      <table className="w-full overflow-x-auto border">
+        <tbody>
+          {(form.watch(`${name}`) || values)
+            ?.slice(1)
+            .map((issue: string, index: number) => (
+              <tr
+                key={index}
+                className="flex items-center gap-1 py-1 truncate border-b"
+              >
+                <td>
+                  {!readOnly && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="text-sm hover:text-destructive"
+                      onClick={() => {
+                        const currentIssues = form.getValues(`${name}`) || [];
+                        form.setValue(`${name}`, [
+                          currentIssues[0],
+                          ...currentIssues
+                            .slice(1)
+                            .filter((_: string, i: number) => i !== index),
+                        ]);
+                      }}
+                    >
+                      ×
+                    </Button>
+                  )}
+                </td>
+                <td className="flex-1 gap-2">
+                  <span className="text-sm text-start">{issue}</span>
+                </td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
     </div>
   );
 }

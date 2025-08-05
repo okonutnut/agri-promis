@@ -56,6 +56,7 @@ export type MonitoringReportType = {
   key?: string;
   project_id?: string;
   reporter_id?: string;
+  reviewed_by_id?: string;
   purpose?: string;
   findings?: string[];
   observation?: string;

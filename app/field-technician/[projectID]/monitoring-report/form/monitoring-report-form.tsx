@@ -32,22 +32,12 @@ const fieldReportSchema = z.object({
     .string()
     .min(1, "Observation is required")
     .min(5, "Observation must be at least 5 characters")
-    .max(500, "Observation must not exceed 500 characters"),
+    .max(700, "Observation must not exceed 700 characters"),
   issues_concern: z.array(z.string()).min(1, "At least one issue is required"),
   remarks: z
     .string()
-    .optional()
-    .refine(
-      (val: string | undefined) => {
-        if (val && val.length < 5) {
-          return false;
-        }
-        return true;
-      },
-      {
-        message: "Remarks must be at least 5 characters when provided",
-      }
-    ),
+    .min(5, "Remarks must be at least 5 characters")
+    .max(700, "Remarks must not exceed 700 characters"),
 });
 
 type FieldReportFormData = z.infer<typeof fieldReportSchema>;
@@ -86,7 +76,6 @@ export default function UploadFieldReportForm({
   // Hook for inserting monitoring report
   const { mutate, isPending, isSuccess } = useInsertMonitoringReportHook();
   const onSubmit = async (data: FieldReportFormData) => {
-    form.setValue("remarks", "");
     // Validate images
     if (!images || images.length === 0) {
       toast.error("At least one image is required");
@@ -164,7 +153,7 @@ export default function UploadFieldReportForm({
           setImages={setImages}
         />
         <form
-          className="space-y-4 m-2 border-t pt-4"
+          className="space-y-4 m-2 border-t pt-4 overflow-x-hidden"
           id="upload-monitoring-report-form"
           onSubmit={form.handleSubmit(onSubmit)}
         >
@@ -196,15 +185,13 @@ export default function UploadFieldReportForm({
             values={values?.issues_concern || null}
             readOnly={!isAddMode}
           />
-          {!isAddMode && (
-            <FormTextarea
-              label="Remarks"
-              name="remarks"
-              form={form}
-              readonly={!!values}
-              noPlaceholder
-            />
-          )}
+          <FormTextarea
+            label="Remarks"
+            name="remarks"
+            form={form}
+            readonly={!isAddMode}
+            noPlaceholder
+          />
         </form>
       </section>
       <SheetFooter className="border-t flex-row justify-end p-2">

@@ -61,7 +61,7 @@ export default function MonitoringReportPage() {
         onAdd={handleAdd}
       />
       <Sheet open={panelOpen} onOpenChange={handlePanelClose}>
-        <SheetContent className="w-screen md:max-w-xl">
+        <SheetContent className="w-screen md:max-w-4xl">
           <UploadFieldReportForm isAddMode={isAddMode} values={selectedRow} />
         </SheetContent>
       </Sheet>

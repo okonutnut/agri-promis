@@ -15,7 +15,7 @@ export default function FieldTechnicianPage() {
 
   return (
     <UserPageLayout isLoading={isLoading} error={error}>
-      <div className="py-16 flex justify-between items-start">
+      <section className="py-14 flex justify-between items-start">
         {data && (
           <>
             <div className="flex flex-col gap-1 text-2xl font-medium">
@@ -42,8 +42,9 @@ export default function FieldTechnicianPage() {
             </Badge>
           </>
         )}
-      </div>
+      </section>
       <Separator className="fixed left-0" />
+      <section className="w-full flex justify-start items-start gap-4 mt-4"></section>
     </UserPageLayout>
   );
 }

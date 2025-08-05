@@ -7,6 +7,7 @@ workbox.precaching.cleanupOutdatedCaches();
 // Pre-cache important routes and assets
 workbox.precaching.precacheAndRoute([
   { url: '/', revision: null },
+  { url: '/auth/callback', revision: null },
   { url: '/login', revision: null },
   { url: '/dashboard/programs', revision: null },
   { url: '/dashboard/schedules', revision: null },

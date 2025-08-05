@@ -1,12 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import NonFormInput from "@/components/custom/input/non-form-input";
 import { Textarea } from "@/components/ui/textarea";
-import FormTextarea from "@/components/custom/input/form-textarea";
 import {
   SheetClose,
   SheetFooter,
@@ -22,40 +18,23 @@ import { Label } from "@/components/ui/label";
 import NonFormMultiInput from "@/components/custom/input/non-form-multi-input";
 import ImageCarousel from "@/components/custom/images/image-carousel";
 import PrintMonitoringButton from "@/app/field-technician/[projectID]/monitoring-report/components/print-monitoring";
-
-const formSchema = z.object({
-  id: z.string().min(1, "ID is required"),
-  remarks: z
-    .string()
-    .min(1, "Remarks is required")
-    .max(500, "Remarks cannot exceed 500 characters"),
-});
-
-type FieldTechType = z.infer<typeof formSchema>;
+import NonFormTextarea from "@/components/custom/input/non-form-textarea";
 
 type FieldReportsFormProps = {
   data: MonitoringReportType | null;
 };
 export function FieldReportsForm({ data }: FieldReportsFormProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
-  const form = useForm<FieldTechType>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      id: data?.id || "",
-      remarks: data?.remarks || "",
-    },
-  });
 
   const { mutate, isPending, isSuccess } =
     useInsertRemarksInMonitoringReportHook(data?.id as string);
-  const onSubmit = (data: FieldTechType) => mutate(data);
+  const onSubmit = () => mutate();
 
   useEffect(() => {
     if (isSuccess) {
-      form.reset();
       closeButtonRef.current?.click();
     }
-  }, [isSuccess, form]);
+  }, [isSuccess]);
 
   return (
     <>
@@ -65,15 +44,11 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
         </SheetTitle>
         <PrintMonitoringButton data={data} />
       </SheetHeader>
-      <section className="space-y-4 h-[calc(100vh)] overflow-y-auto">
+      <section className="space-y-4 h-[calc(100vh)] overflow-y-auto overflow-x-hidden">
         <ImageCarousel images={data?.photo_url || []} />
-        <form
-          className="px-2 space-y-4 border-t"
-          id="remarks-form"
-          onSubmit={form.handleSubmit(onSubmit)}
-        >
+        <div className="px-2 space-y-4 border-t">
           {data?.created_at && (
-            <span className="italic text-xs text-muted-foreground my-2">
+            <span className="italic text-xs text-muted-foreground mb-4">
               Date Submitted: {format(new Date(data.created_at), "PPp")}
             </span>
           )}
@@ -90,13 +65,12 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
             label="Issues / Concern"
             values={data?.issues_concern}
           />
-          <FormTextarea
+          <NonFormTextarea
             label="Remarks"
-            name="remarks"
-            form={form}
-            readonly={data?.remarks ? true : false}
+            defaultValue={data?.remarks}
+            readonly
           />
-        </form>
+        </div>
       </section>
       <SheetFooter className="border-t flex-row justify-end p-2">
         <SheetClose asChild>
@@ -104,14 +78,14 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
             Close
           </Button>
         </SheetClose>
-        {!data?.remarks && (
+        {!data?.reviewed_by_id && (
           <Button
-            form="remarks-form"
+            onClick={() => onSubmit()}
             variant={isPending ? "ghost" : "default"}
             size={"sm"}
             disabled={isPending}
           >
-            {isPending ? <Loader2 className="animate-spin" /> : "Submit"}
+            {isPending ? <Loader2 className="animate-spin" /> : "Review Report"}
           </Button>
         )}
       </SheetFooter>

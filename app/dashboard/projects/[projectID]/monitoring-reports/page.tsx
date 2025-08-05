@@ -30,7 +30,7 @@ export default function FieldReportsPage() {
 
   const { data, isLoading, error } =
     useSelectAllMonitoringReportsByProjectIDHook(projectID as string);
-  console.log("Monitoring Reports Data:", data);
+
   return (
     <CustomPageLayout
       pageTitle="Monitoring Reports"
@@ -44,7 +44,7 @@ export default function FieldReportsPage() {
         onRowSelect={handleRowSelect}
       />
       <Sheet open={panelOpen} onOpenChange={handlePanelClose}>
-        <SheetContent className="w-screen md:min-w-2xl overflow-y-scroll">
+        <SheetContent className="w-screen md:min-w-2xl overflow-y-auto">
           <FieldReportsForm data={selectedRow} />
         </SheetContent>
       </Sheet>
