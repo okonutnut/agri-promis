@@ -22,7 +22,7 @@ export default function FTGPSCard({ user_id }: FTGPSCardProps) {
     className: "leaflet-custom-icon",
   });
 
-  const { data, isLoading, error, refetch, isFetching } =
+  const { data, isLoading, error, refetch, isRefetching } =
     useSelectUserLocationHook(user_id as string);
 
   return (
@@ -37,7 +37,7 @@ export default function FTGPSCard({ user_id }: FTGPSCardProps) {
           )}
         </Label>
         <div className="w-full h-[40vh] relative border rounded-lg flex flex-col items-center justify-center">
-          {isLoading || isFetching ? (
+          {isLoading || isRefetching ? (
             <p>Loading...</p>
           ) : error ? (
             <p>Error loading GPS data</p>

@@ -62,13 +62,12 @@ export default function FieldTechnicianPage() {
                   {isAddMode ? "Invite New Team Member" : "View Member Details"}
                 </SheetTitle>
               </SheetHeader>
-              <>
-                <TeamMemberForm
-                  key={isAddMode ? "add-mode" : selectedRow?.id || "view-mode"}
-                  data={isAddMode ? null : selectedRow}
-                  setPanelOpen={setPanelOpen}
-                />
-              </>
+              <TeamMemberForm
+                isAddMode={isAddMode}
+                key={isAddMode ? "add-mode" : selectedRow?.id || "view-mode"}
+                data={isAddMode ? null : selectedRow}
+                setPanelOpen={setPanelOpen}
+              />
             </SheetContent>
           </Sheet>
         </>

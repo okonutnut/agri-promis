@@ -20,17 +20,14 @@ import {
   InsertMonitoringReportAction,
   DeleteProjectAction,
   InsertRemarksInMonitoringReportAction,
-  InsertPostActivityReportAction,
-  SelectAllPostActivityReportsByUserID,
   SelectAllMonitoringReportsByProjectIDAndUserAction,
-  SelectAllPostActivityReportsByProjectIDAction,
-  InsertPostActivityRemarksAction,
   SelectUserCurrentLocationAction,
   SelectAllUserProfilesAction,
   InsertTravelOrderAction,
   SelectAllTravelOrdersByProgramIDAction,
   SelectActivityLogsByUserIDAction,
   SelectAllActivityLogsAction,
+  SelectDashboardItemsAction,
 } from "@/components/actions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -38,7 +35,6 @@ import { toast } from "sonner";
 import {
   AssignedProjectsType,
   MonitoringReportType,
-  PostActivityReportType,
   ProgramType,
   ProjectType,
   TravelOrderType,
@@ -259,7 +255,7 @@ export function useDeleteProjectHook(projectId: string, programId: string) {
       qc.invalidateQueries({
         queryKey: ["allProjectsByProgramId", programId],
       });
-      toast("Project deleted successfully!");
+      toast.error("Project deleted successfully!");
       router.push("/dashboard/programs/" + programId);
     },
     onError: (error) => {
@@ -332,8 +328,8 @@ export function useInsertMonitoringReportHook() {
 export function useInsertRemarksInMonitoringReportHook(reportId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async () =>
-      await InsertRemarksInMonitoringReportAction(reportId),
+    mutationFn: async (remarks: string) =>
+      await InsertRemarksInMonitoringReportAction(reportId, remarks),
     onSuccess: () => {
       qc.invalidateQueries({
         queryKey: ["allMonitoringReportsByProjectId"],
@@ -387,7 +383,7 @@ export function useSelectAllMembersHook() {
   });
 }
 
-export function useSelectAllMembersByRoleHook(role: string) {
+export function useSelectAllMembersByRoleHook(role: number) {
   return useQuery({
     queryKey: ["members", role],
     queryFn: async () => await SelectAllMembersByRoleAction(role),
@@ -440,73 +436,12 @@ export function useSelectAssignedProjectsByFieldTechnicianHook() {
   });
 }
 
-// POST ACTIVITY REPORT HOOKS
-export function useInsertPostActivityReportHook() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (data: PostActivityReportType) =>
-      await InsertPostActivityReportAction(data),
-    onSuccess: () => {
-      qc.invalidateQueries({
-        queryKey: ["postActivityReport"],
-      });
-      toast("Post activity report submitted successfully!");
-    },
-    onError: (error) => {
-      toast.error(`Failed to submit post activity report: ${error.message}`);
-    },
-  });
-}
-
-export function useInsertPostActivityRemarksHook() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (data: PostActivityReportType) =>
-      await InsertPostActivityRemarksAction(data),
-    onSuccess: () => {
-      qc.invalidateQueries({
-        queryKey: ["postActivityReport"],
-      });
-      toast("Remarks submitted successfully!");
-    },
-    onError: (error) => {
-      toast.error(`Failed to submit remarks: ${error.message}`);
-    },
-  });
-}
-
-export function useSelectAllPostActivityReportsByProjectIDHook(
-  projectID: string
-) {
-  return useQuery({
-    queryKey: ["postActivityReport"],
-    queryFn: async () =>
-      await SelectAllPostActivityReportsByProjectIDAction(projectID),
-    enabled: !!projectID,
-    refetchOnMount: true,
-    refetchInterval: 3000,
-    networkMode: "online",
-  });
-}
-
-export function useSelectAllPostActivityReportsByUserHook() {
-  return useQuery({
-    queryKey: ["postActivityReport"],
-    queryFn: async () => await SelectAllPostActivityReportsByUserID(),
-    refetchOnMount: true,
-    refetchInterval: 3000,
-    networkMode: "online",
-  });
-}
-
 // LOCATION HOOKS
 export function useSelectUserLocationHook(user_id: string) {
   return useQuery({
     queryKey: ["userLocation", user_id],
     queryFn: async () => await SelectUserCurrentLocationAction(user_id),
-
     refetchOnMount: true,
-    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -526,6 +461,17 @@ export function useSelectAllActivityLogsHook() {
   return useQuery({
     queryKey: ["activity-logs"],
     queryFn: async () => await SelectAllActivityLogsAction(),
+    refetchInterval: 3000,
+    refetchOnMount: true,
+    networkMode: "online",
+  });
+}
+
+// DASHBOARD HOOKS
+export function useSelectDashboardItemsHook(projectID: string) {
+  return useQuery({
+    queryKey: ["dashboard_items", projectID],
+    queryFn: async () => await SelectDashboardItemsAction(projectID),
     refetchInterval: 3000,
     refetchOnMount: true,
     networkMode: "online",

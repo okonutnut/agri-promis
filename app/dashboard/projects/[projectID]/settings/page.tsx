@@ -7,11 +7,15 @@ import { useSelectProgramAndProjectDetailsByProgjectIDHook } from "@/components/
 import { useParams } from "next/navigation";
 import { getProjectNavItems } from "@/components/sidebar/navitems";
 import DeleteProjectCard from "./components/delete-project-card";
+import { useEffect } from "react";
 
 export default function ProgramSettingsPage() {
   const { projectID } = useParams();
-  const { data, isLoading, error } =
+  const { data, isLoading, error, refetch } =
     useSelectProgramAndProjectDetailsByProgjectIDHook(projectID as string);
+  useEffect(() => {
+    refetch();
+  }, [refetch, projectID]);
 
   return (
     <CustomPageLayout

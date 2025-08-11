@@ -6,12 +6,23 @@ import { format } from "date-fns";
 
 export const columns: ColumnDef<UserProfileType>[] = [
   {
+    id: "no",
+    header: "No.",
+    cell: ({ row }) => {
+      return <div>{row.index + 1}</div>;
+    },
+  },
+  {
     accessorKey: "fullname",
     header: "Fullname",
   },
   {
-    accessorKey: "role",
-    header: "Role",
+    accessorKey: "position",
+    header: "Position",
+  },
+  {
+    accessorKey: "email",
+    header: "Email",
   },
   {
     accessorKey: "created_at",

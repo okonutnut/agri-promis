@@ -10,6 +10,7 @@ import { useParams, useRouter } from "next/navigation";
 import { CardFooter } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import LocationSelector from "@/components/custom/location-selector";
+import FormTextarea from "../input/form-textarea";
 
 const formSchema = z
   .object({
@@ -20,13 +21,7 @@ const formSchema = z
       .refine((val) => !/\d/.test(val), {
         message: "Project name cannot contain numbers",
       }),
-    crop_type: z
-      .string()
-      .min(1, "Crop type is required")
-      .max(20, "Crop type cannot exceed 20 characters")
-      .refine((val) => !/\d/.test(val), {
-        message: "Crop type cannot contain numbers",
-      }),
+    description: z.string().optional(),
     location: z.string().min(1, "Location is required"),
     start_date: z.string().refine(
       (val) => {
@@ -59,7 +54,7 @@ export default function CreateProjectForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       project_name: "",
-      crop_type: "",
+      description: "",
       location: "",
       start_date: new Date().toISOString().slice(0, 10),
       end_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1))
@@ -70,7 +65,11 @@ export default function CreateProjectForm() {
 
   const { mutate, isPending } = useInsertProjectHook();
   const handleSubmit = (data: FormData) =>
-    mutate({ ...data, program_id: programUID as string });
+    mutate({
+      ...data,
+      program_id: programUID as string,
+      description: data.description ?? "",
+    });
 
   return (
     <>
@@ -80,7 +79,12 @@ export default function CreateProjectForm() {
         onSubmit={form.handleSubmit(handleSubmit)}
       >
         <FormInput label="Project Name" name="project_name" form={form} />
-        <FormInput label="Crop Type" name="crop_type" form={form} />
+        <FormTextarea
+          label="Description"
+          name="description"
+          form={form}
+          rows={3}
+        />
         <LocationSelector
           onChange={(location) => form.setValue("location", location)}
         />

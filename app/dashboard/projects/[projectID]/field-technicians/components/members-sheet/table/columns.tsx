@@ -14,6 +14,10 @@ export const columns = (
     header: "Name",
   },
   {
+    accessorKey: "position",
+    header: "Position",
+  },
+  {
     id: "actions",
     cell: ({ row }) => (
       <div className="text-end" key={row.id}>

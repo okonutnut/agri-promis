@@ -24,6 +24,7 @@ import FormInput from "@/components/custom/input/form-input";
 import SaveDraftButton from "../components/draft-button";
 import { deleteDraft } from "@/hooks/use-draft";
 import PrintMonitoringButton from "../components/print-monitoring";
+import NonFormTextarea from "@/components/custom/input/non-form-textarea";
 
 const fieldReportSchema = z.object({
   purpose: z.string().min(1, "Purpose is required"),
@@ -34,10 +35,6 @@ const fieldReportSchema = z.object({
     .min(5, "Observation must be at least 5 characters")
     .max(700, "Observation must not exceed 700 characters"),
   issues_concern: z.array(z.string()).min(1, "At least one issue is required"),
-  remarks: z
-    .string()
-    .min(5, "Remarks must be at least 5 characters")
-    .max(700, "Remarks must not exceed 700 characters"),
 });
 
 type FieldReportFormData = z.infer<typeof fieldReportSchema>;
@@ -69,7 +66,6 @@ export default function UploadFieldReportForm({
       findings: values?.findings || [],
       issues_concern: values?.issues_concern || [],
       observation: values?.observation || "",
-      remarks: values?.remarks || "",
     },
   });
 
@@ -153,7 +149,7 @@ export default function UploadFieldReportForm({
           setImages={setImages}
         />
         <form
-          className="space-y-4 m-2 border-t pt-4 overflow-x-hidden"
+          className="space-y-4 p-2 border-t pt-4 overflow-x-hidden"
           id="upload-monitoring-report-form"
           onSubmit={form.handleSubmit(onSubmit)}
         >
@@ -162,7 +158,12 @@ export default function UploadFieldReportForm({
               {form.formState.errors.root.message}
             </div>
           )}
-          <FormInput label="Purpose" name="purpose" form={form} />
+          <FormInput
+            label="Purpose"
+            name="purpose"
+            form={form}
+            readonly={!isAddMode}
+          />
           {/* Findings */}
           <FormMultiInput
             label="Findings"
@@ -185,13 +186,14 @@ export default function UploadFieldReportForm({
             values={values?.issues_concern || null}
             readOnly={!isAddMode}
           />
-          <FormTextarea
-            label="Remarks"
-            name="remarks"
-            form={form}
-            readonly={!isAddMode}
-            noPlaceholder
-          />
+          {!isAddMode && (
+            <NonFormTextarea
+              label="Remarks"
+              defaultValue={values?.remarks || "N/A"}
+              readonly
+              noPlaceholder
+            />
+          )}
         </form>
       </section>
       <SheetFooter className="border-t flex-row justify-end p-2">

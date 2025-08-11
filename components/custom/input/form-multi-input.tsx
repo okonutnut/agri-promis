@@ -49,21 +49,21 @@ export default function FormMultiInput({
       ) : (
         <Label>{label}</Label>
       )}
-      <table className="w-full overflow-x-auto border">
+      <table className="w-full overflow-x-auto shadow-xs rounded-sm py-1">
         <tbody>
           {(form.watch(`${name}`) || values)
             ?.slice(1)
             .map((issue: string, index: number) => (
               <tr
                 key={index}
-                className="flex items-center gap-1 py-1 truncate border-b"
+                className="flex items-center gap-1 truncate border-b"
               >
                 <td>
                   {!readOnly && (
                     <Button
                       type="button"
-                      variant="ghost"
-                      className="text-sm hover:text-destructive"
+                      variant="secondary"
+                      className="text-sm shadow-none hover:text-destructive"
                       onClick={() => {
                         const currentIssues = form.getValues(`${name}`) || [];
                         form.setValue(`${name}`, [

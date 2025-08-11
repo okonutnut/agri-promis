@@ -4,11 +4,12 @@ import { subscribeUser, unsubscribeUser } from "@/app/actions";
 import { SelectIfSubscribedAction } from "@/components/actions";
 import { Button } from "@/components/ui/button";
 import { urlBase64ToUint8Array } from "@/lib/utils";
-import { BellOff, BellRing } from "lucide-react";
+import { BellOff, BellRing, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function NotificationsPanel() {
+  const [state, setState] = useState<"ready" | "loading" | "disabled">("ready");
   const [isEnabled, setIsEnabled] = useState(false);
   const [isSupported, setIsSupported] = useState(false);
   const [subscription, setSubscription] = useState<PushSubscription | null>(
@@ -58,40 +59,48 @@ export default function NotificationsPanel() {
   useEffect(() => {
     isSubscribed()
       .then(setIsEnabled)
-      .catch((error) => {
-        console.error("Error checking subscription status:", error);
+      .catch(() => {
         toast.error("Failed to check subscription status.");
         setIsEnabled(false);
       });
   }, [isSubscribed]);
 
   return (
-    <Button
-      variant={"ghost"}
-      className="relative rounded-full"
-      onClick={() => {
-        if (!isSupported) {
-          toast.error("Push notifications are not supported in this browser.");
-          return;
-        }
-        if (isEnabled) {
-          unsubscribeFromPush().then(() => {
-            setIsEnabled(false);
-            toast("Unsubscribed from notifications.");
-          });
-        } else {
-          subscribeToPush().then(() => {
-            setIsEnabled(true);
-            toast("Subscribed to notifications.");
-          });
-        }
-      }}
-    >
-      {isEnabled ? (
-        <BellRing className="h-5 w-5" />
-      ) : (
-        <BellOff className="h-5 w-5" />
-      )}
-    </Button>
+    <>
+      <Button
+        variant={"ghost"}
+        size={"icon"}
+        disabled={state === "loading"}
+        onClick={() => {
+          setState("loading");
+          if (!isSupported) {
+            toast.error(
+              "Push notifications are not supported in this browser."
+            );
+          }
+          if (isEnabled) {
+            unsubscribeFromPush().then(() => {
+              setIsEnabled(false);
+              setState("ready");
+              toast.error("Unsubscribed from notifications.");
+            });
+          } else {
+            subscribeToPush().then(() => {
+              setIsEnabled(true);
+              setState("ready");
+              toast("Subscribed to notifications.");
+            });
+          }
+        }}
+      >
+        {state === "loading" ? (
+          <Loader2 className="h-5 w-5 animate-spin" />
+        ) : isEnabled ? (
+          <BellRing className="h-5 w-5" />
+        ) : (
+          <BellOff className="h-5 w-5" />
+        )}
+      </Button>
+    </>
   );
 }

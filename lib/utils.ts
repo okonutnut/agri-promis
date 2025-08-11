@@ -1,6 +1,5 @@
-import { LocationData } from "@/components/interfaces";
-// import { getClientIpFromHeaders } from "@/utils/getClientIpFromHeaders";
 import { createClient } from "@/utils/supabase/client";
+import { LocationData } from "@/components/interfaces";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -261,8 +260,10 @@ export async function getLongtitudeLatitudeFromGPS(): Promise<LocationData> {
 export async function updateUserLocation() {
   const supabase = createClient();
   const locationData = await getLongtitudeLatitudeFromGPS();
-  // const ipAddress = await getClientIpFromHeaders();
   const { data: user } = await supabase.auth.getUser();
+
+  const response = await fetch("https://api.ipify.org?format=json");
+  const ipAddress = await response.json();
 
   if (!user?.user?.id) {
     return;
@@ -272,8 +273,9 @@ export async function updateUserLocation() {
     {
       user_id: user?.user?.id,
       longitude: locationData.longitude,
+      ip_address: ipAddress.ip,
       latitude: locationData.latitude,
-      created_at: new Date(),
+      modified_at: new Date(),
     },
     {
       onConflict: "user_id",

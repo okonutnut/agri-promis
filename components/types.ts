@@ -5,7 +5,8 @@ export type UserProfileType = {
   fullname: string;
   email?: string;
   phone?: string;
-  role?: string;
+  role?: number;
+  position?: string;
   access_level?: string;
   created_at?: string;
 };
@@ -31,7 +32,7 @@ export type ProgramType = {
 export type ProjectType = {
   id?: string;
   project_name: string;
-  crop_type: string;
+  description: string;
   start_date: string;
   end_date: string;
   status?: number;

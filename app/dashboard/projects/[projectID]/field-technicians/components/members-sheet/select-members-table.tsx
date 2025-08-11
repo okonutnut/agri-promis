@@ -22,8 +22,7 @@ export default function SelectMemberTable({
   const { projectID } = useParams();
 
   // GET
-  const { data, isLoading, isError } =
-    useSelectAllMembersByRoleHook("field_technician");
+  const { data, isLoading, isError } = useSelectAllMembersByRoleHook(2);
 
   const tableData = useMemo(() => {
     if (!data) return [];

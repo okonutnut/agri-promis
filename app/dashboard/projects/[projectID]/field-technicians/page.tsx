@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DataTable } from "./table/data-table";
 import { columns } from "./table/columns";
 import {
@@ -47,9 +47,12 @@ export default function FieldTechnicianPage() {
     setSelectedRow(null);
   };
 
-  const { data, isLoading, error } = useSelectFieldTechniciansByProjectIDHook(
-    projectID as string
-  );
+  const { data, isLoading, error, refetch } =
+    useSelectFieldTechniciansByProjectIDHook(projectID as string);
+
+  useEffect(() => {
+    refetch();
+  }, [refetch, projectID]);
 
   return (
     <CustomPageLayout

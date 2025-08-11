@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DataTable } from "./table/data-table";
 import { columns } from "./table/columns";
 import { FieldReportsForm } from "./components/field-reports-form";
@@ -11,7 +11,7 @@ import { getProjectNavItems } from "@/components/sidebar/navitems";
 import { MonitoringReportType } from "@/components/types";
 import { useSelectAllMonitoringReportsByProjectIDHook } from "@/components/hooks";
 
-export default function FieldReportsPage() {
+export default function MonitoringReportPage() {
   const { projectID } = useParams();
   const [panelOpen, setPanelOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<MonitoringReportType | null>(
@@ -28,8 +28,13 @@ export default function FieldReportsPage() {
     setSelectedRow(null);
   };
 
-  const { data, isLoading, error } =
+  const { data, isLoading, error, refetch } =
     useSelectAllMonitoringReportsByProjectIDHook(projectID as string);
+
+  // Refetch data when projectID changes
+  useEffect(() => {
+    refetch();
+  }, [refetch, projectID]);
 
   return (
     <CustomPageLayout

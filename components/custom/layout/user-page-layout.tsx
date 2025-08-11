@@ -32,7 +32,7 @@ export default function UserPageLayout({
     updateUserLocation();
     const interval = setInterval(() => {
       updateUserLocation();
-    }, 5000);
+    }, 10000);
 
     return () => clearInterval(interval);
   }, []);

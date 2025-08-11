@@ -6,8 +6,17 @@ import { MonitoringReportType } from "@/components/types";
 
 export const columns: ColumnDef<MonitoringReportType>[] = [
   {
+    id: "count",
+    header: "#",
+    cell: ({ row }) => row.index + 1,
+  },
+  {
     accessorKey: "reporter.fullname",
     header: "Reporter Name",
+  },
+  {
+    accessorKey: "purpose",
+    header: "Purpose",
   },
   {
     accessorKey: "remarkBy.fullname",

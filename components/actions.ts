@@ -6,18 +6,18 @@ import {
   ProjectType,
   UserProfileType,
   MonitoringReportType,
-  PostActivityReportType,
   TravelOrderType,
   ActivityLogType,
 } from "@/components/types";
-import { decodeSupabaseJWT } from "@/utils/decodeSupabaseJwt";
+import { decodeSupabaseJWT } from "@/utils/helpers/decodeSupabaseJwt";
 import { createClient } from "@/utils/supabase/server";
 import webpush from "web-push";
 import type { PushSubscription as WebPushSubscription } from "web-push";
+import { cookies } from "next/headers";
 
 // USER PROFILE ACTIONS
 export async function SelectAllUserProfilesAction() {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
   const { data, error } = await supabase
     .from("user_profile")
     .select("*")
@@ -29,7 +29,7 @@ export async function SelectAllUserProfilesAction() {
   return data as UserProfileType[];
 }
 export async function SelectUserProfileByIDAction(userID: string) {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
   const { data, error } = await supabase
     .from("user_profile")
     .select("*")
@@ -45,7 +45,7 @@ export async function SelectUserProfileByIDAction(userID: string) {
 }
 
 export async function SelectUserProfileAction() {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user) {
@@ -72,7 +72,7 @@ export async function InsertProgramAction({
   program_name,
   description,
 }: ProgramType) {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
   const userId = (await supabase.auth.getUser()).data.user?.id;
   const { data, error } = await supabase
     .from("programs")
@@ -87,9 +87,6 @@ export async function InsertProgramAction({
   if (error) {
     throw new Error("Failed to create program. Please try again.");
   }
-
-  // Send push notification to all subscribers
-  await SendPushNotificationToAllAction("New program created");
 
   // Log the activity
   await InsertActivityLogAction(
@@ -109,7 +106,7 @@ export async function EditProgramNameAction({
   program_id: string;
   program_name: string;
 }) {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
   const { data, error } = await supabase
     .from("programs")
     .update({ program_name })
@@ -124,7 +121,7 @@ export async function EditProgramNameAction({
 }
 
 export async function SelectProgramByIdAction(programId: string) {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
   const { data, error } = await supabase
     .from("programs")
     .select("*")
@@ -140,7 +137,7 @@ export async function SelectProgramByIdAction(programId: string) {
 }
 
 export async function SelectAllProgramsByAgriculturistAction() {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user?.id) {
@@ -163,7 +160,7 @@ export async function SelectAllProgramsByAgriculturistAction() {
 }
 
 export async function DeleteProgramAction(programID: string) {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
   const { error } = await supabase
     .from("programs")
     .delete()
@@ -178,27 +175,15 @@ export async function DeleteProgramAction(programID: string) {
 }
 
 // PROJECT ACTIONS
-export async function InsertProjectAction({
-  program_id,
-  project_name,
-  crop_type,
-  start_date,
-  end_date,
-  location,
-}: ProjectType) {
-  const supabase = await createClient();
+export async function InsertProjectAction(values: ProjectType) {
+  const supabase = await createClient(cookies());
   const userId = (await supabase.auth.getUser()).data.user?.id;
   const { data, error } = await supabase
     .from("projects")
     .insert({
-      project_name: project_name,
-      crop_type: crop_type,
-      start_date: new Date(start_date).toISOString(),
-      end_date: new Date(end_date).toISOString(),
-      location: location,
+      ...values,
       status: 1,
       created_by: userId,
-      program_id: program_id,
     })
     .select()
     .single();
@@ -208,20 +193,19 @@ export async function InsertProjectAction({
     throw new Error(`Failed to create project. ${error.message}`);
   }
 
-  // Send push notification to all subscribers
-  await SendPushNotificationToAllAction("New project created");
-
   // Log the activity
   await InsertActivityLogAction(
     "Created a Project",
-    `Project ${project_name} created on ${new Date().toLocaleDateString()}`
+    `Project ${
+      values.project_name as string
+    } created on ${new Date().toLocaleDateString()}`
   );
 
   return data as ProjectType;
 }
 
 export async function SelectAllProjectsByProgramIDAction(programID: string) {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
   const { data, error } = await supabase
     .from("projects")
     .select("*")
@@ -239,7 +223,7 @@ export async function SelectAllProjectsByProgramIDAction(programID: string) {
 export async function SelectProgramAndProjectDetailsByProjectIDAction(
   projectID: string
 ) {
-  const supabase = await createClient(); // your server-side Supabase client
+  const supabase = await createClient(cookies()); // your server-side Supabase client
   const { data, error } = await supabase
     .from("projects")
     .select(
@@ -265,7 +249,7 @@ export async function SelectProgramAndProjectDetailsByProjectIDAction(
 }
 
 export async function SelectProjectDetailsByProjectIDAction(projectID: string) {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
   const { data, error } = await supabase
     .from("projects")
     .select("*")
@@ -289,7 +273,7 @@ export async function EditProjectNameAction({
   project_name: string;
   status: number;
 }) {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
   const { data, error } = await supabase
     .from("projects")
     .update({ project_name, status })
@@ -305,7 +289,7 @@ export async function EditProjectNameAction({
 }
 
 export async function DeleteProjectAction(projectID: string) {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
   const { error } = await supabase
     .from("projects")
     .delete()
@@ -320,7 +304,7 @@ export async function DeleteProjectAction(projectID: string) {
 
 // TRAVEL ORDER ACTIONS
 export async function InsertTravelOrderAction(data: TravelOrderType) {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
   const {
     data: { user },
     error: userError,
@@ -356,7 +340,7 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
 export async function SelectAllTravelOrdersByProgramIDAction(
   programID: string
 ) {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
   const { data, error } = await supabase
     .from("travel_order")
     .select(
@@ -378,7 +362,7 @@ export async function SelectAllTravelOrdersByProgramIDAction(
 export async function SelectAllMonitoringReportsByProjectIDAction(
   projectID: string
 ) {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
   const { data, error } = await supabase
     .from("monitoring")
     .select(
@@ -400,7 +384,7 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
 export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
   projectID: string
 ) {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user) {
@@ -438,7 +422,7 @@ export async function InsertMonitoringReportAction({
 }: MonitoringReportType) {
   if (!images?.length) throw new Error("No images provided");
 
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -498,11 +482,15 @@ export async function InsertMonitoringReportAction({
   return;
 }
 
-export async function InsertRemarksInMonitoringReportAction(reportId: string) {
-  const supabase = await createClient();
-  const { data, error } = await supabase
+export async function InsertRemarksInMonitoringReportAction(
+  reportId: string,
+  remarks: string
+) {
+  const supabase = await createClient(cookies());
+  const { error } = await supabase
     .from("monitoring")
     .update({
+      remarks,
       reviewed_by_id: (await supabase.auth.getUser()).data.user?.id,
     })
     .eq("id", reportId)
@@ -514,18 +502,12 @@ export async function InsertRemarksInMonitoringReportAction(reportId: string) {
     throw new Error("Failed to insert remarks. Please try again.");
   }
 
-  // Send push notification to user
-  await SendPushNotificationToUserAction(
-    data.reporter_id,
-    "Your monitoring report has been reviewed."
-  );
-
   return;
 }
 
 // MEMBERS ACTIONS
 export async function InsertMemberAction(data: UserProfileType) {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
 
   const { data: authData, error: authError } =
     await supabase.auth.admin.createUser({
@@ -533,7 +515,7 @@ export async function InsertMemberAction(data: UserProfileType) {
       email_confirm: true,
       user_metadata: {
         name: data.fullname as string,
-        role: data.role as string,
+        role: data.role,
       },
     });
 
@@ -543,10 +525,8 @@ export async function InsertMemberAction(data: UserProfileType) {
   }
 
   const { error: userError } = await supabase.from("user_profile").insert({
+    ...data,
     id: authData.user.id,
-    fullname: data.fullname,
-    email: data.email,
-    role: data.role,
   });
 
   if (userError) {
@@ -558,7 +538,7 @@ export async function InsertMemberAction(data: UserProfileType) {
 }
 
 export async function SelectAllMembersAction() {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
 
   const { data, error } = await supabase
     .from("user_profile")
@@ -570,34 +550,11 @@ export async function SelectAllMembersAction() {
     throw new Error(`Failed to fetch members: ${error.message}`);
   }
 
-  // Get user email from auth
-  const userIds = data?.map((item) => item.id).filter(Boolean) || [];
-  const { data: userData, error: emailError } =
-    await supabase.auth.admin.listUsers();
-  if (emailError) {
-    console.error("Error fetching user emails:", emailError);
-    throw new Error(`Failed to fetch user emails: ${emailError.message}`);
-  }
-  const emailMap = new Map(
-    (userData?.users ?? [])
-      .filter((user) => userIds.includes(user.id))
-      .map((user) => [user.id, user.email])
-  );
-
-  const result = data?.map((item) => ({
-    ...item,
-    role: item.role
-      .replace(/_/g, " ")
-      .toLowerCase()
-      .replace(/\b\w/g, (char: string) => char.toUpperCase()),
-    email: emailMap.get(item.id) || "",
-  }));
-
-  return result as UserProfileType[];
+  return data as UserProfileType[];
 }
 
-export async function SelectAllMembersByRoleAction(role: string) {
-  const supabase = await createClient();
+export async function SelectAllMembersByRoleAction(role: number) {
+  const supabase = await createClient(cookies());
 
   const { data, error } = await supabase
     .from("user_profile")
@@ -625,10 +582,6 @@ export async function SelectAllMembersByRoleAction(role: string) {
 
   const result = data?.map((item) => ({
     ...item,
-    role: item.role
-      .replace(/_/g, " ")
-      .toLowerCase()
-      .replace(/\b\w/g, (char: string) => char.toUpperCase()),
     email: emailMap.get(item.id) || "",
   }));
 
@@ -640,7 +593,7 @@ export async function InsertFieldTechnicianToProjectAction(
   data: AssignedProjectsType,
   project_id: string
 ) {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
 
   // Try to fetch the assigned_projects row for the user
   const { data: existingUser, error: selectError } = await supabase
@@ -696,10 +649,10 @@ export async function InsertFieldTechnicianToProjectAction(
 export async function SelectAllFieldTechniciansByProjectIDAction(
   projectID: string
 ) {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
   const { data, error } = await supabase
     .from("assigned_projects")
-    .select("*, user_profile (fullname)")
+    .select("*, user_profile (fullname, position)")
     .contains("project_ids", [projectID])
     .order("created_at", { ascending: true });
 
@@ -712,7 +665,7 @@ export async function SelectAllFieldTechniciansByProjectIDAction(
 }
 
 export async function SelectAllAssignedProjectsByFieldTechnicianIDAction() {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
   const { data, error } = await supabase
     .from("assigned_projects")
     .select("*")
@@ -745,111 +698,11 @@ export async function SelectAllAssignedProjectsByFieldTechnicianIDAction() {
   return projectsData as ProjectType[];
 }
 
-// POST ACTIVITY REPORTS ACTIONS
-export async function InsertPostActivityReportAction(
-  values: PostActivityReportType
-) {
-  const supabase = await createClient();
-  const { data: userData, error: userError } = await supabase.auth.getUser();
-
-  if (userError || !userData?.user) {
-    console.error("Error fetching user:", userError);
-    throw new Error(userError?.message || "User not authenticated");
-  }
-
-  const { error } = await supabase
-    .from("post_activity")
-    .insert({
-      ...values,
-      submitted_by_id: userData.user.id,
-    })
-    .select()
-    .single();
-
-  if (error) {
-    console.error("Error inserting post activity report:", error);
-    throw new Error(error.message);
-  }
-
-  return;
-}
-
-export async function InsertPostActivityRemarksAction(
-  values: PostActivityReportType
-) {
-  console.log("Inserting remarks:", values);
-  const supabase = await createClient();
-  const { data: userData, error: userError } = await supabase.auth.getUser();
-
-  if (userError || !userData?.user) {
-    console.error("Error fetching user:", userError);
-    throw new Error(userError?.message || "User not authenticated");
-  }
-
-  const { error } = await supabase
-    .from("post_activity")
-    .update({
-      remarks: values.remarks,
-      reviewed_by_id: userData.user.id,
-    })
-    .eq("id", values.id);
-
-  if (error) {
-    console.error("Error inserting remarks:", error);
-    throw new Error(error.message);
-  }
-
-  return;
-}
-
-export async function SelectAllPostActivityReportsByProjectIDAction(
-  projectID: string
-) {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("post_activity")
-    .select(
-      "*, submittedBy:user_profile!post_activity_submitted_by_id_fkey (fullname), reviewedBy:user_profile!post_activity_reviewed_by_id_fkey (fullname)"
-    )
-    .eq("project_id", projectID)
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error("Error fetching post activity reports:", error);
-    throw new Error(error.message);
-  }
-
-  return data as PostActivityReportType[];
-}
-
-export async function SelectAllPostActivityReportsByUserID() {
-  const supabase = await createClient();
-  const { data: userData, error: userError } = await supabase.auth.getUser();
-
-  if (userError || !userData?.user) {
-    console.error("Error fetching user:", userError);
-    throw new Error(userError?.message || "User not authenticated");
-  }
-
-  const { data, error } = await supabase
-    .from("post_activity")
-    .select("*")
-    .eq("submitted_by_id", userData.user.id)
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error("Error fetching post activity reports:", error);
-    throw new Error(error.message);
-  }
-
-  return data as PostActivityReportType[];
-}
-
 // NOTIFICATION ACTIONS
 export async function InsertSubscriptionAction(
   subscription: WebPushSubscription
 ) {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
   const serializedSub = JSON.parse(JSON.stringify(subscription));
 
   const { error } = await supabase.from("push_subscriptions").upsert({
@@ -866,7 +719,7 @@ export async function InsertSubscriptionAction(
 }
 
 export async function DeleteSubscriptionAction(endpoint?: string) {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
 
   const { error } = await supabase
     .from("push_subscriptions")
@@ -884,7 +737,7 @@ export async function DeleteSubscriptionAction(endpoint?: string) {
 }
 
 export async function SelectIfSubscribedAction(endpoint?: string) {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
   const { data, error } = await supabase
     .from("push_subscriptions")
     .select("created_at")
@@ -899,7 +752,7 @@ export async function SelectIfSubscribedAction(endpoint?: string) {
 }
 
 export async function SendPushNotificationToAllAction(message: string) {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
   const { data: subscriptions } = await supabase
     .from("push_subscriptions")
     .select("endpoint, expirationTime, keys");
@@ -930,7 +783,7 @@ export async function SendPushNotificationToUserAction(
     console.error("Invalid user ID for push notification");
     return;
   }
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
   const { data: subscriptions } = await supabase
     .from("push_subscriptions")
     .select("*")
@@ -957,12 +810,12 @@ export async function SendPushNotificationToUserAction(
 // SESSION ACTIONS
 export async function SelectUserCurrentLocationAction(user_id: string) {
   console.log("Fetching user location for user_id:", user_id);
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
   const { data, error } = await supabase
     .from("user_session")
     .select("latitude, longitude, created_at")
     .eq("user_id", user_id)
-    .order("created_at", { ascending: false })
+    .order("modified_at", { ascending: false })
     .limit(1)
     .single();
 
@@ -975,7 +828,7 @@ export async function SelectUserCurrentLocationAction(user_id: string) {
 }
 
 export async function DeleteUserSessionAction() {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
   const { data: session } = await supabase.auth.getSession();
   const { error } = await supabase
     .from("user_session")
@@ -998,7 +851,7 @@ export async function InsertActivityLogAction(
   code: string,
   description: string
 ) {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user) {
@@ -1024,7 +877,7 @@ export async function InsertActivityLogAction(
 }
 
 export async function SelectActivityLogsByUserIDAction(user_id: string) {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
 
   const { data, error } = await supabase
     .from("activity_logs")
@@ -1041,7 +894,7 @@ export async function SelectActivityLogsByUserIDAction(user_id: string) {
 }
 
 export async function SelectAllActivityLogsAction() {
-  const supabase = await createClient();
+  const supabase = await createClient(cookies());
 
   const { data, error } = await supabase
     .from("activity_logs")
@@ -1053,4 +906,30 @@ export async function SelectAllActivityLogsAction() {
   }
 
   return data as ActivityLogType[];
+}
+
+// DASHBOARD ACTIONS
+export async function SelectDashboardItemsAction(projectID: string) {
+  const supabase = await createClient(cookies());
+  // project progress percent - last
+  // total assigned ft
+  const { data: APData, error: APError } = await supabase
+    .from("assigned_projects")
+    .select("*")
+    .contains("project_ids", [projectID]);
+  if (APError) {
+    console.error(APError.message);
+    throw new Error("Failed fetching assigned_projects");
+  }
+  // total monitoring reports
+  const { data: MData, error: MError } = await supabase
+    .from("monitoring")
+    .select("*")
+    .eq("project_id", projectID);
+  if (MError) {
+    console.error(MError.message);
+    throw new Error("Failed fetching assigned_projects");
+  }
+
+  return { ap: APData, m: MData };
 }

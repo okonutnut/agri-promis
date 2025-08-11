@@ -16,43 +16,30 @@ const formSchema = z.object({
   fullname: z
     .string()
     .min(1, "Fullname is required")
-    .refine((val) => /^[A-Za-z\s]+$/.test(val), {
-      message: "Fullname must only contain letters and spaces",
+    .refine((val) => /^[A-Za-z\s.]+$/.test(val), {
+      message: "Fullname must only contain letters, spaces, and periods",
     }),
   email: z.string().email("Invalid email address"),
-  role: z.enum(["field_technician", "agriculturist"], {
-    errorMap: () => ({ message: "Role is required" }),
-  }),
+  position: z.string().min(1, "Position is required"),
+  role: z.string().min(1, "Role is required"),
 });
 
 type MemberType = z.infer<typeof formSchema>;
 
 type TeamMemberFormProps = {
+  isAddMode: boolean;
   data: UserProfileType | null;
   setPanelOpen: Dispatch<SetStateAction<boolean>>;
 };
-export function TeamMemberForm({ data, setPanelOpen }: TeamMemberFormProps) {
+export function TeamMemberForm({
+  isAddMode,
+  data,
+  setPanelOpen,
+}: TeamMemberFormProps) {
   const roles = [
-    { value: "agriculturist", label: "Agriculturist" },
-    { value: "field_technician", label: "Field Technician" },
+    { value: 1, label: "System Admin" },
+    { value: 2, label: "System User" },
   ];
-
-  // Map role label to value, handle both label and value formats
-  const getRoleValue = () => {
-    if (!data?.role) return undefined;
-
-    // First check if it's already a value format
-    const directMatch = roles.find((role) => role.value === data.role);
-    if (directMatch)
-      return directMatch.value as "field_technician" | "agriculturist";
-
-    // Then check if it's a label format
-    const labelMatch = roles.find((role) => role.label === data.role);
-    if (labelMatch)
-      return labelMatch.value as "field_technician" | "agriculturist";
-
-    return undefined;
-  };
 
   const form = useForm<MemberType>({
     resolver: zodResolver(formSchema),
@@ -60,12 +47,14 @@ export function TeamMemberForm({ data, setPanelOpen }: TeamMemberFormProps) {
       id: data?.id || "",
       email: data?.email || "",
       fullname: data?.fullname || "",
-      role: getRoleValue() || "agriculturist",
+      position: data?.position || "",
+      role: data?.role ? String(data.role) : "1",
     },
   });
 
   const { mutate, isPending, isSuccess } = useInsertMemberHook();
-  const onSubmit = (data: MemberType) => mutate(data);
+  const onSubmit = (data: MemberType) =>
+    mutate({ ...data, role: Number(data.role) });
 
   useEffect(() => {
     if (isSuccess) {
@@ -80,22 +69,50 @@ export function TeamMemberForm({ data, setPanelOpen }: TeamMemberFormProps) {
         id="team-member-form"
         onSubmit={form.handleSubmit(onSubmit)}
       >
-        {data?.id && <FormInput label="ID" name="id" form={form} readonly />}
-        <FormInput label="Fullname" name="fullname" form={form} />
+        <FormInput
+          label="Fullname"
+          name="fullname"
+          form={form}
+          readonly={!isAddMode}
+        />
         <FormInput
           label="Email"
           name="email"
           form={form}
           type="email"
-          readonly={data ? true : false}
+          readonly={!isAddMode}
         />
-        {!data ? (
-          <FormSelect options={roles} label="Role" name="role" form={form} />
+        <FormInput
+          label="Position"
+          name="position"
+          form={form}
+          readonly={!isAddMode}
+        />
+        {!data?.role ? (
+          <FormSelect
+            options={roles.map((role) => ({
+              value: role.value.toString(),
+              label: role.label,
+            }))}
+            label="Role"
+            name="role"
+            form={form}
+          />
         ) : (
-          <NonFormInput label="Role" defaultValue={data?.role || ""} readonly />
+          <NonFormInput
+            label="Role"
+            defaultValue={
+              data.role != null
+                ? data.role.toString() === "1"
+                  ? "System Admin"
+                  : "System User"
+                : "N/A"
+            }
+            readonly
+          />
         )}
       </form>
-      <SheetFooter className="border-t">
+      <SheetFooter className="border-t p-2">
         {!data && (
           <Button
             type="submit"

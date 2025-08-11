@@ -1,33 +1,35 @@
 import { createServerClient } from "@supabase/ssr";
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY;
 
 export async function updateSession(request: NextRequest) {
+  // Create an unmodified response
   let supabaseResponse = NextResponse.next({
-    request,
+    request: {
+      headers: request.headers,
+    },
   });
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            request.cookies.set(name, value)
-          );
-          supabaseResponse = NextResponse.next({
-            request,
-          });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          );
-        },
+  const supabase = createServerClient(supabaseUrl!, supabaseKey!, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
       },
-    }
-  );
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) =>
+          request.cookies.set(name, value)
+        );
+        supabaseResponse = NextResponse.next({
+          request,
+        });
+        cookiesToSet.forEach(({ name, value, options }) =>
+          supabaseResponse.cookies.set(name, value, options)
+        );
+      },
+    },
+  });
 
   // IMPORTANT: DO NOT REMOVE auth.getUser()
   const {
@@ -72,25 +74,11 @@ export async function updateSession(request: NextRequest) {
   const url = request.nextUrl.clone();
 
   // Redirect from login page based on role
-  if (pathname === "/login") {
-    if (userRole === "agriculturist") {
+  if (pathname === "/login" || pathname === "/") {
+    if (userRole === 1) {
       url.pathname = "/dashboard/programs";
       return NextResponse.redirect(url);
-    } else if (userRole === "field_technician") {
-      url.pathname = "/field-technician";
-      return NextResponse.redirect(url);
-    } else {
-      url.pathname = "/access-denied";
-      return NextResponse.redirect(url);
-    }
-  }
-
-  // Redirect from root path based on role
-  if (pathname === "/") {
-    if (userRole === "agriculturist") {
-      url.pathname = "/dashboard/programs";
-      return NextResponse.redirect(url);
-    } else if (userRole === "field_technician") {
+    } else if (userRole === 2) {
       url.pathname = "/field-technician";
       return NextResponse.redirect(url);
     } else {
@@ -105,17 +93,14 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Protect dashboard routes - only agriculturists allowed
-  if (pathname.startsWith("/dashboard") && userRole !== "agriculturist") {
+  // // Protect dashboard routes - only admins allowed
+  if (pathname.startsWith("/dashboard") && userRole !== 1) {
     url.pathname = "/access-denied";
     return NextResponse.redirect(url);
   }
 
-  // Protect field technician routes - only field technicians allowed
-  if (
-    pathname.startsWith("/field-technician") &&
-    userRole !== "field_technician"
-  ) {
+  // // Protect field technician routes - only field technicians allowed
+  if (pathname.startsWith("/field-technician") && userRole !== 2) {
     url.pathname = "/access-denied";
     return NextResponse.redirect(url);
   }

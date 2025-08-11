@@ -12,7 +12,11 @@ export const columns: ColumnDef<AssignedProjectsType>[] = [
   },
   {
     accessorKey: "user_profile.fullname",
-    header: "Fullname",
+    header: () => <div className="w-1/2">Fullname</div>,
+  },
+  {
+    accessorKey: "user_profile.position",
+    header: "Position",
   },
   {
     accessorKey: "created_at",
