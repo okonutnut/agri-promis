@@ -1,6 +1,5 @@
 import {
   Cctv,
-  ChartBar,
   ChartLine,
   ClipboardPen,
   House,
@@ -12,15 +11,15 @@ import {
 export function getDashboardNavItems() {
   return [
     {
-      title: "All Programs",
+      title: "Programs",
       href: "/dashboard/programs",
       icon: House,
     },
-    {
-      title: "Schedules",
-      href: "/dashboard/schedules",
-      icon: ChartBar,
-    },
+    // {
+    //   title: "Schedules",
+    //   href: "/dashboard/schedules",
+    //   icon: ChartBar,
+    // },
     {
       title: "Team",
       href: "/dashboard/team",
@@ -71,11 +70,6 @@ export function getProjectNavItems(id: string) {
       href: `/dashboard/projects/${id}/monitoring-reports`,
       icon: Cctv,
     },
-    // {
-    //   title: "Post Activity Reports",
-    //   href: `/dashboard/projects/${id}/post-activity-reports`,
-    //   icon: NotebookPen,
-    // },
     {
       title: "Project Settings",
       href: `/dashboard/projects/${id}/settings`,
@@ -84,22 +78,32 @@ export function getProjectNavItems(id: string) {
   ];
 }
 
-export function getFieldTechnicianNavItems(id: string) {
+export function getUserDashboardNavItems() {
+  return [
+    {
+      title: "Assigned Projects",
+      href: "/field-technician/projects",
+      icon: UserPen,
+    },
+    {
+      title: "Travel Orders",
+      href: "/field-technician/travel-order",
+      icon: ClipboardPen,
+    },
+  ];
+}
+
+export function getUserProjectNavItems(id: string) {
   return [
     {
       title: "Project Overview",
-      href: `/field-technician/${id}`,
+      href: `/field-technician/projects/${id}`,
       icon: House,
     },
     {
       title: "Monitoring Report",
-      href: `/field-technician/${id}/monitoring-report`,
+      href: `/field-technician/projects/${id}/monitoring-report`,
       icon: Cctv,
     },
-    // {
-    //   title: "Post Activity Report",
-    //   href: `/field-technician/${id}/post-activity-report`,
-    //   icon: NotebookPen,
-    // },
   ];
 }

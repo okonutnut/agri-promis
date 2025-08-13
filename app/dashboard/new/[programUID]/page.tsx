@@ -10,7 +10,7 @@ import {
 import CreateProjectForm from "@/components/custom/forms/create-project-form";
 import { useParams } from "next/navigation";
 import { useSelectProgramByIDHook } from "@/components/hooks";
-import CustomPageLayout from "@/components/custom/layout/admin-page-layout";
+import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 
 export default function CreateProgramPage() {
   const { programUID } = useParams();

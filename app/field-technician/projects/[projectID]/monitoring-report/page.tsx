@@ -6,10 +6,11 @@ import { columns } from "./table/columns";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useSelectAllMonitoringReportsByProjectIDAndUserHook } from "@/components/hooks";
 import { MonitoringReportType } from "@/components/types";
-import UserPageLayout from "@/components/custom/layout/user-page-layout";
 import UploadFieldReportForm from "./form/monitoring-report-form";
 import { useParams } from "next/navigation";
 import ViewDraftsSheet from "./components/view-drafts-sheet";
+import { getUserProjectNavItems } from "@/components/sidebar/navitems";
+import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 
 export default function MonitoringReportPage() {
   const { projectID } = useParams();
@@ -19,6 +20,7 @@ export default function MonitoringReportPage() {
     null
   );
   const [isAddMode, setIsAddMode] = useState(false);
+  const [isDraft, setIsDraft] = useState(false);
 
   const handleRowSelect = (row: MonitoringReportType) => {
     setSelectedRow(row);
@@ -34,6 +36,7 @@ export default function MonitoringReportPage() {
 
   const handleModify = (row: MonitoringReportType | null) => {
     setSelectedRow(row);
+    setIsDraft(true);
     setIsAddMode(true);
     setPanelOpen(true);
   };
@@ -41,6 +44,7 @@ export default function MonitoringReportPage() {
   const handlePanelClose = () => {
     setPanelOpen(false);
     setIsAddMode(false);
+    setIsDraft(false);
     setSelectedRow(null);
   };
 
@@ -48,11 +52,13 @@ export default function MonitoringReportPage() {
     useSelectAllMonitoringReportsByProjectIDAndUserHook(projectID as string);
 
   return (
-    <UserPageLayout
+    <CustomPageLayout
       pageTitle="My Monitoring Reports"
       isLoading={isLoading}
       error={error}
+      navItems={getUserProjectNavItems(projectID as string)}
       topRightComponent={<ViewDraftsSheet handleModify={handleModify} />}
+      role="user"
     >
       <DataTable
         columns={columns}
@@ -62,9 +68,14 @@ export default function MonitoringReportPage() {
       />
       <Sheet open={panelOpen} onOpenChange={handlePanelClose}>
         <SheetContent className="w-screen md:max-w-4xl">
-          <UploadFieldReportForm isAddMode={isAddMode} values={selectedRow} />
+          <UploadFieldReportForm
+            isAddMode={isAddMode}
+            isDraft={isDraft}
+            values={selectedRow}
+            onOpenChange={handlePanelClose}
+          />
         </SheetContent>
       </Sheet>
-    </UserPageLayout>
+    </CustomPageLayout>
   );
 }

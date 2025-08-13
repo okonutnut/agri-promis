@@ -5,7 +5,7 @@ import { DataTable } from "./table/data-table";
 import { columns } from "./table/columns";
 import { FieldReportsForm } from "./components/field-reports-form";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import CustomPageLayout from "@/components/custom/layout/admin-page-layout";
+import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import { useParams } from "next/navigation";
 import { getProjectNavItems } from "@/components/sidebar/navitems";
 import { MonitoringReportType } from "@/components/types";

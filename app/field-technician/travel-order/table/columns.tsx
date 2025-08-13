@@ -6,11 +6,6 @@ import { format } from "date-fns";
 
 export const columns: ColumnDef<TravelOrderType>[] = [
   {
-    id: "count",
-    header: "#",
-    cell: ({ row }) => <span className="text-center">{row.index + 1}</span>,
-  },
-  {
     accessorKey: "travel_order_no",
     header: "Travel Order No",
   },

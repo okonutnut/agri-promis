@@ -5,21 +5,29 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
-  Boxes,
   Check,
   Slash,
   ChevronsUpDown,
-  Plus,
   Box,
   AlignLeft,
+  Plus,
+  Boxes,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useParams, usePathname } from "next/navigation";
+import Link from "next/link";
+import NavbarUserImage from "./navbar-user-image";
+import { Skeleton } from "@/components/ui/skeleton";
+import MobileNavbar from "./mobile-nav";
+import AppDrawer from "@/components/sidebar/appDrawer";
+import { Separator } from "@/components/ui/separator";
+import { useMemo } from "react";
 import {
+  useSelectAssignedProjectsByFieldTechnicianHook,
   useSelectAllProgramsByAgriculturistHook,
   useSelectAllProjectsByProgramIDHook,
   useSelectProgramAndProjectDetailsByProgjectIDHook,
@@ -29,16 +37,12 @@ import {
   ProgramType,
   ProjectType,
 } from "@/components/types";
-import Link from "next/link";
-import NavbarUserImage from "./navbar-user-image";
-import { useMemo } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
-import MobileNavbar from "./mobile-nav";
-import AppDrawer from "@/components/sidebar/appDrawer";
 
-// Constants for path matching
+// Constants
 const PATHS = {
+  FIELD_TECHNICIAN: "/field-technician/projects",
   NEW_PROGRAM: "/dashboard/new",
+  NEW_PROJECT: "/dashboard/new/[programUID]",
   PROGRAMS: "/dashboard/programs",
   TEAM: "/dashboard/team",
   ACTIVITY_LOGS: "/dashboard/activity-logs",
@@ -46,24 +50,13 @@ const PATHS = {
 
 // Types
 type NavbarProps = {
+  role: "admin" | "user";
   noSidebar?: boolean;
-  sidebarOptions?: NavigationItemType[];
+  navItems?: NavigationItemType[];
+  pageTitle?: string;
 };
 
-type ProgramDropdownProps = {
-  programID: string | undefined;
-  programData: ProgramType | undefined;
-  allProgramsData: ProgramType[] | undefined;
-  programProjectsData: any;
-};
-
-type ProjectDropdownProps = {
-  projectID: string;
-  programProjectsData: any;
-  allProjectsByProgramIDData: ProjectType[] | undefined;
-};
-
-// Reusable components
+// Shared Components
 const BreadcrumbSeparator = () => (
   <span className="text-gray-400">
     <Slash className="h-3 w-3 mx-1" />
@@ -75,7 +68,12 @@ const ProgramDropdown = ({
   programData,
   allProgramsData,
   programProjectsData,
-}: ProgramDropdownProps) => {
+}: {
+  programID: string | undefined;
+  programData: ProgramType | undefined;
+  allProgramsData: ProgramType[] | undefined;
+  programProjectsData: any;
+}) => {
   const currentProgramID = programID ?? programProjectsData?.program_id;
 
   return (
@@ -114,7 +112,7 @@ const ProgramDropdown = ({
             </Link>
           ))}
           <DropdownMenuSeparator />
-          <Link href="/dashboard/programs">
+          <Link href={PATHS.PROGRAMS}>
             <DropdownMenuItem className="justify-between w-full h-7 cursor-pointer hover:bg-gray-100">
               All Programs
             </DropdownMenuItem>
@@ -133,96 +131,67 @@ const ProgramDropdown = ({
 };
 
 const ProjectDropdown = ({
-  programProjectsData,
-  allProjectsByProgramIDData,
-}: ProjectDropdownProps) => {
+  projectID,
+  projects,
+}: {
+  projectID: string;
+  projects: ProjectType[] | undefined;
+}) => {
+  const currentProject = projects?.find((project) => project.id === projectID);
+
   return (
-    <>
-      <BreadcrumbSeparator />
-      <DropdownMenu>
-        <Link
-          href={`/dashboard/projects/${programProjectsData?.id}`}
-          className="text-black whitespace-nowrap flex items-center gap-2 h-full"
+    <DropdownMenu>
+      <Link
+        href={PATHS.FIELD_TECHNICIAN}
+        className="text-black whitespace-nowrap flex items-center gap-2 h-full"
+      >
+        <Box className="h-4 w-4 flex-shrink-0 text-[#707070]" />
+        <span className="min-w-[150px] truncate inline-block">
+          {currentProject?.project_name ?? <Skeleton className="w-full h-5" />}
+        </span>
+      </Link>
+      <DropdownMenuTrigger asChild>
+        <Button
+          className="ml-2 h-7 w-4 flex-shrink-0 text-[#707070]"
+          variant="ghost"
         >
-          <Box className="h-4 w-4 flex-shrink-0 text-[#707070]" />
-          <span className="min-w-[150px] truncate inline-block">
-            {programProjectsData?.project_name ?? (
-              <Skeleton className="w-full h-5" />
-            )}
-          </span>
-        </Link>
-        <DropdownMenuTrigger asChild>
-          <Button
-            className="ml-2 h-7 w-4 flex-shrink-0 text-[#707070]"
-            variant="ghost"
+          <ChevronsUpDown />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="m-1">
+        {projects?.map((project: ProjectType) => (
+          <Link
+            key={project.id}
+            href={`${PATHS.FIELD_TECHNICIAN}/${project.id}`}
           >
-            <ChevronsUpDown />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="m-1">
-          {allProjectsByProgramIDData?.map((project: ProjectType) => (
-            <Link key={project.id} href={`/dashboard/projects/${project.id}`}>
-              <DropdownMenuItem className="justify-between w-full h-7 cursor-pointer hover:bg-gray-100">
-                {project?.project_name ?? <Skeleton className="w-full h-5" />}
-                {project.id === programProjectsData?.id && (
-                  <Check className="ml-2 h-4 w-4" />
-                )}
-              </DropdownMenuItem>
-            </Link>
-          ))}
-          <DropdownMenuSeparator />
-          <Link href={`/dashboard/programs/${programProjectsData?.program_id}`}>
             <DropdownMenuItem className="justify-between w-full h-7 cursor-pointer hover:bg-gray-100">
-              All Projects
+              {project?.project_name ?? <Skeleton className="w-full h-5" />}
+              {project.id === projectID && <Check className="ml-2 h-4 w-4" />}
             </DropdownMenuItem>
           </Link>
-          <DropdownMenuSeparator />
-          <Link href={`/dashboard/new/${programProjectsData?.program_id}`}>
-            <DropdownMenuItem>
-              <Plus />
-              New project
-            </DropdownMenuItem>
-          </Link>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </>
+        ))}
+        <Separator />
+        <Link href={PATHS.FIELD_TECHNICIAN}>
+          <DropdownMenuItem className="justify-between w-full h-7 cursor-pointer hover:bg-gray-100">
+            All Projects
+          </DropdownMenuItem>
+        </Link>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 
-const BreadcrumbTitle = ({ currentPath }: { currentPath: string }) => {
-  const getTitle = () => {
-    switch (currentPath) {
-      case PATHS.NEW_PROGRAM:
-        return { text: "New Program", isLink: false };
-      case PATHS.PROGRAMS:
-        return { text: "Programs", isLink: true, href: PATHS.PROGRAMS };
-      case PATHS.TEAM:
-        return { text: "Team", isLink: false };
-      case PATHS.ACTIVITY_LOGS:
-        return { text: "Activity Logs", isLink: false };
-      default:
-        return { text: "Schedules", isLink: false };
-    }
-  };
-
-  const title = getTitle();
-
-  if (title.isLink) {
-    return (
-      <Link href={title.href!} className="text-black whitespace-nowrap">
-        {title.text}
-      </Link>
-    );
-  }
-
-  return <span className="text-black whitespace-nowrap">{title.text}</span>;
-};
-
-export default function Navbar({ noSidebar, sidebarOptions }: NavbarProps) {
+// Main Navbar Component
+export default function CustomNavbar({
+  role,
+  noSidebar,
+  navItems,
+  pageTitle,
+}: NavbarProps) {
   const { programID, projectID } = useParams();
-  const currentPath = usePathname();
+  const hasProgramOrProject = Boolean(programID || projectID);
 
-  // Program Data
+  // Admin Data
   const { data: allProgramsData } = useSelectAllProgramsByAgriculturistHook();
   const programData = useMemo(() => {
     return allProgramsData?.find(
@@ -230,7 +199,6 @@ export default function Navbar({ noSidebar, sidebarOptions }: NavbarProps) {
     );
   }, [programID, allProgramsData]);
 
-  // Project Data
   const { data: programProjectsData } =
     useSelectProgramAndProjectDetailsByProgjectIDHook(projectID as string);
   const { data: allProjectsByProgramIDData } =
@@ -238,7 +206,8 @@ export default function Navbar({ noSidebar, sidebarOptions }: NavbarProps) {
       programProjectsData?.program_id as string
     );
 
-  const hasProgramOrProject = Boolean(programID || projectID);
+  // User Data
+  const { data: projects } = useSelectAssignedProjectsByFieldTechnicianHook();
 
   return (
     <>
@@ -258,7 +227,7 @@ export default function Navbar({ noSidebar, sidebarOptions }: NavbarProps) {
 
             {!noSidebar && (
               <AppDrawer
-                sidebarOptions={sidebarOptions}
+                sidebarOptions={navItems || []}
                 trigger={
                   <Button variant="ghost" className="md:hidden sm:hidden">
                     <AlignLeft />
@@ -269,24 +238,39 @@ export default function Navbar({ noSidebar, sidebarOptions }: NavbarProps) {
 
             <BreadcrumbSeparator />
 
-            {hasProgramOrProject ? (
-              <>
-                <ProgramDropdown
-                  programID={programID as string}
-                  programData={programData}
-                  allProgramsData={allProgramsData}
-                  programProjectsData={programProjectsData}
-                />
-                {projectID && (
-                  <ProjectDropdown
-                    projectID={projectID as string}
+            {role === "admin" ? (
+              hasProgramOrProject ? (
+                <>
+                  <ProgramDropdown
+                    programID={programID as string}
+                    programData={programData}
+                    allProgramsData={allProgramsData}
                     programProjectsData={programProjectsData}
-                    allProjectsByProgramIDData={allProjectsByProgramIDData}
                   />
-                )}
-              </>
+                  {projectID && (
+                    <ProjectDropdown
+                      projectID={projectID as string}
+                      projects={allProjectsByProgramIDData}
+                    />
+                  )}
+                </>
+              ) : (
+                <span className="text-black whitespace-nowrap">
+                  {pageTitle}
+                </span>
+              )
             ) : (
-              <BreadcrumbTitle currentPath={currentPath} />
+              role === "user" &&
+              (hasProgramOrProject ? (
+                <ProjectDropdown
+                  projectID={projectID as string}
+                  projects={projects}
+                />
+              ) : (
+                <span className="text-black whitespace-nowrap">
+                  {pageTitle}
+                </span>
+              ))
             )}
           </div>
         </div>

@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/sheet";
 import { UserProfileType } from "@/components/types";
 import { useSelectAllMembersHook } from "@/components/hooks";
-import CustomPageLayout from "@/components/custom/layout/admin-page-layout";
+import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import { getDashboardNavItems } from "@/components/sidebar/navitems";
 
 export default function FieldTechnicianPage() {

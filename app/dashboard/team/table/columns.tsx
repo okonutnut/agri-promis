@@ -1,6 +1,7 @@
 "use client";
 
 import { UserProfileType } from "@/components/types";
+import { Badge } from "@/components/ui/badge";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 
@@ -23,6 +24,24 @@ export const columns: ColumnDef<UserProfileType>[] = [
   {
     accessorKey: "email",
     header: "Email",
+  },
+  {
+    accessorKey: "active_status",
+    header: "Active Status",
+    cell: ({ getValue }) => {
+      const status = getValue() as number;
+      return (
+        <Badge
+          className={`inline-flex items-center px-2.5 py-0.5 text-xs font-medium ${
+            status === 1
+              ? "bg-green-100 text-green-800"
+              : "bg-red-100 text-red-800"
+          }`}
+        >
+          {status === 1 ? "Active" : "Inactive"}
+        </Badge>
+      );
+    },
   },
   {
     accessorKey: "created_at",

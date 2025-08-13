@@ -9,16 +9,13 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
-import { useParams } from "next/navigation";
 import IssueTravelOrderForm from "./components/travel-order-form";
 import { TravelOrderType } from "@/components/types";
-import { getProgramNavItems } from "@/components/sidebar/navitems";
-import { useSelectAllTravelOrdersByProgramIDHook } from "@/components/hooks";
+import { getUserDashboardNavItems } from "@/components/sidebar/navitems";
+import { useSelectAllTravelOrdersByUserIDHook } from "@/components/hooks";
+import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 
 export default function FieldTechnicianPage() {
-  const { programID } = useParams();
-
   const [panelOpen, setPanelOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<TravelOrderType | null>(null);
   const [isAddMode, setIsAddMode] = useState(false);
@@ -29,34 +26,26 @@ export default function FieldTechnicianPage() {
     setPanelOpen(true);
   };
 
-  const handleAdd = () => {
-    setSelectedRow(null);
-    setIsAddMode(true);
-    setPanelOpen(true);
-  };
-
   const handlePanelClose = () => {
     setPanelOpen(false);
     setIsAddMode(false);
     setSelectedRow(null);
   };
 
-  const { data, isLoading, error } = useSelectAllTravelOrdersByProgramIDHook(
-    programID as string
-  );
+  const { data, isLoading, error } = useSelectAllTravelOrdersByUserIDHook();
 
   return (
     <CustomPageLayout
       pageTitle="Issued Travel Orders"
       isLoading={isLoading}
       error={error}
-      navItems={getProgramNavItems(programID as string)}
+      navItems={getUserDashboardNavItems()}
+      role="user"
     >
       <DataTable
         columns={columns}
         data={data || []}
         onRowSelect={handleRowSelect}
-        onAdd={handleAdd}
       />
       <Sheet open={panelOpen} onOpenChange={handlePanelClose}>
         <SheetContent className="w-screen md:min-w-[600px]">
@@ -65,7 +54,7 @@ export default function FieldTechnicianPage() {
               {isAddMode ? "Issue Travel Order" : "View Travel Order Details"}
             </SheetTitle>
           </SheetHeader>
-          <IssueTravelOrderForm isAddMode={isAddMode} values={selectedRow} />
+          <IssueTravelOrderForm values={selectedRow} />
         </SheetContent>
       </Sheet>
     </CustomPageLayout>

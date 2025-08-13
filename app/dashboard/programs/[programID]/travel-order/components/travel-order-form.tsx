@@ -145,7 +145,7 @@ export default function IssueTravelOrderForm({
         ) : (
           <NonFormInput
             label="Project"
-            defaultValue={values?.project}
+            defaultValue={values?.project?.project_name}
             readonly={!isAddMode}
           />
         )}
@@ -193,8 +193,8 @@ export default function IssueTravelOrderForm({
         ) : (
           <NonFormInput
             label="Mode of Transportation"
-            defaultValue={values?.mode_of_transport}
-            readonly={isAddMode}
+            defaultValue={values?.mode_of_transport?.toUpperCase()}
+            readonly
           />
         )}
       </form>

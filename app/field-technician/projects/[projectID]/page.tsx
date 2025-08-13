@@ -1,12 +1,12 @@
 "use client";
 
 import ProjectDashboardItems from "@/components/custom/dashboard/dashboard-summary-items";
-import UserPageLayout from "@/components/custom/layout/user-page-layout";
+import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import { useSelectProjectDetailsHook } from "@/components/hooks";
+import { getUserProjectNavItems } from "@/components/sidebar/navitems";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
-import { Dot } from "lucide-react";
 import { useParams } from "next/navigation";
 
 export default function FieldTechnicianPage() {
@@ -16,7 +16,13 @@ export default function FieldTechnicianPage() {
   );
 
   return (
-    <UserPageLayout isLoading={isLoading} error={error} className="m-0 p-0">
+    <CustomPageLayout
+      isLoading={isLoading}
+      error={error}
+      navItems={getUserProjectNavItems(projectID as string)}
+      className="m-0 p-0"
+      role="user"
+    >
       <>
         {data && (
           <>
@@ -49,6 +55,6 @@ export default function FieldTechnicianPage() {
           </>
         )}
       </>
-    </UserPageLayout>
+    </CustomPageLayout>
   );
 }

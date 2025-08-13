@@ -1,5 +1,6 @@
 "use client";
 
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectTrigger,
@@ -7,14 +8,13 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { UseFormReturn } from "react-hook-form";
+import { Controller, UseFormReturn } from "react-hook-form";
 
 type FormSelectProps = {
   label: string;
   name: string;
-  options: { value: string; label: string }[];
+  options: { value: any; label: string }[];
   form: UseFormReturn<any>;
-  defaultValue?: string;
   onClick?: () => void;
 };
 export default function FormSelect({
@@ -22,35 +22,40 @@ export default function FormSelect({
   name,
   options,
   form,
-  defaultValue,
   onClick,
 }: FormSelectProps) {
   return (
     <div>
       {label && (
-        <div className="text-sm font-medium text flex justify-between items-center mb-1">
+        <Label className="text-sm font-medium text flex justify-between items-center mb-1">
           {label}
-        </div>
+        </Label>
       )}
-      <Select
-        defaultValue={defaultValue}
-        onValueChange={(value) => form.setValue(name, value)}
-      >
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder={`Select ${label.toLowerCase()}`} />
-        </SelectTrigger>
-        <SelectContent>
-          {options.map((option) => (
-            <SelectItem
-              key={option.value}
-              value={option.value}
-              onClick={onClick}
-            >
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <Controller
+        control={form.control}
+        name={name}
+        render={({ field }) => (
+          <Select
+            value={field.value?.toString()}
+            onValueChange={(value) => field.onChange(value)}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder={`Select ${label.toLowerCase()}`} />
+            </SelectTrigger>
+            <SelectContent>
+              {options.map((option) => (
+                <SelectItem
+                  key={option.value}
+                  value={option.value.toString()}
+                  onClick={onClick}
+                >
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+      />
       {form.formState.errors[name] && (
         <p className="text-xs text-red-500 mt-1">
           {typeof form.formState.errors[name]?.message === "string"

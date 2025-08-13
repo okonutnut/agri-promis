@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { useSelectAllProgramsByAgriculturistHook } from "@/components/hooks";
 import Link from "next/link";
-import CustomPageLayout from "@/components/custom/layout/admin-page-layout";
+import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
 import { Boxes } from "lucide-react";
@@ -13,7 +13,7 @@ export default function DashboardPage() {
   const { data, isLoading, error } = useSelectAllProgramsByAgriculturistHook();
   return (
     <CustomPageLayout
-      pageTitle="Your Programs"
+      pageTitle="Programs"
       isLoading={isLoading}
       error={error}
       navItems={getDashboardNavItems()}

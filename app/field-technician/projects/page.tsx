@@ -1,23 +1,25 @@
 "use client";
 
-import UserPageLayout from "@/components/custom/layout/user-page-layout";
 import { useSelectAssignedProjectsByFieldTechnicianHook } from "@/components/hooks";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import Link from "next/link";
 import { Box } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { getUserDashboardNavItems } from "@/components/sidebar/navitems";
+import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 
 export default function FieldTechnicianPage() {
   const { data, isLoading, error } =
     useSelectAssignedProjectsByFieldTechnicianHook();
 
   return (
-    <UserPageLayout
-      noSidebar
+    <CustomPageLayout
       pageTitle="Assigned Projects"
       isLoading={isLoading}
       error={error}
+      navItems={getUserDashboardNavItems()}
+      role="user"
     >
       {data && (
         <>
@@ -29,7 +31,7 @@ export default function FieldTechnicianPage() {
                     <TableRow key={project.id}>
                       <TableCell>
                         <Link
-                          href={`/field-technician/${project.id}`}
+                          href={`/field-technician/projects/${project.id}`}
                           className="flex justify-start items-center gap-2 p-2"
                         >
                           <span className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 border">
@@ -61,6 +63,6 @@ export default function FieldTechnicianPage() {
           )}
         </>
       )}
-    </UserPageLayout>
+    </CustomPageLayout>
   );
 }

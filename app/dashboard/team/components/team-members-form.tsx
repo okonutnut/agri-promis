@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -5,10 +7,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import FormInput from "@/components/custom/input/form-input";
 import FormSelect from "@/components/custom/select/form-select";
 import { Loader2 } from "lucide-react";
-import { useInsertMemberHook } from "@/components/hooks";
+import {
+  useInsertMemberHook,
+  useUpdateActiveStatusMemberHook,
+  useUpdateMemberHook,
+} from "@/components/hooks";
 import { UserProfileType } from "@/components/types";
-import NonFormInput from "@/components/custom/input/non-form-input";
-import { Dispatch, SetStateAction, useEffect } from "react";
+import { Dispatch, SetStateAction } from "react";
 import { SheetClose, SheetFooter } from "@/components/ui/sheet";
 
 const formSchema = z.object({
@@ -21,7 +26,7 @@ const formSchema = z.object({
     }),
   email: z.string().email("Invalid email address"),
   position: z.string().min(1, "Position is required"),
-  role: z.string().min(1, "Role is required"),
+  role: z.coerce.number().min(1, "Role is required"),
 });
 
 type MemberType = z.infer<typeof formSchema>;
@@ -48,20 +53,39 @@ export function TeamMemberForm({
       email: data?.email || "",
       fullname: data?.fullname || "",
       position: data?.position || "",
-      role: data?.role ? String(data.role) : "1",
+      role: data?.role || 1,
     },
   });
 
-  const { mutate, isPending, isSuccess } = useInsertMemberHook();
-  const onSubmit = (data: MemberType) =>
-    mutate({ ...data, role: Number(data.role) });
+  // INSERT MEMBER HOOK
+  const { mutate: insertMutate, isPending: isInsertPending } =
+    useInsertMemberHook();
+  // UPDATE MEMBER HOOK
+  const { mutate: updateMutate, isPending: isUpdatePending } =
+    useUpdateMemberHook();
+  // ACTIVE STATUS HOOK
+  const { mutate: statusMutate, isPending: isStatusPending } =
+    useUpdateActiveStatusMemberHook();
 
-  useEffect(() => {
-    if (isSuccess) {
-      setPanelOpen(false);
+  const isPending = isInsertPending || isUpdatePending || isStatusPending;
+
+  const onSubmit = (data: MemberType) => {
+    if (isAddMode) {
+      insertMutate(data, {
+        onSuccess: () => {
+          form.reset();
+          setPanelOpen(false);
+        },
+      });
+    } else {
+      updateMutate(data, {
+        onSuccess: () => {
+          form.reset();
+          setPanelOpen(false);
+        },
+      });
     }
-  }, [isSuccess, setPanelOpen]);
-
+  };
   return (
     <>
       <form
@@ -69,63 +93,61 @@ export function TeamMemberForm({
         id="team-member-form"
         onSubmit={form.handleSubmit(onSubmit)}
       >
-        <FormInput
-          label="Fullname"
-          name="fullname"
+        <FormInput label="Fullname" name="fullname" form={form} />
+        <FormInput label="Email" name="email" form={form} type="email" />
+        <FormInput label="Position" name="position" form={form} />
+        <FormSelect
+          options={roles.map((role) => ({
+            value: role.value,
+            label: role.label,
+          }))}
+          label="Role"
+          name="role"
           form={form}
-          readonly={!isAddMode}
         />
-        <FormInput
-          label="Email"
-          name="email"
-          form={form}
-          type="email"
-          readonly={!isAddMode}
-        />
-        <FormInput
-          label="Position"
-          name="position"
-          form={form}
-          readonly={!isAddMode}
-        />
-        {!data?.role ? (
-          <FormSelect
-            options={roles.map((role) => ({
-              value: role.value.toString(),
-              label: role.label,
-            }))}
-            label="Role"
-            name="role"
-            form={form}
-          />
-        ) : (
-          <NonFormInput
-            label="Role"
-            defaultValue={
-              data.role != null
-                ? data.role.toString() === "1"
-                  ? "System Admin"
-                  : "System User"
-                : "N/A"
-            }
-            readonly
-          />
-        )}
       </form>
-      <SheetFooter className="border-t p-2">
-        {!data && (
+      <SheetFooter className="border-t p-2 flex-row justify-end gap-2">
+        <SheetClose asChild>
+          <Button variant={"outline"} size={"sm"} disabled={isPending}>
+            Close
+          </Button>
+        </SheetClose>
+        {!isAddMode && (
           <Button
-            type="submit"
-            form="team-member-form"
-            variant={isPending ? "ghost" : "default"}
+            size={"sm"}
+            onClick={() => {
+              statusMutate(
+                {
+                  userID: data?.id as string,
+                  status: data?.active_status == 1 ? 0 : 1,
+                },
+                {
+                  onSuccess: () => {
+                    form.reset();
+                    setPanelOpen(false);
+                  },
+                }
+              );
+            }}
+            variant={isPending ? "ghost" : "outline"}
             disabled={isPending}
           >
-            {isPending ? <Loader2 className="animate-spin" /> : "Save"}
+            {isStatusPending ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              `Set as ${data?.active_status == 1 ? "Inactive" : "Active"}`
+            )}
           </Button>
         )}
-        <SheetClose asChild>
-          <Button variant={"outline"}>Close</Button>
-        </SheetClose>
+        <Button
+          type="submit"
+          form="team-member-form"
+          size={"sm"}
+          variant={isPending ? "ghost" : "default"}
+          disabled={isPending}
+        >
+          {isInsertPending ? <Loader2 className="animate-spin" /> : "Save"}
+        </Button>
       </SheetFooter>
     </>
   );

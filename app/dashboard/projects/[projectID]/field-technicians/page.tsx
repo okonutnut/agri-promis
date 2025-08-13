@@ -5,17 +5,14 @@ import { DataTable } from "./table/data-table";
 import { columns } from "./table/columns";
 import {
   Sheet,
-  SheetClose,
   SheetContent,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useSelectFieldTechniciansByProjectIDHook } from "@/components/hooks";
-import CustomPageLayout from "@/components/custom/layout/admin-page-layout";
+import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import { useParams } from "next/navigation";
 import SelectMembersTable from "./components/members-sheet/select-members-table";
-import { Button } from "@/components/ui/button";
 import { AssignedProjectsType } from "@/components/types";
 import ViewFieldTechnicianPanel from "./components/view-field-technician-panel";
 import { getProjectNavItems } from "@/components/sidebar/navitems";
@@ -86,13 +83,6 @@ export default function FieldTechnicianPage() {
               ) : (
                 <ViewFieldTechnicianPanel selectedRow={selectedRow} />
               )}
-              <SheetFooter className="border-t flex-row justify-end p-2">
-                <SheetClose asChild>
-                  <Button variant={"outline"} size={"sm"}>
-                    Close
-                  </Button>
-                </SheetClose>
-              </SheetFooter>
             </SheetContent>
           </Sheet>
         </>

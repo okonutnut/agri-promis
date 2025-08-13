@@ -7,9 +7,12 @@ import { useState } from "react";
 import { Plus, XCircle, ZoomIn } from "lucide-react";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
-import { ImageData, LocationData } from "@/components/interfaces";
-import { addOverlayToImage, compressImage } from "@/lib/utils";
-import GetCurrentLocation from "../components/get-current-location";
+import { ImageData } from "@/components/interfaces";
+import {
+  addOverlayToImage,
+  compressImage,
+  getLongtitudeLatitudeFromGPS,
+} from "@/lib/utils";
 import ImageModal from "@/components/ui/image-modal";
 import { MonitoringReportType } from "@/components/types";
 import ImageCarousel from "@/components/custom/images/image-carousel";
@@ -17,16 +20,12 @@ import ImageCarousel from "@/components/custom/images/image-carousel";
 type ImageCaptureFormProps = {
   isAddMode?: boolean;
   values?: MonitoringReportType | null;
-  location: LocationData;
-  setLocation: (location: LocationData) => void;
   images: ImageData[];
   setImages: React.Dispatch<React.SetStateAction<ImageData[]>>;
 };
 export default function ImageCaptureForm({
   isAddMode,
   values,
-  location,
-  setLocation,
   images,
   setImages,
 }: ImageCaptureFormProps) {
@@ -57,7 +56,7 @@ export default function ImageCaptureForm({
         const overlayedFile = await addOverlayToImage(
           file,
           dateTimeCaptured,
-          location
+          await getLongtitudeLatitudeFromGPS()
         );
 
         const compressedFile =
@@ -86,6 +85,45 @@ export default function ImageCaptureForm({
     }
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+
+    if (files.length === 0) return;
+
+    setIsCompressing(true);
+
+    try {
+      const processedImages: ImageData[] = [];
+
+      for (const file of files) {
+        const fileURL = URL.createObjectURL(file);
+        const dateTimeCaptured = new Date().toLocaleDateString("en-PH", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        const imageData: ImageData = {
+          id: `${Date.now()}-${Math.random()}`,
+          src: fileURL,
+          file: file,
+          dateTimeCaptured: dateTimeCaptured,
+        };
+
+        processedImages.push(imageData);
+      }
+
+      setImages((prev) => [...prev, ...processedImages]);
+    } catch (error) {
+      toast.error("Error uploading images. Please try again.");
+      console.error("Error uploading images:", error);
+    } finally {
+      setIsCompressing(false);
+      e.target.value = "";
+    }
+  };
+
   const removeImage = (imageId: string) => {
     setImages((prev: ImageData[]) => {
       const imageToRemove = prev.find((img) => img.id === imageId);
@@ -106,26 +144,15 @@ export default function ImageCaptureForm({
 
   return (
     <>
-      {/* {values?.created_at && (
-        <span className="italic text-xs text-muted-foreground mx-2">
-          Date Submitted: {format(new Date(values.created_at), "PPp")}
-        </span>
-      )} */}
       <div className="space-y-4 m-2">
         {isAddMode ? (
           <>
-            <GetCurrentLocation location={location} setLocation={setLocation} />
+            {/* <GetCurrentLocation location={location} setLocation={setLocation} /> */}
             {/* Image Gallery with Camera Trigger */}
             <div className="space-y-2">
-              <div className="flex gap-4 overflow-x-auto pb-4">
+              <div className="flex gap-4 justify-start overflow-x-auto pb-4">
                 {/* Camera Trigger Card */}
-                <div
-                  className={`${
-                    images.length === 0
-                      ? "w-full"
-                      : "min-w-[128px] max-w-[200px]"
-                  } h-40`}
-                >
+                <div className="min-w-[128px] max-w-[200px] h-40">
                   <Card className="h-full w-full flex flex-col items-center justify-center border-2 border-dashed shadow-none transition-colors cursor-pointer relative overflow-hidden">
                     <Input
                       type="file"
@@ -138,9 +165,52 @@ export default function ImageCaptureForm({
                     />
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <Plus className="text-gray-400" />
+                      <p className="text-xs text-gray-500">
+                        Capture via Camera
+                      </p>
                     </div>
                   </Card>
                 </div>
+
+                {/* File Upload Card */}
+                <div className="min-w-[128px] max-w-[200px] h-40">
+                  <Card className="h-full w-full flex flex-col items-center justify-center border-2 border-dashed shadow-none transition-colors cursor-pointer relative overflow-hidden">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleFileUpload}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      disabled={isCompressing}
+                    />
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <Plus className="text-gray-400" />
+                      <p className="text-xs text-gray-500">
+                        Upload from Gallery
+                      </p>
+                    </div>
+                  </Card>
+                </div>
+
+                {/* Open Camera App Card */}
+                {/* <div
+                  className={`${
+                    images.length === 0
+                      ? "w-full"
+                      : "min-w-[128px] max-w-[200px]"
+                  } h-40`}
+                >
+                  <Card className="h-full w-full flex flex-col items-center justify-center border-2 border-dashed shadow-none transition-colors cursor-pointer relative overflow-hidden">
+                    <a
+                      href="intent://#Intent;action=android.media.action.IMAGE_CAPTURE;end"
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    ></a>
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <Plus className="text-gray-400" />
+                      <p className="text-xs text-gray-500">Open Camera App</p>
+                    </div>
+                  </Card>
+                </div> */}
 
                 {/* Uploaded Images */}
                 {images.map((image) => (

@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import EditProgramNameForm from "./form/edit-program-name-form";
 import { useParams } from "next/navigation";
 import { useSelectProgramByIDHook } from "@/components/hooks";
-import CustomPageLayout from "@/components/custom/layout/admin-page-layout";
+import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import { getProgramNavItems } from "@/components/sidebar/navitems";
 import DeleteProgramCard from "./components/delete-program-card";
 

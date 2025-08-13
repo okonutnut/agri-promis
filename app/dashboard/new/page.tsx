@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import CreateProgramForm from "@/components/custom/forms/create-program-form";
-import CustomPageLayout from "@/components/custom/layout/admin-page-layout";
+import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 
 export default function CreateProgramPage() {
   return (
@@ -19,7 +19,7 @@ export default function CreateProgramPage() {
             <CardTitle className="uppercase text-primary">
               Create new program
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-muted-foreground text-xs">
               This is where you can create a new program to manage your
               agricultural projects.
             </CardDescription>

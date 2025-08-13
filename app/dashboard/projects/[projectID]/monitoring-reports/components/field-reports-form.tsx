@@ -15,7 +15,7 @@ import { format } from "date-fns";
 import { useEffect, useRef } from "react";
 import NonFormMultiInput from "@/components/custom/input/non-form-multi-input";
 import ImageCarousel from "@/components/custom/images/image-carousel";
-import PrintMonitoringButton from "@/app/field-technician/[projectID]/monitoring-report/components/print-monitoring";
+import PrintMonitoringButton from "@/app/field-technician/projects/[projectID]/monitoring-report/components/print-monitoring";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";

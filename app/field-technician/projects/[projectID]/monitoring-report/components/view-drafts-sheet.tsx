@@ -57,10 +57,15 @@ export default function ViewDraftsSheet({
           <SheetTitle>My Drafts</SheetTitle>
         </SheetHeader>
         <Table>
-          <TableCaption>Note: All drafts are only saved locally.</TableCaption>
+          <TableCaption className="text-xs">
+            All drafts are only saved locally in the device.
+          </TableCaption>
           <TableBody>
             {drafts.map((draft) => (
-              <TableRow key={`${draft.key}-${draft.created_at}`}>
+              <TableRow
+                key={`${draft.key}-${draft.created_at}`}
+                className="border-b"
+              >
                 <TableCell>
                   <span className="truncate block max-w-md">
                     {draft.purpose || "Untitled"}

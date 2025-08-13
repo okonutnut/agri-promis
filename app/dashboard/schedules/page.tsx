@@ -1,6 +1,6 @@
 "use client";
 
-import CustomPageLayout from "@/components/custom/layout/admin-page-layout";
+import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import { getDashboardNavItems } from "@/components/sidebar/navitems";
 import {
   Calendar,

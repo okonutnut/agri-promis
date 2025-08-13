@@ -11,7 +11,7 @@ export const columns: ColumnDef<ActivityLogType>[] = [
   },
   {
     accessorKey: "code",
-    header: "Code",
+    header: "Activity",
   },
   {
     accessorKey: "ip_address",

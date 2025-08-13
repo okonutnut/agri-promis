@@ -1,6 +1,6 @@
 "use client";
 
-import CustomPageLayout from "@/components/custom/layout/admin-page-layout";
+import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import CardLink from "@/components/custom/link/card-link";
 import { useSelectAllProjectsByProgramIDHook } from "@/components/hooks";
 import { ProjectType } from "@/components/types";
@@ -46,18 +46,17 @@ export default function DashboardPage() {
                     <span className="font-mono text-xs">
                       {project.location}
                     </span>
-                    <Badge
-                      variant={"outline"}
-                      className={`text-xs uppercase ${
-                        project.status == 1
-                          ? "border-green-600"
-                          : "border-red-600"
-                      } ${
-                        project.status == 1 ? "text-green-600" : "text-red-600"
-                      }`}
-                    >
-                      {project.status == 1 ? "active" : "inactive"}
-                    </Badge>
+                    <div className="flex items-center justify-between w-full mt-auto">
+                      <Badge
+                        variant={
+                          project.status == 1 ? "default" : "destructive"
+                        }
+                        className={`text-xs uppercase `}
+                      >
+                        {project.status == 1 ? "active" : "inactive"}
+                      </Badge>
+                      <span className="font-medium text-xs">72% Completed</span>
+                    </div>
                   </CardLink>
                 ))}
             </div>

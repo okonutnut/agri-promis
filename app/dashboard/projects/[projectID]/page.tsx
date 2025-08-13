@@ -1,7 +1,7 @@
 "use client";
 
 import ProjectDashboardItems from "@/components/custom/dashboard/dashboard-summary-items";
-import CustomPageLayout from "@/components/custom/layout/admin-page-layout";
+import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import { useSelectProgramAndProjectDetailsByProgjectIDHook } from "@/components/hooks";
 import { getProjectNavItems } from "@/components/sidebar/navitems";
 import { Badge } from "@/components/ui/badge";
@@ -23,8 +23,8 @@ export default function DashboardPage() {
     >
       {data && (
         <>
-          <div className="py-10 px-4 flex justify-between items-start">
-            <div className="flex flex-col gap-1 text-2xl font-medium cursor-default">
+          <div className="py-10 px-4 flex justify-between items-start cursor-default">
+            <div className="flex flex-col gap-1 text-2xl font-medium ">
               {data?.project_name}
               <span className="text-sm text-muted-foreground mt-4">
                 Start Date: {format(new Date(data?.start_date), "PP")}

@@ -75,26 +75,6 @@ export const compressImage = (
   });
 };
 
-export const getLocationName = async (
-  lat: number,
-  lng: number
-): Promise<string> => {
-  try {
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`
-    );
-    const data = await response.json();
-
-    return (
-      `${data.address.village}, ${data.address.city}, ${data.address.city}` ||
-      "Location unavailable"
-    );
-  } catch (error) {
-    console.error("Error fetching from OpenStreetMap:", error);
-    return "Location unavailable";
-  }
-};
-
 export const addOverlayToImage = (
   file: File,
   timestamp: string,
@@ -157,6 +137,9 @@ export const addOverlayToImage = (
           if (currentLine) locationLines.push(currentLine.trim());
           overlayLines.push(...locationLines);
         }
+
+        // Add "Captured by Agri-Promis" to the overlay
+        overlayLines.push("Captured by Agri-ProMIS");
 
         const padding = fontSize * 1.0;
         const lineHeight = fontSize * 1.5;
@@ -235,12 +218,27 @@ export async function getLongtitudeLatitudeFromGPS(): Promise<LocationData> {
 
   return new Promise<LocationData>((resolve) => {
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const { latitude, longitude } = position.coords;
+        let locationName = "";
+
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`
+          );
+          const data = await response.json();
+          locationName = `${data.address.village || ""}, ${
+            data.address.city || ""
+          }, ${data.address.country || ""}`.replace(/^,\s|,\s$/g, "");
+        } catch (error) {
+          console.error("Error fetching from OpenStreetMap:", error);
+          locationName = "Location unavailable";
+        }
+
         resolve({
           latitude,
           longitude,
-          locationName: "",
+          locationName,
           error: undefined,
         });
       },

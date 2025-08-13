@@ -1,10 +1,6 @@
 "use client";
 
-import FormTextarea from "@/components/custom/input/form-textarea";
-import FormMultiInput from "@/components/custom/input/form-multi-input";
-import { useInsertMonitoringReportHook } from "@/components/hooks";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -16,15 +12,20 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { ImageData, LocationData } from "@/components/interfaces";
+import { ImageData } from "@/components/interfaces";
 import { MonitoringReportType } from "@/components/types";
-import { useEffect, useRef, useState } from "react";
 import ImageCaptureForm from "./image-report-form";
 import FormInput from "@/components/custom/input/form-input";
-import SaveDraftButton from "../components/draft-button";
-import { deleteDraft } from "@/hooks/use-draft";
-import PrintMonitoringButton from "../components/print-monitoring";
+import FormTextarea from "@/components/custom/input/form-textarea";
+import FormMultiInput from "@/components/custom/input/form-multi-input";
 import NonFormTextarea from "@/components/custom/input/non-form-textarea";
+import SaveDraftButton from "../components/save-draft-button";
+import DeleteDraftButton from "../components/delete-draft-button";
+import PrintMonitoringButton from "../components/print-monitoring";
+import { useInsertMonitoringReportHook } from "@/components/hooks";
+import { deleteDraft } from "@/hooks/use-draft";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 const fieldReportSchema = z.object({
   purpose: z.string().min(1, "Purpose is required"),
@@ -36,98 +37,94 @@ const fieldReportSchema = z.object({
     .max(700, "Observation must not exceed 700 characters"),
   issues_concern: z.array(z.string()).min(1, "At least one issue is required"),
 });
-
 type FieldReportFormData = z.infer<typeof fieldReportSchema>;
 
 type UploadFieldReportFormProps = {
+  onOpenChange: () => void;
   isAddMode?: boolean;
+  isDraft?: boolean;
   values?: MonitoringReportType | null;
 };
 
+const validateImages = (images: ImageData[]) => {
+  const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+  const maxSize = 1 * 1024 * 1024; // 1MB per image
+  const maxTotalSize = 20 * 1024 * 1024; // 20MB total limit
+
+  if (!images || images.length === 0) {
+    toast.error("At least one image is required");
+    return false;
+  }
+
+  for (const imageData of images) {
+    if (!allowedTypes.includes(imageData.file.type)) {
+      toast.error("Please upload valid image files (JPEG, PNG, or WebP)");
+      return false;
+    }
+    if (imageData.file.size > maxSize) {
+      toast.error("Each image file must be less than 1MB");
+      return false;
+    }
+  }
+
+  const totalSize = images.reduce((sum, img) => sum + img.file.size, 0);
+  if (totalSize > maxTotalSize) {
+    toast.error("Total images size must be less than 20MB");
+    return false;
+  }
+
+  return true;
+};
+
 export default function UploadFieldReportForm({
+  onOpenChange,
   isAddMode,
+  isDraft,
   values,
 }: UploadFieldReportFormProps) {
   const { projectID } = useParams();
-  const [location, setLocation] = useState<LocationData>({
-    latitude: undefined,
-    longitude: undefined,
-    locationName: undefined,
-    error: undefined,
-  });
-  const [isDrafted, setIsDrafted] = useState(false);
-  const [images, setImages] = useState<ImageData[]>(values?.images || []);
-  const closeBtnRef = useRef<HTMLButtonElement>(null);
 
-  const form = useForm<FieldReportFormData>({
-    resolver: zodResolver(fieldReportSchema),
-    defaultValues: {
+  const [images, setImages] = useState<ImageData[]>(values?.images || []);
+
+  const defaultValues = useMemo(
+    () => ({
       purpose: values?.purpose || "",
       findings: values?.findings || [],
       issues_concern: values?.issues_concern || [],
       observation: values?.observation || "",
-    },
+    }),
+    [values]
+  );
+
+  const form = useForm<FieldReportFormData>({
+    resolver: zodResolver(fieldReportSchema),
+    defaultValues,
   });
 
-  // Hook for inserting monitoring report
   const { mutate, isPending, isSuccess } = useInsertMonitoringReportHook();
-  const onSubmit = async (data: FieldReportFormData) => {
-    // Validate images
-    if (!images || images.length === 0) {
-      toast.error("At least one image is required");
-      return;
-    }
 
-    // Validate each image file
-    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-    const maxSize = 1 * 1024 * 1024; // 1MB in bytes
+  const onSubmit = useCallback(
+    async (data: FieldReportFormData) => {
+      if (!validateImages(images)) return;
 
-    for (const imageData of images) {
-      // Validate image file type
-      if (!allowedTypes.includes(imageData.file.type)) {
-        toast.error("Please upload valid image files (JPEG, PNG, or WebP)");
-        return;
-      }
+      await deleteDraft(values?.key as string);
 
-      // Validate image file size
-      if (imageData.file.size > maxSize) {
-        toast.error("Each image file must be less than 5MB");
-        return;
-      }
-    }
+      mutate({
+        ...data,
+        project_id: projectID as string,
+        images,
+      });
+    },
+    [images, mutate, projectID, values?.key]
+  );
 
-    // Calculate total size
-    const totalSize = images.reduce((sum, img) => sum + img.file.size, 0);
-    const maxTotalSize = 20 * 1024 * 1024; // 20MB total limit
-
-    if (totalSize > maxTotalSize) {
-      toast.error("Total images size must be less than 20MB");
-      return;
-    }
-
-    await deleteDraft(values?.key as string);
-
-    mutate({
-      ...data,
-      project_id: projectID as string,
-      images: images,
-    });
-  };
-
-  // Reset form and state on successful submission
   useEffect(() => {
-    if (isSuccess || isDrafted) {
+    if (isSuccess) {
       form.reset();
       setImages([]);
-      setLocation({
-        latitude: undefined,
-        longitude: undefined,
-        locationName: undefined,
-        error: undefined,
-      });
-      closeBtnRef.current?.click();
+      onOpenChange();
     }
-  }, [isSuccess, isDrafted, form, closeBtnRef]);
+  }, [isSuccess, form, onOpenChange]);
 
   return (
     <>
@@ -143,8 +140,6 @@ export default function UploadFieldReportForm({
         <ImageCaptureForm
           isAddMode={isAddMode}
           values={values}
-          location={location}
-          setLocation={setLocation}
           images={images}
           setImages={setImages}
         />
@@ -164,7 +159,6 @@ export default function UploadFieldReportForm({
             form={form}
             readonly={!isAddMode}
           />
-          {/* Findings */}
           <FormMultiInput
             label="Findings"
             name="findings"
@@ -178,7 +172,6 @@ export default function UploadFieldReportForm({
             form={form}
             readonly={!isAddMode}
           />
-          {/* Issues and Concerns */}
           <FormMultiInput
             label="Issues & Concern"
             name="issues_concern"
@@ -198,23 +191,23 @@ export default function UploadFieldReportForm({
       </section>
       <SheetFooter className="border-t flex-row justify-end p-2">
         <SheetClose asChild>
-          <Button
-            variant="outline"
-            disabled={isPending}
-            ref={closeBtnRef}
-            size={"sm"}
-          >
+          <Button variant="outline" disabled={isPending} size={"sm"}>
             Close
           </Button>
         </SheetClose>
+        {(isDraft || !isAddMode) && (
+          <DeleteDraftButton
+            draftKey={values?.key as string}
+            onOpenChange={onOpenChange}
+          />
+        )}
         {isAddMode && (
           <SaveDraftButton
             draftKey={values?.key as string}
             form={form}
             images={images}
-            projectID={projectID as string}
             isPending={isPending}
-            setIsDrafted={setIsDrafted}
+            onOpenChange={onOpenChange}
           />
         )}
         {isAddMode && (

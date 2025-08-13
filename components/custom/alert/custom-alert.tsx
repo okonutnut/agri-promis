@@ -28,7 +28,7 @@ export default function CustomAlertDialog({
   return (
     <AlertDialog onOpenChange={onClose}>
       <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent className="p-3">
         <AlertDialogHeader>
           <section className="flex justify-between items-start gap-2">
             <AlertDialogTitle>{title}</AlertDialogTitle>
@@ -36,10 +36,9 @@ export default function CustomAlertDialog({
               <X className="h-4 w-4" />
             </AlertDialogCancel>
           </section>
-          <AlertDialogDescription>
-            {description ||
-              "Are you sure you want to delete this item? This action cannot be undone."}
-          </AlertDialogDescription>
+          {description && (
+            <AlertDialogDescription>{description}</AlertDialogDescription>
+          )}
         </AlertDialogHeader>
         {children}
       </AlertDialogContent>

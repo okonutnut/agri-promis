@@ -5,30 +5,63 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { UseFormReturn } from "react-hook-form";
 import { ImageData } from "@/components/interfaces";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useSelectCurrentUserSessionHook } from "@/components/hooks";
 import { MonitoringReportType } from "@/components/types";
 import { upsertDraft } from "@/hooks/use-draft";
+import { useParams } from "next/navigation";
 
 interface SaveDraftButtonProps {
   draftKey: string;
   form: UseFormReturn<any>;
   images: ImageData[];
-  projectID: string;
   isPending: boolean;
-  setIsDrafted: (isDrafted: boolean) => void;
+  onOpenChange: () => void;
 }
+
+// Helper function to create draft data
+const createDraftData = (
+  projectID: string,
+  formData: any,
+  images: ImageData[]
+): MonitoringReportType => {
+  const currentDate = new Date();
+  const processedImages = images.map((img) => ({
+    id: img.id,
+    src: img.src,
+    dateTimeCaptured: img.dateTimeCaptured,
+    file: img.file,
+  }));
+
+  return {
+    project_id: projectID,
+    images: processedImages,
+    purpose: formData.purpose || "",
+    findings: formData.findings || [],
+    observation: formData.observation,
+    issues_concern: formData.issues_concern || [],
+    remarks: formData.remarks || "",
+    created_at: currentDate.toLocaleString("en-US", {
+      timeZone: "Asia/Manila",
+    }),
+  };
+};
 
 export default function SaveDraftButton({
   draftKey,
   form,
   images,
-  projectID,
   isPending,
-  setIsDrafted,
+  onOpenChange,
 }: SaveDraftButtonProps) {
+  const { projectID } = useParams();
   const { data, isFetched } = useSelectCurrentUserSessionHook();
   const [isSaving, setIsSaving] = useState(false);
+
+  const isDisabled = useMemo(
+    () => isPending || isSaving || !isFetched,
+    [isPending, isSaving, isFetched]
+  );
 
   const handleSaveDraft = async () => {
     try {
@@ -37,41 +70,20 @@ export default function SaveDraftButton({
       // Get current form data
       const formData = form.getValues();
 
-      // Process images for storage
-      const processedImages = await Promise.all(
-        images.map(async (img) => {
-          return {
-            id: img.id,
-            src: img.src,
-            dateTimeCaptured: img.dateTimeCaptured,
-            file: img.file,
-          };
-        })
-      );
+      // Create draft data
+      const draftData = createDraftData(projectID as string, formData, images);
 
-      // Create draft object with all necessary data
-      const draftData: MonitoringReportType = {
-        project_id: projectID,
-        images: processedImages,
-        purpose: formData.purpose || "",
-        findings: formData.findings || [],
-        observation: formData.observation,
-        issues_concern: formData.issues_concern || [],
-        remarks: formData.remarks || "",
-        created_at: new Date().toLocaleString("en-US", {
-          timeZone: "Asia/Manila",
-        }),
-      };
-
+      // Generate draft key
       const key =
         draftKey || `draft_${data?.user.id}_${new Date().toISOString()}`;
 
+      // Save draft
       await upsertDraft(key, draftData);
       toast.success("Draft saved successfully");
-      setIsDrafted(true);
+      onOpenChange();
     } catch (error) {
       console.error("Error saving draft:", error);
-      toast.error("Failed to save draft");
+      toast.error("Failed to save draft. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -79,8 +91,8 @@ export default function SaveDraftButton({
 
   return (
     <Button
-      variant={isPending || isSaving ? "ghost" : "outline"}
-      disabled={isPending || isSaving || !isFetched}
+      variant={isDisabled ? "ghost" : "outline"}
+      disabled={isDisabled}
       onClick={handleSaveDraft}
       type="button"
       size={"sm"}

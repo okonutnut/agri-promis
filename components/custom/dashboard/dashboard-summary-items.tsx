@@ -23,8 +23,8 @@ export default function ProjectDashboardItems({
         <ChartRadialText />
       </SummaryCard>
       <SummaryCard
-        title="Personel"
-        description="Total Assigned Personel"
+        title="Operators"
+        description="Total Assigned Field Operators"
         icon={Contact}
         isLoading={isLoading || error ? true : false}
       >

@@ -7,7 +7,7 @@ export type UserProfileType = {
   phone?: string;
   role?: number;
   position?: string;
-  access_level?: string;
+  active_status?: number;
   created_at?: string;
 };
 
@@ -104,7 +104,7 @@ export type TravelOrderType = {
   office?: string;
   program_id?: string;
   project_id?: string;
-  project?: string;
+  project?: ProjectType;
   fund?: number;
   estimated_cost?: number;
   departure_date?: string;

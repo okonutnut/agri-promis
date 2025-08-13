@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import EditProgramNameForm from "./form/edit-project-name-form";
-import CustomPageLayout from "@/components/custom/layout/admin-page-layout";
+import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import { useSelectProgramAndProjectDetailsByProgjectIDHook } from "@/components/hooks";
 import { useParams } from "next/navigation";
 import { getProjectNavItems } from "@/components/sidebar/navitems";

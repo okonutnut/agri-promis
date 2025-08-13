@@ -28,6 +28,10 @@ import {
   SelectActivityLogsByUserIDAction,
   SelectAllActivityLogsAction,
   SelectDashboardItemsAction,
+  UpdateMemberAction,
+  UpdateActiveStatusMemberAction,
+  DeleteFieldTechnicianFromProjectAction,
+  SelectAllTravelOrdersByUserIDAction,
 } from "@/components/actions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -282,6 +286,16 @@ export function useInsertTravelOrderHook() {
   });
 }
 
+export function useSelectAllTravelOrdersByUserIDHook() {
+  return useQuery({
+    queryKey: ["travelOrders"],
+    queryFn: async () => await SelectAllTravelOrdersByUserIDAction(),
+    refetchOnMount: true,
+    refetchInterval: 3000,
+    networkMode: "online",
+  });
+}
+
 export function useSelectAllTravelOrdersByProgramIDHook(programID: string) {
   return useQuery({
     queryKey: ["travelOrders"],
@@ -373,6 +387,47 @@ export function useInsertMemberHook() {
   });
 }
 
+export function useUpdateMemberHook() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: UserProfileType) =>
+      await UpdateMemberAction(data.id as string, data),
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: ["members"],
+      });
+      toast("Member updated successfully!");
+    },
+    onError: () => {
+      console.error("Failed to update member.");
+      toast.error("Failed to update member.");
+    },
+  });
+}
+
+export function useUpdateActiveStatusMemberHook() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      userID,
+      status,
+    }: {
+      userID: string;
+      status: number;
+    }) => await UpdateActiveStatusMemberAction(userID, status),
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: ["members"],
+      });
+      toast("Member updated successfully!");
+    },
+    onError: () => {
+      console.error("Failed to update member.");
+      toast.error("Failed to update member.");
+    },
+  });
+}
+
 export function useSelectAllMembersHook() {
   return useQuery({
     queryKey: ["members"],
@@ -409,6 +464,24 @@ export function useInsertFieldTechnicianToProjectHook(project_id: string) {
     onError: (error) => {
       console.error("Failed to add field technician to project:", error);
       toast.error(`Failed to add field technician: ${error.message}`);
+    },
+  });
+}
+
+export function useDeleteFieldTechnicianToProjectHook(projectID: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (userID: string) =>
+      await DeleteFieldTechnicianFromProjectAction(userID, projectID),
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: ["fieldTechnicians", projectID],
+      });
+      toast("Field technician removed from project successfully!");
+    },
+    onError: (error) => {
+      console.error("Failed to remove field technician from project:", error);
+      toast.error(`Failed to remove field technician: ${error.message}`);
     },
   });
 }

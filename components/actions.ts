@@ -77,7 +77,7 @@ export async function InsertProgramAction({
   const { data, error } = await supabase
     .from("programs")
     .insert({
-      agriculturist_id: userId,
+      admin_id: userId,
       program_name: program_name,
       description: description,
     })
@@ -148,7 +148,7 @@ export async function SelectAllProgramsByAgriculturistAction() {
   const { data, error } = await supabase
     .from("programs")
     .select("*, project_count:projects(count)")
-    .eq("agriculturist_id", userData.user.id)
+    .eq("admin_id", userData.user.id)
     .order("created_at", { ascending: true });
 
   if (error) {
@@ -223,20 +223,10 @@ export async function SelectAllProjectsByProgramIDAction(programID: string) {
 export async function SelectProgramAndProjectDetailsByProjectIDAction(
   projectID: string
 ) {
-  const supabase = await createClient(cookies()); // your server-side Supabase client
+  const supabase = await createClient(cookies());
   const { data, error } = await supabase
     .from("projects")
-    .select(
-      `
-        *,
-        programs (
-          id,
-          program_name,
-          description,
-          agriculturist_id
-        )
-      `
-    )
+    .select(`*,programs ("*")`)
     .eq("id", projectID)
     .single();
 
@@ -337,6 +327,32 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
   return;
 }
 
+export async function SelectAllTravelOrdersByUserIDAction() {
+  const supabase = await createClient(cookies());
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !userData?.user) {
+    console.error("Error fetching user:", userError);
+    throw new Error(userError?.message || "User not authenticated");
+  }
+
+  const { data, error } = await supabase
+    .from("travel_order")
+    .select(
+      `*, project:projects(id, project_name), user:user_profile!travel_order_user_id_fkey(fullname),
+      created_by:user_profile!travel_order_created_by_fkey(fullname)`
+    )
+    .eq("user_id", userData.user.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching travel orders:", error);
+    throw new Error(error.message);
+  }
+
+  return data as TravelOrderType[];
+}
+
 export async function SelectAllTravelOrdersByProgramIDAction(
   programID: string
 ) {
@@ -344,11 +360,11 @@ export async function SelectAllTravelOrdersByProgramIDAction(
   const { data, error } = await supabase
     .from("travel_order")
     .select(
-      `*, projects (id, project_name), user:user_profile!travel_order_user_id_fkey (fullname),
-      createdBy:user_profile!travel_order_created_by_fkey (fullname)`
+      `*, project:projects(id, project_name), user:user_profile!travel_order_user_id_fkey(fullname),
+      created_by:user_profile!travel_order_created_by_fkey(fullname)`
     )
-    .eq("projects.id", programID)
-    .order("created_at", { ascending: true });
+    .eq("program_id", programID)
+    .order("created_at", { ascending: false });
 
   if (error) {
     console.error("Error fetching travel orders:", error);
@@ -515,6 +531,7 @@ export async function InsertMemberAction(data: UserProfileType) {
       email_confirm: true,
       user_metadata: {
         name: data.fullname as string,
+        active_status: 1,
         role: data.role,
       },
     });
@@ -525,13 +542,88 @@ export async function InsertMemberAction(data: UserProfileType) {
   }
 
   const { error: userError } = await supabase.from("user_profile").insert({
-    ...data,
     id: authData.user.id,
+    ...data,
   });
 
   if (userError) {
     console.error("Error creating field technician:", userError);
     throw new Error(`Failed to create field technician: ${userError.message}`);
+  }
+
+  return;
+}
+
+export async function UpdateMemberAction(
+  userId: string,
+  data: Partial<UserProfileType>
+) {
+  const supabase = await createClient(cookies());
+
+  const { error: userError } = await supabase
+    .from("user_profile")
+    .update({ ...data, created_at: new Date() })
+    .eq("id", userId)
+    .select()
+    .single();
+
+  if (userError) {
+    console.error("Error updating member:", userError);
+    throw new Error(`Failed to update member: ${userError.message}`);
+  }
+
+  // Update auth metadata if name or role changed
+  if (data.fullname || data.role !== undefined) {
+    const { error: authError } = await supabase.auth.admin.updateUserById(
+      userId,
+      {
+        user_metadata: {
+          name: data.fullname,
+          role: data.role,
+        },
+      }
+    );
+
+    if (authError) {
+      console.error("Error updating user metadata:", authError);
+      throw new Error(`Failed to update user metadata: ${authError.message}`);
+    }
+  }
+
+  return;
+}
+
+export async function UpdateActiveStatusMemberAction(
+  userId: string,
+  status: number
+) {
+  const supabase = await createClient(cookies());
+
+  const { error: userError } = await supabase
+    .from("user_profile")
+    .update({ active_status: status, created_at: new Date() })
+    .eq("id", userId)
+    .select()
+    .single();
+
+  if (userError) {
+    console.error("Error updating member:", userError);
+    throw new Error(`Failed to update member: ${userError.message}`);
+  }
+
+  // Update auth metadata if name or role changed
+  const { error: authError } = await supabase.auth.admin.updateUserById(
+    userId,
+    {
+      user_metadata: {
+        active_status: status,
+      },
+    }
+  );
+
+  if (authError) {
+    console.error("Error updating user metadata:", authError);
+    throw new Error(`Failed to update user metadata: ${authError.message}`);
   }
 
   return;
@@ -646,6 +738,59 @@ export async function InsertFieldTechnicianToProjectAction(
   return;
 }
 
+export async function DeleteFieldTechnicianFromProjectAction(
+  user_id: string,
+  project_id: string
+) {
+  const supabase = await createClient(cookies());
+
+  // Fetch current project assignments
+  const { data: existingUser, error: selectError } = await supabase
+    .from("assigned_projects")
+    .select("project_ids")
+    .eq("user_id", user_id)
+    .single();
+
+  if (selectError) {
+    console.error("Error checking existing user:", selectError);
+    throw new Error("Failed to check existing user. Please try again.");
+  }
+
+  // Remove project_id from array
+  const updatedProjects = existingUser.project_ids.filter(
+    (id: string) => id !== project_id
+  );
+
+  // If no projects left, delete the record, otherwise update
+  if (updatedProjects.length === 0) {
+    const { error: deleteError } = await supabase
+      .from("assigned_projects")
+      .delete()
+      .eq("user_id", user_id);
+
+    if (deleteError) {
+      console.error("Error removing field technician:", deleteError);
+      throw new Error(
+        "Failed to remove field technician from project. Please try again."
+      );
+    }
+  } else {
+    const { error: updateError } = await supabase
+      .from("assigned_projects")
+      .update({ project_ids: updatedProjects })
+      .eq("user_id", user_id);
+
+    if (updateError) {
+      console.error("Error updating assigned projects:", updateError);
+      throw new Error(
+        "Failed to remove project from field technician. Please try again."
+      );
+    }
+  }
+
+  return;
+}
+
 export async function SelectAllFieldTechniciansByProjectIDAction(
   projectID: string
 ) {
@@ -698,7 +843,7 @@ export async function SelectAllAssignedProjectsByFieldTechnicianIDAction() {
   return projectsData as ProjectType[];
 }
 
-// NOTIFICATION ACTIONS
+// PUSH SUBSCRIPTION ACTIONS
 export async function InsertSubscriptionAction(
   subscription: WebPushSubscription
 ) {
@@ -813,7 +958,7 @@ export async function SelectUserCurrentLocationAction(user_id: string) {
   const supabase = await createClient(cookies());
   const { data, error } = await supabase
     .from("user_session")
-    .select("latitude, longitude, created_at")
+    .select("latitude, longitude, modified_at")
     .eq("user_id", user_id)
     .order("modified_at", { ascending: false })
     .limit(1)

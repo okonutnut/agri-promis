@@ -1,12 +1,12 @@
 "use client";
 
-import Navbar from "../navbar/admin-navbar";
 import { cn, updateUserLocation } from "@/lib/utils";
 import { toast } from "sonner";
 import SkeletonLoading from "./skeleton-loading";
 import { AppSidebar } from "@/components/sidebar/appSidebar";
 import { NavigationItemType } from "@/components/types";
 import { useEffect } from "react";
+import CustomNavbar from "../navbar/custom-navbar";
 
 type CustomPageLayoutProps = {
   children?: React.ReactNode;
@@ -17,6 +17,7 @@ type CustomPageLayoutProps = {
   noSidebar?: boolean;
   navItems?: NavigationItemType[];
   topRightComponent?: React.ReactNode;
+  role?: "admin" | "user";
 };
 export default function CustomPageLayout({
   children,
@@ -27,6 +28,7 @@ export default function CustomPageLayout({
   noSidebar,
   navItems,
   topRightComponent,
+  role,
 }: CustomPageLayoutProps) {
   useEffect(() => {
     updateUserLocation();
@@ -42,7 +44,12 @@ export default function CustomPageLayout({
         toast.error(
           `Error: ${error.message || "An unexpected error occurred"}`
         )}
-      <Navbar sidebarOptions={navItems || []} noSidebar={noSidebar} />
+      <CustomNavbar
+        navItems={navItems || []}
+        noSidebar={noSidebar}
+        pageTitle={pageTitle}
+        role={role || "admin"}
+      />
       <div className="flex">
         {!noSidebar && <AppSidebar navItems={navItems || []} />}
         <div className={cn(`container mx-auto p-4`, className)}>
