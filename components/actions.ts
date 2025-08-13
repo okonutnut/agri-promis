@@ -28,6 +28,7 @@ export async function SelectAllUserProfilesAction() {
   }
   return data as UserProfileType[];
 }
+
 export async function SelectUserProfileByIDAction(userID: string) {
   const supabase = await createClient(cookies());
   const { data, error } = await supabase
@@ -220,6 +221,38 @@ export async function SelectAllProjectsByProgramIDAction(programID: string) {
   return data as ProjectType[];
 }
 
+export async function SelectAllProjectsByUserIDAction(userID: string) {
+  const supabase = await createClient(cookies());
+
+  // Fetch assigned projects for the user
+  const { data: assignedProjects, error: assignedError } = await supabase
+    .from("assigned_projects")
+    .select("project_ids")
+    .eq("user_id", userID)
+    .single();
+  if (assignedError) {
+    if (assignedError.code === "PGRST116") {
+      return [];
+    }
+    console.error("Error fetching assigned projects:", assignedError);
+    throw new Error(assignedError.message);
+  }
+
+  // Fetch project details for the assigned project IDs
+  const { data, error } = await supabase
+    .from("projects")
+    .select("*")
+    .in("id", assignedProjects.project_ids)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("Error fetching projects:", error);
+    throw new Error(error.message);
+  }
+
+  return data as ProjectType[];
+}
+
 export async function SelectProgramAndProjectDetailsByProjectIDAction(
   projectID: string
 ) {
@@ -383,6 +416,7 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
     .from("monitoring")
     .select(
       `*, 
+      travel_order:travel_order(travel_order_no, purpose),
       reporter:user_profile!field_reports_reporter_id_fkey (fullname),
       remarkBy:user_profile!monitoring_reviewed_by_id_fkey (fullname)`
     )
@@ -412,6 +446,7 @@ export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
     .from("monitoring")
     .select(
       `*, 
+      travel_order:travel_order(travel_order_no, purpose),
       reporter:user_profile!field_reports_reporter_id_fkey (fullname),
       reviewedBy:user_profile!monitoring_reviewed_by_id_fkey (fullname)`
     )
@@ -435,6 +470,7 @@ export async function InsertMonitoringReportAction({
   issues_concern,
   images,
   remarks,
+  travel_order_no,
 }: MonitoringReportType) {
   if (!images?.length) throw new Error("No images provided");
 
@@ -464,6 +500,7 @@ export async function InsertMonitoringReportAction({
   );
 
   const { error } = await supabase.from("monitoring").insert({
+    travel_order_no,
     project_id,
     purpose,
     findings,
@@ -1077,4 +1114,48 @@ export async function SelectDashboardItemsAction(projectID: string) {
   }
 
   return { ap: APData, m: MData };
+}
+
+export async function SelectUserDashboardItemsAction() {
+  const supabase = await createClient(cookies());
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !userData?.user) {
+    console.error("Error fetching user:", userError);
+    throw new Error(userError?.message || "User not authenticated");
+  }
+
+  // Get travel orders
+  const { data: TData, error: TError } = await supabase
+    .from("travel_order")
+    .select("*")
+    .eq("user_id", userData.user.id)
+    .gte("return_date", new Date().toISOString())
+    .order("created_at", { ascending: false });
+  if (TError) {
+    console.error(TError.message);
+    throw new Error("Failed fetching travel orders");
+  }
+
+  // Get assigned projects
+  const { data: APData, error: APError } = await supabase
+    .from("assigned_projects")
+    .select("*")
+    .eq("user_id", userData.user.id);
+  if (APError) {
+    console.error(APError.message);
+    throw new Error("Failed fetching assigned_projects");
+  }
+
+  // Get monitoring reports
+  const { data: MData, error: MError } = await supabase
+    .from("monitoring")
+    .select("*")
+    .eq("reporter_id", userData.user.id);
+  if (MError) {
+    console.error(MError.message);
+    throw new Error("Failed fetching monitoring reports");
+  }
+
+  return { ap: APData, m: MData, to: TData };
 }

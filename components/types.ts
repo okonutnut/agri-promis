@@ -56,6 +56,7 @@ export type MonitoringReportType = {
   id?: string;
   key?: string;
   project_id?: string;
+  travel_order_no?: string;
   reporter_id?: string;
   reviewed_by_id?: string;
   purpose?: string;
@@ -66,6 +67,7 @@ export type MonitoringReportType = {
   photo_url?: string[];
   images?: ImageData[];
   reporter?: UserProfileType;
+  travel_order?: TravelOrderType;
   reviewedBy?: UserProfileType;
   created_at?: string;
 };

@@ -23,7 +23,7 @@ export default function SummaryCard({
   isLoading,
 }: SummaryCardsProps) {
   return (
-    <Card className="p-4 w-full md:w-[276px] relative rounded-md shadow-xs">
+    <Card className="p-4 w-full relative rounded-md shadow-xs">
       <CardContent className="p-0 space-y-4">
         <CardTitle className="uppercase flex items-center gap-2">
           {Icon && (
@@ -37,10 +37,10 @@ export default function SummaryCard({
           <SkeletonLoading />
         ) : (
           <>
-            <CardDescription className="text-foreground-500 font-medium">
+            <CardDescription className="text-foreground-500 font-medium text-xs">
               {description}
             </CardDescription>
-            {children}
+            <div className="mt-auto">{children}</div>
           </>
         )}
       </CardContent>

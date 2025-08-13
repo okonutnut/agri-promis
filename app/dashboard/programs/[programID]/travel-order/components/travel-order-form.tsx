@@ -214,7 +214,7 @@ export default function IssueTravelOrderForm({
             form="travel-order-form"
             variant={isPending ? "ghost" : "default"}
             type="submit"
-            disabled={isPending}
+            disabled={isPending || !form.formState.isValid}
             size={"sm"}
           >
             {isPending ? <Loader2 className="animate-spin" /> : "Submit"}

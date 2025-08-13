@@ -39,7 +39,7 @@ export default function CustomPageLayout({
   }, []);
 
   return (
-    <section className="w-full h-screen flex flex-col relative text-sm">
+    <section className="w-full h-screen flex flex-col relative text-sm overflow-hidden">
       {error &&
         toast.error(
           `Error: ${error.message || "An unexpected error occurred"}`
@@ -52,12 +52,14 @@ export default function CustomPageLayout({
       />
       <div className="flex">
         {!noSidebar && <AppSidebar navItems={navItems || []} />}
-        <div className={cn(`container mx-auto p-4`, className)}>
-          <div className="w-full flex justify-between items-start">
-            <h1 className="text-2xl font-medium mb-4">{pageTitle}</h1>
-            {topRightComponent}
+        <div className="flex-1 w-full ">
+          <div className={cn("p-4", className)}>
+            <div className="flex justify-between items-start">
+              <h1 className="text-2xl font-medium mb-4">{pageTitle}</h1>
+              {topRightComponent}
+            </div>
+            {isLoading || error ? <SkeletonLoading /> : <>{children}</>}
           </div>
-          {isLoading || error ? <SkeletonLoading /> : <>{children}</>}
         </div>
       </div>
     </section>

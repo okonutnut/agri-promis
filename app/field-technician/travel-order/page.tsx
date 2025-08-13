@@ -37,9 +37,9 @@ export default function FieldTechnicianPage() {
   return (
     <CustomPageLayout
       pageTitle="Issued Travel Orders"
+      navItems={getUserDashboardNavItems()}
       isLoading={isLoading}
       error={error}
-      navItems={getUserDashboardNavItems()}
       role="user"
     >
       <DataTable

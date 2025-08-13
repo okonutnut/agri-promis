@@ -26,8 +26,11 @@ import { useInsertMonitoringReportHook } from "@/components/hooks";
 import { deleteDraft } from "@/hooks/use-draft";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { TravelOrderDropdown } from "../components/travel-order-combobox";
+import NonFormInput from "@/components/custom/input/non-form-input";
 
 const fieldReportSchema = z.object({
+  travel_order_no: z.string().min(1, "Travel order number is required"),
   purpose: z.string().min(1, "Purpose is required"),
   findings: z.array(z.string()).min(1, "At least one finding is required"),
   observation: z
@@ -102,7 +105,6 @@ export default function UploadFieldReportForm({
   });
 
   const { mutate, isPending, isSuccess } = useInsertMonitoringReportHook();
-
   const onSubmit = useCallback(
     async (data: FieldReportFormData) => {
       if (!validateImages(images)) return;
@@ -146,12 +148,16 @@ export default function UploadFieldReportForm({
         <form
           className="space-y-4 p-2 border-t pt-4 overflow-x-hidden"
           id="upload-monitoring-report-form"
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit((data) => onSubmit(data))}
         >
-          {form.formState.errors.root && (
-            <div className="text-red-500 text-sm">
-              {form.formState.errors.root.message}
-            </div>
+          {isAddMode || isDraft ? (
+            <TravelOrderDropdown form={form} />
+          ) : (
+            <NonFormInput
+              label="Travel Order No"
+              defaultValue={values?.travel_order?.travel_order_no}
+              readonly
+            />
           )}
           <FormInput
             label="Purpose"
@@ -195,7 +201,7 @@ export default function UploadFieldReportForm({
             Close
           </Button>
         </SheetClose>
-        {(isDraft || !isAddMode) && (
+        {values?.key != null && (
           <DeleteDraftButton
             draftKey={values?.key as string}
             onOpenChange={onOpenChange}

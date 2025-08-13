@@ -20,29 +20,19 @@ import {
 } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
 import { UseFormReturn } from "react-hook-form";
-import { useSelectAllProjectsByUserIDHook } from "@/components/hooks";
+import { useSelectAllTravelOrdersByUserIDHook } from "@/components/hooks";
 
-type ProjectDropdownProps = {
+type TravelOrderDropdownProps = {
   form: UseFormReturn<any>;
 };
-export function ProjectDropdown({ form }: ProjectDropdownProps) {
-  const userId = form.watch("user_id");
-  const { data, isLoading, refetch, isRefetching } =
-    useSelectAllProjectsByUserIDHook(userId);
+export function TravelOrderDropdown({ form }: TravelOrderDropdownProps) {
+  const { data, isLoading } = useSelectAllTravelOrdersByUserIDHook();
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
 
-  React.useEffect(() => {
-    if (userId) {
-      setValue("");
-      form.setValue("project_id", "");
-      refetch();
-    }
-  }, [form, userId, refetch]);
-
   return (
     <>
-      <Label className="mb-1">Project Name</Label>
+      <Label className="mb-1">Travel Order No</Label>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
@@ -52,37 +42,42 @@ export function ProjectDropdown({ form }: ProjectDropdownProps) {
             className="w-full justify-between shadow-xs font-normal"
           >
             {value
-              ? data?.find((project) => project.id === value)?.project_name
-              : "Select project..."}
+              ? `${
+                  data?.find((order) => order.id === value)?.travel_order_no
+                }: ${data?.find((order) => order.id === value)?.purpose}`
+              : "Select travel order..."}
             <ChevronsUpDown className="opacity-50" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
-          {isLoading || isRefetching ? (
+          {isLoading ? (
             <div className="flex items-center justify-center p-4">
               <Loader2 className="animate-spin" />
             </div>
-          ) : userId ? (
+          ) : (
             <Command>
-              <CommandInput placeholder="Search projects..." className="h-9" />
+              <CommandInput
+                placeholder="Search travel orders..."
+                className="h-9"
+              />
               <CommandList>
-                <CommandEmpty>No projects found.</CommandEmpty>
+                <CommandEmpty>No travel order found.</CommandEmpty>
                 <CommandGroup>
-                  {data?.map((project) => (
+                  {data?.map((order) => (
                     <CommandItem
-                      key={project.id}
-                      value={project.id}
+                      key={order.id}
+                      value={order.id}
                       onSelect={(currentValue) => {
                         setValue(currentValue === value ? "" : currentValue);
-                        form.setValue("project_id", currentValue);
+                        form.setValue("travel_order_no", currentValue);
                         setOpen(false);
                       }}
                     >
-                      {project.project_name}
+                      {order.travel_order_no}: {order.purpose}
                       <Check
                         className={cn(
                           "ml-auto",
-                          value === project.id ? "opacity-100" : "opacity-0"
+                          value === order.id ? "opacity-100" : "opacity-0"
                         )}
                       />
                     </CommandItem>
@@ -90,10 +85,6 @@ export function ProjectDropdown({ form }: ProjectDropdownProps) {
                 </CommandGroup>
               </CommandList>
             </Command>
-          ) : (
-            <div className="p-4 text-center text-muted-foreground">
-              Please select a user to view their projects.
-            </div>
           )}
         </PopoverContent>
       </Popover>

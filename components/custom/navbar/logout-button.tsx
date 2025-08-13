@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { DropdownMenuItem } from "../../ui/dropdown-menu";
 import { useQueryClient } from "@tanstack/react-query";
 import { DoorOpen } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 export default function SidebarLogoutButton() {
   const supabase = createClient();
@@ -30,15 +29,9 @@ export default function SidebarLogoutButton() {
   };
 
   return (
-    <DropdownMenuItem asChild>
-      <Button
-        variant={"ghost"}
-        className="w-full justify-start"
-        onClick={handleLogout}
-      >
-        <DoorOpen className="mr-2 h-4 w-4" />
-        Sign out
-      </Button>
+    <DropdownMenuItem onClick={handleLogout} className="text-xs">
+      <DoorOpen className="h-2 w-2" />
+      Sign out
     </DropdownMenuItem>
   );
 }

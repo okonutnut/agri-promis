@@ -1,16 +1,25 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useSelectAllProgramsByAgriculturistHook } from "@/components/hooks";
 import Link from "next/link";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
-import { Boxes } from "lucide-react";
+import { Boxes, Search } from "lucide-react";
 import { getDashboardNavItems } from "@/components/sidebar/navitems";
+import { Input } from "@/components/ui/input";
 
 export default function DashboardPage() {
   const { data, isLoading, error } = useSelectAllProgramsByAgriculturistHook();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Filter programs based on the search query
+  const filteredPrograms = data?.filter((program) =>
+    program.program_name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <CustomPageLayout
       pageTitle="Programs"
@@ -20,17 +29,26 @@ export default function DashboardPage() {
     >
       {data && (
         <>
-          <Link href="/dashboard/new/">
-            <Button className="mb-4" size={"sm"}>
-              Create New Program
-            </Button>
-          </Link>
+          <div className="flex flex-wrap items-start gap-4 mb-4">
+            <Link href="/dashboard/new/">
+              <Button className="w-full">New Program</Button>
+            </Link>
+            <div className="relative w-full max-w-xs">
+              <Input
+                placeholder="Search..."
+                className="pl-8"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <Search className="absolute left-2 top-1/2 w-4 h-4 transform -translate-y-1/2 text-gray-500" />
+            </div>
+          </div>
 
-          {data.length > 0 ? (
+          {filteredPrograms && filteredPrograms?.length > 0 ? (
             <Card className="md:p-2 shadow-none rounded-md py-0">
               <Table>
                 <TableBody>
-                  {data?.map((program) => (
+                  {filteredPrograms.map((program) => (
                     <TableRow
                       key={program.id}
                       className="cursor-pointer hover:bg-gray-50"

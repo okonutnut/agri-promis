@@ -73,6 +73,11 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
             defaultValue={data?.reporter?.fullname}
             readonly
           />
+          <NonFormInput
+            label="Travel Order No"
+            defaultValue={data?.travel_order?.travel_order_no}
+            readonly
+          />
           <NonFormInput label="Purpose" defaultValue={data?.purpose} readonly />
           <NonFormMultiInput label="Findings" values={data?.findings} />
           <NonFormTextarea

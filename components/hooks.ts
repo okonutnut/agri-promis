@@ -32,6 +32,8 @@ import {
   UpdateActiveStatusMemberAction,
   DeleteFieldTechnicianFromProjectAction,
   SelectAllTravelOrdersByUserIDAction,
+  SelectUserDashboardItemsAction,
+  SelectAllProjectsByUserIDAction,
 } from "@/components/actions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -75,8 +77,6 @@ export function useSelectCurrentUserSessionHook() {
       const { session } = (await supabase.auth.getSession()).data;
       return session;
     },
-    refetchOnMount: true,
-    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -173,6 +173,14 @@ export function useSelectAllProjectsByProgramIDHook(programId: string) {
     enabled: !!programId,
     refetchOnMount: true,
     refetchInterval: 3000,
+    networkMode: "online",
+  });
+}
+
+export function useSelectAllProjectsByUserIDHook(userID: string) {
+  return useQuery({
+    queryKey: ["allProjectsByUserId", userID],
+    queryFn: async () => await SelectAllProjectsByUserIDAction(userID),
     networkMode: "online",
   });
 }
@@ -543,8 +551,18 @@ export function useSelectAllActivityLogsHook() {
 // DASHBOARD HOOKS
 export function useSelectDashboardItemsHook(projectID: string) {
   return useQuery({
-    queryKey: ["dashboard_items", projectID],
+    queryKey: ["dashboard_items"],
     queryFn: async () => await SelectDashboardItemsAction(projectID),
+    refetchInterval: 3000,
+    refetchOnMount: true,
+    networkMode: "online",
+  });
+}
+
+export function useSelectUserDashboardItemsHook() {
+  return useQuery({
+    queryKey: ["dashboard_items"],
+    queryFn: async () => await SelectUserDashboardItemsAction(),
     refetchInterval: 3000,
     refetchOnMount: true,
     networkMode: "online",

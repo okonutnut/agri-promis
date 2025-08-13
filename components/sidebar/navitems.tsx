@@ -81,6 +81,11 @@ export function getProjectNavItems(id: string) {
 export function getUserDashboardNavItems() {
   return [
     {
+      title: "Dashboard",
+      href: "/field-technician/dashboard",
+      icon: House,
+    },
+    {
       title: "Assigned Projects",
       href: "/field-technician/projects",
       icon: UserPen,

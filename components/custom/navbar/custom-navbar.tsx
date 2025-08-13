@@ -44,6 +44,7 @@ const PATHS = {
   NEW_PROGRAM: "/dashboard/new",
   NEW_PROJECT: "/dashboard/new/[programUID]",
   PROGRAMS: "/dashboard/programs",
+  PROJECTS: "/dashboard/projects/",
   TEAM: "/dashboard/team",
   ACTIVITY_LOGS: "/dashboard/activity-logs",
 } as const;
@@ -75,7 +76,6 @@ const ProgramDropdown = ({
   programProjectsData: any;
 }) => {
   const currentProgramID = programID ?? programProjectsData?.program_id;
-
   return (
     <div className="flex items-center gap-2 min-w-max">
       <DropdownMenu>
@@ -133,16 +133,18 @@ const ProgramDropdown = ({
 const ProjectDropdown = ({
   projectID,
   projects,
+  role,
 }: {
   projectID: string;
   projects: ProjectType[] | undefined;
+  role: "admin" | "user";
 }) => {
   const currentProject = projects?.find((project) => project.id === projectID);
-
+  const pathname = usePathname();
   return (
     <DropdownMenu>
       <Link
-        href={PATHS.FIELD_TECHNICIAN}
+        href={pathname}
         className="text-black whitespace-nowrap flex items-center gap-2 h-full"
       >
         <Box className="h-4 w-4 flex-shrink-0 text-[#707070]" />
@@ -162,7 +164,9 @@ const ProjectDropdown = ({
         {projects?.map((project: ProjectType) => (
           <Link
             key={project.id}
-            href={`${PATHS.FIELD_TECHNICIAN}/${project.id}`}
+            href={`${
+              role == "admin" ? PATHS.PROJECTS : PATHS.FIELD_TECHNICIAN
+            }/${project.id}`}
           >
             <DropdownMenuItem className="justify-between w-full h-7 cursor-pointer hover:bg-gray-100">
               {project?.project_name ?? <Skeleton className="w-full h-5" />}
@@ -171,7 +175,7 @@ const ProjectDropdown = ({
           </Link>
         ))}
         <Separator />
-        <Link href={PATHS.FIELD_TECHNICIAN}>
+        <Link href={role === "admin" ? PATHS.PROJECTS : PATHS.FIELD_TECHNICIAN}>
           <DropdownMenuItem className="justify-between w-full h-7 cursor-pointer hover:bg-gray-100">
             All Projects
           </DropdownMenuItem>
@@ -212,8 +216,8 @@ export default function CustomNavbar({
   return (
     <>
       <MobileNavbar />
-      <nav className="w-full flex items-center justify-between min-h-12 px-2 border-b z-50">
-        <div className="flex items-center gap-4 overflow-x-auto overflow-y-hidden w-full">
+      <nav className="w-screen flex items-center justify-between min-h-12 px-2 border-b z-50">
+        <div className="flex items-center gap-4 overflow-x-auto overflow-y-hidden">
           <div className="flex items-center gap-2 min-w-max">
             <span className="hidden sm:inline">
               <Image
@@ -238,44 +242,51 @@ export default function CustomNavbar({
 
             <BreadcrumbSeparator />
 
-            {role === "admin" ? (
-              hasProgramOrProject ? (
-                <>
-                  <ProgramDropdown
-                    programID={programID as string}
-                    programData={programData}
-                    allProgramsData={allProgramsData}
-                    programProjectsData={programProjectsData}
-                  />
-                  {projectID && (
-                    <ProjectDropdown
-                      projectID={projectID as string}
-                      projects={allProjectsByProgramIDData}
+            {(() => {
+              if (!hasProgramOrProject) {
+                return (
+                  <span className="text-black whitespace-nowrap">
+                    {pageTitle}
+                  </span>
+                );
+              }
+
+              if (role === "admin") {
+                return (
+                  <>
+                    <ProgramDropdown
+                      programID={programID as string}
+                      programData={programData}
+                      allProgramsData={allProgramsData}
+                      programProjectsData={programProjectsData}
                     />
-                  )}
-                </>
-              ) : (
-                <span className="text-black whitespace-nowrap">
-                  {pageTitle}
-                </span>
-              )
-            ) : (
-              role === "user" &&
-              (hasProgramOrProject ? (
-                <ProjectDropdown
-                  projectID={projectID as string}
-                  projects={projects}
-                />
-              ) : (
-                <span className="text-black whitespace-nowrap">
-                  {pageTitle}
-                </span>
-              ))
-            )}
+                    {projectID && (
+                      <ProjectDropdown
+                        projectID={projectID as string}
+                        projects={allProjectsByProgramIDData}
+                        role={role}
+                      />
+                    )}
+                  </>
+                );
+              }
+
+              if (role === "user") {
+                return (
+                  <ProjectDropdown
+                    projectID={projectID as string}
+                    projects={projects}
+                    role={role}
+                  />
+                );
+              }
+
+              return null;
+            })()}
           </div>
         </div>
 
-        <span className="hidden sm:flex items-center gap-2">
+        <span className="hidden sm:block">
           <NavbarUserImage />
         </span>
       </nav>

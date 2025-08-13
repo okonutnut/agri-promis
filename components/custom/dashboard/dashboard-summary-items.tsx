@@ -1,3 +1,5 @@
+"use client";
+
 import { useSelectDashboardItemsHook } from "@/components/hooks";
 import SummaryCard from "../card/summary-cards";
 import { ChartLine, Contact, FileStack } from "lucide-react";
@@ -13,7 +15,7 @@ export default function ProjectDashboardItems({
     projectID as string
   );
   return (
-    <section className="flex flex-wrap justify-evenly gap-5 p-4">
+    <section className="flex flex-wrap md:flex-nowrap justify-between gap-5 p-4">
       <SummaryCard
         title="Progress"
         description="Project's Progress"

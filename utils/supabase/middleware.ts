@@ -79,7 +79,7 @@ export async function updateSession(request: NextRequest) {
       url.pathname = "/dashboard/programs";
       return NextResponse.redirect(url);
     } else if (userRole === 2) {
-      url.pathname = "/field-technician/projects";
+      url.pathname = "/field-technician/dashboard";
       return NextResponse.redirect(url);
     } else {
       url.pathname = "/access-denied";
@@ -92,7 +92,7 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
   if (pathname === "/field-technician") {
-    url.pathname = "/field-technician/projects";
+    url.pathname = "/field-technician/dashboard";
     return NextResponse.redirect(url);
   }
 
