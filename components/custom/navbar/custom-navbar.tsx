@@ -37,6 +37,7 @@ import {
   ProgramType,
   ProjectType,
 } from "@/components/types";
+// import NotificationsPanel from "../notifications/notification-bell";
 
 // Constants
 const PATHS = {
@@ -175,7 +176,13 @@ const ProjectDropdown = ({
           </Link>
         ))}
         <Separator />
-        <Link href={role === "admin" ? PATHS.PROJECTS : PATHS.FIELD_TECHNICIAN}>
+        <Link
+          href={
+            role === "admin" && projects?.length
+              ? `/dashboard/programs/${projects[0].program_id}`
+              : PATHS.FIELD_TECHNICIAN
+          }
+        >
           <DropdownMenuItem className="justify-between w-full h-7 cursor-pointer hover:bg-gray-100">
             All Projects
           </DropdownMenuItem>
@@ -219,7 +226,7 @@ export default function CustomNavbar({
       <nav className="w-screen flex items-center justify-between min-h-12 px-2 border-b z-50">
         <div className="flex items-center gap-4 overflow-x-auto overflow-y-hidden">
           <div className="flex items-center gap-2 min-w-max">
-            <span className="hidden sm:inline">
+            <Link href="/" className="hidden sm:inline">
               <Image
                 src="/logo.png"
                 alt="app-logo"
@@ -227,7 +234,7 @@ export default function CustomNavbar({
                 height={32}
                 className="h-8 w-8 flex-shrink-0 text-[#707070]"
               />
-            </span>
+            </Link>
 
             {!noSidebar && (
               <AppDrawer
@@ -286,7 +293,8 @@ export default function CustomNavbar({
           </div>
         </div>
 
-        <span className="hidden sm:block">
+        <span className="hidden sm:flex items-center gap-2">
+          {/* <NotificationsPanel /> */}
           <NavbarUserImage />
         </span>
       </nav>

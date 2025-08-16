@@ -3,6 +3,7 @@
 import Image from "next/image";
 import NavbarUserImage from "./navbar-user-image";
 import Link from "next/link";
+// import NotificationsPanel from "../notifications/notification-bell";
 
 export default function MobileNavbar() {
   return (
@@ -11,6 +12,7 @@ export default function MobileNavbar() {
         <Image src={"/logo.png"} width={40} height={40} alt="app_logo" />
       </Link>
       <span className="flex items-center gap-2">
+        {/* <NotificationsPanel /> */}
         <NavbarUserImage />
       </span>
     </header>

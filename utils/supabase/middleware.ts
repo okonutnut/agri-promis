@@ -76,7 +76,7 @@ export async function updateSession(request: NextRequest) {
   // Redirect from login page based on role
   if (pathname === "/login" || pathname === "/") {
     if (userRole === 1) {
-      url.pathname = "/dashboard/programs";
+      url.pathname = "/dashboard";
       return NextResponse.redirect(url);
     } else if (userRole === 2) {
       url.pathname = "/field-technician/dashboard";
@@ -87,10 +87,6 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  if (pathname === "/dashboard") {
-    url.pathname = "/dashboard/programs";
-    return NextResponse.redirect(url);
-  }
   if (pathname === "/field-technician") {
     url.pathname = "/field-technician/dashboard";
     return NextResponse.redirect(url);

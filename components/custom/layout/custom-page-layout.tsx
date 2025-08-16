@@ -39,29 +39,33 @@ export default function CustomPageLayout({
   }, []);
 
   return (
-    <section className="w-full h-screen flex flex-col relative text-sm overflow-hidden">
-      {error &&
-        toast.error(
-          `Error: ${error.message || "An unexpected error occurred"}`
-        )}
-      <CustomNavbar
-        navItems={navItems || []}
-        noSidebar={noSidebar}
-        pageTitle={pageTitle}
-        role={role || "admin"}
-      />
-      <div className="flex">
-        {!noSidebar && <AppSidebar navItems={navItems || []} />}
-        <div className="flex-1 w-full ">
-          <div className={cn("p-4", className)}>
-            <div className="flex justify-between items-start">
-              <h1 className="text-2xl font-medium mb-4">{pageTitle}</h1>
-              {topRightComponent}
+    <>
+      <section className="w-full h-screen flex flex-col relative text-sm overflow-hidden">
+        {error &&
+          toast.error(
+            `Error: ${error.message || "An unexpected error occurred"}`
+          )}
+        <CustomNavbar
+          navItems={navItems || []}
+          noSidebar={noSidebar}
+          pageTitle={pageTitle}
+          role={role || "admin"}
+        />
+        <div className="flex flex-1 overflow-hidden">
+          {!noSidebar && <AppSidebar navItems={navItems || []} />}
+          <div className="flex-1 w-full overflow-hidden">
+            <div className={cn("pl-4 pr-2 h-full flex flex-col", className)}>
+              <div className="flex-1 overflow-y-auto py-4">
+                <div className="flex justify-between items-start mb-4">
+                  <h1 className="text-2xl font-medium">{pageTitle}</h1>
+                  {topRightComponent}
+                </div>
+                {isLoading || error ? <SkeletonLoading /> : <>{children}</>}
+              </div>
             </div>
-            {isLoading || error ? <SkeletonLoading /> : <>{children}</>}
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }

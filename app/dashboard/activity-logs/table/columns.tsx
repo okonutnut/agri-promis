@@ -10,7 +10,7 @@ export const columns: ColumnDef<ActivityLogType>[] = [
     header: "Fullname",
   },
   {
-    accessorKey: "code",
+    accessorKey: "description",
     header: "Activity",
   },
   {

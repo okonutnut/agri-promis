@@ -1,6 +1,6 @@
 "use client";
 
-import ProjectDashboardItems from "@/components/custom/dashboard/dashboard-summary-items";
+import ProjectDashboardItems from "@/components/custom/dashboard/admin/dashboard-summary-items";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import { useSelectProjectDetailsHook } from "@/components/hooks";
 import { getUserProjectNavItems } from "@/components/sidebar/navitems";

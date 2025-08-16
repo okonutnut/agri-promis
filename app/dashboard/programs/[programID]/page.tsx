@@ -53,11 +53,13 @@ export default function DashboardPage() {
                 <CardLink
                   href={`/dashboard/projects/${project.id}`}
                   key={project.id}
-                  className="min-h-36 min-w-[360px] flex flex-col items-start h-full p-5 space-y-2 gap-0"
+                  className="group min-h-36 min-w-[360px] flex flex-col items-start h-full p-5 space-y-2 gap-0"
                 >
                   <span className="w-full flex justify-between items-center font-semibold">
                     {project.project_name}
-                    <ChevronRight className="ml-2 h-4 w-4" />
+                    <span className="ml-2 transform transition-transform group-hover:translate-x-2">
+                      <ChevronRight className="h-4 w-4" />
+                    </span>
                   </span>
                   <span className="font-mono text-xs">{project.location}</span>
                   <div className="flex items-center justify-between w-full mt-auto">

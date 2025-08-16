@@ -1,6 +1,6 @@
 "use client";
 
-import SummaryCard from "../card/summary-cards";
+import SummaryCard from "@/components/custom/card/summary-cards";
 import { Activity, CheckCircle, FileStack } from "lucide-react";
 
 type UserDashboardItemsProps = {

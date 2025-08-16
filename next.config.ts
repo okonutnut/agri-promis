@@ -3,6 +3,11 @@
 import type { NextConfig } from "next";
 import withBundleAnalyzer from "@next/bundle-analyzer";
 
+const withPWA = require("@ducanh2912/next-pwa").default({
+  dest: "public",
+  register: true,
+});
+
 const nextConfig: NextConfig = {
   productionBrowserSourceMaps: true,
   output: "standalone",
@@ -21,5 +26,5 @@ const nextConfig: NextConfig = {
 };
 
 export default withBundleAnalyzer({ enabled: !!process.env.ANALYZE })(
-  nextConfig
+  withPWA(nextConfig)
 );

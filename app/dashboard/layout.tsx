@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "Dashboard page for Agri-ProMIS",
 };
 
-export default function AdminDashboardLayout({
+export default function ScheduleLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;

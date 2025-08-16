@@ -1,8 +1,10 @@
 import {
+  BookOpen,
   Cctv,
   ChartLine,
   ClipboardPen,
   House,
+  LayoutDashboard,
   Settings,
   UserPen,
   Users,
@@ -11,15 +13,15 @@ import {
 export function getDashboardNavItems() {
   return [
     {
+      title: "Dashboard",
+      href: "/dashboard",
+      icon: LayoutDashboard,
+    },
+    {
       title: "Programs",
       href: "/dashboard/programs",
-      icon: House,
+      icon: BookOpen,
     },
-    // {
-    //   title: "Schedules",
-    //   href: "/dashboard/schedules",
-    //   icon: ChartBar,
-    // },
     {
       title: "Team",
       href: "/dashboard/team",
