@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { DataTable } from "./table/data-table";
 import { columns } from "./table/columns";
 import {
@@ -9,9 +9,13 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
+const CustomPageLayout = React.lazy(
+  () => import("@/components/custom/layout/custom-page-layout")
+);
+const IssueTravelOrderForm = React.lazy(
+  () => import("./components/travel-order-form")
+);
 import { useParams } from "next/navigation";
-import IssueTravelOrderForm from "./components/travel-order-form";
 import { TravelOrderType } from "@/components/types";
 import { getProgramNavItems } from "@/components/sidebar/navitems";
 import { useSelectAllTravelOrdersByProgramIDHook } from "@/components/hooks";

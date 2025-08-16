@@ -1,5 +1,5 @@
-import LoadingPage from "@/components/custom/layout/loading-page";
+import FrameLoading from "@/components/custom/layout/frame-loading";
 
 export default function Loading() {
-  return <LoadingPage />;
+  return <FrameLoading />;
 }

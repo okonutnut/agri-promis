@@ -11,7 +11,7 @@ import { Boxes, Search } from "lucide-react";
 import { getDashboardNavItems } from "@/components/sidebar/navitems";
 import { Input } from "@/components/ui/input";
 
-export default function DashboardPage() {
+export default function ProgramsPage() {
   const { data, isLoading, error } = useSelectAllProgramsByAgriculturistHook();
   const [searchQuery, setSearchQuery] = useState("");
 

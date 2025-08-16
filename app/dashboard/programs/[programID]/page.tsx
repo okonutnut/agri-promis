@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
-import CardLink from "@/components/custom/link/card-link";
+import { useState, lazy } from "react";
 import { useSelectAllProjectsByProgramIDHook } from "@/components/hooks";
 import { ProjectType } from "@/components/types";
 import { Button } from "@/components/ui/button";
@@ -12,6 +10,11 @@ import { useParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { getProgramNavItems } from "@/components/sidebar/navitems";
 import { Input } from "@/components/ui/input";
+
+const CustomPageLayout = lazy(
+  () => import("@/components/custom/layout/custom-page-layout")
+);
+const CardLink = lazy(() => import("@/components/custom/link/card-link"));
 
 export default function DashboardPage() {
   const { programID } = useParams();
