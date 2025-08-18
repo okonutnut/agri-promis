@@ -2,14 +2,11 @@
 
 import { useState } from "react";
 import { useSelectAssignedProjectsByFieldTechnicianHook } from "@/components/hooks";
-import { Card } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import Link from "next/link";
-import { Box, Search } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Box, ChevronRight, Search } from "lucide-react";
 import { getUserDashboardNavItems } from "@/components/sidebar/navitems";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import { Input } from "@/components/ui/input";
+import CardLink from "@/components/custom/link/card-link";
 
 export default function FieldTechnicianPage() {
   const { data, isLoading, error } =
@@ -40,39 +37,32 @@ export default function FieldTechnicianPage() {
             <Search className="absolute left-2 top-1/2 w-4 h-4 transform -translate-y-1/2 text-gray-500" />
           </div>
           {filteredData && filteredData.length > 0 ? (
-            <>
-              <Card className="p-0 shadow-none">
-                <Table>
-                  <TableBody>
-                    {filteredData.map((project) => (
-                      <TableRow key={project.id}>
-                        <TableCell>
-                          <Link
-                            href={`/field-technician/projects/${project.id}`}
-                            className="flex justify-start items-center gap-2 p-2"
-                          >
-                            <span className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 border">
-                              <Box className="h-5 w-5 text-gray-500" />
-                            </span>
-                            <div className="w-full flex flex-col gap-1">
-                              <div className="flex w-full justify-between items-center">
-                                <strong>{project.project_name}</strong>
-                                <Badge>
-                                  {project.status == 0 ? "INACTIVE" : "ACTIVE"}
-                                </Badge>
-                              </div>
-                              <span className="font-mono text-xs">
-                                {project.location}
-                              </span>
-                            </div>
-                          </Link>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </Card>
-            </>
+            <div className="flex flex-wrap justify-start items-center gap-2">
+              {filteredData.map((project) => (
+                <CardLink
+                  href={`/field-technician/projects/${project.id}`}
+                  key={project.id}
+                  className="group min-w-sm flex flex-col items-start h-full p-4 space-y-2 gap-0"
+                >
+                  <div className="w-full flex justify-between items-start">
+                    <div className="flex items-center gap-4">
+                      <span className="border rounded-full p-2">
+                        <Box className="h-5 w-5 text-gray-500" />
+                      </span>
+                      <div className="font-semibold">
+                        {project.project_name} <br />
+                        <small className="font-normal">
+                          {project.location}
+                        </small>
+                      </div>
+                    </div>
+                    <span className="ml-2 transform transition-transform group-hover:translate-x-2">
+                      <ChevronRight className="h-4 w-4" />
+                    </span>
+                  </div>
+                </CardLink>
+              ))}
+            </div>
           ) : (
             <span>
               No results found for &quot;{searchTerm}&quot;. <br />

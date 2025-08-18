@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardContent,
@@ -23,27 +25,25 @@ export default function SummaryCard({
   isLoading,
 }: SummaryCardsProps) {
   return (
-    <Card className="p-4 w-full relative rounded-md shadow-xs">
-      <CardContent className="p-0 space-y-4">
-        <CardTitle className="uppercase flex items-center gap-2">
-          {Icon && (
-            <span className="border border-primary p-1 rounded-md">
-              <Icon className="w-5 h-5 text-primary" />
-            </span>
-          )}
-          {title}
-        </CardTitle>
-        {isLoading ? (
-          <SkeletonLoading />
-        ) : (
-          <>
-            <CardDescription className="text-foreground-500 font-medium text-xs">
-              {description}
-            </CardDescription>
-            <div className="mt-auto">{children}</div>
-          </>
-        )}
-      </CardContent>
+    <Card className="p-4 w-full relative rounded-md shadow-xs  flex flex-col h-[200px]">
+      {isLoading ? (
+        <SkeletonLoading />
+      ) : (
+        <CardContent className="p-0 space-y-4 h-full flex flex-col">
+          <CardTitle className="uppercase flex items-center gap-2">
+            {Icon && (
+              <span className="border border-primary p-1 rounded-md">
+                <Icon className="w-5 h-5 text-primary" />
+              </span>
+            )}
+            {title}
+          </CardTitle>
+          <CardDescription className="text-foreground-500 font-medium">
+            {description}
+          </CardDescription>
+          <div className="mt-auto">{children}</div>
+        </CardContent>
+      )}
     </Card>
   );
 }

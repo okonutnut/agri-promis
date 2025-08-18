@@ -1,16 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import dynamic from "next/dynamic";
+import { useCallback, useState } from "react";
 import { DataTable } from "./table/data-table";
 import { columns } from "./table/columns";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useSelectAllMonitoringReportsByProjectIDAndUserHook } from "@/components/hooks";
 import { MonitoringReportType } from "@/components/types";
-import UploadFieldReportForm from "./form/monitoring-report-form";
 import { useParams } from "next/navigation";
-import ViewDraftsSheet from "./components/view-drafts-sheet";
 import { getUserProjectNavItems } from "@/components/sidebar/navitems";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
+const UploadFieldReportForm = dynamic(
+  () => import("./form/monitoring-report-form"),
+  {
+    ssr: false,
+  }
+);
+const ViewDraftsSheet = dynamic(
+  () => import("./components/view-drafts-sheet"),
+  {
+    ssr: false,
+  }
+);
 
 export default function MonitoringReportPage() {
   const { projectID } = useParams();
@@ -41,12 +52,12 @@ export default function MonitoringReportPage() {
     setPanelOpen(true);
   };
 
-  const handlePanelClose = () => {
+  const handlePanelClose = useCallback(() => {
     setPanelOpen(false);
     setIsAddMode(false);
     setIsDraft(false);
     setSelectedRow(null);
-  };
+  }, []);
 
   const { data, isLoading, error } =
     useSelectAllMonitoringReportsByProjectIDAndUserHook(projectID as string);

@@ -1,21 +1,29 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Card, CardContent } from "@/components/ui/card";
-import EditProgramNameForm from "./form/edit-project-name-form";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import { useSelectProgramAndProjectDetailsByProgjectIDHook } from "@/components/hooks";
 import { useParams } from "next/navigation";
 import { getProjectNavItems } from "@/components/sidebar/navitems";
-import DeleteProjectCard from "./components/delete-project-card";
-import { useEffect } from "react";
+import { ProgramType, ProjectType } from "@/components/types";
+const DeleteProjectCard = dynamic(
+  () => import("./components/delete-project-card"),
+  {
+    ssr: false,
+  }
+);
+const EditProgramNameForm = dynamic(
+  () => import("./form/edit-project-name-form"),
+  {
+    ssr: false,
+  }
+);
 
 export default function ProgramSettingsPage() {
   const { projectID } = useParams();
-  const { data, isLoading, error, refetch } =
+  const { data, isLoading, error } =
     useSelectProgramAndProjectDetailsByProgjectIDHook(projectID as string);
-  useEffect(() => {
-    refetch();
-  }, [refetch, projectID]);
 
   return (
     <CustomPageLayout
@@ -24,20 +32,18 @@ export default function ProgramSettingsPage() {
       error={error}
       navItems={getProjectNavItems(projectID as string)}
     >
-      {data && (
-        <>
-          <Card className="shadow-xs mb-4">
-            <CardContent className="flex flex-wrap justify-between items-start">
-              <div className="font-semibold w-full mb-4">General Settings</div>
-              <EditProgramNameForm project={data} />
-            </CardContent>
-          </Card>
-          <DeleteProjectCard
-            data={data}
-            programID={data.program_id as string}
+      <Card className="shadow-xs mb-4">
+        <CardContent className="flex flex-wrap justify-between items-start">
+          <div className="font-semibold w-full mb-4">General Settings</div>
+          <EditProgramNameForm
+            project={data as ProjectType & { programs: ProgramType }}
           />
-        </>
-      )}
+        </CardContent>
+      </Card>
+      <DeleteProjectCard
+        data={data as ProjectType}
+        programID={(data && (data.program_id as string)) ?? ""}
+      />
     </CustomPageLayout>
   );
 }

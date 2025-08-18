@@ -1,10 +1,16 @@
 "use client";
 
-import MonitoringTemplate from "@/components/custom/print/monitoring-template";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
 import { useReactToPrint } from "react-to-print";
 import { MonitoringReportType } from "@/components/types";
+const MonitoringTemplate = dynamic(
+  () => import("@/components/custom/print/monitoring-template"),
+  {
+    ssr: false,
+  }
+);
 
 type PrintMonitoringButtonProps = {
   data: MonitoringReportType | null;

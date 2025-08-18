@@ -51,7 +51,7 @@ export default function FieldTechnicianPage() {
 
   return (
     <CustomPageLayout
-      pageTitle="Issued Travel Orders"
+      pageTitle="Travel Orders"
       isLoading={isLoading}
       error={error}
       navItems={getProgramNavItems(programID as string)}

@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/table";
 import { loadDrafts } from "@/hooks/use-draft";
 import { format } from "date-fns";
-import { FileInput } from "lucide-react";
+import { Archive } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type ViewDraftsSheetProps = {
@@ -48,7 +48,7 @@ export default function ViewDraftsSheet({
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <Button variant={"outline"} className="cursor-pointer">
-          <FileInput />
+          <Archive />
           Drafts
         </Button>
       </SheetTrigger>

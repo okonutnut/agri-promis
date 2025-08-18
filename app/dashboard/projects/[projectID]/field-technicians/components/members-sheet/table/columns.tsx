@@ -1,15 +1,32 @@
 "use client";
 
-import { AssignedProjectsType, UserProfileType } from "@/components/types";
-import { Button } from "@/components/ui/button";
-import { UseMutateFunction } from "@tanstack/react-query";
+import { UserProfileType } from "@/components/types";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";
-import { Loader2 } from "lucide-react";
 
-export const columns = (
-  mutate: UseMutateFunction<void, Error, AssignedProjectsType, unknown>,
-  isPending: boolean
-): ColumnDef<UserProfileType>[] => [
+export const columns: ColumnDef<UserProfileType>[] = [
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
   {
     accessorKey: "fullname",
     header: "Name",
@@ -17,26 +34,5 @@ export const columns = (
   {
     accessorKey: "position",
     header: "Position",
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => (
-      <div className="text-end" key={row.id}>
-        <Button
-          variant={isPending ? "ghost" : "link"}
-          size="sm"
-          disabled={isPending}
-          onClick={(e) => {
-            e.stopPropagation();
-            row.getToggleSelectedHandler()(e);
-            mutate({
-              user_id: row.original.id,
-            });
-          }}
-        >
-          {isPending ? <Loader2 className="animate-spin" /> : "Select"}
-        </Button>
-      </div>
-    ),
   },
 ];

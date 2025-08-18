@@ -1,12 +1,13 @@
 "use client";
 
-import { cn, updateUserLocation } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import SkeletonLoading from "./skeleton-loading";
 import { AppSidebar } from "@/components/sidebar/appSidebar";
 import { NavigationItemType } from "@/components/types";
-import { useEffect } from "react";
+import { Suspense } from "react";
+import SkeletonLoading from "./skeleton-loading";
 import CustomNavbar from "../navbar/custom-navbar";
+import { useUpdateUserCurrentLocationHook } from "@/components/hooks";
 
 type CustomPageLayoutProps = {
   children?: React.ReactNode;
@@ -30,14 +31,7 @@ export default function CustomPageLayout({
   topRightComponent,
   role,
 }: CustomPageLayoutProps) {
-  useEffect(() => {
-    updateUserLocation();
-    const interval = setInterval(() => {
-      updateUserLocation();
-    }, 10000);
-    return () => clearInterval(interval);
-  }, []);
-
+  useUpdateUserCurrentLocationHook();
   return (
     <>
       <section className="w-full h-screen flex flex-col relative text-sm overflow-hidden">
@@ -60,7 +54,11 @@ export default function CustomPageLayout({
                   <h1 className="text-2xl font-medium">{pageTitle}</h1>
                   {topRightComponent}
                 </div>
-                {isLoading || error ? <SkeletonLoading /> : <>{children}</>}
+                {isLoading || error ? (
+                  <SkeletonLoading />
+                ) : (
+                  <Suspense fallback={<SkeletonLoading />}>{children}</Suspense>
+                )}
               </div>
             </div>
           </div>

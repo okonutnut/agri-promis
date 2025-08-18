@@ -3,6 +3,8 @@
 import {
   ColumnDef,
   flexRender,
+  SortingState,
+  getSortedRowModel,
   getCoreRowModel,
   useReactTable,
   getPaginationRowModel,
@@ -37,25 +39,29 @@ export function DataTable<TData, TValue>({
   onAdd,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     state: {
       columnFilters,
+      sorting,
     },
   });
 
   return (
     <div className="space-y-4">
       {/* Global Search Bar and Add Button */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-start gap-2">
         <Button onClick={onAdd}>New Travel Order</Button>
-        <div className="relative w-full max-w-md">
+        <div className="relative w-full max-w-sm">
           <Input
             placeholder="Search..."
             className="pl-8"

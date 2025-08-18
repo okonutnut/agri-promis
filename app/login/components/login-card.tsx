@@ -1,11 +1,17 @@
 "use client";
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import Image from "next/image";
+import dynamic from "next/dynamic";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Suspense } from "react";
+import { Loader2 } from "lucide-react";
+const GoogleSignInButton = dynamic(() => import("./google-login"), {
+  ssr: false,
+});
 
-export default function LoginCard({ children }: { children: React.ReactNode }) {
+export default function LoginCard() {
   return (
-    <>
+    <section className="col-span-full md:col-span-1 h-screen flex items-center justify-center">
       <Card className="p-8 w-full gap-2 mx-4 border-none shadow-none">
         <CardHeader>
           <Image
@@ -28,10 +34,18 @@ export default function LoginCard({ children }: { children: React.ReactNode }) {
           <h1 className="text-sm font-medium text-center mb-2">
             Sign in to your account
           </h1>
-          {children}
+          <Suspense
+            fallback={
+              <center>
+                <Loader2 className="animate-spin" />
+              </center>
+            }
+          >
+            <GoogleSignInButton />
+          </Suspense>
         </CardContent>
         <p className="text-center text-xs text-gray-500">version 0.1.0-dev</p>
       </Card>
-    </>
+    </section>
   );
 }

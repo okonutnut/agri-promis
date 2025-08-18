@@ -1,6 +1,7 @@
 "use client";
 
 import { TravelOrderType } from "@/components/types";
+import { Badge } from "@/components/ui/badge";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 
@@ -16,6 +17,17 @@ export const columns: ColumnDef<TravelOrderType>[] = [
   {
     accessorKey: "destination",
     header: "Destination",
+  },
+  {
+    accessorKey: "is_active",
+    header: "Status",
+    cell: ({ getValue }) => {
+      return (
+        <Badge variant={getValue() ? "default" : "destructive"}>
+          {getValue() ? "Active" : "Inactive"}
+        </Badge>
+      );
+    },
   },
   {
     accessorKey: "created_at",

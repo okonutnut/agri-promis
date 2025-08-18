@@ -6,6 +6,10 @@ import { format } from "date-fns";
 
 export const columns: ColumnDef<MonitoringReportType>[] = [
   {
+    accessorKey: "travel_order.travel_order_no",
+    header: "Travel Order No",
+  },
+  {
     accessorKey: "purpose",
     header: "Purpose",
   },

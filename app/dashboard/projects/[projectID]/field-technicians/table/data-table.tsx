@@ -121,7 +121,7 @@ export function DataTable<TData, TValue>({
       </div>
 
       {/* Pagination */}
-      {data.length > 0 && (
+      {data.length > 10 && (
         <div className="flex items-center justify-start space-x-2 py-4">
           <div className="flex items-center space-x-2">
             <Button

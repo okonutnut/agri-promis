@@ -1,15 +1,22 @@
 "use client";
 
 import {
-  useInsertFieldTechnicianToProjectHook,
+  useInsertFieldTechniciansToProjectHook,
   useSelectAllMembersByRoleHook,
 } from "@/components/hooks";
 import { DataTable } from "./table/data-table";
 import { columns } from "./table/columns";
-import { Dispatch, SetStateAction, useEffect, useMemo } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 import SkeletonLoading from "@/components/custom/layout/skeleton-loading";
 import { useParams } from "next/navigation";
-import { toast } from "sonner";
+import { SheetClose, SheetFooter } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
 
 type SelectMemberTableProps = {
   assignedMembers: string[];
@@ -20,6 +27,7 @@ export default function SelectMemberTable({
   setPanelOpen,
 }: SelectMemberTableProps) {
   const { projectID } = useParams();
+  const [selectedRows, setSelectedRows] = useState<string[]>([]);
 
   // GET
   const { data, isLoading, isError } = useSelectAllMembersByRoleHook(2);
@@ -33,26 +41,44 @@ export default function SelectMemberTable({
   }, [assignedMembers, data]);
 
   // POST
-  const {
-    mutate,
-    isError: addError,
-    isPending,
-    isSuccess,
-  } = useInsertFieldTechnicianToProjectHook(projectID as string);
-
-  useEffect(() => {
-    if (isSuccess) {
-      setPanelOpen(false);
-    }
-  }, [isSuccess, setPanelOpen]);
+  const { mutate, isPending } = useInsertFieldTechniciansToProjectHook(
+    projectID as string
+  );
+  const handleRowSelectionChange = useCallback(
+    (selectedRows: typeof tableData) => {
+      console.log("Selected Rows:", selectedRows);
+      setSelectedRows(selectedRows.map((row) => row.id as string));
+    },
+    [setSelectedRows]
+  );
 
   return (
     <>
       {(isLoading || isError) && <SkeletonLoading />}
-      {addError && toast.error("Failed to add member(s).")}
       {!isLoading && !isError && (
-        <DataTable columns={columns(mutate, isPending)} data={tableData} />
+        <>
+          <DataTable
+            columns={columns}
+            data={tableData}
+            isPending={isPending}
+            onAdd={() =>
+              mutate(selectedRows, {
+                onSuccess: () => {
+                  setPanelOpen(false);
+                },
+              })
+            }
+            onRowSelectionChange={handleRowSelectionChange}
+          />
+        </>
       )}
+      <SheetFooter className="flex-row justify-end border-t p-2">
+        <SheetClose asChild>
+          <Button variant={"outline"} size={"sm"} disabled={isPending}>
+            Close
+          </Button>
+        </SheetClose>
+      </SheetFooter>
     </>
   );
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import CustomAlertDialog from "@/components/custom/alert/custom-alert";
 import { useDeleteProgramHook } from "@/components/hooks";
 import { ProgramType } from "@/components/types";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useState } from "react";
+import CustomAlertDialog from "@/components/custom/alert/custom-alert";
 
 type DeleteProgramCardProps = {
   data: ProgramType;

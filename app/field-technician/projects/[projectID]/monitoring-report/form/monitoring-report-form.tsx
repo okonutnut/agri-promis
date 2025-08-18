@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
+import React, { useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -14,20 +15,55 @@ import {
 } from "@/components/ui/sheet";
 import { ImageData } from "@/components/interfaces";
 import { MonitoringReportType } from "@/components/types";
-import ImageCaptureForm from "./image-report-form";
-import FormInput from "@/components/custom/input/form-input";
-import FormTextarea from "@/components/custom/input/form-textarea";
-import FormMultiInput from "@/components/custom/input/form-multi-input";
-import NonFormTextarea from "@/components/custom/input/non-form-textarea";
-import SaveDraftButton from "../components/save-draft-button";
-import DeleteDraftButton from "../components/delete-draft-button";
-import PrintMonitoringButton from "../components/print-monitoring";
 import { useInsertMonitoringReportHook } from "@/components/hooks";
 import { deleteDraft } from "@/hooks/use-draft";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { TravelOrderDropdown } from "../components/travel-order-combobox";
-import NonFormInput from "@/components/custom/input/non-form-input";
+import { Loader2, Send } from "lucide-react";
+const TravelOrderDropdown = dynamic(
+  () => import("../components/travel-order-combobox"),
+  {
+    ssr: false,
+  }
+);
+const ImageCaptureForm = dynamic(() => import("./image-report-form"), {
+  ssr: false,
+});
+const FormInput = dynamic(
+  () => import("@/components/custom/input/form-input"),
+  {
+    ssr: false,
+  }
+);
+const FormTextarea = dynamic(
+  () => import("@/components/custom/input/form-textarea"),
+  { ssr: false }
+);
+const FormMultiInput = dynamic(
+  () => import("@/components/custom/input/form-multi-input"),
+  { ssr: false }
+);
+const NonFormTextarea = dynamic(
+  () => import("@/components/custom/input/non-form-textarea"),
+  { ssr: false }
+);
+const SaveDraftButton = dynamic(
+  () => import("../components/save-draft-button"),
+  { ssr: false }
+);
+const DeleteDraftButton = dynamic(
+  () => import("../components/delete-draft-button"),
+  { ssr: false }
+);
+const NonFormInput = dynamic(
+  () => import("@/components/custom/input/non-form-input"),
+  { ssr: false }
+);
+const PrintMonitoringButton = dynamic(
+  () => import("../components/print-monitoring"),
+  {
+    ssr: false,
+  }
+);
 
 const fieldReportSchema = z.object({
   travel_order_no: z.string().min(1, "Travel order number is required"),
@@ -104,29 +140,30 @@ export default function UploadFieldReportForm({
     defaultValues,
   });
 
-  const { mutate, isPending, isSuccess } = useInsertMonitoringReportHook();
+  const { mutate, isPending } = useInsertMonitoringReportHook();
   const onSubmit = useCallback(
     async (data: FieldReportFormData) => {
       if (!validateImages(images)) return;
 
       await deleteDraft(values?.key as string);
 
-      mutate({
-        ...data,
-        project_id: projectID as string,
-        images,
-      });
+      mutate(
+        {
+          ...data,
+          project_id: projectID as string,
+          images,
+        },
+        {
+          onSuccess: () => {
+            form.reset();
+            setImages([]);
+            onOpenChange();
+          },
+        }
+      );
     },
     [images, mutate, projectID, values?.key]
   );
-
-  useEffect(() => {
-    if (isSuccess) {
-      form.reset();
-      setImages([]);
-      onOpenChange();
-    }
-  }, [isSuccess, form, onOpenChange]);
 
   return (
     <>
@@ -146,7 +183,7 @@ export default function UploadFieldReportForm({
           setImages={setImages}
         />
         <form
-          className="space-y-4 p-2 border-t pt-4 overflow-x-hidden"
+          className="space-y-3 p-2 border-t pt-4 overflow-x-hidden"
           id="upload-monitoring-report-form"
           onSubmit={form.handleSubmit((data) => onSubmit(data))}
         >
@@ -223,7 +260,14 @@ export default function UploadFieldReportForm({
             size={"sm"}
             disabled={isPending || !images || images.length === 0}
           >
-            {isPending ? <Loader2 className="animate-spin" /> : "Submit Report"}
+            {isPending ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              <>
+                <Send />
+                Submit
+              </>
+            )}
           </Button>
         )}
       </SheetFooter>

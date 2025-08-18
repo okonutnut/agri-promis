@@ -1,4 +1,3 @@
-import { createClient } from "@/utils/supabase/client";
 import { LocationData } from "@/components/interfaces";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -253,36 +252,4 @@ export async function getLongtitudeLatitudeFromGPS(): Promise<LocationData> {
       }
     );
   });
-}
-
-export async function updateUserLocation() {
-  const supabase = createClient();
-  const locationData = await getLongtitudeLatitudeFromGPS();
-  const { data: user } = await supabase.auth.getUser();
-
-  const response = await fetch("https://api.ipify.org?format=json");
-  const ipAddress = await response.json();
-
-  if (!user?.user?.id) {
-    return;
-  }
-
-  const { error } = await supabase.from("user_session").upsert(
-    {
-      user_id: user?.user?.id,
-      longitude: locationData.longitude,
-      ip_address: ipAddress.ip,
-      latitude: locationData.latitude,
-      modified_at: new Date(),
-    },
-    {
-      onConflict: "user_id",
-    }
-  );
-
-  if (error) {
-    console.error("Error updating user location:", error);
-  }
-
-  return;
 }

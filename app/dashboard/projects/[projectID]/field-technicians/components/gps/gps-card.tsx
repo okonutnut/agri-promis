@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense } from "react";
 import dynamic from "next/dynamic";
+import { Suspense } from "react";
 import { Icon } from "leaflet";
 import { useSelectUserLocationHook } from "@/components/hooks";
 import { Label } from "@/components/ui/label";
@@ -72,14 +72,13 @@ export default function FTGPSCard({ user_id }: FTGPSCardProps) {
     <Suspense fallback={<SkeletonLoading />}>
       <section className="space-y-4 pb-4 border-b">
         <Label htmlFor="gps-card" className="mb-1">
-          Current Location:
           {data && (
             <span className="italic text-xs text-gray-500">
               Last update: {format(data?.modified_at, "PPp")}
             </span>
           )}
         </Label>
-        <div className="w-full h-[40vh] relative border rounded-lg flex flex-col items-center justify-center">
+        <div className="w-full h-[20vh] relative border rounded-lg flex flex-col items-center justify-center">
           {isLoading || isRefetching ? (
             <Loader2 className="animate-spin text-primary" />
           ) : error ? (

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Archive, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { UseFormReturn } from "react-hook-form";
 import { ImageData } from "@/components/interfaces";
@@ -97,7 +97,13 @@ export default function SaveDraftButton({
       type="button"
       size={"sm"}
     >
-      {isSaving ? <Loader2 className="animate-spin" /> : "Save as Draft"}
+      {isSaving ? (
+        <Loader2 className="animate-spin" />
+      ) : (
+        <>
+          <Archive /> Draft
+        </>
+      )}
     </Button>
   );
 }

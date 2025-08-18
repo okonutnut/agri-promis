@@ -1,9 +1,12 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useSelectDashboardItemsHook } from "@/components/hooks";
-import SummaryCard from "../../card/summary-cards";
 import { ChartLine, Contact, FileStack } from "lucide-react";
 import { ChartRadialText } from "../project-progress-chart";
+const SummaryCard = dynamic(() => import("../../card/summary-cards"), {
+  ssr: false,
+});
 
 type ProjectDashboardItemsProps = {
   projectID: string;
@@ -14,6 +17,7 @@ export default function ProjectDashboardItems({
   const { data, isLoading, error } = useSelectDashboardItemsHook(
     projectID as string
   );
+
   return (
     <section className="flex flex-wrap md:flex-nowrap justify-between gap-5 p-4">
       <SummaryCard

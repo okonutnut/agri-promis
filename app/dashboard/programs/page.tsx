@@ -5,11 +5,10 @@ import { Button } from "@/components/ui/button";
 import { useSelectAllProgramsByAgriculturistHook } from "@/components/hooks";
 import Link from "next/link";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { Card } from "@/components/ui/card";
-import { Boxes, Search } from "lucide-react";
+import { Boxes, ChevronRight, Search } from "lucide-react";
 import { getDashboardNavItems } from "@/components/sidebar/navitems";
 import { Input } from "@/components/ui/input";
+import CardLink from "@/components/custom/link/card-link";
 
 export default function ProgramsPage() {
   const { data, isLoading, error } = useSelectAllProgramsByAgriculturistHook();
@@ -33,7 +32,7 @@ export default function ProgramsPage() {
             <Link href="/dashboard/new/">
               <Button className="w-full">New Program</Button>
             </Link>
-            <div className="relative w-full max-w-xs">
+            <div className="relative w-full max-w-sm">
               <Input
                 placeholder="Search..."
                 className="pl-8"
@@ -45,37 +44,32 @@ export default function ProgramsPage() {
           </div>
 
           {filteredPrograms && filteredPrograms?.length > 0 ? (
-            <Card className="md:p-2 shadow-none rounded-md py-0">
-              <Table>
-                <TableBody>
-                  {filteredPrograms.map((program) => (
-                    <TableRow
-                      key={program.id}
-                      className="cursor-pointer hover:bg-gray-50"
-                    >
-                      <TableCell>
-                        <Link
-                          href={`/dashboard/programs/${program.id}`}
-                          className="flex items-center gap-2 rounded-md p-2"
-                        >
-                          <span className="flex items-center justify-center w-9 h-9 mx-1 rounded-full bg-gray-100 border">
-                            <Boxes className="h-5 w-5 text-gray-500" />
-                          </span>
-                          <span>
-                            <strong>{program.program_name}</strong> <br />
-                            {program.project_count && (
-                              <span className="text-xs text-gray-500 font-mono">
-                                {program.project_count[0].count} Projects
-                              </span>
-                            )}
-                          </span>
-                        </Link>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Card>
+            <div className="flex flex-wrap justify-start items-center gap-2">
+              {filteredPrograms.map((program) => (
+                <CardLink
+                  href={`/dashboard/programs/${program.id}`}
+                  key={program.id}
+                  className="group min-w-sm flex flex-col items-start h-full p-4 space-y-2 gap-0"
+                >
+                  <div className="w-full flex justify-between items-start">
+                    <div className="flex items-center gap-4">
+                      <span className="border rounded-full p-2">
+                        <Boxes className="h-5 w-5 text-gray-500" />
+                      </span>
+                      <div className="font-semibold">
+                        {program.program_name} <br />
+                        <small className="font-normal">
+                          {program.project_count[0].count ?? 0} projects
+                        </small>
+                      </div>
+                    </div>
+                    <span className="ml-2 transform transition-transform group-hover:translate-x-2">
+                      <ChevronRight className="h-4 w-4" />
+                    </span>
+                  </div>
+                </CardLink>
+              ))}
+            </div>
           ) : (
             <p className="text-center">No programs found</p>
           )}

@@ -1,6 +1,6 @@
 "use client";
 
-import FormInput from "@/components/custom/input/form-input";
+import dynamic from "next/dynamic";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,6 +9,12 @@ import { CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { ProgramType } from "@/components/types";
+const FormInput = dynamic(
+  () => import("@/components/custom/input/form-input"),
+  {
+    ssr: false,
+  }
+);
 
 const formSchema = z.object({
   program_name: z.string().min(1, "Program name is required"),

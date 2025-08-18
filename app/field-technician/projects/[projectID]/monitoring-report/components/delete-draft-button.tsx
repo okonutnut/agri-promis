@@ -24,12 +24,13 @@ export default function DeleteDraftButton({
   return (
     <Button
       variant="outline"
+      className="text-red-500 hover:text-red-500"
       size={"sm"}
       disabled={state === "pending"}
       onClick={() => handleDelete()}
     >
-      <Trash className="mr-2 h-4 w-4" color="red" />
-      Delete Draft
+      <Trash className="h-4 w-4" color="red" />
+      Discard
     </Button>
   );
 }

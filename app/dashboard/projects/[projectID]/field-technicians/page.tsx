@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+import { useState } from "react";
 import { DataTable } from "./table/data-table";
 import { columns } from "./table/columns";
 import {
@@ -12,10 +13,20 @@ import {
 import { useSelectFieldTechniciansByProjectIDHook } from "@/components/hooks";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import { useParams } from "next/navigation";
-import SelectMembersTable from "./components/members-sheet/select-members-table";
 import { AssignedProjectsType } from "@/components/types";
-import ViewFieldTechnicianPanel from "./components/view-field-technician-panel";
 import { getProjectNavItems } from "@/components/sidebar/navitems";
+const SelectMembersTable = dynamic(
+  () => import("./components/members-sheet/select-members-table"),
+  {
+    ssr: false,
+  }
+);
+const ViewFieldTechnicianPanel = dynamic(
+  () => import("./components/view-field-technician-panel"),
+  {
+    ssr: false,
+  }
+);
 
 export default function FieldTechnicianPage() {
   const { projectID } = useParams();
@@ -26,7 +37,7 @@ export default function FieldTechnicianPage() {
   );
   const [isAddMode, setIsAddMode] = useState(false);
 
-  const handleRowSelect = (row: AssignedProjectsType) => {
+  const handleRowSelect: (row: AssignedProjectsType) => void = (row) => {
     setSelectedRow(row);
     setIsAddMode(false);
     setPanelOpen(true);
@@ -44,12 +55,9 @@ export default function FieldTechnicianPage() {
     setSelectedRow(null);
   };
 
-  const { data, isLoading, error, refetch } =
-    useSelectFieldTechniciansByProjectIDHook(projectID as string);
-
-  useEffect(() => {
-    refetch();
-  }, [refetch, projectID]);
+  const { data, isLoading, error } = useSelectFieldTechniciansByProjectIDHook(
+    projectID as string
+  );
 
   return (
     <CustomPageLayout
@@ -58,35 +66,36 @@ export default function FieldTechnicianPage() {
       error={error}
       navItems={getProjectNavItems(projectID as string)}
     >
-      {data && (
-        <>
-          <DataTable
-            columns={columns}
-            data={data}
-            onRowSelect={handleRowSelect}
-            onAdd={handleAdd}
-          />
-          <Sheet open={panelOpen} onOpenChange={handlePanelClose}>
-            <SheetContent className="w-screen md:min-w-2xl overflow-y-auto">
-              <SheetHeader className="border-b">
-                <SheetTitle className="text-primary uppercase">
-                  {isAddMode
-                    ? "Assign New Field Technician"
-                    : "View Member Details"}
-                </SheetTitle>
-              </SheetHeader>
-              {isAddMode ? (
-                <SelectMembersTable
-                  assignedMembers={data.map((d) => d.user_id as string)}
-                  setPanelOpen={setPanelOpen}
-                />
-              ) : (
-                <ViewFieldTechnicianPanel selectedRow={selectedRow} />
-              )}
-            </SheetContent>
-          </Sheet>
-        </>
-      )}
+      <DataTable
+        columns={columns}
+        data={data ?? []}
+        onRowSelect={handleRowSelect}
+        onAdd={handleAdd}
+      />
+      <Sheet open={panelOpen} onOpenChange={handlePanelClose}>
+        <SheetContent className="w-screen md:min-w-2xl overflow-y-auto">
+          <SheetHeader className="border-b">
+            <SheetTitle className="text-primary uppercase">
+              {isAddMode
+                ? "Assign New Field Technician"
+                : "View Member Details"}
+            </SheetTitle>
+          </SheetHeader>
+          {isAddMode ? (
+            <SelectMembersTable
+              assignedMembers={
+                (data && data.map((d) => d.user_id as string)) ?? []
+              }
+              setPanelOpen={setPanelOpen}
+            />
+          ) : (
+            <ViewFieldTechnicianPanel
+              selectedRow={selectedRow}
+              setPanelOpen={setPanelOpen}
+            />
+          )}
+        </SheetContent>
+      </Sheet>
     </CustomPageLayout>
   );
 }

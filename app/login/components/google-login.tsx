@@ -6,9 +6,9 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 
-export function GoogleSignInButton() {
-  const [state, setState] = useState<"ready" | "loading" | "disabled">("ready");
+export default function GoogleSignInButton() {
   const supabase = createClient();
+  const [state, setState] = useState<"ready" | "loading" | "disabled">("ready");
 
   const login = async () => {
     await supabase.auth.signInWithOAuth({

@@ -1,10 +1,11 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useState } from "react";
-import { Plus, XCircle, ZoomIn } from "lucide-react";
+import { Camera, Images, XCircle, ZoomIn } from "lucide-react";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { ImageData } from "@/components/interfaces";
@@ -13,9 +14,16 @@ import {
   compressImage,
   getLongtitudeLatitudeFromGPS,
 } from "@/lib/utils";
-import ImageModal from "@/components/ui/image-modal";
 import { MonitoringReportType } from "@/components/types";
-import ImageCarousel from "@/components/custom/images/image-carousel";
+const ImageModal = dynamic(() => import("@/components/ui/image-modal"), {
+  ssr: false,
+});
+const ImageCarousel = dynamic(
+  () => import("@/components/custom/images/image-carousel"),
+  {
+    ssr: false,
+  }
+);
 
 type ImageCaptureFormProps = {
   isAddMode?: boolean;
@@ -164,7 +172,7 @@ export default function ImageCaptureForm({
                       disabled={isCompressing}
                     />
                     <div className="flex flex-col items-center justify-center space-y-2">
-                      <Plus className="text-gray-400" />
+                      <Camera className="text-gray-400" />
                       <p className="text-xs text-gray-500">
                         Capture via Camera
                       </p>
@@ -184,7 +192,7 @@ export default function ImageCaptureForm({
                       disabled={isCompressing}
                     />
                     <div className="flex flex-col items-center justify-center space-y-2">
-                      <Plus className="text-gray-400" />
+                      <Images className="text-gray-400" />
                       <p className="text-xs text-gray-500">
                         Upload from Gallery
                       </p>

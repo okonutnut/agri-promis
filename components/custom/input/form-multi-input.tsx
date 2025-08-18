@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import FormInput from "./form-input";
 import { UseFormReturn } from "react-hook-form";
 import { Label } from "@/components/ui/label";
+import FormTextarea from "./form-textarea";
+import { Dot } from "lucide-react";
 
 type FormMultiInputProps = {
   label: string;
@@ -20,10 +22,12 @@ export default function FormMultiInput({
   readOnly,
 }: FormMultiInputProps) {
   return (
-    <div className="space-y-2 relative">
-      {!readOnly ? (
-        <div className="flex items-end gap-2">
-          <FormInput
+    <div className="relative">
+      {readOnly ? (
+        <Label>{label}</Label>
+      ) : (
+        <div className="flex items-center gap-2 m-0">
+          <FormTextarea
             label={label}
             name={`${name}.0`}
             form={form}
@@ -41,29 +45,28 @@ export default function FormMultiInput({
               }
             }}
             disabled={!form.watch(`${name}`)?.[0] || readOnly}
-            className="mb-[1.5px] min-w-[20px]"
+            className="min-h-full min-w-[20px]"
           >
             +
           </Button>
         </div>
-      ) : (
-        <Label>{label}</Label>
       )}
-      <table className="w-full overflow-x-auto shadow-xs rounded-sm py-1">
+      <table className="w-full overflow-x-auto">
         <tbody>
           {(form.watch(`${name}`) || values)
             ?.slice(1)
             .map((issue: string, index: number) => (
-              <tr
-                key={index}
-                className="flex items-center gap-1 truncate border-b"
-              >
+              <tr key={index} className="flex items-center truncate">
                 <td>
-                  {!readOnly && (
+                  {readOnly ? (
+                    <span className="text-sm text-muted-foreground">
+                      <Dot />
+                    </span>
+                  ) : (
                     <Button
                       type="button"
                       variant="secondary"
-                      className="text-sm shadow-none hover:text-destructive"
+                      className="text-sm shadow-none text-destructive"
                       onClick={() => {
                         const currentIssues = form.getValues(`${name}`) || [];
                         form.setValue(`${name}`, [
@@ -78,8 +81,10 @@ export default function FormMultiInput({
                     </Button>
                   )}
                 </td>
-                <td className="flex-1 gap-2">
-                  <span className="text-sm text-start">{issue}</span>
+                <td className="my-auto">
+                  <span className="text-sm text-start max-w-sm break-words">
+                    {issue}
+                  </span>
                 </td>
               </tr>
             ))}

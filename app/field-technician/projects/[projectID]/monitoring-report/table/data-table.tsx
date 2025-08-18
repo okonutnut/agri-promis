@@ -53,7 +53,7 @@ export function DataTable<TData, TValue>({
   return (
     <div className="space-y-4">
       {/* Global Search Bar and Add Button */}
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <Button onClick={onAdd}>New Report</Button>
         <div className="relative w-full max-w-md">
           <Input
@@ -121,7 +121,7 @@ export function DataTable<TData, TValue>({
       </div>
 
       {/* Pagination */}
-      {data.length > 0 && (
+      {data.length > 10 && (
         <div className="flex items-center justify-start space-x-2 py-4">
           <div className="flex items-center space-x-2">
             <Button

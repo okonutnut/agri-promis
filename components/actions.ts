@@ -14,6 +14,7 @@ import { createClient } from "@/utils/supabase/server";
 import webpush from "web-push";
 import type { PushSubscription as WebPushSubscription } from "web-push";
 import { cookies } from "next/headers";
+import { getLongtitudeLatitudeFromGPS } from "@/lib/utils";
 
 // USER PROFILE ACTIONS
 export async function SelectAllUserProfilesAction() {
@@ -448,13 +449,17 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
   return;
 }
 
-export async function SelectAllTravelOrdersByUserIDAction() {
+export async function SelectAllTravelOrdersByUserIDAction(user_id?: string) {
   const supabase = await createClient(cookies());
-  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (!user_id) {
+    const { data: userData, error: userError } = await supabase.auth.getUser();
 
-  if (userError || !userData?.user) {
-    console.error("Error fetching user:", userError);
-    throw new Error(userError?.message || "User not authenticated");
+    if (userError || !userData?.user) {
+      console.error("Error fetching user:", userError);
+      throw new Error(userError?.message || "User not authenticated");
+    }
+
+    user_id = userData.user.id;
   }
 
   const { data, error } = await supabase
@@ -463,7 +468,7 @@ export async function SelectAllTravelOrdersByUserIDAction() {
       `*, project:projects(id, project_name), user:user_profile!travel_order_user_id_fkey(fullname),
       created_by:user_profile!travel_order_created_by_fkey(fullname)`
     )
-    .eq("user_id", userData.user.id)
+    .eq("user_id", user_id)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -615,7 +620,8 @@ export async function InsertMonitoringReportAction({
   // Log the activity
   await InsertActivityLogAction(
     "Submitted a Monitoring Report",
-    `Monitoring report submitted for project ${projectData.project_name}.`
+    `Monitoring report submitted for project ${projectData.project_name}.`,
+    project_id
   );
 
   return;
@@ -626,7 +632,7 @@ export async function InsertRemarksInMonitoringReportAction(
   remarks: string
 ) {
   const supabase = await createClient(cookies());
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("monitoring")
     .update({
       remarks,
@@ -644,7 +650,8 @@ export async function InsertRemarksInMonitoringReportAction(
   // Log the activity
   await InsertActivityLogAction(
     "Reviewed a Monitoring Report",
-    `Monitoring report with ID ${reportId} has been reviewed.`
+    `Monitoring report with ID ${reportId} has been reviewed.`,
+    data.project_id
   );
 
   return;
@@ -828,76 +835,83 @@ export async function SelectAllMembersByRoleAction(role: number) {
 }
 
 // ASSIGNED PROJECTS ACTIONS
-export async function InsertFieldTechnicianToProjectAction(
-  data: AssignedProjectsType,
+export async function InsertFieldTechniciansToProjectAction(
+  data: string[],
   project_id: string
 ) {
   const supabase = await createClient(cookies());
 
-  // Try to fetch the assigned_projects row for the user
-  const { data: existingUser, error: selectError } = await supabase
-    .from("assigned_projects")
-    .select("project_ids, user_profile (fullname)")
-    .eq("user_id", data.user_id)
-    .maybeSingle();
+  for (const technician_id of data) {
+    // Try to fetch the assigned_projects row for the user
+    const { data: existingUser, error: selectError } = await supabase
+      .from("assigned_projects")
+      .select("project_ids")
+      .eq("user_id", technician_id)
+      .maybeSingle();
 
-  if (selectError) {
-    console.error("Error checking existing user:", selectError);
-    throw new Error("Failed to check existing user. Please try again.");
-  }
+    if (selectError) {
+      console.error("Error checking existing user:", selectError);
+      throw new Error("Failed to check existing user. Please try again.");
+    }
 
-  if (existingUser) {
-    // Avoid duplicate project_id
-    const currentProjects: string[] = existingUser.project_ids || [];
-    if (!currentProjects.includes(project_id)) {
-      const updatedProjects = [...currentProjects, project_id];
-      const { error: updateError } = await supabase
+    if (existingUser) {
+      // Avoid duplicate project_id
+      const currentProjects: string[] = existingUser.project_ids || [];
+      if (!currentProjects.includes(project_id)) {
+        const updatedProjects = [...currentProjects, project_id];
+        const { error: updateError } = await supabase
+          .from("assigned_projects")
+          .update({ project_ids: updatedProjects })
+          .eq("user_id", technician_id);
+
+        if (updateError) {
+          console.error("Error updating assigned projects:", updateError);
+          throw new Error(
+            "Failed to add project to field technician. Please try again."
+          );
+        }
+      }
+    } else {
+      const { error: insertError } = await supabase
         .from("assigned_projects")
-        .update({ project_ids: updatedProjects })
-        .eq("user_id", data.user_id);
+        .insert({
+          user_id: technician_id,
+          project_ids: [project_id],
+        });
 
-      if (updateError) {
-        console.error("Error updating assigned projects:", updateError);
+      if (insertError) {
+        console.error(
+          "Error inserting field technician to project:",
+          insertError
+        );
         throw new Error(
-          "Failed to add project to field technician. Please try again."
+          "Failed to add field technician to project. Please try again."
         );
       }
     }
-  } else {
-    const { error: insertError } = await supabase
-      .from("assigned_projects")
-      .insert({
-        ...data,
-        project_ids: [project_id],
-      });
 
-    if (insertError) {
-      console.error(
-        "Error inserting field technician to project:",
-        insertError
-      );
-      throw new Error(
-        "Failed to add field technician to project. Please try again."
-      );
+    // Get project details for logging
+    const { data: projectData, error: projectError } = await supabase
+      .from("projects")
+      .select("project_name")
+      .eq("id", project_id)
+      .single();
+    if (projectError) {
+      console.error("Error fetching project details:", projectError);
+      throw new Error("Failed to fetch project details. Please try again.");
     }
-  }
 
-  // Get project details for logging
-  const { data: projectData, error: projectError } = await supabase
-    .from("projects")
-    .select("project_name")
-    .eq("id", project_id)
-    .single();
-  if (projectError) {
-    console.error("Error fetching project details:", projectError);
-    throw new Error("Failed to fetch project details. Please try again.");
-  }
+    const userProfile = await SelectUserProfileByIDAction(
+      technician_id as string
+    );
 
-  // Log the activity
-  await InsertActivityLogAction(
-    "Added a Field Technician to Project",
-    `Field technician ${data.user_profile?.fullname} added to project ${projectData.project_name}.`
-  );
+    // Log the activity
+    await InsertActivityLogAction(
+      "Added a Field Technician to Project",
+      `Field technician ${userProfile?.fullname} was added to project ${projectData.project_name}.`,
+      project_id
+    );
+  }
 
   return;
 }
@@ -911,7 +925,7 @@ export async function DeleteFieldTechnicianFromProjectAction(
   // Fetch current project assignments
   const { data: existingUser, error: selectError } = await supabase
     .from("assigned_projects")
-    .select("project_ids, user_profile (fullname)")
+    .select("project_ids")
     .eq("user_id", user_id)
     .single();
 
@@ -963,10 +977,13 @@ export async function DeleteFieldTechnicianFromProjectAction(
     throw new Error("Failed to fetch project details. Please try again.");
   }
 
+  const existingUserData = await SelectUserProfileByIDAction(user_id);
+
   // Log the activity
   await InsertActivityLogAction(
     "Removed a Field Technician from Project",
-    `Field technician ${existingUser.user_profile[0]?.fullname} removed from project ${projectData.project_name}.`
+    `Field technician ${existingUserData.fullname} was removed from project ${projectData.project_name}.`,
+    project_id
   );
 
   return;
@@ -1153,6 +1170,37 @@ export async function SelectUserCurrentLocationAction(user_id: string) {
   return data;
 }
 
+export async function UpdateUserCurrentLocationAction() {
+  const supabase = await createClient(cookies());
+  const { data: user } = await supabase.auth.getUser();
+  if (!user?.user?.id) {
+    return;
+  }
+
+  const locationData = await getLongtitudeLatitudeFromGPS();
+  const response = await fetch("https://api.ipify.org?format=json");
+  const ipAddress = await response.json();
+
+  const { error } = await supabase.from("user_session").upsert(
+    {
+      user_id: user?.user?.id,
+      longitude: locationData.longitude,
+      ip_address: ipAddress.ip,
+      latitude: locationData.latitude,
+      modified_at: new Date(),
+    },
+    {
+      onConflict: "user_id",
+    }
+  );
+
+  if (error) {
+    console.error("Error updating user location:", error);
+  }
+
+  return;
+}
+
 export async function DeleteUserSessionAction() {
   const supabase = await createClient(cookies());
   const { data: session } = await supabase.auth.getSession();
@@ -1175,7 +1223,8 @@ export async function DeleteUserSessionAction() {
 // ACTIVITY LOG ACTIONS
 export async function InsertActivityLogAction(
   code: string,
-  description: string
+  description: string,
+  project_id?: string
 ) {
   const supabase = await createClient(cookies());
   const { data: userData, error: userError } = await supabase.auth.getUser();
@@ -1192,6 +1241,7 @@ export async function InsertActivityLogAction(
     ip_address: data.ip,
     code,
     description,
+    project_id: project_id || null,
   });
 
   if (error) {
@@ -1209,6 +1259,23 @@ export async function SelectActivityLogsByUserIDAction(user_id: string) {
     .from("activity_logs")
     .select("*")
     .eq("user_id", user_id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching activity logs:", error);
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+export async function SelectActivityLogsByProjectIDAction(project_id: string) {
+  const supabase = await createClient(cookies());
+
+  const { data, error } = await supabase
+    .from("activity_logs")
+    .select("*, user:user_profile (fullname)")
+    .eq("project_id", project_id)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -1343,6 +1410,21 @@ export async function SelectAdminDashboardItemsAction() {
     throw new Error(projectCountError.message);
   }
 
+  // Scheduled travel orders
+  const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
+  const todayStart = `${today}T00:00:00`;
+  // Fetch future travel orders based on departure_date or return_date
+  const { data: futureOrders, error: futureError } = await supabase
+    .from("travel_order")
+    .select("*, user:user_profile!travel_order_user_id_fkey (fullname)")
+    .or(`departure_date.gte.${todayStart},return_date.gte.${todayStart}`)
+    .limit(10);
+
+  if (futureError) {
+    console.error("Error fetching future travel orders:", futureError);
+    throw new Error("Failed fetching future travel orders");
+  }
+
   // Get last 10 activity logs
   const { data: activityLogs, error: activityLogsError } = await supabase
     .from("activity_logs")
@@ -1360,36 +1442,8 @@ export async function SelectAdminDashboardItemsAction() {
     totalPrograms: programCount?.length || 0,
     totalProjects: projectCount?.length || 0,
     recentActivityLogs: activityLogs || [],
+    futureTravelOrders: futureOrders || [],
   };
-}
-
-export async function SelectScheduledMonitoringReportsAction() {
-  const supabase = await createClient(cookies());
-  const { data: userData, error: userError } = await supabase.auth.getUser();
-
-  if (userError || !userData?.user) {
-    console.error("Error fetching user:", userError);
-    throw new Error(userError?.message || "User not authenticated");
-  }
-
-  // Get scheduled monitoring reports
-  const { data, error } = await supabase
-    .from("monitoring")
-    .select(
-      `*, 
-      travel_order:travel_order(travel_order_no, purpose),
-      reporter:user_profile!field_reports_reporter_id_fkey (fullname),
-      reviewedBy:user_profile!monitoring_reviewed_by_id_fkey (fullname)`
-    )
-    .eq("reporter_id", userData.user.id)
-    .order("scheduled_date", { ascending: true });
-
-  if (error) {
-    console.error("Error fetching scheduled monitoring reports:", error);
-    throw new Error(error.message);
-  }
-
-  return data as MonitoringReportType[];
 }
 
 export async function SelectTravelOrdersByDateAction() {

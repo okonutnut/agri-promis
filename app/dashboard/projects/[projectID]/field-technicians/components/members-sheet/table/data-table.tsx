@@ -19,18 +19,38 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Loader2, Search } from "lucide-react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  isPending?: boolean;
+  onAdd?: () => void;
+  onRowSelectionChange?: (selectedRows: TData[]) => void; // Add this prop
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  isPending,
+  onAdd,
+  onRowSelectionChange,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    if (onRowSelectionChange) {
+      const selectedRows = Object.keys(rowSelection).filter(
+        (key) => rowSelection[key]
+      );
+      onRowSelectionChange(
+        data.filter((_, index) => selectedRows.includes(index.toString()))
+      );
+    }
+  }, [rowSelection, data]);
 
   const table = useReactTable({
     data,
@@ -39,18 +59,33 @@ export function DataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
+    onRowSelectionChange: setRowSelection,
     state: {
       columnFilters,
+      rowSelection,
     },
   });
 
   return (
     <div className="space-y-4 m-2 h-[calc(100vh)]">
-      <Input
-        placeholder="Search..."
-        value={table.getState().globalFilter ?? ""}
-        onChange={(event) => table.setGlobalFilter(event.target.value)}
-      />
+      <div className="flex items-center justify-between gap-2">
+        <div className="relative w-full max-w-md">
+          <Input
+            placeholder="Search..."
+            className="pl-8"
+            value={table.getState().globalFilter ?? ""}
+            onChange={(event) => table.setGlobalFilter(event.target.value)}
+          />
+          <Search className="absolute left-2 top-1/2 w-4 h-4 transform -translate-y-1/2 text-gray-500" />
+        </div>
+        <Button
+          onClick={onAdd}
+          disabled={isPending}
+          variant={isPending ? "ghost" : "default"}
+        >
+          {isPending ? <Loader2 className="animate-spin" /> : "Assign"}
+        </Button>
+      </div>
 
       {/* Table */}
       <div className="rounded-md border">

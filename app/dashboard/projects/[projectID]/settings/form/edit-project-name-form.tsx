@@ -1,6 +1,6 @@
 'use client";';
 
-import FormInput from "@/components/custom/input/form-input";
+import dynamic from "next/dynamic";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,6 +11,12 @@ import { Loader2 } from "lucide-react";
 import { ProgramType, ProjectType } from "@/components/types";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+const FormInput = dynamic(
+  () => import("@/components/custom/input/form-input"),
+  {
+    ssr: false,
+  }
+);
 
 const formSchema = z.object({
   id: z.string().min(1, "Project ID is required"),

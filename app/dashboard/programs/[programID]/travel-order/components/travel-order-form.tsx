@@ -13,7 +13,7 @@ import { TravelOrderType } from "@/components/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useInsertTravelOrderHook } from "@/components/hooks";
-import { Loader2 } from "lucide-react";
+import { Loader2, Send } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 
@@ -217,7 +217,13 @@ export default function IssueTravelOrderForm({
             disabled={isPending || !form.formState.isValid}
             size={"sm"}
           >
-            {isPending ? <Loader2 className="animate-spin" /> : "Submit"}
+            {isPending ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              <>
+                <Send /> Submit
+              </>
+            )}
           </Button>
         )}
       </SheetFooter>
