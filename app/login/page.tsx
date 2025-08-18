@@ -1,23 +1,33 @@
-import { redirect } from "next/navigation";
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import LoginCard from "./components/login-card";
 
-export default async function LoginPage() {
+export default function LoginPage() {
+  const router = useRouter();
   const supabase = createClient();
 
-  const {
-    data: { session },
-    error,
-  } = await supabase.auth.getSession();
+  useEffect(() => {
+    const checkSession = async () => {
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
 
-  if (error) {
-    console.error("Error fetching session:", error);
-  }
+      if (error) {
+        console.error("Error fetching session:", error);
+      }
 
-  // Redirect if session exists
-  if (session) {
-    redirect("/");
-  }
+      // Redirect if session exists
+      if (session) {
+        router.push("/");
+      }
+    };
+
+    checkSession();
+  }, [router, supabase]);
 
   return (
     <div className="grid grid-cols-3 h-screen w-screen gap-2 overflow-hidden">
