@@ -677,14 +677,17 @@ export async function InsertMemberAction(data: UserProfileType) {
     throw new Error(`Failed to create user: ${authError.message}`);
   }
 
+  // Get the user ID from the auth data
+  const userId = authData.user.id;
+
   const { error: userError } = await supabase.from("user_profile").insert({
-    id: authData.user.id,
     ...data,
+    id: userId,
   });
 
   if (userError) {
-    console.error("Error creating field technician:", userError);
-    throw new Error(`Failed to create field technician: ${userError.message}`);
+    console.error("Error creating member:", userError);
+    throw new Error(`Failed to create member: ${userError.message}`);
   }
 
   // Log the activity
