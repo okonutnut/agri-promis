@@ -11,16 +11,16 @@ import {
 import { useInsertRemarksInMonitoringReportHook } from "@/components/hooks";
 import { MonitoringReportType } from "@/components/types";
 import { Loader2 } from "lucide-react";
-import { format } from "date-fns";
 import { useEffect, useRef } from "react";
 import NonFormMultiInput from "@/components/custom/input/non-form-multi-input";
 import ImageCarousel from "@/components/custom/images/image-carousel";
-import PrintMonitoringButton from "@/app/field-technician/projects/[projectID]/monitoring-report/components/print-monitoring";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import FormTextarea from "@/components/custom/input/form-textarea";
 import NonFormTextarea from "@/components/custom/input/non-form-textarea";
+import PrintDownloadDropdown from "@/components/custom/print/print-download-dropdown";
+import MonitoringReportDocument from "@/components/custom/pdf/monitoring-reports-document";
 
 const formSchema = z.object({
   remarks: z
@@ -54,19 +54,16 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
 
   return (
     <>
-      <SheetHeader className="border-b flex-row justify-between items-start">
+      <SheetHeader className="border-b flex-row justify-between items-center p-2">
         <SheetTitle className="uppercase text-primary">
-          View Field Report
+          View Monitoring Report
         </SheetTitle>
-        <PrintMonitoringButton data={data} />
+        <PrintDownloadDropdown
+          data={<MonitoringReportDocument data={data} />}
+        />
       </SheetHeader>
       <section className="space-y-4 h-[calc(100vh)] overflow-y-auto overflow-x-hidden">
         <ImageCarousel images={data?.photo_url || []} />
-        {data?.created_at && (
-          <span className="italic text-xs text-muted-foreground mb-4">
-            Date Submitted: {format(new Date(data.created_at), "PPp")}
-          </span>
-        )}
         <div className="p-2 space-y-4 border-t">
           <NonFormInput
             label="Reporter Name"

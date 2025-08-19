@@ -19,6 +19,8 @@ import { useInsertMonitoringReportHook } from "@/components/hooks";
 import { deleteDraft } from "@/hooks/use-draft";
 import { Button } from "@/components/ui/button";
 import { Loader2, Send } from "lucide-react";
+import PrintDownloadDropdown from "@/components/custom/print/print-download-dropdown";
+import MonitoringReportDocument from "@/components/custom/pdf/monitoring-reports-document";
 const TravelOrderDropdown = dynamic(
   () => import("../components/travel-order-combobox"),
   {
@@ -58,12 +60,6 @@ const NonFormInput = dynamic(
   () => import("@/components/custom/input/non-form-input"),
   { ssr: false }
 );
-const PrintMonitoringButton = dynamic(
-  () => import("../components/print-monitoring"),
-  {
-    ssr: false,
-  }
-);
 
 const fieldReportSchema = z.object({
   travel_order_no: z.string().min(1, "Travel order number is required"),
@@ -71,9 +67,10 @@ const fieldReportSchema = z.object({
   findings: z.array(z.string()).min(1, "At least one finding is required"),
   observation: z
     .string()
-    .min(1, "Observation is required")
-    .min(5, "Observation must be at least 5 characters")
-    .max(700, "Observation must not exceed 700 characters"),
+    .optional()
+    .refine((value) => !value || (value.length >= 5 && value.length <= 700), {
+      message: "Observation must be between 5 and 700 characters if provided",
+    }),
   issues_concern: z.array(z.string()).min(1, "At least one issue is required"),
 });
 type FieldReportFormData = z.infer<typeof fieldReportSchema>;
@@ -173,7 +170,11 @@ export default function UploadFieldReportForm({
             ? "Upload New Post Activity Report"
             : "View Post Activity Report Details"}
         </SheetTitle>
-        {!isAddMode && <PrintMonitoringButton data={values ?? null} />}
+        {!isAddMode && (
+          <PrintDownloadDropdown
+            data={<MonitoringReportDocument data={values ?? null} />}
+          />
+        )}
       </SheetHeader>
       <section className="overflow-y-auto">
         <ImageCaptureForm

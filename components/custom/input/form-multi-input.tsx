@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import FormInput from "./form-input";
 import { UseFormReturn } from "react-hook-form";
 import { Label } from "@/components/ui/label";
 import FormTextarea from "./form-textarea";
