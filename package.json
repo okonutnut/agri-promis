@@ -51,7 +51,8 @@
     "vaul": "^1.1.2",
     "web-push": "^3.6.7",
     "workbox-sw": "^7.3.0",
-    "zod": "^3.25.75"
+    "zod": "^3.25.75",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

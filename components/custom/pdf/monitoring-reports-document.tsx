@@ -122,112 +122,114 @@ const BulletItem = ({ children }: { children: string }) => (
 type MonitoringReportDocumentProps = {
   data: MonitoringReportType | null;
 };
-const MonitoringReportDocument = ({ data }: MonitoringReportDocumentProps) => (
-  <Document>
-    <Page size="A4" style={styles.page}>
-      {/* HEADER IMAGE */}
-      <Image src="/assets/header.jpg" style={styles.headerImage} fixed />
-      <Text style={styles.headerNumber} fixed>
-        DA-RF02.NVES.124.21
-      </Text>
+export default function MonitoringReportDocument({
+  data,
+}: MonitoringReportDocumentProps) {
+  return (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        {/* HEADER IMAGE */}
+        <Image src="/assets/header.jpg" style={styles.headerImage} fixed />
+        <Text style={styles.headerNumber} fixed>
+          DA-RF02.NVES.124.21
+        </Text>
 
-      {/* DOCUMENT TITLE */}
-      <View style={styles.section}>
-        <Text style={styles.heading}>MONITORING AND EVALUATION REPORT</Text>
-      </View>
-
-      {/* CONTACT */}
-      <View style={styles.section}>
-        <View style={styles.row}>
-          <Text style={styles.label}>Municipality:</Text>
-          <Text>Bagabag, Nueva Vizcaya</Text>
-        </View>
-        <View style={styles.rowIndent}>
-          <Text style={styles.label}>Contact Person:</Text>
-          <Text>Charles S. Fernandez Jr. (Municipal Agriculturist)</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}></Text>
-          <Text>Helen S. Apolonio (Agricultural Extension Worker)</Text>
-        </View>
-        <View style={styles.rowIndent}>
-          <Text style={styles.label}>FCA:</Text>
-          <Text>PNB Corn Cluster Farmers Association</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}></Text>
-          <Text>Sta. Lucia Corn Cluster Farmers Association</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>Purpose:</Text>
-          <Text>{data?.purpose ?? ""}</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>Date Monitored:</Text>
-          <Text>
-            {format(new Date(data?.created_at ?? ""), "MMMM dd, yyyy")}
-          </Text>
-        </View>
-      </View>
-
-      {/* FINDINGS */}
-      <View style={styles.section}>
-        {data?.observation ? (
-          <Text style={styles.subheading}>Findings:</Text>
-        ) : (
-          <Text style={styles.subheading}>Findings / Observation:</Text>
-        )}
-        {data?.findings &&
-          data?.findings
-            .filter((finding) => finding !== "")
-            .map((finding, index) => (
-              <BulletItem key={index}>{finding}</BulletItem>
-            ))}
-      </View>
-
-      {/* OBSERVATION */}
-      {data?.observation && (
+        {/* DOCUMENT TITLE */}
         <View style={styles.section}>
-          <Text style={styles.subheading}>Observation:</Text>
-          <Text>{data?.observation ?? ""}</Text>
+          <Text style={styles.heading}>MONITORING AND EVALUATION REPORT</Text>
         </View>
-      )}
 
-      {/* ISSUES AND CONCERN */}
-      <View style={styles.section}>
-        <Text style={styles.subheading}>Issues and Concern:</Text>
-        {data?.issues_concern &&
-          data.issues_concern
-            .filter((issue) => issue !== "")
-            .map((issue, index) => (
-              <BulletItem key={index}>{issue}</BulletItem>
+        {/* CONTACT */}
+        <View style={styles.section}>
+          <View style={styles.row}>
+            <Text style={styles.label}>Municipality:</Text>
+            <Text>Bagabag, Nueva Vizcaya</Text>
+          </View>
+          <View style={styles.rowIndent}>
+            <Text style={styles.label}>Contact Person:</Text>
+            <Text>Charles S. Fernandez Jr. (Municipal Agriculturist)</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}></Text>
+            <Text>Helen S. Apolonio (Agricultural Extension Worker)</Text>
+          </View>
+          <View style={styles.rowIndent}>
+            <Text style={styles.label}>FCA:</Text>
+            <Text>PNB Corn Cluster Farmers Association</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}></Text>
+            <Text>Sta. Lucia Corn Cluster Farmers Association</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>Purpose:</Text>
+            <Text>{data?.purpose ?? ""}</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>Date Monitored:</Text>
+            <Text>
+              {format(new Date(data?.created_at ?? ""), "MMMM dd, yyyy")}
+            </Text>
+          </View>
+        </View>
+
+        {/* FINDINGS */}
+        <View style={styles.section}>
+          {data?.observation ? (
+            <Text style={styles.subheading}>Findings:</Text>
+          ) : (
+            <Text style={styles.subheading}>Findings / Observation:</Text>
+          )}
+          {data?.findings &&
+            data?.findings
+              .filter((finding) => finding !== "")
+              .map((finding, index) => (
+                <BulletItem key={index}>{finding}</BulletItem>
+              ))}
+        </View>
+
+        {/* OBSERVATION */}
+        {data?.observation && (
+          <View style={styles.section}>
+            <Text style={styles.subheading}>Observation:</Text>
+            <Text>{data?.observation ?? ""}</Text>
+          </View>
+        )}
+
+        {/* ISSUES AND CONCERN */}
+        <View style={styles.section}>
+          <Text style={styles.subheading}>Issues and Concern:</Text>
+          {data?.issues_concern &&
+            data.issues_concern
+              .filter((issue) => issue !== "")
+              .map((issue, index) => (
+                <BulletItem key={index}>{issue}</BulletItem>
+              ))}
+        </View>
+
+        {/* PHOTO DOCS */}
+        <View style={styles.section}>
+          <Text style={styles.heading}>PHOTO DOCUMENTATION</Text>
+          <View style={styles.imageGrid}>
+            {data?.photo_url?.map((url, index) => (
+              <View key={index} style={styles.imageWrapper}>
+                <Image src={url} style={styles.image} />
+              </View>
             ))}
-      </View>
-
-      {/* PHOTO DOCS */}
-      <View style={styles.section}>
-        <Text style={styles.heading}>PHOTO DOCUMENTATION</Text>
-        <View style={styles.imageGrid}>
-          {data?.photo_url?.map((url, index) => (
-            <View key={index} style={styles.imageWrapper}>
-              <Image src={url} style={styles.image} />
-            </View>
-          ))}
+          </View>
         </View>
-      </View>
 
-      <View style={styles.section}>
-        <View
-          style={{ borderBottom: "3px solid black", marginVertical: 10 }}
-        ></View>
-        <Text style={styles.signature}>Monitored by:</Text>
-        <Text style={styles.signature}>{data?.reporter?.fullname}</Text>
-        <Text style={styles.signature}>{data?.reporter?.position}</Text>
-      </View>
+        <View style={styles.section}>
+          <View
+            style={{ borderBottom: "3px solid black", marginVertical: 10 }}
+          ></View>
+          <Text style={styles.signature}>Monitored by:</Text>
+          <Text style={styles.signature}>{data?.reporter?.fullname}</Text>
+          <Text style={styles.signature}>{data?.reporter?.position}</Text>
+        </View>
 
-      <Image src="/assets/footer.jpg" style={styles.footerImage} fixed />
-    </Page>
-  </Document>
-);
-
-export default MonitoringReportDocument;
+        <Image src="/assets/footer.jpg" style={styles.footerImage} fixed />
+      </Page>
+    </Document>
+  );
+}
