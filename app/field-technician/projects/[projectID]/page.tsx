@@ -36,11 +36,15 @@ export default function FieldTechnicianPage() {
               {data.project_name}
               <span className="text-sm text-muted-foreground mt-4">
                 Start Date:&nbsp;
-                {format(new Date(data.start_date), "PP")}
+                {data.start_date
+                  ? format(new Date(data.start_date), "PP")
+                  : "Not specified"}
               </span>
               <span className="text-sm text-muted-foreground">
                 Estimated End Date:&nbsp;
-                {format(new Date(data.end_date), "PP")}
+                {data.end_date
+                  ? format(new Date(data.end_date), "PP")
+                  : "Not specified"}
               </span>
               <span className="text-sm text-muted-foreground">
                 Location: {data.location}

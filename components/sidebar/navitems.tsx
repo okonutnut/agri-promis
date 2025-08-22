@@ -3,6 +3,7 @@ import {
   Cctv,
   ChartLine,
   ClipboardPen,
+  Contact,
   House,
   LayoutDashboard,
   Settings,
@@ -26,6 +27,11 @@ export function getDashboardNavItems() {
       title: "Team",
       href: "/dashboard/team",
       icon: Users,
+    },
+    {
+      title: "FCA",
+      href: "/dashboard/fca",
+      icon: Contact,
     },
     {
       title: "Activity Logs",

@@ -1,11 +1,11 @@
 "use client";
 
-import { UserProfileType } from "@/components/types";
+import { FCAType } from "@/components/types";
 import { Badge } from "@/components/ui/badge";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 
-export const columns: ColumnDef<UserProfileType>[] = [
+export const columns: ColumnDef<FCAType>[] = [
   {
     id: "no",
     header: "No.",
@@ -14,24 +14,8 @@ export const columns: ColumnDef<UserProfileType>[] = [
     },
   },
   {
-    accessorKey: "fullname",
-    header: "Fullname",
-  },
-  {
-    accessorKey: "email",
-    header: "Email",
-  },
-  {
-    accessorKey: "position",
-    header: "Position",
-  },
-  {
-    accessorKey: "role",
-    header: "System Role",
-    cell: ({ getValue }) => {
-      const role = getValue() as number;
-      return <div>{role === 1 ? "System Admin" : "System User"}</div>;
-    },
+    accessorKey: "description",
+    header: "Name",
   },
   {
     accessorKey: "active_status",

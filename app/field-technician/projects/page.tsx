@@ -14,7 +14,7 @@ export default function FieldTechnicianPage() {
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredData = data?.filter((project) =>
-    project.project_name.toLowerCase().includes(searchTerm.toLowerCase())
+    project.project_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (

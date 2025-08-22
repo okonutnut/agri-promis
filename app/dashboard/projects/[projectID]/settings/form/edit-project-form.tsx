@@ -4,13 +4,19 @@ import dynamic from "next/dynamic";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEditProjectNameHook } from "@/components/hooks";
+import { useEditProjectHook } from "@/components/hooks";
 import { CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { ProgramType, ProjectType } from "@/components/types";
+import { ProjectType } from "@/components/types";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+const FCASelector = dynamic(
+  () => import("@/components/custom/dropdown/fca-selector"),
+  {
+    ssr: false,
+  }
+);
 const FormInput = dynamic(
   () => import("@/components/custom/input/form-input"),
   {
@@ -21,6 +27,7 @@ const FormInput = dynamic(
 const formSchema = z.object({
   id: z.string().min(1, "Project ID is required"),
   project_name: z.string().min(1, "Project name is required"),
+  fca_ids: z.array(z.string()).min(1, "FCA is required"),
   status: z
     .number()
     .refine(
@@ -31,7 +38,7 @@ const formSchema = z.object({
 type FormSchemaType = z.infer<typeof formSchema>;
 
 type EditProjectNameFormProps = {
-  project: ProjectType & { programs: ProgramType };
+  project: ProjectType;
 };
 export default function EditProjectNameForm({
   project,
@@ -41,21 +48,26 @@ export default function EditProjectNameForm({
     defaultValues: {
       id: project.id as string,
       project_name: project.project_name || "",
+      fca_ids: project.fca_ids || [],
       status: project.status || 0,
     },
   });
 
-  const { mutate, isPending } = useEditProjectNameHook();
-  const handleSubmit = (data: z.infer<typeof formSchema>) => mutate(data);
+  const { mutate, isPending } = useEditProjectHook();
+  const handleSubmit = (data: FormSchemaType) => mutate(data);
 
   return (
     <>
       <form
-        className="w-full flex flex-col items-start space-y-4"
+        className="w-full flex flex-col items-start space-y-6"
         onSubmit={form.handleSubmit(handleSubmit)}
       >
         <FormInput label="Project ID" name="id" form={form} readonly copy />
         <FormInput label="Project name" name="project_name" form={form} />
+        <FCASelector
+          onChange={(value) => form.setValue("fca_ids", value)}
+          defaultValue={project.fca_ids || []}
+        />
         <div className="w-full flex justify-between items-center">
           <Label>Set Active</Label>
           <Switch

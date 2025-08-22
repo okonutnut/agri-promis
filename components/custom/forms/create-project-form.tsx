@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import z from "zod";
@@ -9,8 +10,16 @@ import { useInsertProjectHook } from "@/components/hooks";
 import { useParams, useRouter } from "next/navigation";
 import { CardFooter } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-import LocationSelector from "@/components/custom/location-selector";
 import FormTextarea from "../input/form-textarea";
+const LocationSelector = dynamic(
+  () => import("@/components/custom/dropdown/location-selector"),
+  {
+    ssr: false,
+  }
+);
+const FCASelector = dynamic(() => import("../dropdown/fca-selector"), {
+  ssr: false,
+});
 
 const formSchema = z
   .object({
@@ -23,6 +32,7 @@ const formSchema = z
       }),
     description: z.string().optional(),
     location: z.string().min(1, "Location is required"),
+    fca: z.array(z.string()).min(1, "At least one FCA is required"),
     start_date: z.string().refine(
       (val) => {
         const date = new Date(val);
@@ -56,6 +66,7 @@ export default function CreateProjectForm() {
       project_name: "",
       description: "",
       location: "",
+      fca: [],
       start_date: new Date().toISOString().slice(0, 10),
       end_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1))
         .toISOString()
@@ -69,6 +80,7 @@ export default function CreateProjectForm() {
       ...data,
       program_id: programUID as string,
       description: data.description ?? "",
+      fca: data.fca.map((fca) => ({ id: fca })),
     });
 
   return (
@@ -85,6 +97,7 @@ export default function CreateProjectForm() {
           form={form}
           rows={3}
         />
+        <FCASelector onChange={(fca) => form.setValue("fca", fca)} />
         <LocationSelector
           onChange={(location) => form.setValue("location", location)}
         />

@@ -20,6 +20,14 @@ export type ActivityLogType = {
   created_at?: string;
 };
 
+export type FCAType = {
+  id?: string;
+  code?: string;
+  description?: string;
+  active_status?: number;
+  created_at?: string;
+};
+
 export type ProgramType = {
   id?: string;
   agriculturist_id?: string;
@@ -31,13 +39,15 @@ export type ProgramType = {
 
 export type ProjectType = {
   id?: string;
-  project_name: string;
-  description: string;
-  start_date: string;
-  end_date: string;
+  project_name?: string;
+  description?: string;
+  start_date?: string;
+  end_date?: string;
   status?: number;
   location_id?: string;
   location?: string;
+  fca?: FCAType[];
+  fca_ids?: string[];
   locationData?: LocationType;
   program_id?: string;
   created_by?: string;

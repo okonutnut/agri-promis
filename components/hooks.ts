@@ -1,3 +1,5 @@
+"use client";
+
 import {
   InsertProgramAction,
   SelectProgramByIdAction,
@@ -6,7 +8,7 @@ import {
   SelectAllProjectsByProgramIDAction,
   EditProgramNameAction,
   SelectProgramAndProjectDetailsByProjectIDAction,
-  EditProjectNameAction,
+  EditProjectAction,
   InsertMemberAction,
   SelectAllMembersAction,
   SelectAllFieldTechniciansByProjectIDAction,
@@ -37,11 +39,16 @@ import {
   SelectActivityLogsByProjectIDAction,
   UpdateUserCurrentLocationAction,
   InsertFieldTechniciansToProjectAction,
+  InsertFCAAction,
+  SelectAllFCAAction,
+  EditFCAAction,
+  SelectAllFCAByStatusAction,
 } from "@/components/actions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
+  FCAType,
   MonitoringReportType,
   ProgramType,
   ProjectType,
@@ -78,6 +85,57 @@ export function useSelectCurrentUserSessionHook() {
       return session;
     },
     networkMode: "online",
+  });
+}
+
+// FCA HOOKS
+export function useInsertFCAHook() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: FCAType) => await InsertFCAAction(data),
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: ["farmers"],
+      });
+      toast("FCA created successfully!");
+    },
+    onError: (error) => {
+      toast.error(`Failed to create FCA: ${error.message}`);
+    },
+  });
+}
+
+export function useSelectAllFCAHook() {
+  return useQuery({
+    queryKey: ["farmers"],
+    queryFn: async () => await SelectAllFCAAction(),
+    refetchInterval: 2000,
+    networkMode: "online",
+  });
+}
+
+export function useSelectAllFCAByStatusHook(status: number) {
+  return useQuery({
+    queryKey: ["farmers"],
+    queryFn: async () => await SelectAllFCAByStatusAction(status),
+    refetchInterval: 2000,
+    networkMode: "online",
+  });
+}
+
+export function useEditFCAHook() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: FCAType) => await EditFCAAction(data),
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: ["farmers"],
+      });
+      toast("FCA updated successfully!");
+    },
+    onError: (error) => {
+      toast.error(`Failed to update FCA: ${error.message}`);
+    },
   });
 }
 
@@ -166,7 +224,7 @@ export function useDeleteProgramHook(programId: string) {
 // PROJECT HOOKS
 export function useSelectAllProjectsByProgramIDHook(programId: string) {
   return useQuery({
-    queryKey: ["allProjectsByProgramId", programId],
+    queryKey: ["allProjectsByProgramId"],
     queryFn: async () => await SelectAllProjectsByProgramIDAction(programId),
     enabled: !!programId,
     refetchInterval: 2000,
@@ -186,7 +244,7 @@ export function useSelectProgramAndProjectDetailsByProgjectIDHook(
   projectId: string
 ) {
   return useQuery({
-    queryKey: ["programAndProjectDetailsByProjectId", projectId],
+    queryKey: ["programAndProjectDetailsByProjectId"],
     queryFn: async () =>
       await SelectProgramAndProjectDetailsByProjectIDAction(projectId),
     enabled: !!projectId,
@@ -213,7 +271,7 @@ export function useInsertProjectHook() {
     mutationFn: async (data: ProjectType) => await InsertProjectAction(data),
     onSuccess: (data) => {
       qc.invalidateQueries({
-        queryKey: ["allProjectsByProgramId", data.program_id],
+        queryKey: ["allProjectsByProgramId"],
       });
       toast("Project created successfully!");
       router.push(`/dashboard/projects/${data.id}`);
@@ -225,25 +283,16 @@ export function useInsertProjectHook() {
   });
 }
 
-export function useEditProjectNameHook() {
+export function useEditProjectHook() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (data: {
-      id: string;
-      project_name: string;
-      status: number;
-    }) =>
-      await EditProjectNameAction({
-        project_id: data.id ?? "",
-        project_name: data.project_name,
-        status: data.status,
-      }),
-    onSuccess: (data) => {
+    mutationFn: async (data: ProjectType) => await EditProjectAction(data),
+    onSuccess: () => {
       qc.invalidateQueries({
-        queryKey: ["programAndProjectDetailsByProjectId", data.id],
+        queryKey: ["programAndProjectDetailsByProjectId"],
       });
       qc.invalidateQueries({
-        queryKey: ["allProjectsByProgramId", data.program_id],
+        queryKey: ["allProjectsByProgramId"],
       });
       toast("Project updated successfully!");
     },
@@ -260,7 +309,7 @@ export function useDeleteProjectHook(projectId: string, programId: string) {
     mutationFn: async () => await DeleteProjectAction(projectId),
     onSuccess: () => {
       qc.invalidateQueries({
-        queryKey: ["allProjectsByProgramId", programId],
+        queryKey: ["allProjectsByProgramId"],
       });
       toast.error("Project deleted successfully!");
       router.push("/dashboard/programs/" + programId);

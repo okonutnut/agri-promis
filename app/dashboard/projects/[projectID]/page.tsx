@@ -24,14 +24,25 @@ function ProjectDashboardInfo(data: ProjectType) {
       <div className="flex flex-col gap-1 text-2xl font-medium ">
         {data?.project_name}
         <span className="text-sm text-muted-foreground mt-4">
-          Start Date: {format(new Date(data?.start_date), "PP")}
+          Start Date:{" "}
+          {data?.start_date
+            ? format(new Date(data.start_date), "PP")
+            : "Not specified"}
         </span>
         <span className="text-sm text-muted-foreground">
-          Estimated End Date: {format(new Date(data?.end_date), "PP")}
+          Estimated End Date:{" "}
+          {data?.end_date
+            ? format(new Date(data.end_date), "PP")
+            : "Not specified"}
         </span>
         <span className="text-sm text-muted-foreground">
           Location: {data.location ?? "Not specified"}
         </span>
+        {data.fca && (
+          <span className="text-sm text-muted-foreground">
+            FCA: {data.fca?.map((fca) => fca.description).join(", ")}
+          </span>
+        )}
       </div>
       <Badge variant="outline" className={`h-7 px-4 text-xs gap-2`}>
         <div
@@ -49,6 +60,7 @@ export default function ProjectDashboard() {
   const { projectID } = useParams();
   const { data, isLoading, error } =
     useSelectProgramAndProjectDetailsByProgjectIDHook(projectID as string);
+  console.log("Project Dashboard Data:", data);
 
   return (
     <CustomPageLayout

@@ -8,6 +8,7 @@ import {
   MonitoringReportType,
   TravelOrderType,
   ActivityLogType,
+  FCAType,
 } from "@/components/types";
 import { decodeSupabaseJWT } from "@/utils/helpers/decodeSupabaseJwt";
 import { createClient } from "@/utils/supabase/server";
@@ -67,6 +68,64 @@ export async function SelectUserProfileAction() {
   }
 
   return user as UserProfileType;
+}
+
+// FCA ACTIONS
+export async function InsertFCAAction(data: FCAType) {
+  const supabase = await createClient(cookies());
+  const { id, ...rest } = data;
+  const { error } = await supabase
+    .from("farmers")
+    .insert({ ...rest, active_status: 1 });
+
+  if (error) {
+    console.error("Error inserting FCA:", error);
+    throw new Error(error.message);
+  }
+
+  return;
+}
+
+export async function SelectAllFCAAction() {
+  const supabase = await createClient(cookies());
+  const { data, error } = await supabase.from("farmers").select("*");
+
+  if (error) {
+    console.error("Error fetching all FCA:", error);
+    throw new Error(error.message);
+  }
+
+  return data as FCAType[];
+}
+
+export async function SelectAllFCAByStatusAction(status: number) {
+  const supabase = await createClient(cookies());
+  const { data, error } = await supabase
+    .from("farmers")
+    .select("*")
+    .eq("active_status", status);
+
+  if (error) {
+    console.error("Error fetching FCA by status:", error);
+    throw new Error(error.message);
+  }
+
+  return data as FCAType[];
+}
+
+export async function EditFCAAction(data: FCAType) {
+  const supabase = await createClient(cookies());
+  const { error } = await supabase
+    .from("farmers")
+    .update(data)
+    .eq("id", data.id);
+
+  if (error) {
+    console.error("Error updating FCA:", error);
+    throw new Error(error.message);
+  }
+
+  return;
 }
 
 // PROGRAM ACTIONS
@@ -305,7 +364,23 @@ export async function SelectProgramAndProjectDetailsByProjectIDAction(
     throw new Error(error.message);
   }
 
-  return data as ProjectType & { programs: ProgramType };
+  // GET FCA Info
+  const { data: fcaData, error: fcaError } = await supabase
+    .from("farmers")
+    .select("id, description")
+    .in("id", data.fca_ids);
+
+  if (fcaError) {
+    console.error("Error fetching FCA details:", fcaError);
+    throw new Error(fcaError.message);
+  }
+
+  const res = {
+    ...data,
+    fca: fcaData.length > 0 ? fcaData : null,
+  };
+
+  return res as ProjectType & { fca: FCAType[] | null };
 }
 
 export async function SelectProjectDetailsByProjectIDAction(projectID: string) {
@@ -324,23 +399,15 @@ export async function SelectProjectDetailsByProjectIDAction(projectID: string) {
   return data as ProjectType;
 }
 
-export async function EditProjectNameAction({
-  project_id,
-  project_name,
-  status,
-}: {
-  project_id: string;
-  project_name: string;
-  status: number;
-}) {
+export async function EditProjectAction(data: ProjectType) {
   const supabase = await createClient(cookies());
-
   // Get the current project details for logging
   const { data: currentProject, error: currentError } = await supabase
     .from("projects")
     .select("project_name")
-    .eq("id", project_id)
+    .eq("id", data.id)
     .single();
+
   if (currentError) {
     console.error("Error fetching current project details:", currentError);
     throw new Error(
@@ -349,12 +416,14 @@ export async function EditProjectNameAction({
   }
 
   // Update the project name and status
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("projects")
-    .update({ project_name, status })
-    .eq("id", project_id)
-    .select()
-    .single();
+    .update({
+      project_name: data.project_name,
+      status: data.status,
+      fca_ids: data.fca_ids,
+    })
+    .eq("id", data.id);
 
   if (error) {
     console.error("Error updating project name:", error);
@@ -363,11 +432,11 @@ export async function EditProjectNameAction({
 
   // Log the activity
   await InsertActivityLogAction(
-    "Updated Project Name",
-    `Project ${currentProject.project_name} name updated to ${project_name}.`
+    "Updated Project",
+    `Project ${currentProject.project_name} updated successfully.`
   );
 
-  return data as ProjectType;
+  return;
 }
 
 export async function DeleteProjectAction(projectID: string) {

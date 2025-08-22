@@ -56,7 +56,7 @@ export default function DeleteProjectCard({
           </center>
           <Input
             onChange={(e) =>
-              setConfirm(e.target.value === data.project_name.trim())
+              setConfirm(e.target.value === data.project_name?.trim())
             }
           />
           <Separator />

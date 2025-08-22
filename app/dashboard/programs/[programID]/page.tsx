@@ -32,7 +32,7 @@ export default function ProgramDashboardPage() {
   const [searchQuery, setSearchQuery] = useState("");
   // Filter projects based on the search query
   const filteredProjects = data?.filter((project: ProjectType) =>
-    project.project_name.toLowerCase().includes(searchQuery.toLowerCase())
+    project.project_name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (

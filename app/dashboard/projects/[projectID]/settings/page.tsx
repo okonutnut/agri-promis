@@ -13,12 +13,9 @@ const DeleteProjectCard = dynamic(
     ssr: false,
   }
 );
-const EditProgramNameForm = dynamic(
-  () => import("./form/edit-project-name-form"),
-  {
-    ssr: false,
-  }
-);
+const EditProjectForm = dynamic(() => import("./form/edit-project-form"), {
+  ssr: false,
+});
 
 export default function ProgramSettingsPage() {
   const { projectID } = useParams();
@@ -35,7 +32,7 @@ export default function ProgramSettingsPage() {
       <Card className="shadow-xs mb-4">
         <CardContent className="flex flex-wrap justify-between items-start">
           <div className="font-semibold w-full mb-4">General Settings</div>
-          <EditProgramNameForm
+          <EditProjectForm
             project={data as ProjectType & { programs: ProgramType }}
           />
         </CardContent>
