@@ -4,10 +4,41 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { AppSidebar } from "@/components/sidebar/appSidebar";
 import { NavigationItemType } from "@/components/types";
-import { Suspense } from "react";
+import {
+  Suspense,
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+} from "react";
 import SkeletonLoading from "./skeleton-loading";
 import CustomNavbar from "../navbar/custom-navbar";
 import { useUpdateUserCurrentLocationHook } from "@/components/hooks";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+
+// Sheet Context
+interface SheetContextType {
+  isOpen: boolean;
+  title: string;
+  content: ReactNode;
+  openSheet: (title: string, content: ReactNode) => void;
+  closeSheet: () => void;
+}
+
+const SheetContext = createContext<SheetContextType | undefined>(undefined);
+
+export const useSheet = () => {
+  const context = useContext(SheetContext);
+  if (!context) {
+    throw new Error("useSheet must be used within a CustomPageLayout");
+  }
+  return context;
+};
 
 type CustomPageLayoutProps = {
   children?: React.ReactNode;
@@ -20,6 +51,7 @@ type CustomPageLayoutProps = {
   topRightComponent?: React.ReactNode;
   role?: "admin" | "user";
 };
+
 export default function CustomPageLayout({
   children,
   className,
@@ -32,8 +64,40 @@ export default function CustomPageLayout({
   role,
 }: CustomPageLayoutProps) {
   useUpdateUserCurrentLocationHook();
+
+  // Sheet state management
+  const [sheetState, setSheetState] = useState({
+    isOpen: false,
+    title: "",
+    content: null as ReactNode,
+  });
+
+  const openSheet = (title: string, content: ReactNode) => {
+    setSheetState({
+      isOpen: true,
+      title,
+      content,
+    });
+  };
+
+  const closeSheet = () => {
+    setSheetState({
+      isOpen: false,
+      title: "",
+      content: null,
+    });
+  };
+
+  const sheetContextValue: SheetContextType = {
+    isOpen: sheetState.isOpen,
+    title: sheetState.title,
+    content: sheetState.content,
+    openSheet,
+    closeSheet,
+  };
+
   return (
-    <>
+    <SheetContext.Provider value={sheetContextValue}>
       <section className="w-full h-screen flex flex-col relative text-sm overflow-hidden">
         {error &&
           toast.error(
@@ -63,7 +127,19 @@ export default function CustomPageLayout({
             </div>
           </div>
         </div>
+
+        {/* Global Sheet */}
+        <Sheet open={sheetState.isOpen} onOpenChange={closeSheet}>
+          <SheetContent className="md:min-w-[600px] w-screen">
+            <SheetHeader className="border-b p-2">
+              <SheetTitle className="uppercase text-primary">
+                {sheetState.title}
+              </SheetTitle>
+            </SheetHeader>
+            {sheetState.content}
+          </SheetContent>
+        </Sheet>
       </section>
-    </>
+    </SheetContext.Provider>
   );
 }

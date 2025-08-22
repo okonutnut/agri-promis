@@ -48,7 +48,7 @@ export default function ScheduledMonitoringTable({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={2} className="text-center">
+                <TableCell colSpan={3} className="text-center">
                   No activities scheduled for today.
                 </TableCell>
               </TableRow>

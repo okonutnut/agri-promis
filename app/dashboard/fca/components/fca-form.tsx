@@ -9,7 +9,6 @@ import FormSelect from "@/components/custom/select/form-select";
 import { Loader2, Send } from "lucide-react";
 import { useEditFCAHook, useInsertFCAHook } from "@/components/hooks";
 import { FCAType } from "@/components/types";
-import { Dispatch, SetStateAction } from "react";
 import { SheetClose, SheetFooter } from "@/components/ui/sheet";
 
 const formSchema = z.object({
@@ -23,7 +22,7 @@ type FormType = z.infer<typeof formSchema>;
 type FCAFormProps = {
   isAddMode: boolean;
   data: FCAType | null;
-  setPanelOpen: Dispatch<SetStateAction<boolean>>;
+  setPanelOpen: () => void;
 };
 export function FCAForm({ isAddMode, data, setPanelOpen }: FCAFormProps) {
   const status = [
@@ -51,14 +50,14 @@ export function FCAForm({ isAddMode, data, setPanelOpen }: FCAFormProps) {
     if (isAddMode) {
       insertMutate(data, {
         onSuccess: () => {
-          setPanelOpen(false);
+          setPanelOpen();
           form.reset();
         },
       });
     } else {
       updateMutate(data, {
         onSuccess: () => {
-          setPanelOpen(false);
+          setPanelOpen();
           form.reset();
         },
       });

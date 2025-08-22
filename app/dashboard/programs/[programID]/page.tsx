@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelectAllProjectsByProgramIDHook } from "@/components/hooks";
 import { ProjectType } from "@/components/types";
 import { ChevronRight, Search } from "lucide-react";
@@ -9,6 +9,7 @@ import { useParams } from "next/navigation";
 import { getProgramNavItems } from "@/components/sidebar/navitems";
 import Link from "next/link";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
+import { useQueryClient } from "@tanstack/react-query";
 
 const Badge = dynamic(
   () => import("@/components/ui/badge").then((mod) => mod.Badge),
@@ -26,14 +27,18 @@ const CardLink = dynamic(() => import("@/components/custom/link/card-link"));
 
 export default function ProgramDashboardPage() {
   const { programID } = useParams();
+  const qc = useQueryClient();
   const { data, isLoading, error } = useSelectAllProjectsByProgramIDHook(
     programID as string
   );
   const [searchQuery, setSearchQuery] = useState("");
-  // Filter projects based on the search query
   const filteredProjects = data?.filter((project: ProjectType) =>
     project.project_name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  useEffect(() => {
+    qc.invalidateQueries({ queryKey: ["allProjectsByProgramId"] });
+  }, []);
 
   return (
     <CustomPageLayout

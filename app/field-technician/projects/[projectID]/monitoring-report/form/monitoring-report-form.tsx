@@ -7,12 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useParams } from "next/navigation";
-import {
-  SheetClose,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { SheetClose, SheetFooter } from "@/components/ui/sheet";
 import { ImageData } from "@/components/interfaces";
 import { MonitoringReportType } from "@/components/types";
 import { useInsertMonitoringReportHook } from "@/components/hooks";
@@ -164,18 +159,6 @@ export default function UploadFieldReportForm({
 
   return (
     <>
-      <SheetHeader className="border-b flex-row justify-between items-start">
-        <SheetTitle className="text-primary uppercase">
-          {isAddMode
-            ? "Upload New Post Activity Report"
-            : "View Post Activity Report Details"}
-        </SheetTitle>
-        {!isAddMode && (
-          <PrintDownloadDropdown
-            data={<MonitoringReportDocument data={values ?? null} />}
-          />
-        )}
-      </SheetHeader>
       <section className="overflow-y-auto">
         <ImageCaptureForm
           isAddMode={isAddMode}
@@ -239,6 +222,11 @@ export default function UploadFieldReportForm({
             Close
           </Button>
         </SheetClose>
+        {!isAddMode && (
+          <PrintDownloadDropdown
+            data={<MonitoringReportDocument data={values ?? null} />}
+          />
+        )}
         {values?.key != null && (
           <DeleteDraftButton
             draftKey={values?.key as string}

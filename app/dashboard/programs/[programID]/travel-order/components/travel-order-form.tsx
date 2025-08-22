@@ -15,9 +15,8 @@ import * as z from "zod";
 import { useInsertTravelOrderHook } from "@/components/hooks";
 import { Loader2, Send } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useEffect, useRef } from "react";
 
-const travelOrderSchema = z
+const formSchema = z
   .object({
     travel_order_no: z
       .string()
@@ -51,20 +50,22 @@ const travelOrderSchema = z
     }
   );
 
-type TravelOrderFormValues = z.infer<typeof travelOrderSchema>;
+type TravelOrderSchema = z.infer<typeof formSchema>;
 
 type IssueTravelOrderFormProps = {
   isAddMode?: boolean;
   values?: TravelOrderType | null;
+  setPanelOpen?: () => void;
 };
 
 export default function IssueTravelOrderForm({
   isAddMode,
   values,
+  setPanelOpen,
 }: IssueTravelOrderFormProps) {
   const { programID } = useParams();
-  const form = useForm<TravelOrderFormValues>({
-    resolver: zodResolver(travelOrderSchema),
+  const form = useForm<TravelOrderSchema>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       travel_order_no: values?.travel_order_no || "",
       user_id: values?.user_id || "",
@@ -92,19 +93,17 @@ export default function IssueTravelOrderForm({
     { value: "plane", label: "Plane" },
   ];
 
-  const closeBtnRef = useRef<HTMLButtonElement>(null);
-
-  const { mutate, isPending, isSuccess } = useInsertTravelOrderHook();
-  const onSubmit = (data: TravelOrderFormValues) => {
-    mutate({ ...data, program_id: programID as string });
+  const { mutate, isPending } = useInsertTravelOrderHook();
+  const onSubmit = (data: TravelOrderSchema) => {
+    mutate(
+      { ...data, program_id: programID as string },
+      {
+        onSuccess: () => {
+          if (setPanelOpen) setPanelOpen();
+        },
+      }
+    );
   };
-
-  useEffect(() => {
-    if (isSuccess) {
-      form.reset();
-      closeBtnRef.current?.click();
-    }
-  }, [form, isSuccess]);
 
   return (
     <>
@@ -200,12 +199,7 @@ export default function IssueTravelOrderForm({
       </form>
       <SheetFooter className="border-t flex-row justify-end p-2">
         <SheetClose asChild>
-          <Button
-            variant={"outline"}
-            disabled={isPending}
-            size={"sm"}
-            ref={closeBtnRef}
-          >
+          <Button variant={"outline"} disabled={isPending} size={"sm"}>
             Close
           </Button>
         </SheetClose>

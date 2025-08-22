@@ -3,15 +3,7 @@
 import { useSelectCurrentUserSessionHook } from "@/components/hooks";
 import { MonitoringReportType } from "@/components/types";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { useSheet } from "@/components/custom/layout/custom-page-layout";
 import {
   Table,
   TableBody,
@@ -23,15 +15,14 @@ import { loadDrafts } from "@/hooks/use-draft";
 import { format } from "date-fns";
 import { Archive } from "lucide-react";
 import { useEffect, useState } from "react";
+import { SheetClose, SheetFooter } from "@/components/ui/sheet";
 
 type ViewDraftsSheetProps = {
   handleModify: (row: MonitoringReportType | null) => void;
 };
-export default function ViewDraftsSheet({
-  handleModify,
-}: ViewDraftsSheetProps) {
+
+function DraftsContent({ handleModify }: ViewDraftsSheetProps) {
   const { data } = useSelectCurrentUserSessionHook();
-  const [isOpen, setIsOpen] = useState(false);
   const [drafts, setDrafts] = useState<MonitoringReportType[]>([]);
 
   useEffect(() => {
@@ -42,62 +33,71 @@ export default function ViewDraftsSheet({
       }
       fetchDrafts();
     }
-  }, [data?.user?.id, isOpen]);
+  }, [data?.user?.id]);
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
-        <Button variant={"outline"} className="cursor-pointer">
-          <Archive />
-          Drafts
-        </Button>
-      </SheetTrigger>
-      <SheetContent className="w-screen md:max-w-xl">
-        <SheetHeader className="border-b">
-          <SheetTitle>My Drafts</SheetTitle>
-        </SheetHeader>
-        <Table>
-          <TableCaption className="text-xs">
-            All drafts are only saved locally in the device.
-          </TableCaption>
-          <TableBody>
-            {drafts.map((draft) => (
-              <TableRow
-                key={`${draft.key}-${draft.created_at}`}
-                className="border-b"
-              >
-                <TableCell>
-                  <span className="truncate block max-w-md">
-                    {draft.purpose || "Untitled"}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    Date:
-                    {format(new Date(draft.created_at ?? new Date()), "PPp")}
-                  </span>
-                </TableCell>
-                <TableCell className="text-end">
-                  <Button
-                    size={"sm"}
-                    onClick={() => {
-                      handleModify(draft);
-                      setIsOpen(false);
-                    }}
-                  >
-                    Open
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <SheetFooter className="border-t flex-row justify-end p-2">
-          <SheetClose asChild>
-            <Button variant={"outline"} size={"sm"} className="cursor-pointer">
-              Close
-            </Button>
-          </SheetClose>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+    <>
+      <Table>
+        <TableCaption className="text-xs">
+          All drafts are only saved locally in the device.
+        </TableCaption>
+        <TableBody>
+          {drafts.map((draft) => (
+            <TableRow
+              key={`${draft.key}-${draft.created_at}`}
+              className="border-b"
+            >
+              <TableCell>
+                <span className="truncate block max-w-md">
+                  {draft.purpose || "Untitled"}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  Date:{" "}
+                  {format(new Date(draft.created_at ?? new Date()), "PPp")}
+                </span>
+              </TableCell>
+              <TableCell className="text-end">
+                <Button
+                  size={"sm"}
+                  onClick={() => {
+                    handleModify(draft);
+                  }}
+                >
+                  Open
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      <SheetFooter className="p-2 border-t flex-row justify-end gap-2">
+        <SheetClose asChild>
+          <Button size={"sm"} variant={"outline"}>
+            Close
+          </Button>
+        </SheetClose>
+      </SheetFooter>
+    </>
+  );
+}
+
+export default function ViewDraftsSheet({
+  handleModify,
+}: ViewDraftsSheetProps) {
+  const { openSheet } = useSheet();
+
+  const handleViewDrafts = () => {
+    openSheet("My Drafts", <DraftsContent handleModify={handleModify} />);
+  };
+
+  return (
+    <Button
+      variant={"outline"}
+      onClick={handleViewDrafts}
+      className="cursor-pointer"
+    >
+      <Archive className="mr-2 h-4 w-4" />
+      Drafts
+    </Button>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { PDFDownloadLink, pdf } from "@react-pdf/renderer";
-import { Download, EllipsisVertical, Printer } from "lucide-react";
+import { Download, Printer } from "lucide-react";
 
 type PrintDownloadDropdownProps = {
   data: React.ReactElement<import("@react-pdf/renderer").DocumentProps>;
@@ -24,10 +25,16 @@ export default function PrintDownloadDropdown({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="mr-2">
-        <EllipsisVertical className="w-4 h-4" />
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="outline"
+          size={"sm"}
+          className="flex items-center gap-2"
+        >
+          Export
+        </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="m-1">
+      <DropdownMenuContent className="m-1 min-w-[150px]">
         <DropdownMenuItem>
           <PDFDownloadLink
             document={data}

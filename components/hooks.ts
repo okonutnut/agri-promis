@@ -62,7 +62,7 @@ export function useSelectAllUserProfilesHook() {
   return useQuery({
     queryKey: ["userProfiles"],
     queryFn: async () => await SelectAllUserProfilesAction(),
-    refetchInterval: 2000,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -71,7 +71,7 @@ export function useSelectUserProfileHook() {
   return useQuery({
     queryKey: ["userProfile"],
     queryFn: async () => await SelectUserProfileAction(),
-    refetchInterval: 2000,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -109,7 +109,7 @@ export function useSelectAllFCAHook() {
   return useQuery({
     queryKey: ["farmers"],
     queryFn: async () => await SelectAllFCAAction(),
-    refetchInterval: 2000,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -118,7 +118,7 @@ export function useSelectAllFCAByStatusHook(status: number) {
   return useQuery({
     queryKey: ["farmers"],
     queryFn: async () => await SelectAllFCAByStatusAction(status),
-    refetchInterval: 2000,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -145,7 +145,7 @@ export function useSelectProgramByIDHook(programId: string) {
     queryKey: ["programById", programId],
     queryFn: async () => await SelectProgramByIdAction(programId),
     enabled: !!programId,
-    refetchInterval: 2000,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -154,7 +154,7 @@ export function useSelectAllProgramsByAgriculturistHook() {
   return useQuery({
     queryKey: ["allProgramsByAgriculturist"],
     queryFn: async () => await SelectAllProgramsByAgriculturistAction(),
-    refetchInterval: 2000,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -227,7 +227,7 @@ export function useSelectAllProjectsByProgramIDHook(programId: string) {
     queryKey: ["allProjectsByProgramId"],
     queryFn: async () => await SelectAllProjectsByProgramIDAction(programId),
     enabled: !!programId,
-    refetchInterval: 2000,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -248,7 +248,7 @@ export function useSelectProgramAndProjectDetailsByProgjectIDHook(
     queryFn: async () =>
       await SelectProgramAndProjectDetailsByProjectIDAction(projectId),
     enabled: !!projectId,
-    refetchInterval: 2000,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -258,7 +258,7 @@ export function useSelectProjectDetailsHook(projectId: string) {
     queryKey: ["projectDetails", projectId],
     queryFn: async () => await SelectProjectDetailsByProjectIDAction(projectId),
     enabled: !!projectId,
-    refetchInterval: 2000,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -342,7 +342,7 @@ export function useSelectAllTravelOrdersByUserIDHook(user_id?: string) {
   return useQuery({
     queryKey: ["travelOrders", user_id],
     queryFn: async () => await SelectAllTravelOrdersByUserIDAction(user_id),
-    refetchInterval: 2000,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -353,7 +353,7 @@ export function useSelectAllTravelOrdersByProgramIDHook(programID: string) {
     queryFn: async () =>
       await SelectAllTravelOrdersByProgramIDAction(programID),
     enabled: !!programID,
-    refetchInterval: 2000,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -366,7 +366,7 @@ export function useSelectAllMonitoringReportsByProjectIDHook(
     queryKey: ["allMonitoringReportsByProjectId"],
     queryFn: async () =>
       await SelectAllMonitoringReportsByProjectIDAction(projectID),
-    refetchInterval: 2000,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -412,7 +412,7 @@ export function useSelectAllMonitoringReportsByProjectIDAndUserHook(
     queryKey: ["allMonitoringReportsByUser", projectID],
     queryFn: async () =>
       await SelectAllMonitoringReportsByProjectIDAndUserAction(projectID),
-    refetchInterval: 2000,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -480,7 +480,7 @@ export function useSelectAllMembersHook() {
   return useQuery({
     queryKey: ["members"],
     queryFn: async () => await SelectAllMembersAction(),
-    refetchInterval: 2000,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -490,7 +490,7 @@ export function useSelectAllMembersByRoleHook(role: number) {
     queryKey: ["members", role],
     queryFn: async () => await SelectAllMembersByRoleAction(role),
     enabled: !!role,
-    refetchInterval: 2000,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -538,7 +538,7 @@ export function useSelectFieldTechniciansByProjectIDHook(project_id: string) {
     queryFn: async () =>
       await SelectAllFieldTechniciansByProjectIDAction(project_id),
     enabled: !!project_id,
-    refetchInterval: 2000,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -548,19 +548,23 @@ export function useSelectAssignedProjectsByFieldTechnicianHook() {
     queryKey: ["assignedProjectsByFieldTechnician"],
     queryFn: async () =>
       await SelectAllAssignedProjectsByFieldTechnicianIDAction(),
-    refetchInterval: 2000,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
 
 // LOCATION HOOKS
 export function useUpdateUserCurrentLocationHook() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: async () => await UpdateUserCurrentLocationAction(),
     onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: ["userLocation"],
+      });
       setInterval(() => {
         UpdateUserCurrentLocationAction();
-      }, 10 * 60 * 1000); // Trigger every 10 minutes
+      }, 10 * 60 * 1000);
     },
     onError: () => {
       UpdateUserCurrentLocationAction();
@@ -570,7 +574,7 @@ export function useUpdateUserCurrentLocationHook() {
 
 export function useSelectUserLocationHook(user_id: string) {
   return useQuery({
-    queryKey: ["userLocation", user_id],
+    queryKey: ["userLocation"],
     queryFn: async () => await SelectUserCurrentLocationAction(user_id),
     networkMode: "online",
   });
@@ -581,7 +585,7 @@ export function useSelectActivityLogsByUserIDHook(user_id: string) {
   return useQuery({
     queryKey: ["activity-logs"],
     queryFn: async () => await SelectActivityLogsByUserIDAction(user_id),
-    refetchInterval: 2000,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -590,7 +594,7 @@ export function useSelectActivityLogsByProjectIDHook(project_id: string) {
   return useQuery({
     queryKey: ["activity-logs", project_id],
     queryFn: async () => await SelectActivityLogsByProjectIDAction(project_id),
-    refetchInterval: 2000,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }
@@ -599,7 +603,7 @@ export function useSelectAllActivityLogsHook() {
   return useQuery({
     queryKey: ["activity-logs"],
     queryFn: async () => await SelectAllActivityLogsAction(),
-    refetchInterval: 2000,
+    refetchInterval: 3000,
     networkMode: "online",
   });
 }

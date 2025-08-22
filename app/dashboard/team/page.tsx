@@ -1,45 +1,58 @@
 "use client";
 
-import { useState } from "react";
 import { DataTable } from "./table/data-table";
 import { columns } from "./table/columns";
 import { TeamMemberForm } from "./components/team-members-form";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
 import { UserProfileType } from "@/components/types";
 import { useSelectAllMembersHook } from "@/components/hooks";
-import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
+import CustomPageLayout, {
+  useSheet,
+} from "@/components/custom/layout/custom-page-layout";
 import { getDashboardNavItems } from "@/components/sidebar/navitems";
 
-export default function FieldTechnicianPage() {
-  const [panelOpen, setPanelOpen] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<UserProfileType | null>(null);
-  const [isAddMode, setIsAddMode] = useState(false);
+function TeamMembersContent({
+  values,
+}: {
+  values: UserProfileType[] | undefined;
+}) {
+  const { openSheet, closeSheet } = useSheet();
 
   const handleRowSelect = (row: UserProfileType) => {
-    setSelectedRow(row);
-    setIsAddMode(false);
-    setPanelOpen(true);
+    openSheet(
+      "View Member Details",
+      <TeamMemberForm
+        isAddMode={false}
+        data={row}
+        setPanelOpen={(open) => !open && closeSheet()}
+      />
+    );
   };
 
   const handleAdd = () => {
-    setSelectedRow(null);
-    setIsAddMode(true);
-    setPanelOpen(true);
+    openSheet(
+      "Invite New Team Member",
+      <TeamMemberForm
+        isAddMode={true}
+        data={null}
+        setPanelOpen={(open) => !open && closeSheet()}
+      />
+    );
   };
 
-  const handlePanelClose = () => {
-    setPanelOpen(false);
-    setIsAddMode(false);
-    setSelectedRow(null);
-  };
+  if (!values) return null;
 
+  return (
+    <DataTable
+      columns={columns}
+      data={values || []}
+      onRowSelect={handleRowSelect}
+      onAdd={handleAdd}
+    />
+  );
+}
+
+export default function TeamMemberPage() {
   const { data, isLoading, error } = useSelectAllMembersHook();
-
   return (
     <CustomPageLayout
       pageTitle="Team Members"
@@ -47,31 +60,7 @@ export default function FieldTechnicianPage() {
       error={error}
       navItems={getDashboardNavItems()}
     >
-      {data && (
-        <>
-          <DataTable
-            columns={columns}
-            data={data || []}
-            onRowSelect={handleRowSelect}
-            onAdd={handleAdd}
-          />
-          <Sheet open={panelOpen} onOpenChange={handlePanelClose}>
-            <SheetContent className="md:min-w-[600px] w-screen">
-              <SheetHeader className="border-b">
-                <SheetTitle className="uppercase text-primary">
-                  {isAddMode ? "Invite New Team Member" : "View Member Details"}
-                </SheetTitle>
-              </SheetHeader>
-              <TeamMemberForm
-                isAddMode={isAddMode}
-                key={isAddMode ? "add-mode" : selectedRow?.id || "view-mode"}
-                data={isAddMode ? null : selectedRow}
-                setPanelOpen={setPanelOpen}
-              />
-            </SheetContent>
-          </Sheet>
-        </>
-      )}
+      <TeamMembersContent values={data} />
     </CustomPageLayout>
   );
 }

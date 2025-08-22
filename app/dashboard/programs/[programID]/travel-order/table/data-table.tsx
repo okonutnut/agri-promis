@@ -58,9 +58,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      {/* Global Search Bar and Add Button */}
-      <div className="flex flex-wrap items-center justify-start gap-2">
-        <Button onClick={onAdd}>New Travel Order</Button>
+      <div className="flex items-center justify-between gap-2">
         <div className="relative w-full max-w-sm">
           <Input
             placeholder="Search..."
@@ -70,6 +68,7 @@ export function DataTable<TData, TValue>({
           />
           <Search className="absolute left-2 top-1/2 w-4 h-4 transform -translate-y-1/2 text-gray-500" />
         </div>
+        <Button onClick={onAdd}>New Travel Order</Button>
       </div>
 
       {/* Table */}

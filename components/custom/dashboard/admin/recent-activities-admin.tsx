@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import { format } from "date-fns";
+import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 
 type RecentActivitiesProps = {
@@ -25,8 +25,16 @@ export default function RecentActivities({ data }: RecentActivitiesProps) {
     <>
       <span className="text-lg font-semibold">Recent Activities</span>
       <div className="border shadow-xs rounded-md">
+        <div className="flex justify-end">
+          {data && data.length > 0 && (
+            <Link href="/dashboard/activity-logs">
+              <Button variant={"ghost"} size={"sm"}>
+                <ExternalLink />
+              </Button>
+            </Link>
+          )}
+        </div>
         <Table>
-          <TableCaption>A list of recent activities.</TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead className="font-medium">Fullname</TableHead>
@@ -57,13 +65,6 @@ export default function RecentActivities({ data }: RecentActivitiesProps) {
             )}
           </TableBody>
         </Table>
-        {data && data.length > 0 && (
-          <Link href="/dashboard/activity-logs">
-            <Button variant={"link"} size={"sm"} className="text-xs">
-              View All
-            </Button>
-          </Link>
-        )}
       </div>
     </>
   );

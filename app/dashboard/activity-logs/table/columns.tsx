@@ -13,10 +13,10 @@ export const columns: ColumnDef<ActivityLogType>[] = [
     accessorKey: "description",
     header: "Activity",
   },
-  {
-    accessorKey: "ip_address",
-    header: "IP Address",
-  },
+  // {
+  //   accessorKey: "ip_address",
+  //   header: "IP Address",
+  // },
   {
     accessorKey: "created_at",
     header: () => <div className="text-end">Date Created</div>,

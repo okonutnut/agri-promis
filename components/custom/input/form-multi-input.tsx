@@ -13,6 +13,7 @@ type FormMultiInputProps = {
   values?: any | null;
   readOnly?: boolean;
 };
+
 export default function FormMultiInput({
   form,
   values,
@@ -21,7 +22,7 @@ export default function FormMultiInput({
   readOnly,
 }: FormMultiInputProps) {
   return (
-    <div className="relative">
+    <div className="relative space-y-2">
       {readOnly ? (
         <Label>{label}</Label>
       ) : (
@@ -50,45 +51,40 @@ export default function FormMultiInput({
           </Button>
         </div>
       )}
-      <table className="w-full overflow-x-auto">
-        <tbody>
-          {(form.watch(`${name}`) || values)
-            ?.slice(1)
-            .map((issue: string, index: number) => (
-              <tr key={index} className="flex items-center truncate">
-                <td>
-                  {readOnly ? (
-                    <span className="text-sm text-muted-foreground">
-                      <Dot />
-                    </span>
-                  ) : (
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      className="text-sm shadow-none text-destructive"
-                      onClick={() => {
-                        const currentIssues = form.getValues(`${name}`) || [];
-                        form.setValue(`${name}`, [
-                          currentIssues[0],
-                          ...currentIssues
-                            .slice(1)
-                            .filter((_: string, i: number) => i !== index),
-                        ]);
-                      }}
-                    >
-                      ×
-                    </Button>
-                  )}
-                </td>
-                <td className="my-auto">
-                  <span className="text-sm text-start max-w-sm break-words">
-                    {issue}
-                  </span>
-                </td>
-              </tr>
-            ))}
-        </tbody>
-      </table>
+      <ul className="max-w-md">
+        {(form.watch(`${name}`) || values)
+          ?.slice(1)
+          .map((issue: string, index: number) => (
+            <li key={index} className="flex items-start gap-2 mb-1">
+              {readOnly ? (
+                <span className="text-sm text-muted-foreground flex-shrink-0 mt-0.5">
+                  <Dot />
+                </span>
+              ) : (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="text-sm shadow-none text-destructive flex-shrink-0 h-6 w-6 p-0"
+                  onClick={() => {
+                    const currentIssues = form.getValues(`${name}`) || [];
+                    form.setValue(`${name}`, [
+                      currentIssues[0],
+                      ...currentIssues
+                        .slice(1)
+                        .filter((_: string, i: number) => i !== index),
+                    ]);
+                  }}
+                >
+                  ×
+                </Button>
+              )}
+              <span className="text-sm break-words flex-1 leading-relaxed">
+                {issue}
+              </span>
+            </li>
+          ))}
+      </ul>
     </div>
   );
 }

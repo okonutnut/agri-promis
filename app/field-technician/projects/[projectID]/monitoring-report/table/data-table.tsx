@@ -28,6 +28,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   onRowSelect?: (row: TData) => void;
   onAdd?: () => void;
+  topLeftComponent?: React.ReactNode;
 }
 
 export function DataTable<TData, TValue>({
@@ -35,6 +36,7 @@ export function DataTable<TData, TValue>({
   data,
   onRowSelect,
   onAdd,
+  topLeftComponent,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
@@ -53,8 +55,7 @@ export function DataTable<TData, TValue>({
   return (
     <div className="space-y-4">
       {/* Global Search Bar and Add Button */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <Button onClick={onAdd}>New Report</Button>
+      <div className="flex flex-wrap-reverse items-center justify-between gap-2">
         <div className="relative w-full max-w-md">
           <Input
             placeholder="Search..."
@@ -63,6 +64,10 @@ export function DataTable<TData, TValue>({
             onChange={(event) => table.setGlobalFilter(event.target.value)}
           />
           <Search className="absolute left-2 top-1/2 w-4 h-4 transform -translate-y-1/2 text-gray-500" />
+        </div>
+        <div className="flex items-center gap-2">
+          <Button onClick={onAdd}>New Report</Button>
+          {topLeftComponent}
         </div>
       </div>
 

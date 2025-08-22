@@ -8,7 +8,7 @@ import { format } from "date-fns";
 export const columns: ColumnDef<UserProfileType>[] = [
   {
     id: "no",
-    header: "No.",
+    header: "#",
     cell: ({ row }) => {
       return <div>{row.index + 1}</div>;
     },

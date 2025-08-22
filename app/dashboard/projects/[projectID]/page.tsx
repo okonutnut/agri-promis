@@ -10,7 +10,8 @@ import { format } from "date-fns";
 import { useParams } from "next/navigation";
 import { ProjectType } from "@/components/types";
 import ProjectActivityLogTable from "@/components/custom/dashboard/project-activity-log-table";
-
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 const ProjectDashboardItems = dynamic(
   () => import("@/components/custom/dashboard/admin/dashboard-summary-items"),
   {
@@ -58,9 +59,13 @@ function ProjectDashboardInfo(data: ProjectType) {
 
 export default function ProjectDashboard() {
   const { projectID } = useParams();
+  const qc = useQueryClient();
   const { data, isLoading, error } =
     useSelectProgramAndProjectDetailsByProgjectIDHook(projectID as string);
-  console.log("Project Dashboard Data:", data);
+
+  useEffect(() => {
+    qc.invalidateQueries({ queryKey: ["programAndProjectDetailsByProjectId"] });
+  }, []);
 
   return (
     <CustomPageLayout

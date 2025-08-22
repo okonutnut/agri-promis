@@ -6,14 +6,13 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import FormInput from "@/components/custom/input/form-input";
 import FormSelect from "@/components/custom/select/form-select";
-import { Loader2 } from "lucide-react";
+import { CircleAlert, Loader2, Send } from "lucide-react";
 import {
   useInsertMemberHook,
   useUpdateActiveStatusMemberHook,
   useUpdateMemberHook,
 } from "@/components/hooks";
 import { UserProfileType } from "@/components/types";
-import { Dispatch, SetStateAction } from "react";
 import { SheetClose, SheetFooter } from "@/components/ui/sheet";
 
 const formSchema = z.object({
@@ -34,7 +33,7 @@ type MemberType = z.infer<typeof formSchema>;
 type TeamMemberFormProps = {
   isAddMode: boolean;
   data: UserProfileType | null;
-  setPanelOpen: Dispatch<SetStateAction<boolean>>;
+  setPanelOpen: (open: boolean) => void;
 };
 export function TeamMemberForm({
   isAddMode,
@@ -115,6 +114,7 @@ export function TeamMemberForm({
         {!isAddMode && (
           <Button
             size={"sm"}
+            className="text-red-500 hover:text-red-600"
             onClick={() => {
               statusMutate(
                 {
@@ -135,7 +135,10 @@ export function TeamMemberForm({
             {isStatusPending ? (
               <Loader2 className="animate-spin" />
             ) : (
-              `Set as ${data?.active_status == 1 ? "Inactive" : "Active"}`
+              <>
+                <CircleAlert />
+                Set as {data?.active_status == 1 ? "Inactive" : "Active"}
+              </>
             )}
           </Button>
         )}
@@ -146,7 +149,13 @@ export function TeamMemberForm({
           variant={isPending ? "ghost" : "default"}
           disabled={isPending}
         >
-          {isInsertPending ? <Loader2 className="animate-spin" /> : "Save"}
+          {isInsertPending ? (
+            <Loader2 className="animate-spin" />
+          ) : (
+            <>
+              <Send /> Submit
+            </>
+          )}
         </Button>
       </SheetFooter>
     </>

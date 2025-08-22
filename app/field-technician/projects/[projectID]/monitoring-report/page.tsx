@@ -1,64 +1,83 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useState } from "react";
 import { DataTable } from "./table/data-table";
 import { columns } from "./table/columns";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useSelectAllMonitoringReportsByProjectIDAndUserHook } from "@/components/hooks";
 import { MonitoringReportType } from "@/components/types";
 import { useParams } from "next/navigation";
 import { getUserProjectNavItems } from "@/components/sidebar/navitems";
-import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
+import CustomPageLayout, {
+  useSheet,
+} from "@/components/custom/layout/custom-page-layout";
+
 const UploadFieldReportForm = dynamic(
   () => import("./form/monitoring-report-form"),
-  {
-    ssr: false,
-  }
+  { ssr: false }
 );
 const ViewDraftsSheet = dynamic(
   () => import("./components/view-drafts-sheet"),
-  {
-    ssr: false,
-  }
+  { ssr: false }
 );
 
-export default function MonitoringReportPage() {
-  const { projectID } = useParams();
-
-  const [panelOpen, setPanelOpen] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<MonitoringReportType | null>(
-    null
-  );
-  const [isAddMode, setIsAddMode] = useState(false);
-  const [isDraft, setIsDraft] = useState(false);
+function MonitoringReportContent({
+  data,
+}: {
+  data: MonitoringReportType[] | undefined;
+}) {
+  const { openSheet, closeSheet } = useSheet();
 
   const handleRowSelect = (row: MonitoringReportType) => {
-    setSelectedRow(row);
-    setIsAddMode(false);
-    setPanelOpen(true);
+    openSheet(
+      "View Monitoring Report",
+      <UploadFieldReportForm
+        isAddMode={false}
+        isDraft={false}
+        values={row}
+        onOpenChange={closeSheet}
+      />
+    );
   };
 
   const handleAdd = () => {
-    setSelectedRow(null);
-    setIsAddMode(true);
-    setPanelOpen(true);
+    openSheet(
+      "Add Monitoring Report",
+      <UploadFieldReportForm
+        isAddMode={true}
+        isDraft={false}
+        values={null}
+        onOpenChange={closeSheet}
+      />
+    );
   };
 
   const handleModify = (row: MonitoringReportType | null) => {
-    setSelectedRow(row);
-    setIsDraft(true);
-    setIsAddMode(true);
-    setPanelOpen(true);
+    openSheet(
+      "Modify Draft Report",
+      <UploadFieldReportForm
+        isAddMode={true}
+        isDraft={true}
+        values={row}
+        onOpenChange={closeSheet}
+      />
+    );
   };
 
-  const handlePanelClose = useCallback(() => {
-    setPanelOpen(false);
-    setIsAddMode(false);
-    setIsDraft(false);
-    setSelectedRow(null);
-  }, []);
+  if (!data) return null;
 
+  return (
+    <DataTable
+      columns={columns}
+      data={data || []}
+      onRowSelect={handleRowSelect}
+      onAdd={handleAdd}
+      topLeftComponent={<ViewDraftsSheet handleModify={handleModify} />}
+    />
+  );
+}
+
+export default function MonitoringReportPage() {
+  const { projectID } = useParams();
   const { data, isLoading, error } =
     useSelectAllMonitoringReportsByProjectIDAndUserHook(projectID as string);
 
@@ -68,25 +87,9 @@ export default function MonitoringReportPage() {
       isLoading={isLoading}
       error={error}
       navItems={getUserProjectNavItems(projectID as string)}
-      topRightComponent={<ViewDraftsSheet handleModify={handleModify} />}
       role="user"
     >
-      <DataTable
-        columns={columns}
-        data={data || []}
-        onRowSelect={handleRowSelect}
-        onAdd={handleAdd}
-      />
-      <Sheet open={panelOpen} onOpenChange={handlePanelClose}>
-        <SheetContent className="w-screen md:max-w-4xl">
-          <UploadFieldReportForm
-            isAddMode={isAddMode}
-            isDraft={isDraft}
-            values={selectedRow}
-            onOpenChange={handlePanelClose}
-          />
-        </SheetContent>
-      </Sheet>
+      <MonitoringReportContent data={data ?? undefined} />
     </CustomPageLayout>
   );
 }
