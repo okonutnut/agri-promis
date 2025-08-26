@@ -1,14 +1,8 @@
 "use client";
 import SkeletonLoading from "@/components/custom/layout/skeleton-loading";
 import { useSelectAllTravelOrdersByUserIDHook } from "@/components/hooks";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 
 type FTTravelOrdersProps = {
@@ -17,39 +11,38 @@ type FTTravelOrdersProps = {
 export default function FTTravelOrders({ user_id }: FTTravelOrdersProps) {
   const { data, isLoading, error } =
     useSelectAllTravelOrdersByUserIDHook(user_id);
+
+  const values = data?.filter((order) => order.is_active === 1);
   return (
     <>
-      <span className="font-semibold text-lg">Travel Orders</span>
+      <Label className="ms-3">Active Travel Orders</Label>
       {isLoading ? (
-        <SkeletonLoading className="mx-auto" />
+        <SkeletonLoading className="mx-3" />
       ) : error ? (
         <div className="text-red-500 text-center">
           Error loading travel orders: {error.message}
         </div>
+      ) : values?.length === 0 ? (
+        <center className="italic text-sm">No active travel orders.</center>
       ) : (
-        <Table className="mx-auto">
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px]">T.O No</TableHead>
-              <TableHead>Purpose</TableHead>
-              <TableHead className="text-right">Date Issued</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data &&
-              data.map((order) => (
-                <TableRow key={order.id}>
-                  <TableCell className="font-medium">
-                    {order.travel_order_no}
-                  </TableCell>
-                  <TableCell>{order.purpose}</TableCell>
-                  <TableCell className="text-right">
-                    {format(new Date(order.created_at ?? ""), "MMM dd, yyyy")}
-                  </TableCell>
-                </TableRow>
-              ))}
-          </TableBody>
-        </Table>
+        <div className="space-y-2 max-h-64 overflow-y-auto">
+          {values &&
+            values.map((order) => (
+              <Card
+                className="p-2 mx-3 rounded-md shadow-xs flex-row justify-between"
+                key={order.id}
+              >
+                <div className="flex flex-col gap-2 text-sm">
+                  <strong>Purpose: {order.purpose}</strong>
+                  <small>Travel Order No. {order.travel_order_no}</small>
+                </div>
+                <small>
+                  Return Date:&nbsp;
+                  {format(new Date(order.return_date ?? ""), "MMM dd, yyyy")}
+                </small>
+              </Card>
+            ))}
+        </div>
       )}
     </>
   );

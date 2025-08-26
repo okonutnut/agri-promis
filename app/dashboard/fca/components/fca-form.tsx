@@ -10,6 +10,8 @@ import { Loader2, Send } from "lucide-react";
 import { useEditFCAHook, useInsertFCAHook } from "@/components/hooks";
 import { FCAType } from "@/components/types";
 import { SheetClose, SheetFooter } from "@/components/ui/sheet";
+import { Label } from "@/components/ui/label";
+import FCAPanel from "./fca-panel";
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -65,8 +67,9 @@ export function FCAForm({ isAddMode, data, setPanelOpen }: FCAFormProps) {
   };
   return (
     <>
+      <Label className="ms-3">FCA Info</Label>
       <form
-        className="p-3 space-y-4 overflow-auto"
+        className="p-3 space-y-4 overflow-auto border-b"
         id="fca-form"
         onSubmit={form.handleSubmit(onSubmit)}
       >
@@ -87,6 +90,7 @@ export function FCAForm({ isAddMode, data, setPanelOpen }: FCAFormProps) {
           />
         )}
       </form>
+      <FCAPanel fcaID={data?.id as string} />
       <SheetFooter className="border-t p-2 flex-row justify-end gap-2">
         <SheetClose asChild>
           <Button variant={"outline"} size={"sm"} disabled={isPending}>

@@ -1,15 +1,14 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Suspense } from "react";
 import { Icon } from "leaflet";
 import { useSelectUserLocationHook } from "@/components/hooks";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import SkeletonLoading from "@/components/custom/layout/skeleton-loading";
 import "leaflet/dist/leaflet.css";
 import { Loader2 } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 // Dynamically import the map components with SSR disabled
 const MapContainer = dynamic(
@@ -69,39 +68,37 @@ export default function FTGPSCard({ user_id }: FTGPSCardProps) {
   };
 
   return (
-    <Suspense fallback={<SkeletonLoading />}>
-      <section className="space-y-4 pb-4 border-b">
-        <Label htmlFor="gps-card" className="mb-1">
-          {data && (
-            <span className="italic text-xs text-gray-500">
-              Last update: {format(data?.modified_at, "PPp")}
-            </span>
-          )}
-        </Label>
-        <div className="w-full h-[20vh] relative border rounded-lg flex flex-col items-center justify-center">
-          {isLoading || isRefetching ? (
-            <Loader2 className="animate-spin text-primary" />
-          ) : error ? (
-            <p>Error loading GPS data</p>
-          ) : data?.latitude && data?.longitude ? (
-            <MapComponent />
-          ) : (
-            <>
-              <center className="text-xs text-red-500 mx-auto">
-                Cannot locate user.
-              </center>
-              <Button
-                variant={"link"}
-                onClick={() => refetch()}
-                className="w-full px-4 py-2"
-                disabled={isLoading}
-              >
-                Retry
-              </Button>
-            </>
-          )}
-        </div>
-      </section>
-    </Suspense>
+    <section className="space-y-4 pb-4 border-b px-1">
+      <Label htmlFor="gps-card" className="mb-1">
+        {data && (
+          <span className="italic text-xs text-gray-500">
+            Last update: {format(data?.modified_at, "PPp")}
+          </span>
+        )}
+      </Label>
+      <Card className="w-full h-[20vh] relative rounded-md flex flex-col items-center justify-center shadow-xs p-0">
+        {isLoading || isRefetching ? (
+          <Loader2 className="animate-spin text-primary" />
+        ) : error ? (
+          <p>Error loading GPS data</p>
+        ) : data?.latitude && data?.longitude ? (
+          <MapComponent />
+        ) : (
+          <>
+            <center className="text-xs text-red-500 mx-auto">
+              Cannot locate user.
+            </center>
+            <Button
+              variant={"link"}
+              onClick={() => refetch()}
+              className="w-full px-4 py-2"
+              disabled={isLoading}
+            >
+              Retry
+            </Button>
+          </>
+        )}
+      </Card>
+    </section>
   );
 }

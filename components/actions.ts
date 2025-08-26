@@ -128,6 +128,21 @@ export async function EditFCAAction(data: FCAType) {
   return;
 }
 
+export async function SelectAllAssignedProjectsByFCAIDAction(fcaID: string) {
+  const supabase = await createClient(cookies());
+  const { data, error } = await supabase
+    .from("projects")
+    .select("project_name, created_at")
+    .contains("fca_ids", [fcaID]);
+
+  if (error) {
+    console.error("Error fetching assigned projects by FCA ID:", error);
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
 // PROGRAM ACTIONS
 export async function InsertProgramAction({
   program_name,
@@ -229,6 +244,29 @@ export async function SelectAllProgramsByAgriculturistAction() {
     .from("programs")
     .select("*, project_count:projects(count)")
     .eq("admin_id", userData.user.id)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("Error fetching programs:", error);
+    throw new Error(error.message);
+  }
+
+  return data as ProgramType[];
+}
+
+export async function SelectAllProgramsByUserIDAction(userID: string) {
+  const supabase = await createClient(cookies());
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !userData?.user?.id) {
+    console.error("Error fetching user:", userError);
+    throw new Error(userError?.message || "User not authenticated");
+  }
+
+  const { data, error } = await supabase
+    .from("programs")
+    .select("*, project_count:projects(count)")
+    .eq("admin_id", userID)
     .order("created_at", { ascending: true });
 
   if (error) {
@@ -578,6 +616,7 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
     .from("monitoring")
     .select(
       `*, 
+      project:projects(project_name, location, fca_ids),
       travel_order:travel_order(travel_order_no, purpose),
       reporter:user_profile!field_reports_reporter_id_fkey (fullname),
       remarkBy:user_profile!monitoring_reviewed_by_id_fkey (fullname)`
@@ -590,7 +629,34 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
     throw new Error(error.message);
   }
 
-  return data as MonitoringReportType[];
+  // Get the FCA details for each report's project
+  const projectFCAIds = Array.from(
+    new Set(
+      data
+        .map((report) => report.project?.fca_ids || [])
+        .flat()
+        .filter((id): id is string => !!id)
+    )
+  );
+  const { data: fcaData, error: fcaError } = await supabase
+    .from("farmers")
+    .select("id, description")
+    .in("id", projectFCAIds);
+
+  if (fcaError) {
+    console.error("Error fetching FCA details:", fcaError);
+    throw new Error(fcaError.message);
+  }
+
+  // Map FCA details back to each report
+  const reportsWithFCA = data.map((report) => {
+    const fcaDetails = report.project?.fca_ids
+      ? fcaData.filter((fca) => report.project?.fca_ids.includes(fca.id))
+      : [];
+    return { ...report, project: { ...report.project, fcaDetails } };
+  });
+
+  return reportsWithFCA as MonitoringReportType[];
 }
 
 export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
@@ -608,6 +674,7 @@ export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
     .from("monitoring")
     .select(
       `*, 
+      project:projects(project_name),
       travel_order:travel_order(travel_order_no, purpose),
       reporter:user_profile!field_reports_reporter_id_fkey (fullname),
       reviewedBy:user_profile!monitoring_reviewed_by_id_fkey (fullname)`
@@ -622,6 +689,40 @@ export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
   }
 
   return data as MonitoringReportType[];
+}
+
+export async function SelectAllMonitoringReportsByCurrentUserAction() {
+  const supabase = await createClient(cookies());
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !userData?.user) {
+    console.error("Error fetching user:", userError);
+    throw new Error(userError?.message || "User not authenticated");
+  }
+
+  const { data, error } = await supabase
+    .from("monitoring")
+    .select(
+      `*, 
+      project:projects(project_name),
+      travel_order:travel_order(travel_order_no, purpose),
+      reporter:user_profile!field_reports_reporter_id_fkey (fullname),
+      reviewedBy:user_profile!monitoring_reviewed_by_id_fkey (fullname)`
+    )
+    .eq("reporter_id", userData.user.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching monitoring reports:", error);
+    throw new Error(error.message);
+  }
+  const sortedData = data.sort((a, b) => {
+    const travelOrderNoA = a.travel_order?.travel_order_no || "Unknown";
+    const travelOrderNoB = b.travel_order?.travel_order_no || "Unknown";
+    return travelOrderNoA.localeCompare(travelOrderNoB);
+  });
+
+  return sortedData as MonitoringReportType[];
 }
 
 export async function InsertMonitoringReportAction({
@@ -665,8 +766,8 @@ export async function InsertMonitoringReportAction({
     travel_order_no,
     project_id,
     purpose,
-    findings,
-    issues_concern,
+    findings: findings?.filter((f) => f !== "") || [],
+    issues_concern: issues_concern?.filter((i) => i !== "") || [],
     reporter_id: user.id,
     observation,
     photo_url: photo_urls,
@@ -1370,6 +1471,25 @@ export async function SelectAllActivityLogsAction() {
     throw new Error(error.message);
   }
 
+  return data as ActivityLogType[];
+}
+
+export async function SelectAllActivityLogsByCurrentUserAction() {
+  const supabase = await createClient(cookies());
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData?.user) {
+    console.error("Error fetching user:", userError);
+    throw new Error(userError?.message || "User not authenticated");
+  }
+  const { data, error } = await supabase
+    .from("activity_logs")
+    .select("*")
+    .eq("user_id", userData.user.id)
+    .order("created_at", { ascending: false });
+  if (error) {
+    console.error("Error fetching activity logs:", error);
+    throw new Error(error.message);
+  }
   return data as ActivityLogType[];
 }
 

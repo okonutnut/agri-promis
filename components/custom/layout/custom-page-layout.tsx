@@ -116,7 +116,7 @@ export default function CustomPageLayout({
               <div className="flex-1 overflow-y-auto py-4">
                 <div className="flex justify-between items-start mb-4">
                   <h1 className="text-2xl font-medium">{pageTitle}</h1>
-                  {topRightComponent}
+                  {(!isLoading || error) && topRightComponent}
                 </div>
                 {isLoading || error ? (
                   <SkeletonLoading />

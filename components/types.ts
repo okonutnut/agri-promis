@@ -75,6 +75,7 @@ export type MonitoringReportType = {
   issues_concern?: string[];
   remarks?: string;
   photo_url?: string[];
+  project?: ProjectType & { fcaDetails?: FCAType[] };
   images?: ImageData[];
   reporter?: UserProfileType;
   travel_order?: TravelOrderType;

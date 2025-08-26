@@ -43,6 +43,10 @@ import {
   SelectAllFCAAction,
   EditFCAAction,
   SelectAllFCAByStatusAction,
+  SelectAllProgramsByUserIDAction,
+  SelectAllAssignedProjectsByFCAIDAction,
+  SelectAllActivityLogsByCurrentUserAction,
+  SelectAllMonitoringReportsByCurrentUserAction,
 } from "@/components/actions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -139,6 +143,15 @@ export function useEditFCAHook() {
   });
 }
 
+export function useSelectAllAssignedProjectsByFCAIDHook(fcaID: string) {
+  return useQuery({
+    queryKey: ["assignedProjectsByFCA", fcaID],
+    queryFn: async () => await SelectAllAssignedProjectsByFCAIDAction(fcaID),
+    refetchInterval: 3000,
+    networkMode: "online",
+  });
+}
+
 // PROGRAM HOOKS
 export function useSelectProgramByIDHook(programId: string) {
   return useQuery({
@@ -154,6 +167,15 @@ export function useSelectAllProgramsByAgriculturistHook() {
   return useQuery({
     queryKey: ["allProgramsByAgriculturist"],
     queryFn: async () => await SelectAllProgramsByAgriculturistAction(),
+    refetchInterval: 3000,
+    networkMode: "online",
+  });
+}
+
+export function useSelectAllProgramsByUserIDHook(userID: string) {
+  return useQuery({
+    queryKey: ["allProgramsByUserId", userID],
+    queryFn: async () => await SelectAllProgramsByUserIDAction(userID),
     refetchInterval: 3000,
     networkMode: "online",
   });
@@ -417,6 +439,15 @@ export function useSelectAllMonitoringReportsByProjectIDAndUserHook(
   });
 }
 
+export function useSelectAllMonitoringReportsByCurrentUserHook() {
+  return useQuery({
+    queryKey: ["allMonitoringReportsByUser"],
+    queryFn: async () => await SelectAllMonitoringReportsByCurrentUserAction(),
+    refetchInterval: 3000,
+    networkMode: "online",
+  });
+}
+
 // MEMBER HOOKS
 export function useInsertMemberHook() {
   const qc = useQueryClient();
@@ -603,6 +634,15 @@ export function useSelectAllActivityLogsHook() {
   return useQuery({
     queryKey: ["activity-logs"],
     queryFn: async () => await SelectAllActivityLogsAction(),
+    refetchInterval: 3000,
+    networkMode: "online",
+  });
+}
+
+export function useSelectAllActivityLogsByCurrentUserHook() {
+  return useQuery({
+    queryKey: ["activity-logs"],
+    queryFn: async () => await SelectAllActivityLogsByCurrentUserAction(),
     refetchInterval: 3000,
     networkMode: "online",
   });

@@ -27,7 +27,7 @@ export default function ViewFieldTechnicianPanel({
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   return (
     <>
-      <section className="p-2 space-y-4 overflow-y-auto h-[calc(100vh)]">
+      <section className="space-y-4 overflow-y-auto h-[calc(100vh)]">
         <FTGPSCard user_id={selectedRow?.user_id as string} />
         <FTTravelOrders user_id={selectedRow?.user_id as string} />
       </section>

@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -14,6 +15,12 @@ import {
 } from "@/components/hooks";
 import { UserProfileType } from "@/components/types";
 import { SheetClose, SheetFooter } from "@/components/ui/sheet";
+import { Label } from "@/components/ui/label";
+import SkeletonLoading from "@/components/custom/layout/skeleton-loading";
+const TeamMemberPanel = dynamic(
+  () => import("./team-member-panel").then((mod) => mod.default),
+  { ssr: false, loading: () => <SkeletonLoading /> }
+);
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -87,8 +94,9 @@ export function TeamMemberForm({
   };
   return (
     <>
+      <Label className="ms-3">Account Info</Label>
       <form
-        className="p-3 space-y-4"
+        className="p-3 space-y-4 border-b"
         id="team-member-form"
         onSubmit={form.handleSubmit(onSubmit)}
       >
@@ -105,6 +113,7 @@ export function TeamMemberForm({
           form={form}
         />
       </form>
+      <TeamMemberPanel userId={data?.id as string} />
       <SheetFooter className="border-t p-2 flex-row justify-end gap-2">
         <SheetClose asChild>
           <Button variant={"outline"} size={"sm"} disabled={isPending}>

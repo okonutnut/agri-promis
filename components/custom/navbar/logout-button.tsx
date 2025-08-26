@@ -6,14 +6,18 @@ import { toast } from "sonner";
 import { DropdownMenuItem } from "../../ui/dropdown-menu";
 import { useQueryClient } from "@tanstack/react-query";
 import { DoorOpen } from "lucide-react";
+import { useState } from "react";
+import LoadingPage from "../layout/loading-page";
 
 export default function SidebarLogoutButton() {
+  const [isLoading, setIsLoading] = useState(false);
   const supabase = createClient();
   const router = useRouter();
   const qc = useQueryClient();
 
   const handleLogout = async () => {
     try {
+      setIsLoading(true);
       // Sign out the user
       const { error } = await supabase.auth.signOut();
       if (error) throw new Error("Error logging out");
@@ -25,8 +29,14 @@ export default function SidebarLogoutButton() {
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "An error occurred");
       console.error(error);
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  if (isLoading) {
+    <LoadingPage />;
+  }
 
   return (
     <DropdownMenuItem onClick={handleLogout} className="text-xs">

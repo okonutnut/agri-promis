@@ -41,7 +41,7 @@ export default function SummaryCard({
           <CardDescription className="text-foreground-500 font-medium">
             {description}
           </CardDescription>
-          <div className="mt-auto">{children}</div>
+          <div className="mt-auto flex justify-start">{children}</div>
         </CardContent>
       )}
     </Card>

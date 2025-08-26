@@ -2,16 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import NonFormInput from "@/components/custom/input/non-form-input";
-import {
-  SheetClose,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { SheetClose, SheetFooter } from "@/components/ui/sheet";
 import { useInsertRemarksInMonitoringReportHook } from "@/components/hooks";
 import { MonitoringReportType } from "@/components/types";
 import { Loader2 } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import NonFormMultiInput from "@/components/custom/input/non-form-multi-input";
 import ImageCarousel from "@/components/custom/images/image-carousel";
 import { useForm } from "react-hook-form";
@@ -42,26 +37,19 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
   });
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
-  const { mutate, isPending, isSuccess } =
-    useInsertRemarksInMonitoringReportHook(data?.id as string);
-  const onSubmit = () => mutate(form.getValues("remarks"));
-
-  useEffect(() => {
-    if (isSuccess) {
-      closeButtonRef.current?.click();
-    }
-  }, [isSuccess, closeButtonRef]);
+  const { mutate, isPending } = useInsertRemarksInMonitoringReportHook(
+    data?.id as string
+  );
+  const onSubmit = () =>
+    mutate(form.getValues("remarks"), {
+      onSuccess: () => {
+        form.reset();
+        closeButtonRef.current?.click();
+      },
+    });
 
   return (
     <>
-      <SheetHeader className="border-b flex-row justify-between items-center p-2">
-        <SheetTitle className="uppercase text-primary">
-          View Monitoring Report
-        </SheetTitle>
-        <PrintDownloadDropdown
-          data={<MonitoringReportDocument data={data} />}
-        />
-      </SheetHeader>
       <section className="space-y-4 h-[calc(100vh)] overflow-y-auto overflow-x-hidden">
         <ImageCarousel images={data?.photo_url || []} />
         <div className="p-2 space-y-4 border-t">
@@ -100,6 +88,11 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
             Close
           </Button>
         </SheetClose>
+        {data && data.remarks && (
+          <PrintDownloadDropdown
+            data={<MonitoringReportDocument data={data} />}
+          />
+        )}
         {(!data?.reviewed_by_id || !data.remarks) && (
           <Button
             onClick={() => onSubmit()}
@@ -107,7 +100,7 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
             size={"sm"}
             disabled={isPending}
           >
-            {isPending ? <Loader2 className="animate-spin" /> : "Review Report"}
+            {isPending ? <Loader2 className="animate-spin" /> : "Review"}
           </Button>
         )}
       </SheetFooter>

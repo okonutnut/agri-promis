@@ -16,7 +16,7 @@ export default function UserDashboardItems({
   isLoading,
 }: UserDashboardItemsProps) {
   return (
-    <section className="flex flex-wrap md:flex-nowrap gap-2 justify-between">
+    <section className="flex flex-wrap md:flex-nowrap gap-2 justify-between mb-4">
       <SummaryCard
         title="Submitted"
         description="Total Monitoring Reports Submitted"

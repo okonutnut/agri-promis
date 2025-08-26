@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { PDFDownloadLink, pdf } from "@react-pdf/renderer";
-import { Download, Printer } from "lucide-react";
+import { ChevronDown, Download, Printer } from "lucide-react";
 
 type PrintDownloadDropdownProps = {
   data: React.ReactElement<import("@react-pdf/renderer").DocumentProps>;
@@ -31,14 +31,14 @@ export default function PrintDownloadDropdown({
           size={"sm"}
           className="flex items-center gap-2"
         >
-          Export
+          Export <ChevronDown />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="m-1 min-w-[150px]">
         <DropdownMenuItem>
           <PDFDownloadLink
             document={data}
-            fileName={`monitoring-report-${Date.now()}.pdf`}
+            fileName={`da-nves-report-${Date.now()}.pdf`}
             className="flex items-center gap-2"
           >
             <Download />

@@ -43,12 +43,12 @@ const styles = StyleSheet.create({
   },
   headerImage: {
     position: "absolute",
-    top: 0,
-    left: 0,
+    top: 1,
+    left: 1,
+    right: 1,
     width: "100%",
     height: 90,
     objectFit: "cover",
-    zIndex: -1,
   },
   headerNumber: {
     position: "absolute",
@@ -59,8 +59,9 @@ const styles = StyleSheet.create({
   },
   footerImage: {
     position: "absolute",
-    bottom: 0,
-    left: 0,
+    bottom: 1,
+    left: 1,
+    right: 1,
     width: "100%",
     height: 50,
     objectFit: "cover",
@@ -153,14 +154,23 @@ export default function MonitoringReportDocument({
             <Text style={styles.label}></Text>
             <Text>Helen S. Apolonio (Agricultural Extension Worker)</Text>
           </View>
-          <View style={styles.rowIndent}>
+          <View
+            style={[
+              styles.rowIndent,
+              data?.project?.fcaDetails?.length === 1
+                ? { marginBottom: 8 }
+                : {},
+            ]}
+          >
             <Text style={styles.label}>FCA:</Text>
-            <Text>PNB Corn Cluster Farmers Association</Text>
+            <Text>{data?.project?.fcaDetails?.[0]?.description ?? ""}</Text>
           </View>
-          <View style={styles.row}>
-            <Text style={styles.label}></Text>
-            <Text>Sta. Lucia Corn Cluster Farmers Association</Text>
-          </View>
+          {data?.project?.fcaDetails?.slice(1).map((fca, index) => (
+            <View style={styles.row} key={index}>
+              <Text style={styles.label}></Text>
+              <Text>{fca.description}</Text>
+            </View>
+          ))}
           <View style={styles.row}>
             <Text style={styles.label}>Purpose:</Text>
             <Text>{data?.purpose ?? ""}</Text>
@@ -190,7 +200,7 @@ export default function MonitoringReportDocument({
 
         {/* OBSERVATION */}
         {data?.observation && (
-          <View style={styles.section}>
+          <View style={styles.section} break>
             <Text style={styles.subheading}>Observation:</Text>
             <Text>{data?.observation ?? ""}</Text>
           </View>
@@ -207,8 +217,14 @@ export default function MonitoringReportDocument({
               ))}
         </View>
 
-        {/* PHOTO DOCS */}
+        {/* REMARKS */}
         <View style={styles.section}>
+          <Text style={styles.subheading}>Remarks:</Text>
+          {data?.remarks && <Text>{data.remarks}</Text>}
+        </View>
+
+        {/* PHOTO DOCS */}
+        <View style={styles.section} break>
           <Text style={styles.heading}>PHOTO DOCUMENTATION</Text>
           <View style={styles.imageGrid}>
             {data?.photo_url?.map((url, index) => (
@@ -219,7 +235,7 @@ export default function MonitoringReportDocument({
           </View>
         </View>
 
-        <View style={styles.section}>
+        <View style={styles.section} break>
           <View
             style={{ borderBottom: "3px solid black", marginVertical: 10 }}
           ></View>
