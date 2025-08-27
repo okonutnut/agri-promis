@@ -11,6 +11,7 @@ import { useParams, useRouter } from "next/navigation";
 import { CardFooter } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import FormTextarea from "../input/form-textarea";
+import { useState } from "react";
 const LocationSelector = dynamic(
   () => import("@/components/custom/dropdown/location-selector"),
   {
@@ -32,7 +33,7 @@ const formSchema = z
       }),
     description: z.string().optional(),
     location: z.string().min(1, "Location is required"),
-    fca: z.array(z.string()).min(1, "At least one FCA is required"),
+    fca_ids: z.array(z.string()).min(1, "At least one FCA is required"),
     start_date: z.string().refine(
       (val) => {
         const date = new Date(val);
@@ -60,13 +61,16 @@ type FormData = z.infer<typeof formSchema>;
 export default function CreateProjectForm() {
   const { programUID } = useParams();
   const router = useRouter();
+
+  const [disabled, setIsDisabled] = useState(false);
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       project_name: "",
       description: "",
       location: "",
-      fca: [],
+      fca_ids: [],
       start_date: new Date().toISOString().slice(0, 10),
       end_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1))
         .toISOString()
@@ -76,12 +80,19 @@ export default function CreateProjectForm() {
 
   const { mutate, isPending } = useInsertProjectHook();
   const handleSubmit = (data: FormData) =>
-    mutate({
-      ...data,
-      program_id: programUID as string,
-      description: data.description ?? "",
-      fca: data.fca.map((fca) => ({ id: fca })),
-    });
+    mutate(
+      {
+        ...data,
+        program_id: programUID as string,
+        description: data.description ?? "",
+        fca_ids: data.fca_ids,
+      },
+      {
+        onSuccess: () => {
+          setIsDisabled(true);
+        },
+      }
+    );
 
   return (
     <>
@@ -97,7 +108,7 @@ export default function CreateProjectForm() {
           form={form}
           rows={3}
         />
-        <FCASelector onChange={(fca) => form.setValue("fca", fca)} />
+        <FCASelector onChange={(fca) => form.setValue("fca_ids", fca)} />
         <LocationSelector
           onChange={(location) => form.setValue("location", location)}
         />
@@ -122,14 +133,14 @@ export default function CreateProjectForm() {
           form="create-project-form"
           className="w-full"
           variant={isPending ? "ghost" : "default"}
-          disabled={isPending}
+          disabled={isPending || disabled}
         >
           {isPending ? <Loader2 className="animate-spin" /> : "Create Project"}
         </Button>
         <Button
           variant={"outline"}
           className="w-full"
-          disabled={isPending}
+          disabled={isPending || disabled}
           onClick={() => router.push(`/dashboard/programs/${programUID}`)}
         >
           Cancel

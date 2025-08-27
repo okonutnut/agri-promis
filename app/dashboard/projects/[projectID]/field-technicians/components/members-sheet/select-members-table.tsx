@@ -44,9 +44,15 @@ export default function SelectMemberTable({
   const { mutate, isPending } = useInsertFieldTechniciansToProjectHook(
     projectID as string
   );
+  const onSubmit = () => {
+    mutate(selectedRows, {
+      onSuccess: () => {
+        setPanelOpen(false);
+      },
+    });
+  };
   const handleRowSelectionChange = useCallback(
     (selectedRows: typeof tableData) => {
-      console.log("Selected Rows:", selectedRows);
       setSelectedRows(selectedRows.map((row) => row.id as string));
     },
     [setSelectedRows]
@@ -61,13 +67,7 @@ export default function SelectMemberTable({
             columns={columns}
             data={tableData}
             isPending={isPending}
-            onAdd={() =>
-              mutate(selectedRows, {
-                onSuccess: () => {
-                  setPanelOpen(false);
-                },
-              })
-            }
+            onAdd={onSubmit}
             onRowSelectionChange={handleRowSelectionChange}
           />
         </>

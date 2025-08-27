@@ -160,7 +160,7 @@ export default function ImageCaptureForm({
             <div className="space-y-2">
               <div className="flex gap-4 justify-start overflow-x-auto pb-4">
                 {/* Camera Trigger Card */}
-                <div className="min-w-[128px] max-w-[200px] h-40">
+                <div className="min-w-[128px] max-w-[200px] h-50">
                   <Card className="h-full w-full flex flex-col items-center justify-center border-2 border-dashed shadow-none transition-colors cursor-pointer relative overflow-hidden">
                     <Input
                       type="file"
@@ -181,7 +181,7 @@ export default function ImageCaptureForm({
                 </div>
 
                 {/* File Upload Card */}
-                <div className="min-w-[128px] max-w-[200px] h-40">
+                <div className="min-w-[128px] max-w-[200px] h-50">
                   <Card className="h-full w-full flex flex-col items-center justify-center border-2 border-dashed shadow-none transition-colors cursor-pointer relative overflow-hidden">
                     <Input
                       type="file"
@@ -227,7 +227,7 @@ export default function ImageCaptureForm({
                     className="relative min-w-[128px] max-w-[200px] group"
                   >
                     <div
-                      className="relative cursor-pointer h-40"
+                      className="relative cursor-pointer h-50"
                       onClick={() => openFullScreen(image)}
                     >
                       <Image

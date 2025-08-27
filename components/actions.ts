@@ -17,6 +17,18 @@ import type { PushSubscription as WebPushSubscription } from "web-push";
 import { cookies } from "next/headers";
 import { getLongtitudeLatitudeFromGPS } from "@/lib/utils";
 
+// SUPABASE UTILS
+export async function getSignedUrl(path: string) {
+  const supabase = createClient(cookies());
+
+  const { data, error } = await (await supabase).storage
+    .from("monitoring-reports")
+    .createSignedUrl(path, 60 * 60); // 1h expiration
+
+  if (error) throw error;
+  return data.signedUrl;
+}
+
 // USER PROFILE ACTIONS
 export async function SelectAllUserProfilesAction() {
   const supabase = await createClient(cookies());
@@ -315,12 +327,18 @@ export async function DeleteProgramAction(programID: string) {
 export async function InsertProjectAction(values: ProjectType) {
   const supabase = await createClient(cookies());
   const userId = (await supabase.auth.getUser()).data.user?.id;
+
+  // Auth check
+  if (!userId) {
+    throw new Error("User not authenticated");
+  }
+
   const { data, error } = await supabase
     .from("projects")
     .insert({
-      ...values,
-      status: 1,
       created_by: userId,
+      status: 1,
+      ...values,
     })
     .select()
     .single();
@@ -361,13 +379,10 @@ export async function SelectAllProjectsByUserIDAction(userID: string) {
   // Fetch assigned projects for the user
   const { data: assignedProjects, error: assignedError } = await supabase
     .from("assigned_projects")
-    .select("project_ids")
-    .eq("user_id", userID)
-    .single();
+    .select("project_id")
+    .eq("user_id", userID);
+
   if (assignedError) {
-    if (assignedError.code === "PGRST116") {
-      return [];
-    }
     console.error("Error fetching assigned projects:", assignedError);
     throw new Error(assignedError.message);
   }
@@ -376,7 +391,10 @@ export async function SelectAllProjectsByUserIDAction(userID: string) {
   const { data, error } = await supabase
     .from("projects")
     .select("*")
-    .in("id", assignedProjects.project_ids)
+    .in(
+      "id",
+      assignedProjects.map((project) => project.project_id)
+    )
     .order("created_at", { ascending: true });
 
   if (error) {
@@ -486,10 +504,13 @@ export async function DeleteProjectAction(projectID: string) {
     .select("project_name")
     .eq("id", projectID)
     .single();
+
   if (projectError) {
     console.error("Error fetching project details:", projectError);
     throw new Error("Failed to fetch project details. Please try again.");
   }
+
+  const projectName = projectData?.project_name;
 
   // Delete the project
   const { error } = await supabase
@@ -505,7 +526,7 @@ export async function DeleteProjectAction(projectID: string) {
   // Log the activity
   await InsertActivityLogAction(
     "Deleted a Project",
-    `Project ${projectData.project_name} has been deleted.`
+    `Project ${projectName} has been deleted.`
   );
 
   return;
@@ -612,14 +633,16 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
   projectID: string
 ) {
   const supabase = await createClient(cookies());
+
+  // Step 1: Fetch monitoring reports with joins
   const { data, error } = await supabase
     .from("monitoring")
     .select(
       `*, 
       project:projects(project_name, location, fca_ids),
       travel_order:travel_order(travel_order_no, purpose),
-      reporter:user_profile!field_reports_reporter_id_fkey (fullname),
-      remarkBy:user_profile!monitoring_reviewed_by_id_fkey (fullname)`
+      reporter:user_profile!monitoring_reporter_id_fkey(fullname),
+      remarkBy:user_profile!monitoring_reviewed_by_id_fkey(fullname)`
     )
     .eq("project_id", projectID)
     .order("created_at", { ascending: false });
@@ -629,7 +652,7 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
     throw new Error(error.message);
   }
 
-  // Get the FCA details for each report's project
+  // Step 2: Collect all FCA IDs from projects
   const projectFCAIds = Array.from(
     new Set(
       data
@@ -638,6 +661,7 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
         .filter((id): id is string => !!id)
     )
   );
+
   const { data: fcaData, error: fcaError } = await supabase
     .from("farmers")
     .select("id, description")
@@ -648,13 +672,33 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
     throw new Error(fcaError.message);
   }
 
-  // Map FCA details back to each report
-  const reportsWithFCA = data.map((report) => {
-    const fcaDetails = report.project?.fca_ids
-      ? fcaData.filter((fca) => report.project?.fca_ids.includes(fca.id))
-      : [];
-    return { ...report, project: { ...report.project, fcaDetails } };
-  });
+  // Step 3: Map FCA + convert photo paths -> signed URLs
+  const reportsWithFCA = await Promise.all(
+    data.map(async (report) => {
+      // Convert photo paths to signed URLs
+      const signedPhotoUrls = report.photo_url
+        ? await Promise.all(
+            report.photo_url.map(async (path: string) => {
+              const { data: signed } = await supabase.storage
+                .from("monitoring-reports")
+                .createSignedUrl(path, 60 * 60); // 1h expiry
+              return signed?.signedUrl ?? null;
+            })
+          )
+        : [];
+
+      // Attach FCA details
+      const fcaDetails = report.project?.fca_ids
+        ? fcaData.filter((fca) => report.project?.fca_ids.includes(fca.id))
+        : [];
+
+      return {
+        ...report,
+        photo_url: signedPhotoUrls.filter((url) => url !== null), // only valid URLs
+        project: { ...report.project, fcaDetails },
+      };
+    })
+  );
 
   return reportsWithFCA as MonitoringReportType[];
 }
@@ -663,21 +707,23 @@ export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
   projectID: string
 ) {
   const supabase = await createClient(cookies());
-  const { data: userData, error: userError } = await supabase.auth.getUser();
 
+  // Get logged-in user
+  const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError || !userData?.user) {
     console.error("Error fetching user:", userError);
     throw new Error(userError?.message || "User not authenticated");
   }
 
+  // Fetch reports by this user for the project
   const { data, error } = await supabase
     .from("monitoring")
     .select(
       `*, 
-      project:projects(project_name),
+      project:projects(project_name, fca_ids),
       travel_order:travel_order(travel_order_no, purpose),
-      reporter:user_profile!field_reports_reporter_id_fkey (fullname),
-      reviewedBy:user_profile!monitoring_reviewed_by_id_fkey (fullname)`
+      reporter:user_profile!monitoring_reporter_id_fkey(fullname),
+      reviewedBy:user_profile!monitoring_reviewed_by_id_fkey(fullname)`
     )
     .eq("reporter_id", userData.user.id)
     .eq("project_id", projectID)
@@ -688,7 +734,55 @@ export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
     throw new Error(error.message);
   }
 
-  return data as MonitoringReportType[];
+  // Collect unique FCA IDs from all reports
+  const projectFCAIds = Array.from(
+    new Set(
+      data
+        .map((report) => report.project?.fca_ids || [])
+        .flat()
+        .filter((id): id is string => !!id)
+    )
+  );
+
+  const { data: fcaData, error: fcaError } = await supabase
+    .from("farmers")
+    .select("id, description")
+    .in("id", projectFCAIds);
+
+  if (fcaError) {
+    console.error("Error fetching FCA details:", fcaError);
+    throw new Error(fcaError.message);
+  }
+
+  // Map FCA details + signed URLs
+  const reportsWithExtras = await Promise.all(
+    data.map(async (report) => {
+      // Resolve signed image URLs
+      const signedPhotoUrls = report.photo_url
+        ? await Promise.all(
+            report.photo_url.map(async (path: string) => {
+              const { data: signed } = await supabase.storage
+                .from("monitoring-reports")
+                .createSignedUrl(path, 60 * 60); // valid 1 hour
+              return signed?.signedUrl ?? null;
+            })
+          )
+        : [];
+
+      // Attach FCA details
+      const fcaDetails = report.project?.fca_ids
+        ? fcaData.filter((fca) => report.project?.fca_ids.includes(fca.id))
+        : [];
+
+      return {
+        ...report,
+        photo_url: signedPhotoUrls.filter((url) => url !== null),
+        project: { ...report.project, fcaDetails },
+      };
+    })
+  );
+
+  return reportsWithExtras as MonitoringReportType[];
 }
 
 export async function SelectAllMonitoringReportsByCurrentUserAction() {
@@ -700,14 +794,15 @@ export async function SelectAllMonitoringReportsByCurrentUserAction() {
     throw new Error(userError?.message || "User not authenticated");
   }
 
+  // Fetch reports for this user
   const { data, error } = await supabase
     .from("monitoring")
     .select(
       `*, 
-      project:projects(project_name),
+      project:projects(project_name, fca_ids),
       travel_order:travel_order(travel_order_no, purpose),
-      reporter:user_profile!field_reports_reporter_id_fkey (fullname),
-      reviewedBy:user_profile!monitoring_reviewed_by_id_fkey (fullname)`
+      reporter:user_profile!monitoring_reporter_id_fkey(fullname),
+      reviewedBy:user_profile!monitoring_reviewed_by_id_fkey(fullname)`
     )
     .eq("reporter_id", userData.user.id)
     .order("created_at", { ascending: false });
@@ -716,13 +811,61 @@ export async function SelectAllMonitoringReportsByCurrentUserAction() {
     console.error("Error fetching monitoring reports:", error);
     throw new Error(error.message);
   }
-  const sortedData = data.sort((a, b) => {
+
+  // Collect FCA IDs
+  const projectFCAIds = Array.from(
+    new Set(
+      data
+        .map((report) => report.project?.fca_ids || [])
+        .flat()
+        .filter((id): id is string => !!id)
+    )
+  );
+
+  const { data: fcaData, error: fcaError } = await supabase
+    .from("farmers")
+    .select("id, description")
+    .in("id", projectFCAIds);
+
+  if (fcaError) {
+    console.error("Error fetching FCA details:", fcaError);
+    throw new Error(fcaError.message);
+  }
+
+  // Resolve signed image URLs + map FCA details
+  const reportsWithExtras = await Promise.all(
+    data.map(async (report) => {
+      const signedPhotoUrls = report.photo_url
+        ? await Promise.all(
+            report.photo_url.map(async (path: string) => {
+              const { data: signed } = await supabase.storage
+                .from("monitoring-reports")
+                .createSignedUrl(path, 60 * 60);
+              return signed?.signedUrl ?? null;
+            })
+          )
+        : [];
+
+      const fcaDetails = report.project?.fca_ids
+        ? fcaData.filter((fca) => report.project?.fca_ids.includes(fca.id))
+        : [];
+
+      return {
+        ...report,
+        photo_url: signedPhotoUrls.filter((url) => url !== null),
+        project: { ...report.project, fcaDetails },
+      };
+    })
+  );
+
+  // Sort by travel_order_no (your custom sort)
+  const sortedReports = reportsWithExtras.sort((a, b) => {
     const travelOrderNoA = a.travel_order?.travel_order_no || "Unknown";
     const travelOrderNoB = b.travel_order?.travel_order_no || "Unknown";
     return travelOrderNoA.localeCompare(travelOrderNoB);
   });
 
-  return sortedData as MonitoringReportType[];
+  return sortedReports as MonitoringReportType[];
 }
 
 export async function InsertMonitoringReportAction({
@@ -738,30 +881,38 @@ export async function InsertMonitoringReportAction({
   if (!images?.length) throw new Error("No images provided");
 
   const supabase = await createClient(cookies());
+
+  // Auth check
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("User not authenticated");
 
+  // Upload images to Supabase Storage
   const imageFile = images.map((img) => {
     return img.file;
   });
 
-  const photo_urls = await Promise.all(
+  const photo_paths = await Promise.all(
     imageFile.map(async (file) => {
       if (!(file instanceof File)) throw new Error("Invalid file");
+
       const filePath = `images/${Date.now()}-${file.name}`;
-      const { data, error } = await supabase.storage
+
+      const { error } = await supabase.storage
         .from("monitoring-reports")
-        .upload(filePath, file, { cacheControl: "3600", upsert: false });
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: false,
+        });
+
       if (error) throw error;
-      const { data: publicURL } = supabase.storage
-        .from("monitoring-reports")
-        .getPublicUrl(data.path);
-      return publicURL.publicUrl;
+
+      return filePath;
     })
   );
 
+  // Upload Monitoring Report to Supabase Database
   const { error } = await supabase.from("monitoring").insert({
     travel_order_no,
     project_id,
@@ -770,12 +921,13 @@ export async function InsertMonitoringReportAction({
     issues_concern: issues_concern?.filter((i) => i !== "") || [],
     reporter_id: user.id,
     observation,
-    photo_url: photo_urls,
+    photo_url: photo_paths,
     remarks,
   });
 
   if (error) throw error;
 
+  // Get project name for logging
   const { data: projectData, error: projectError } = await supabase
     .from("projects")
     .select()
@@ -1015,41 +1167,26 @@ export async function InsertFieldTechniciansToProjectAction(
   const supabase = await createClient(cookies());
 
   for (const technician_id of data) {
-    // Try to fetch the assigned_projects row for the user
-    const { data: existingUser, error: selectError } = await supabase
+    // Check if the technician is already assigned to the project
+    const { data: existingAssignment, error: selectError } = await supabase
       .from("assigned_projects")
-      .select("project_ids")
+      .select("*")
       .eq("user_id", technician_id)
+      .eq("project_id", project_id)
       .maybeSingle();
 
     if (selectError) {
-      console.error("Error checking existing user:", selectError);
-      throw new Error("Failed to check existing user. Please try again.");
+      console.error("Error checking existing assignment:", selectError);
+      throw new Error("Failed to check existing assignment. Please try again.");
     }
 
-    if (existingUser) {
-      // Avoid duplicate project_id
-      const currentProjects: string[] = existingUser.project_ids || [];
-      if (!currentProjects.includes(project_id)) {
-        const updatedProjects = [...currentProjects, project_id];
-        const { error: updateError } = await supabase
-          .from("assigned_projects")
-          .update({ project_ids: updatedProjects })
-          .eq("user_id", technician_id);
-
-        if (updateError) {
-          console.error("Error updating assigned projects:", updateError);
-          throw new Error(
-            "Failed to add project to field technician. Please try again."
-          );
-        }
-      }
-    } else {
+    if (!existingAssignment) {
+      // Insert new assignment if it doesn't exist
       const { error: insertError } = await supabase
         .from("assigned_projects")
         .insert({
           user_id: technician_id,
-          project_ids: [project_id],
+          project_id: project_id,
         });
 
       if (insertError) {
@@ -1061,29 +1198,27 @@ export async function InsertFieldTechniciansToProjectAction(
           "Failed to add field technician to project. Please try again."
         );
       }
+
+      // Get project details for logging
+      const { data: projectData, error: projectError } = await supabase
+        .from("projects")
+        .select("project_name")
+        .eq("id", project_id)
+        .single();
+      if (projectError) {
+        console.error("Error fetching project details:", projectError);
+        throw new Error("Failed to fetch project details. Please try again.");
+      }
+
+      const userProfile = await SelectUserProfileByIDAction(technician_id);
+
+      // Log the activity
+      await InsertActivityLogAction(
+        "Added a Field Technician to Project",
+        `Field technician ${userProfile?.fullname} was added to project ${projectData.project_name}.`,
+        project_id
+      );
     }
-
-    // Get project details for logging
-    const { data: projectData, error: projectError } = await supabase
-      .from("projects")
-      .select("project_name")
-      .eq("id", project_id)
-      .single();
-    if (projectError) {
-      console.error("Error fetching project details:", projectError);
-      throw new Error("Failed to fetch project details. Please try again.");
-    }
-
-    const userProfile = await SelectUserProfileByIDAction(
-      technician_id as string
-    );
-
-    // Log the activity
-    await InsertActivityLogAction(
-      "Added a Field Technician to Project",
-      `Field technician ${userProfile?.fullname} was added to project ${projectData.project_name}.`,
-      project_id
-    );
   }
 
   return;
@@ -1095,48 +1230,18 @@ export async function DeleteFieldTechnicianFromProjectAction(
 ) {
   const supabase = await createClient(cookies());
 
-  // Fetch current project assignments
-  const { data: existingUser, error: selectError } = await supabase
+  // Delete the specific assignment
+  const { error: deleteError } = await supabase
     .from("assigned_projects")
-    .select("project_ids")
+    .delete()
     .eq("user_id", user_id)
-    .single();
+    .eq("project_id", project_id);
 
-  if (selectError) {
-    console.error("Error checking existing user:", selectError);
-    throw new Error("Failed to check existing user. Please try again.");
-  }
-
-  // Remove project_id from array
-  const updatedProjects = existingUser.project_ids.filter(
-    (id: string) => id !== project_id
-  );
-
-  // If no projects left, delete the record, otherwise update
-  if (updatedProjects.length === 0) {
-    const { error: deleteError } = await supabase
-      .from("assigned_projects")
-      .delete()
-      .eq("user_id", user_id);
-
-    if (deleteError) {
-      console.error("Error removing field technician:", deleteError);
-      throw new Error(
-        "Failed to remove field technician from project. Please try again."
-      );
-    }
-  } else {
-    const { error: updateError } = await supabase
-      .from("assigned_projects")
-      .update({ project_ids: updatedProjects })
-      .eq("user_id", user_id);
-
-    if (updateError) {
-      console.error("Error updating assigned projects:", updateError);
-      throw new Error(
-        "Failed to remove project from field technician. Please try again."
-      );
-    }
+  if (deleteError) {
+    console.error("Error removing field technician:", deleteError);
+    throw new Error(
+      "Failed to remove field technician from project. Please try again."
+    );
   }
 
   // Get project details for logging
@@ -1169,7 +1274,7 @@ export async function SelectAllFieldTechniciansByProjectIDAction(
   const { data, error } = await supabase
     .from("assigned_projects")
     .select("*, user_profile (fullname, position)")
-    .contains("project_ids", [projectID])
+    .eq("project_id", projectID)
     .order("created_at", { ascending: true });
 
   if (error) {
@@ -1182,36 +1287,24 @@ export async function SelectAllFieldTechniciansByProjectIDAction(
 
 export async function SelectAllAssignedProjectsByFieldTechnicianIDAction() {
   const supabase = await createClient(cookies());
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !userData?.user) {
+    console.error("Error fetching user:", userError);
+    throw new Error(userError?.message || "User not authenticated");
+  }
+
   const { data, error } = await supabase
     .from("assigned_projects")
-    .select("*")
-    .eq("user_id", (await supabase.auth.getUser()).data.user?.id)
-    .single();
+    .select("project:projects!project_id(*)")
+    .eq("user_id", userData.user.id);
 
   if (error) {
-    if (error.code === "PGRST116") {
-      return [];
-    }
     console.error("Error fetching assigned projects:", error);
     throw new Error(error.message);
   }
 
-  const projectIds: string[] = data?.project_ids || [];
-  if (projectIds.length === 0) {
-    return [];
-  }
-
-  const { data: projectsData, error: projectsError } = await supabase
-    .from("projects")
-    .select("*")
-    .in("id", projectIds);
-
-  if (projectsError) {
-    console.error("Error fetching projects:", projectsError);
-    throw new Error(projectsError.message);
-  }
-
-  return projectsData as ProjectType[];
+  return data.map((item) => item.project) as ProjectType[];
 }
 
 // PUSH SUBSCRIPTION ACTIONS
@@ -1496,24 +1589,25 @@ export async function SelectAllActivityLogsByCurrentUserAction() {
 // DASHBOARD ACTIONS
 export async function SelectDashboardItemsAction(projectID: string) {
   const supabase = await createClient(cookies());
-  // project progress percent - last
-  // total assigned ft
+  // 1. total assigned ft
   const { data: APData, error: APError } = await supabase
     .from("assigned_projects")
     .select("*")
-    .contains("project_ids", [projectID]);
+    .eq("project_id", projectID);
+
   if (APError) {
     console.error(APError.message);
     throw new Error("Failed fetching assigned_projects");
   }
-  // total monitoring reports
+
+  // 2. total monitoring reports
   const { data: MData, error: MError } = await supabase
     .from("monitoring")
     .select("*")
     .eq("project_id", projectID);
   if (MError) {
     console.error(MError.message);
-    throw new Error("Failed fetching assigned_projects");
+    throw new Error("Failed fetching monitoring reports");
   }
 
   return { ap: APData, m: MData };

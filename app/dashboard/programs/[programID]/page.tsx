@@ -88,7 +88,7 @@ export default function ProgramDashboardPage() {
           ))}
         </div>
       ) : (
-        <center>No projects found</center>
+        <span className="italic">No projects found</span>
       )}
     </CustomPageLayout>
   );

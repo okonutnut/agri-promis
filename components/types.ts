@@ -102,7 +102,7 @@ export type AssignedProjectsType = {
   id?: string;
   user_id?: string;
   fullname?: string;
-  project_ids?: string[];
+  project_id?: string;
   created_at?: string;
   user_profile?: UserProfileType;
 };

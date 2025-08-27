@@ -25,8 +25,6 @@ export default function TeamMemberPanel({ userId }: TeamMemberPanelProps) {
     refetch: refetchPrograms,
   } = useSelectAllProgramsByUserIDHook(userId);
 
-  console.log({ projects, programs });
-
   // Refetch when userId changes
   useEffect(() => {
     if (userId) {
@@ -42,6 +40,10 @@ export default function TeamMemberPanel({ userId }: TeamMemberPanelProps) {
       <Label className="ms-3">Assigned Programs/Projects</Label>
       {isLoading ? (
         <SkeletonLoading />
+      ) : programs?.length === 0 && projects?.length === 0 ? (
+        <span className="italic ms-3 text-xs">
+          No assigned programs or projects.
+        </span>
       ) : (
         <div className="space-y-2 max-h-64 overflow-y-auto">
           {programs?.map((program) => (
@@ -55,7 +57,7 @@ export default function TeamMemberPanel({ userId }: TeamMemberPanelProps) {
                   {program?.project_count?.length || 0} Projects
                 </small>
               </div>
-              <Badge>PROGRAM</Badge>
+              <Badge className="text-xs">PROGRAM</Badge>
             </Card>
           ))}
           {projects?.map((project) => (
@@ -69,7 +71,7 @@ export default function TeamMemberPanel({ userId }: TeamMemberPanelProps) {
                   {project.location}
                 </small>
               </div>
-              <Badge>PROJECT</Badge>
+              <Badge className="text-xs">PROJECT</Badge>
             </Card>
           ))}
         </div>

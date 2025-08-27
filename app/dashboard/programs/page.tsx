@@ -71,7 +71,7 @@ export default function ProgramsPage() {
               ))}
             </div>
           ) : (
-            <p className="text-center">No programs found</p>
+            <span className="italic">No programs found</span>
           )}
         </>
       )}

@@ -83,7 +83,7 @@ export default function MonitoringReportPage() {
 
   return (
     <CustomPageLayout
-      pageTitle="My Monitoring Reports"
+      pageTitle="Monitoring Reports"
       isLoading={isLoading}
       error={error}
       navItems={getUserProjectNavItems(projectID as string)}

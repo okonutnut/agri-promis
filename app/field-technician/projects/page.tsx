@@ -11,6 +11,7 @@ import CardLink from "@/components/custom/link/card-link";
 export default function FieldTechnicianPage() {
   const { data, isLoading, error } =
     useSelectAssignedProjectsByFieldTechnicianHook();
+  console.log("Assigned Projects Data:", data);
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredData = data?.filter((project) =>
@@ -25,7 +26,7 @@ export default function FieldTechnicianPage() {
       error={error}
       role="user"
     >
-      {data ? (
+      {data && data.length > 0 ? (
         <>
           <div className="relative w-full max-w-md mb-4">
             <Input
@@ -70,7 +71,7 @@ export default function FieldTechnicianPage() {
           )}
         </>
       ) : (
-        <span>
+        <span className="italic">
           No assigned projects found. <br /> Please contact your admin for
           assistance.
         </span>

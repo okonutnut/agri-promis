@@ -33,6 +33,9 @@ export const columns: ColumnDef<UserProfileType>[] = [
   },
   {
     accessorKey: "position",
-    header: "Position",
+    header: () => <div className="text-right">Position</div>,
+    cell: ({ getValue }) => (
+      <div className="text-right">{getValue() as string}</div>
+    ),
   },
 ];

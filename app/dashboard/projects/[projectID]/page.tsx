@@ -25,13 +25,13 @@ function ProjectDashboardInfo(data: ProjectType) {
       <div className="flex flex-col gap-1 text-2xl font-medium ">
         {data?.project_name}
         <span className="text-sm text-muted-foreground mt-4">
-          Start Date:{" "}
+          Start Date:&nbsp;
           {data?.start_date
             ? format(new Date(data.start_date), "PP")
             : "Not specified"}
         </span>
         <span className="text-sm text-muted-foreground">
-          Estimated End Date:{" "}
+          Estimated End Date:&nbsp;
           {data?.end_date
             ? format(new Date(data.end_date), "PP")
             : "Not specified"}

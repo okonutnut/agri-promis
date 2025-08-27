@@ -35,7 +35,7 @@ export default function ConfirmAlertDialog({
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
-      <AlertDialogContent className="p-3">
+      <AlertDialogContent className="p-3 space-y-1">
         <AlertDialogHeader>
           <section className="flex justify-between items-start gap-2">
             <AlertDialogTitle>{title}</AlertDialogTitle>
@@ -51,8 +51,10 @@ export default function ConfirmAlertDialog({
           )}
         </AlertDialogHeader>
         <Separator />
+        <center className="text-sm my-0">
+          Type <strong>{confirmText}</strong> to continue.
+        </center>
         <Input
-          placeholder={`Type '${confirmText}' to continue`}
           className="my-2"
           onChange={(e) => {
             if (e.target.value === confirmText) {

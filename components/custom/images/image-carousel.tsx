@@ -59,15 +59,15 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
           {images.map((image, index) => (
             <CarouselItem key={index}>
               <div
-                className="cursor-pointer hover:opacity-80 transition-opacity max-h-min"
+                className="cursor-pointer hover:opacity-80 transition-opacity max-h-50"
                 onClick={() => handleImageClick(image)}
               >
                 <Image
                   src={image}
                   alt={`Image ${index + 1}`}
-                  width={200}
-                  height={200}
-                  className="object-contain mx-auto"
+                  width={100}
+                  height={100}
+                  className="object-contain mx-auto rounded-sm"
                 />
               </div>
             </CarouselItem>

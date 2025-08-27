@@ -23,7 +23,7 @@ export default function UserDashboardItems({
         icon={CheckCircle}
         isLoading={isLoading}
       >
-        <strong className="text-3xl">{data?.m.length || 0}</strong>
+        <strong className="text-3xl">{data?.m?.length || 0}</strong>
       </SummaryCard>
       <SummaryCard
         title="Projects"
@@ -31,7 +31,7 @@ export default function UserDashboardItems({
         icon={FileStack}
         isLoading={isLoading}
       >
-        <strong className="text-3xl">{data?.ap.length || 0}</strong>
+        <strong className="text-3xl">{data?.ap?.length || 0}</strong>
       </SummaryCard>
       <SummaryCard
         title="Ongoing"
@@ -39,7 +39,7 @@ export default function UserDashboardItems({
         icon={Activity}
         isLoading={isLoading}
       >
-        <strong className="text-3xl">{data?.to.length || 0}</strong>
+        <strong className="text-3xl">{data?.to?.length || 0}</strong>
       </SummaryCard>
     </section>
   );

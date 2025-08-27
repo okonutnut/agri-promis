@@ -11,6 +11,11 @@ export const columns: ColumnDef<MonitoringReportType>[] = [
     cell: ({ row }) => row.index + 1,
   },
   {
+    accessorKey: "travel_order.travel_order_no",
+    header: "Travel Order No.",
+    meta: { className: "w-32" },
+  },
+  {
     accessorKey: "reporter.fullname",
     header: "Reporter Name",
   },

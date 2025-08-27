@@ -59,14 +59,14 @@ const NonFormInput = dynamic(
 const fieldReportSchema = z.object({
   travel_order_no: z.string().min(1, "Travel order number is required"),
   purpose: z.string().min(1, "Purpose is required"),
-  findings: z.array(z.string()).min(1, "At least one finding is required"),
+  findings: z.array(z.string()),
   observation: z
     .string()
     .optional()
     .refine((value) => !value || (value.length >= 5 && value.length <= 700), {
       message: "Observation must be between 5 and 700 characters if provided",
     }),
-  issues_concern: z.array(z.string()).min(1, "At least one issue is required"),
+  issues_concern: z.array(z.string()),
 });
 type FieldReportFormData = z.infer<typeof fieldReportSchema>;
 
@@ -120,8 +120,11 @@ export default function UploadFieldReportForm({
   const defaultValues = useMemo(
     () => ({
       purpose: values?.purpose || "",
-      findings: values?.findings || [],
-      issues_concern: values?.issues_concern || [],
+      // Add empty string at index 0 for input field, then add existing values
+      findings: values?.findings ? ["", ...values.findings] : [""],
+      issues_concern: values?.issues_concern
+        ? ["", ...values.issues_concern]
+        : [""],
       observation: values?.observation || "",
     }),
     [values]
@@ -137,11 +140,24 @@ export default function UploadFieldReportForm({
     async (data: FieldReportFormData) => {
       if (!validateImages(images)) return;
 
+      // Filter out empty strings from arrays and remove the first element (input field)
+      const cleanedData = {
+        ...data,
+        findings: (data.findings || [])
+          .slice(1) // Remove the input field value at index 0
+          .filter((item) => item && item.trim().length > 0),
+        issues_concern: (data.issues_concern || [])
+          .slice(1) // Remove the input field value at index 0
+          .filter((item) => item && item.trim().length > 0),
+      };
+
+      console.log("Cleaned data:", cleanedData); // Debug cleaned data
+
       await deleteDraft(values?.key as string);
 
       mutate(
         {
-          ...data,
+          ...cleanedData,
           project_id: projectID as string,
           images,
         },
@@ -154,7 +170,7 @@ export default function UploadFieldReportForm({
         }
       );
     },
-    [images, mutate, projectID, values?.key]
+    [images, mutate, projectID, values?.key, form, onOpenChange]
   );
 
   return (
@@ -169,7 +185,7 @@ export default function UploadFieldReportForm({
         <form
           className="space-y-3 p-2 border-t pt-4 overflow-x-hidden"
           id="upload-monitoring-report-form"
-          onSubmit={form.handleSubmit((data) => onSubmit(data))}
+          onSubmit={form.handleSubmit(onSubmit)}
         >
           {isAddMode || isDraft ? (
             <TravelOrderDropdown form={form} />
@@ -222,7 +238,7 @@ export default function UploadFieldReportForm({
             Close
           </Button>
         </SheetClose>
-        {!isAddMode && (
+        {!isAddMode && values?.remarks && (
           <PrintDownloadDropdown
             data={<MonitoringReportDocument data={values ?? null} />}
           />

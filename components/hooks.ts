@@ -196,7 +196,6 @@ export function useInsertProgramHook() {
     },
     onError: (error) => {
       toast.error(`Failed to create program: ${error.message}`);
-      router.push("/dashboard/programs/");
     },
   });
 }
@@ -299,8 +298,9 @@ export function useInsertProjectHook() {
       router.push(`/dashboard/projects/${data.id}`);
     },
     onError: (error) => {
-      toast.error(`${error.message}`);
-      router.push(`/dashboard/projects/`);
+      toast.error(`${error.message}`, {
+        duration: 2000,
+      });
     },
   });
 }

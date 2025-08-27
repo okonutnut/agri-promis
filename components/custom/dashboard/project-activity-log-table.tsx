@@ -23,11 +23,11 @@ export default function ProjectActivityLogTable(value: { project_id: string }) {
       {isLoading ? (
         <SkeletonLoading />
       ) : error ? (
-        <span>Error fetching activity logs</span>
+        <span className="italic">Error fetching activity logs</span>
       ) : data?.length === 0 ? (
-        <span>No logs yet</span>
+        <span className="italic">No logs yet</span>
       ) : (
-        <Card className="p-2 rounded-md shadow-xs max-h-[300px] overflow-y-auto">
+        <Card className="p-0 rounded-md shadow-xs max-h-[300px] overflow-y-auto">
           <Table>
             <TableHeader>
               <TableRow>
