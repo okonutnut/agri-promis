@@ -3,6 +3,8 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { MonitoringReportType } from "@/components/types";
+import { Button } from "@/components/ui/button";
+import { ArrowUpDown } from "lucide-react";
 
 export const columns: ColumnDef<MonitoringReportType>[] = [
   {
@@ -13,11 +15,22 @@ export const columns: ColumnDef<MonitoringReportType>[] = [
   {
     accessorKey: "travel_order.travel_order_no",
     header: "Travel Order No.",
-    meta: { className: "w-32" },
   },
   {
     accessorKey: "reporter.fullname",
-    header: "Reporter Name",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="h-8 p-0 hover:bg-transparent"
+        >
+          Reporter Name
+          <ArrowUpDown className="ml-1 h-3 w-3 text-muted-foreground" />
+        </Button>
+      );
+    },
+    enableSorting: true,
   },
   {
     accessorKey: "purpose",
@@ -30,7 +43,21 @@ export const columns: ColumnDef<MonitoringReportType>[] = [
   },
   {
     accessorKey: "created_at",
-    header: () => <div className="text-end">Date Submitted</div>,
+    header: ({ column }) => {
+      return (
+        <div className="flex items-center justify-end">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="h-8 p-0 hover:bg-transparent"
+          >
+            <div>Date Submitted</div>
+            <ArrowUpDown className="ml-1 h-3 w-3 text-muted-foreground" />
+          </Button>
+        </div>
+      );
+    },
+    enableSorting: true,
     cell: ({ getValue }) => (
       <div className="text-end">
         {format(

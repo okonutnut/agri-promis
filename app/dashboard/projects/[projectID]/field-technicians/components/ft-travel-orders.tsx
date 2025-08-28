@@ -29,12 +29,12 @@ export default function FTTravelOrders({ user_id }: FTTravelOrdersProps) {
           {values &&
             values.map((order) => (
               <Card
-                className="p-2 mx-3 rounded-md shadow-xs flex-row justify-between"
+                className="p-2 mx-2 rounded-md shadow-xs flex-row justify-between"
                 key={order.id}
               >
                 <div className="flex flex-1/2 flex-col gap-1">
-                  <strong className="text-xs">Purpose: {order.purpose}</strong>
                   <small>Travel Order No. {order.travel_order_no}</small>
+                  <strong className="text-xs">Purpose: {order.purpose}</strong>
                 </div>
                 <small>
                   Return Date:&nbsp;

@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
 import { UseFormReturn } from "react-hook-form";
-import { useSelectAllUserProfilesHook } from "@/components/hooks";
+import { useSelectAllUserProfilesHook } from "@/app/hooks/UserProfileHook";
 
 type UserComboBoxProps = {
   form: UseFormReturn<any>;

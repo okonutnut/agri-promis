@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { UseFormReturn } from "react-hook-form";
 import { ImageData } from "@/components/interfaces";
 import { useState, useMemo } from "react";
-import { useSelectCurrentUserSessionHook } from "@/components/hooks";
+import { useSelectCurrentUserSessionHook } from "@/app/hooks/UserProfileHook";
 import { MonitoringReportType } from "@/components/types";
 import { upsertDraft } from "@/hooks/use-draft";
 import { useParams } from "next/navigation";

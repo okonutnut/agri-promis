@@ -1,6 +1,6 @@
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { useSelectAllAssignedProjectsByFCAIDHook } from "@/components/hooks";
+import { useSelectAllAssignedProjectsByFCAIDHook } from "@/app/hooks/FCAHook";
 import { Badge } from "@/components/ui/badge";
 import SkeletonLoading from "@/components/custom/layout/skeleton-loading";
 import { useEffect } from "react";

@@ -4,7 +4,7 @@ import { DataTable } from "./table/data-table";
 import { columns } from "./table/columns";
 import { FCAForm } from "./components/fca-form";
 import { FCAType } from "@/components/types";
-import { useSelectAllFCAHook } from "@/components/hooks";
+import { useSelectAllFCAHook } from "@/app/hooks/FCAHook";
 import CustomPageLayout, {
   useSheet,
 } from "@/components/custom/layout/custom-page-layout";

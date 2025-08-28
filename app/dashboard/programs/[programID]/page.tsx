@@ -1,15 +1,21 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSelectAllProjectsByProgramIDHook } from "@/components/hooks";
 import { ProjectType } from "@/components/types";
-import { ChevronRight, Search } from "lucide-react";
+import { Check, ChevronRight, Funnel, Search } from "lucide-react";
 import { useParams } from "next/navigation";
 import { getProgramNavItems } from "@/components/sidebar/navitems";
 import Link from "next/link";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import { useQueryClient } from "@tanstack/react-query";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Badge = dynamic(
   () => import("@/components/ui/badge").then((mod) => mod.Badge),
@@ -28,12 +34,24 @@ const CardLink = dynamic(() => import("@/components/custom/link/card-link"));
 export default function ProgramDashboardPage() {
   const { programID } = useParams();
   const qc = useQueryClient();
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [projectStatus, setProjectStatus] = useState<number>(1);
+
   const { data, isLoading, error } = useSelectAllProjectsByProgramIDHook(
     programID as string
   );
-  const [searchQuery, setSearchQuery] = useState("");
-  const filteredProjects = data?.filter((project: ProjectType) =>
-    project.project_name?.toLowerCase().includes(searchQuery.toLowerCase())
+
+  const filteredProjects = useMemo(
+    () =>
+      data
+        ?.filter((project: ProjectType) =>
+          project.project_name
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase())
+        )
+        .filter((project: ProjectType) => project.status === projectStatus),
+    [data, searchQuery, projectStatus]
   );
 
   useEffect(() => {
@@ -46,7 +64,7 @@ export default function ProgramDashboardPage() {
       error={error}
       navItems={getProgramNavItems(programID as string)}
     >
-      <div className="flex flex-wrap items-start gap-4 mb-4">
+      <div className="flex items-start gap-2 mb-4">
         <Link href={`/dashboard/new/${programID}`}>
           <Button>New project</Button>
         </Link>
@@ -59,6 +77,25 @@ export default function ProgramDashboardPage() {
           />
           <Search className="absolute left-2 top-1/2 w-4 h-4 transform -translate-y-1/2 text-gray-500" />
         </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline">
+              <Funnel />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="mx-1">
+            <DropdownMenuItem onClick={() => setProjectStatus(1)}>
+              {projectStatus === 1 && <Check />}
+              <span className={`w-2 h-2 bg-primary rounded-full`} />
+              Active
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setProjectStatus(0)}>
+              {projectStatus === 0 && <Check />}
+              <span className={`w-2 h-2 bg-red-500 rounded-full`} />
+              Inactive
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       {filteredProjects && filteredProjects?.length > 0 ? (
         <div className="flex flex-wrap justify-start items-center gap-2">

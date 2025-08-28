@@ -200,7 +200,7 @@ export default function MonitoringReportDocument({
 
         {/* OBSERVATION */}
         {data?.observation && (
-          <View style={styles.section} break>
+          <View style={styles.section}>
             <Text style={styles.subheading}>Observation:</Text>
             <Text>{data?.observation ?? ""}</Text>
           </View>
@@ -224,7 +224,7 @@ export default function MonitoringReportDocument({
         </View>
 
         {/* PHOTO DOCS */}
-        <View style={styles.section} break>
+        <View style={[styles.section, { marginTop: 20 }]}>
           <Text style={styles.heading}>PHOTO DOCUMENTATION</Text>
           <View style={styles.imageGrid}>
             {data?.photo_url?.map((url, index) => (
@@ -235,7 +235,7 @@ export default function MonitoringReportDocument({
           </View>
         </View>
 
-        <View style={styles.section} break>
+        <View style={[styles.section, { marginTop: 20 }]}>
           <View
             style={{ borderBottom: "3px solid black", marginVertical: 10 }}
           ></View>

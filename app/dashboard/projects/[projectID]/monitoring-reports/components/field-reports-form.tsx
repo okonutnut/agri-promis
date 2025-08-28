@@ -8,19 +8,19 @@ import { MonitoringReportType } from "@/components/types";
 import { Loader2, Send } from "lucide-react";
 import { useRef } from "react";
 import NonFormMultiInput from "@/components/custom/input/non-form-multi-input";
-import ImageCarousel from "@/components/custom/images/image-carousel";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import FormTextarea from "@/components/custom/input/form-textarea";
 import NonFormTextarea from "@/components/custom/input/non-form-textarea";
 import dynamic from "next/dynamic";
-const PrintDownloadDropdown = dynamic(
-  () => import("@/components/custom/print/print-download-dropdown"),
+import MonitoringReportDocument from "@/components/custom/pdf/monitoring-reports-document";
+const ImageCarousel = dynamic(
+  () => import("@/components/custom/images/image-carousel"),
   { ssr: false }
 );
-const MonitoringReportDocument = dynamic(
-  () => import("@/components/custom/pdf/monitoring-reports-document"),
+const PrintDownloadDropdown = dynamic(
+  () => import("@/components/custom/print/print-download-dropdown"),
   { ssr: false }
 );
 

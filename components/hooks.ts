@@ -1,156 +1,72 @@
 "use client";
 
 import {
+  SelectDashboardItemsAction,
+  SelectUserDashboardItemsAction,
+  SelectAdminDashboardItemsAction,
+} from "@/app/actions/DashboardAction";
+import {
+  SelectActivityLogsByUserIDAction,
+  SelectAllActivityLogsAction,
+  SelectActivityLogsByProjectIDAction,
+  SelectAllActivityLogsByCurrentUserAction,
+} from "@/app/actions/ActivityLogAction";
+import {
+  SelectUserCurrentLocationAction,
+  UpdateUserCurrentLocationAction,
+} from "@/app/actions/UserSessionAction";
+import {
+  SelectAllFieldTechniciansByProjectIDAction,
+  SelectAllAssignedProjectsByFieldTechnicianIDAction,
+  DeleteFieldTechnicianFromProjectAction,
+  InsertFieldTechniciansToProjectAction,
+} from "@/app/actions/AssignedProjectAction";
+import {
+  InsertMemberAction,
+  SelectAllMembersAction,
+  SelectAllMembersByRoleAction,
+  UpdateMemberAction,
+  UpdateActiveStatusMemberAction,
+} from "@/app/actions/MemberAction";
+import {
+  SelectAllMonitoringReportsByProjectIDAction,
+  InsertMonitoringReportAction,
+  InsertRemarksInMonitoringReportAction,
+  SelectAllMonitoringReportsByProjectIDAndUserAction,
+  SelectAllMonitoringReportsByCurrentUserAction,
+} from "@/app/actions/MonitoringAction";
+import {
+  InsertTravelOrderAction,
+  SelectAllTravelOrdersByProgramIDAction,
+  SelectAllTravelOrdersByUserIDAction,
+} from "@/app/actions/TravelOrderAction";
+import {
+  InsertProjectAction,
+  SelectAllProjectsByProgramIDAction,
+  SelectProgramAndProjectDetailsByProjectIDAction,
+  EditProjectAction,
+  SelectProjectDetailsByProjectIDAction,
+  DeleteProjectAction,
+  SelectAllProjectsByUserIDAction,
+} from "@/app/actions/ProjectAction";
+import {
   InsertProgramAction,
   SelectProgramByIdAction,
   SelectAllProgramsByAgriculturistAction,
-  InsertProjectAction,
-  SelectAllProjectsByProgramIDAction,
   EditProgramNameAction,
-  SelectProgramAndProjectDetailsByProjectIDAction,
-  EditProjectAction,
-  InsertMemberAction,
-  SelectAllMembersAction,
-  SelectAllFieldTechniciansByProjectIDAction,
-  SelectAllMembersByRoleAction,
-  SelectAllAssignedProjectsByFieldTechnicianIDAction,
-  SelectProjectDetailsByProjectIDAction,
-  SelectUserProfileAction,
   DeleteProgramAction,
-  SelectAllMonitoringReportsByProjectIDAction,
-  InsertMonitoringReportAction,
-  DeleteProjectAction,
-  InsertRemarksInMonitoringReportAction,
-  SelectAllMonitoringReportsByProjectIDAndUserAction,
-  SelectUserCurrentLocationAction,
-  SelectAllUserProfilesAction,
-  InsertTravelOrderAction,
-  SelectAllTravelOrdersByProgramIDAction,
-  SelectActivityLogsByUserIDAction,
-  SelectAllActivityLogsAction,
-  SelectDashboardItemsAction,
-  UpdateMemberAction,
-  UpdateActiveStatusMemberAction,
-  DeleteFieldTechnicianFromProjectAction,
-  SelectAllTravelOrdersByUserIDAction,
-  SelectUserDashboardItemsAction,
-  SelectAllProjectsByUserIDAction,
-  SelectAdminDashboardItemsAction,
-  SelectActivityLogsByProjectIDAction,
-  UpdateUserCurrentLocationAction,
-  InsertFieldTechniciansToProjectAction,
-  InsertFCAAction,
-  SelectAllFCAAction,
-  EditFCAAction,
-  SelectAllFCAByStatusAction,
   SelectAllProgramsByUserIDAction,
-  SelectAllAssignedProjectsByFCAIDAction,
-  SelectAllActivityLogsByCurrentUserAction,
-  SelectAllMonitoringReportsByCurrentUserAction,
-} from "@/components/actions";
+} from "@/app/actions/ProgramAction";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
-  FCAType,
   MonitoringReportType,
   ProgramType,
   ProjectType,
   TravelOrderType,
   UserProfileType,
 } from "./types";
-import { createClient } from "@/utils/supabase/client";
-
-// USER PROFILE HOOKS
-export function useSelectAllUserProfilesHook() {
-  return useQuery({
-    queryKey: ["userProfiles"],
-    queryFn: async () => await SelectAllUserProfilesAction(),
-    refetchInterval: 3000,
-    networkMode: "online",
-  });
-}
-
-export function useSelectUserProfileHook() {
-  return useQuery({
-    queryKey: ["userProfile"],
-    queryFn: async () => await SelectUserProfileAction(),
-    refetchInterval: 3000,
-    networkMode: "online",
-  });
-}
-
-export function useSelectCurrentUserSessionHook() {
-  const supabase = createClient();
-  return useQuery({
-    queryKey: ["currentUserSession"],
-    queryFn: async () => {
-      const { session } = (await supabase.auth.getSession()).data;
-      return session;
-    },
-    networkMode: "online",
-  });
-}
-
-// FCA HOOKS
-export function useInsertFCAHook() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (data: FCAType) => await InsertFCAAction(data),
-    onSuccess: () => {
-      qc.invalidateQueries({
-        queryKey: ["farmers"],
-      });
-      toast("FCA created successfully!");
-    },
-    onError: (error) => {
-      toast.error(`Failed to create FCA: ${error.message}`);
-    },
-  });
-}
-
-export function useSelectAllFCAHook() {
-  return useQuery({
-    queryKey: ["farmers"],
-    queryFn: async () => await SelectAllFCAAction(),
-    refetchInterval: 3000,
-    networkMode: "online",
-  });
-}
-
-export function useSelectAllFCAByStatusHook(status: number) {
-  return useQuery({
-    queryKey: ["farmers"],
-    queryFn: async () => await SelectAllFCAByStatusAction(status),
-    refetchInterval: 3000,
-    networkMode: "online",
-  });
-}
-
-export function useEditFCAHook() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (data: FCAType) => await EditFCAAction(data),
-    onSuccess: () => {
-      qc.invalidateQueries({
-        queryKey: ["farmers"],
-      });
-      toast("FCA updated successfully!");
-    },
-    onError: (error) => {
-      toast.error(`Failed to update FCA: ${error.message}`);
-    },
-  });
-}
-
-export function useSelectAllAssignedProjectsByFCAIDHook(fcaID: string) {
-  return useQuery({
-    queryKey: ["assignedProjectsByFCA", fcaID],
-    queryFn: async () => await SelectAllAssignedProjectsByFCAIDAction(fcaID),
-    refetchInterval: 3000,
-    networkMode: "online",
-  });
-}
 
 // PROGRAM HOOKS
 export function useSelectProgramByIDHook(programId: string) {

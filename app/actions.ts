@@ -3,7 +3,7 @@
 import {
   DeleteSubscriptionAction,
   InsertSubscriptionAction,
-} from "@/components/actions";
+} from "@/app/actions/SubscriptionAction";
 import webpush from "web-push";
 
 webpush.setVapidDetails(

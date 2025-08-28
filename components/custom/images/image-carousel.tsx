@@ -8,7 +8,10 @@ import {
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { type CarouselApi } from "@/components/ui/carousel";
-import ImageModal from "@/components/ui/image-modal";
+import dynamic from "next/dynamic";
+const ImageModal = dynamic(() => import("@/components/ui/image-modal"), {
+  ssr: false,
+});
 
 type ImageCarouselProps = {
   images: string[]; // Array of image URLs

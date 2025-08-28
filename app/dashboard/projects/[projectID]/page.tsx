@@ -46,11 +46,11 @@ function ProjectDashboardInfo(data: ProjectType) {
         )}
       </div>
       <Badge variant="outline" className={`h-7 px-4 text-xs gap-2`}>
-        <div
+        <span
           className={`w-2 h-2 bg-${
             data.status == 1 ? "primary" : "red-500"
           } rounded-full`}
-        ></div>
+        ></span>
         Project Status
       </Badge>
     </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { subscribeUser, unsubscribeUser } from "@/app/actions";
-import { SelectIfSubscribedAction } from "@/components/actions";
+import { SelectIfSubscribedAction } from "@/app/actions/SubscriptionAction";
 import { Button } from "@/components/ui/button";
 import { urlBase64ToUint8Array } from "@/lib/utils";
 import { BellOff, BellRing, Loader2 } from "lucide-react";

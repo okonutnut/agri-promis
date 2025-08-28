@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useState, useRef } from "react";
 import { X, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import AnalyzeImageButton from "../custom/ai/analyze-image-button";
 
 interface ImageModalProps {
   isOpen: boolean;
@@ -204,7 +205,7 @@ export default function ImageModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center"
+      className="fixed inset-0 bg-foreground bg-opacity-95 z-50 flex items-center justify-center"
       onClick={handleClose}
     >
       <div
@@ -214,6 +215,7 @@ export default function ImageModal({
       >
         {/* Control buttons */}
         <div className="absolute top-4 right-4 z-20 flex gap-2">
+          <AnalyzeImageButton imageSrc={imageSrc} />
           <Button
             onClick={handleZoomIn}
             variant="ghost"

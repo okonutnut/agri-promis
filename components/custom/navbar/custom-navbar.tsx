@@ -223,7 +223,7 @@ export default function CustomNavbar({
   return (
     <>
       <MobileNavbar />
-      <nav className="w-screen flex items-center justify-between min-h-12 px-2 border-b z-50">
+      <nav className="w-screen flex items-center justify-between h-12 px-2 border-b z-50">
         <div className="flex items-center gap-4 overflow-x-auto overflow-y-hidden">
           <div className="flex items-center gap-2 min-w-max">
             <Link href="/" className="hidden sm:inline">

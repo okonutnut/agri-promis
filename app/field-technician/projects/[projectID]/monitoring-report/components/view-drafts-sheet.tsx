@@ -1,6 +1,6 @@
 "use client";
 
-import { useSelectCurrentUserSessionHook } from "@/components/hooks";
+import { useSelectCurrentUserSessionHook } from "@/app/hooks/UserProfileHook";
 import { MonitoringReportType } from "@/components/types";
 import { Button } from "@/components/ui/button";
 import { useSheet } from "@/components/custom/layout/custom-page-layout";

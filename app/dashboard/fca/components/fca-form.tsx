@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import FormInput from "@/components/custom/input/form-input";
 import FormSelect from "@/components/custom/select/form-select";
 import { Loader2, Send } from "lucide-react";
-import { useEditFCAHook, useInsertFCAHook } from "@/components/hooks";
+import { useEditFCAHook, useInsertFCAHook } from "@/app/hooks/FCAHook";
 import { FCAType } from "@/components/types";
 import { SheetClose, SheetFooter } from "@/components/ui/sheet";
 import { Label } from "@/components/ui/label";

@@ -12,7 +12,7 @@ import SidebarLogoutButton from "./logout-button";
 import {
   useSelectCurrentUserSessionHook,
   useSelectUserProfileHook,
-} from "@/components/hooks";
+} from "@/app/hooks/UserProfileHook";
 
 export default function NavbarUserImage() {
   const { data } = useSelectUserProfileHook();

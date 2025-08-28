@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import "leaflet/dist/leaflet.css";
 import { Loader2 } from "lucide-react";
-import { Card } from "@/components/ui/card";
 
 // Dynamically import the map components with SSR disabled
 const MapContainer = dynamic(
@@ -68,7 +67,7 @@ export default function FTGPSCard({ user_id }: FTGPSCardProps) {
   };
 
   return (
-    <section className="space-y-4 pb-4 border-b px-1">
+    <section className="space-y-2 border-b">
       <Label htmlFor="gps-card" className="mb-1">
         {data && (
           <span className="italic text-xs text-gray-500">
@@ -76,7 +75,7 @@ export default function FTGPSCard({ user_id }: FTGPSCardProps) {
           </span>
         )}
       </Label>
-      <Card className="w-full h-[20vh] relative rounded-md flex flex-col items-center justify-center shadow-xs p-0">
+      <div className="w-full h-[20vh] relative rounded-md flex flex-col items-center justify-center">
         {isLoading || isRefetching ? (
           <Loader2 className="animate-spin text-primary" />
         ) : error ? (
@@ -98,7 +97,7 @@ export default function FTGPSCard({ user_id }: FTGPSCardProps) {
             </Button>
           </>
         )}
-      </Card>
+      </div>
     </section>
   );
 }

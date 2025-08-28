@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { useSelectAllFCAByStatusHook } from "@/components/hooks";
+import { useSelectAllFCAByStatusHook } from "@/app/hooks/FCAHook";
 
 interface FCASelectorProps {
   onChange?: (fcas: string[]) => void;
