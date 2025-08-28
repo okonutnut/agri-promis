@@ -5,7 +5,7 @@ import NonFormInput from "@/components/custom/input/non-form-input";
 import { SheetClose, SheetFooter } from "@/components/ui/sheet";
 import { useInsertRemarksInMonitoringReportHook } from "@/components/hooks";
 import { MonitoringReportType } from "@/components/types";
-import { Loader2 } from "lucide-react";
+import { Loader2, Send } from "lucide-react";
 import { useRef } from "react";
 import NonFormMultiInput from "@/components/custom/input/non-form-multi-input";
 import ImageCarousel from "@/components/custom/images/image-carousel";
@@ -14,8 +14,15 @@ import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import FormTextarea from "@/components/custom/input/form-textarea";
 import NonFormTextarea from "@/components/custom/input/non-form-textarea";
-import PrintDownloadDropdown from "@/components/custom/print/print-download-dropdown";
-import MonitoringReportDocument from "@/components/custom/pdf/monitoring-reports-document";
+import dynamic from "next/dynamic";
+const PrintDownloadDropdown = dynamic(
+  () => import("@/components/custom/print/print-download-dropdown"),
+  { ssr: false }
+);
+const MonitoringReportDocument = dynamic(
+  () => import("@/components/custom/pdf/monitoring-reports-document"),
+  { ssr: false }
+);
 
 const formSchema = z.object({
   remarks: z
@@ -40,8 +47,9 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
   const { mutate, isPending } = useInsertRemarksInMonitoringReportHook(
     data?.id as string
   );
-  const onSubmit = () =>
-    mutate(form.getValues("remarks"), {
+
+  const onSubmit = (formData: formDataType) =>
+    mutate(formData.remarks, {
       onSuccess: () => {
         form.reset();
         closeButtonRef.current?.click();
@@ -74,33 +82,48 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
             label="Issues / Concern"
             values={data?.issues_concern}
           />
-          <FormTextarea
-            label="Remarks"
-            form={form}
-            name="remarks"
-            readonly={data?.remarks ? true : false}
-          />
+          <form id="remarks-form" onSubmit={form.handleSubmit(onSubmit)}>
+            <FormTextarea
+              label="Remarks"
+              form={form}
+              name="remarks"
+              readonly={data?.reviewed_by_id ? true : false}
+              noPlaceholder={data?.reviewed_by_id ? true : false}
+            />
+          </form>
         </div>
       </section>
       <SheetFooter className="border-t flex-row justify-end p-2">
         <SheetClose asChild>
-          <Button variant="outline" ref={closeButtonRef} size={"sm"}>
+          <Button
+            variant="outline"
+            disabled={isPending}
+            ref={closeButtonRef}
+            size={"sm"}
+          >
             Close
           </Button>
         </SheetClose>
-        {data && data.remarks && (
+        {data?.reviewed_by_id && (
           <PrintDownloadDropdown
             data={<MonitoringReportDocument data={data} />}
           />
         )}
-        {(!data?.reviewed_by_id || !data.remarks) && (
+        {!data?.reviewed_by_id && (
           <Button
-            onClick={() => onSubmit()}
+            form="remarks-form"
             variant={isPending ? "ghost" : "default"}
             size={"sm"}
-            disabled={isPending}
+            disabled={isPending || !form.formState.isValid}
           >
-            {isPending ? <Loader2 className="animate-spin" /> : "Review"}
+            {isPending ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              <>
+                <Send />
+                Review
+              </>
+            )}
           </Button>
         )}
       </SheetFooter>

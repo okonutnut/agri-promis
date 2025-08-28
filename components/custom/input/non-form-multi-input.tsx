@@ -13,7 +13,7 @@ export default function FormMultiInput({ values, label }: FormMultiInputProps) {
     <div className="space-y-2 relative">
       <Label>{label}</Label>
       <ul>
-        {values?.slice(1).map((issue: string, index: number) => (
+        {values?.map((issue: string, index: number) => (
           <li key={index} className="flex items-start gap-1 mb-1">
             <span className="text-sm text-muted-foreground flex-shrink-0 mt-0.5">
               <Dot />

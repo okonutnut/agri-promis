@@ -954,14 +954,22 @@ export async function InsertRemarksInMonitoringReportAction(
   remarks: string
 ) {
   const supabase = await createClient(cookies());
+
+  // auth check
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("User not authenticated");
+
   const { data, error } = await supabase
     .from("monitoring")
     .update({
       remarks,
-      reviewed_by_id: (await supabase.auth.getUser()).data.user?.id,
+      reviewed_by_id: user.id,
+      reviewed_at: new Date(),
     })
     .eq("id", reportId)
-    .select()
+    .select("project_id, travel_order_no")
     .single();
 
   if (error) {
@@ -969,11 +977,22 @@ export async function InsertRemarksInMonitoringReportAction(
     throw new Error("Failed to insert remarks. Please try again.");
   }
 
+  const { data: toData, error: toError } = await supabase
+    .from("travel_order")
+    .select("travel_order_no")
+    .eq("id", data.travel_order_no)
+    .single();
+
+  if (toError) {
+    console.error("Error fetching report data:", toError);
+    throw new Error("Failed to fetch report data. Please try again.");
+  }
+
   // Log the activity
   await InsertActivityLogAction(
     "Reviewed a Monitoring Report",
-    `Monitoring report with ID ${reportId} has been reviewed.`,
-    data.project_id
+    `Monitoring report with T.O no ${toData.travel_order_no} has been reviewed.`,
+    data?.project_id
   );
 
   return;
