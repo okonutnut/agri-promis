@@ -4,6 +4,8 @@ import { Outfit } from "next/font/google";
 import { Toaster } from "sonner";
 import ReactQueryProvider from "@/components/reactQueryProvider";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: "Agri-ProMIS",
@@ -35,6 +37,8 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${outfit.variable} antialiased`}>
         <ReactQueryProvider>
+          <Analytics />
+          <SpeedInsights />
           <Toaster richColors position="top-center" />
           <SidebarProvider>{children}</SidebarProvider>
         </ReactQueryProvider>
