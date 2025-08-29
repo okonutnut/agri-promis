@@ -69,11 +69,11 @@ export default function FormMultiInput({
           </Button>
         </div>
       )}
-      <ul className="max-w-md">
-        {(readOnly ? values : currentValues)
+      <ul className="max-w-md my-1">
+        {(readOnly ? values : currentValues.slice(1)) // Only show saved items (skip index 0 which is the input)
           ?.filter(Boolean) // Filter out empty strings
           ?.map((item: string, index: number) => (
-            <li key={index} className="flex items-start gap-2 mb-1">
+            <li key={index} className="flex items-start gap-2 my-2">
               {readOnly ? (
                 <span className="text-sm text-muted-foreground flex-shrink-0 mt-0.5">
                   <Dot />
@@ -81,7 +81,7 @@ export default function FormMultiInput({
               ) : (
                 <Button
                   type="button"
-                  variant="secondary"
+                  variant="ghost"
                   size="sm"
                   className="text-sm shadow-none text-destructive flex-shrink-0 h-6 w-6 p-0"
                   onClick={() => {

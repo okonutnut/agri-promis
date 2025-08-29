@@ -79,7 +79,7 @@ type UploadFieldReportFormProps = {
 
 const validateImages = (images: ImageData[]) => {
   const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-  const maxSize = 1 * 1024 * 1024; // 1MB per image
+  const maxSize = 3 * 1024 * 1024; // 3MB per image
   const maxTotalSize = 20 * 1024 * 1024; // 20MB total limit
 
   if (!images || images.length === 0) {
