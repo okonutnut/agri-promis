@@ -9,23 +9,34 @@ import CustomPageLayout, {
   useSheet,
 } from "@/components/custom/layout/custom-page-layout";
 import { getDashboardNavItems } from "@/components/sidebar/navitems";
+import TeamMemberPanel from "./components/team-member-panel";
 
 function TeamMembersContent({
   values,
 }: {
   values: UserProfileType[] | undefined;
 }) {
-  const { openSheet, closeSheet } = useSheet();
+  const { openSheet, closeSheet, openSheetWithTabs } = useSheet();
 
   const handleRowSelect = (row: UserProfileType) => {
-    openSheet(
-      "View Member Details",
-      <TeamMemberForm
-        isAddMode={false}
-        data={row}
-        setPanelOpen={(open) => !open && closeSheet()}
-      />
-    );
+    openSheetWithTabs("View Member Details", [
+      {
+        label: "User Information",
+        value: "user-information",
+        content: (
+          <TeamMemberForm
+            isAddMode={false}
+            data={row}
+            setPanelOpen={(open) => !open && closeSheet()}
+          />
+        ),
+      },
+      {
+        label: "Assigned Program/Projects",
+        value: "assigned-program-projects",
+        content: <TeamMemberPanel userId={row.id as string} />,
+      },
+    ]);
   };
 
   const handleAdd = () => {

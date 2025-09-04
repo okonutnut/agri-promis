@@ -9,20 +9,31 @@ import CustomPageLayout, {
   useSheet,
 } from "@/components/custom/layout/custom-page-layout";
 import { getDashboardNavItems } from "@/components/sidebar/navitems";
+import FCAPanel from "./components/fca-panel";
 
 function FCAContent({ values }: { values: FCAType[] | undefined }) {
-  const { openSheet, closeSheet } = useSheet();
+  const { openSheet, closeSheet, openSheetWithTabs } = useSheet();
 
   const handleRowSelect = (row: FCAType) => {
-    openSheet(
-      "View FCA Details",
-      <FCAForm
-        isAddMode={false}
-        key={`view-${row.id}`}
-        data={row}
-        setPanelOpen={() => closeSheet()}
-      />
-    );
+    openSheetWithTabs("View FCA Details", [
+      {
+        label: "FCA Information",
+        value: "fca-info",
+        content: (
+          <FCAForm
+            isAddMode={false}
+            key={`view-${row.id}`}
+            data={row}
+            setPanelOpen={() => closeSheet()}
+          />
+        ),
+      },
+      {
+        label: "Assigned Projects",
+        value: "assigned-projects",
+        content: <FCAPanel fcaID={row.id as string} />,
+      },
+    ]);
   };
 
   const handleAdd = () => {

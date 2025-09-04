@@ -1,23 +1,18 @@
 "use client";
 
 import ConfirmAlertDialog from "@/components/custom/alert/confirm-alert";
+import { useSheet } from "@/components/custom/layout/custom-page-layout";
 import { useDeleteFieldTechnicianToProjectHook } from "@/components/hooks";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useEffect } from "react";
 
 type RemoveFTButtonProps = {
   userID: string;
-  setIsLoading: (isLoading: boolean) => void;
-  setPanelOpen: (isOpen: boolean) => void; // Add setPanelOpen prop
 };
-export default function RemoveFTButton({
-  userID,
-  setIsLoading,
-  setPanelOpen, // Destructure setPanelOpen
-}: RemoveFTButtonProps) {
+export default function RemoveFTButton({ userID }: RemoveFTButtonProps) {
   const { projectID } = useParams();
+  const { closeSheet } = useSheet();
   const { mutate, isPending } = useDeleteFieldTechnicianToProjectHook(
     projectID as string
   );
@@ -25,18 +20,9 @@ export default function RemoveFTButton({
   const onSubmit = () =>
     mutate(userID, {
       onSuccess: () => {
-        // Close the sheet after successful mutation
-        setPanelOpen(false);
+        closeSheet();
       },
     });
-
-  useEffect(() => {
-    if (isPending) {
-      setIsLoading(true);
-    } else {
-      setIsLoading(false);
-    }
-  }, [isPending, setIsLoading]);
 
   return (
     <ConfirmAlertDialog
@@ -45,7 +31,11 @@ export default function RemoveFTButton({
       onSubmit={onSubmit}
       confirmText="CONFIRM"
       trigger={
-        <Button variant={"outline"} size={"sm"} className="text-red-500">
+        <Button
+          variant={"outline"}
+          size={"sm"}
+          className="w-full px-3text-red-500"
+        >
           {isPending ? (
             <Loader2 className="animate-spin" />
           ) : (

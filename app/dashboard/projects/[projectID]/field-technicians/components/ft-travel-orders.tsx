@@ -1,9 +1,12 @@
 "use client";
+
 import SkeletonLoading from "@/components/custom/layout/skeleton-loading";
 import { useSelectAllTravelOrdersByUserIDHook } from "@/components/hooks";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
+import { useState } from "react";
 
 type FTTravelOrdersProps = {
   user_id: string;
@@ -12,10 +15,23 @@ export default function FTTravelOrders({ user_id }: FTTravelOrdersProps) {
   const { data, isLoading, error } =
     useSelectAllTravelOrdersByUserIDHook(user_id);
 
-  const values = data?.filter((order) => order.is_active === 1);
+  const [search, setSearch] = useState("");
+  const values = data
+    ?.filter((order) => order.is_active === 1)
+    ?.filter(
+      (order) =>
+        order.travel_order_no?.toLowerCase().includes(search.toLowerCase()) ||
+        order.purpose?.toLowerCase().includes(search.toLowerCase())
+    );
+
   return (
-    <>
-      <Label className="ms-3">Active Travel Orders</Label>
+    <div className="px-3 my-2 space-y-4">
+      <Label className="text-xl mb-2">Active Travel Orders</Label>
+      <Input
+        placeholder="Search..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
       {isLoading ? (
         <SkeletonLoading className="mx-3" />
       ) : error ? (
@@ -29,7 +45,7 @@ export default function FTTravelOrders({ user_id }: FTTravelOrdersProps) {
           {values &&
             values.map((order) => (
               <Card
-                className="p-2 mx-2 rounded-md shadow-xs flex-row justify-between"
+                className="p-2 rounded-md shadow-xs flex-row justify-between"
                 key={order.id}
               >
                 <div className="flex flex-1/2 flex-col gap-1">
@@ -44,6 +60,6 @@ export default function FTTravelOrders({ user_id }: FTTravelOrdersProps) {
             ))}
         </div>
       )}
-    </>
+    </div>
   );
 }

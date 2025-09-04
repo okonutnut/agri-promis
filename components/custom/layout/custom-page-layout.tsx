@@ -16,18 +16,32 @@ import CustomNavbar from "../navbar/custom-navbar";
 import { useUpdateUserCurrentLocationHook } from "@/components/hooks";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 
 // Sheet Context
 interface SheetContextType {
   isOpen: boolean;
   title: string;
   content: ReactNode;
-  openSheet: (title: string, content: ReactNode) => void;
+  tabs: { label: string; value: string; content: ReactNode }[];
+  activeTab: string;
+  footer: ReactNode;
+  openSheet: (title: string, content: ReactNode, footer?: ReactNode) => void;
+  openSheetWithTabs: (
+    title: string,
+    tabs: { label: string; value: string; content: ReactNode }[],
+    defaultTab?: string,
+    footer?: ReactNode
+  ) => void;
   closeSheet: () => void;
+  setActiveTab: (tab: string) => void;
 }
 
 const SheetContext = createContext<SheetContextType | undefined>(undefined);
@@ -38,6 +52,15 @@ export const useSheet = () => {
     throw new Error("useSheet must be used within a CustomPageLayout");
   }
   return context;
+};
+
+// convenience hooks
+export const useOpenSheet = () => useSheet().openSheet;
+export const useOpenSheetWithTabs = () => useSheet().openSheetWithTabs;
+export const useCloseSheet = () => useSheet().closeSheet;
+export const useActiveSheetTab = () => {
+  const { activeTab, setActiveTab } = useSheet();
+  return { activeTab, setActiveTab };
 };
 
 type CustomPageLayoutProps = {
@@ -70,13 +93,35 @@ export default function CustomPageLayout({
     isOpen: false,
     title: "",
     content: null as ReactNode,
+    tabs: [] as { label: string; value: string; content: ReactNode }[],
+    activeTab: "",
+    footer: null as ReactNode,
   });
 
-  const openSheet = (title: string, content: ReactNode) => {
+  const openSheet = (title: string, content: ReactNode, footer?: ReactNode) => {
     setSheetState({
       isOpen: true,
       title,
       content,
+      tabs: [],
+      activeTab: "",
+      footer: footer || null,
+    });
+  };
+
+  const openSheetWithTabs = (
+    title: string,
+    tabs: { label: string; value: string; content: ReactNode }[],
+    defaultTab?: string,
+    footer?: ReactNode
+  ) => {
+    setSheetState({
+      isOpen: true,
+      title,
+      content: null,
+      tabs,
+      activeTab: defaultTab || (tabs[0]?.value ?? ""),
+      footer: footer || null,
     });
   };
 
@@ -85,15 +130,27 @@ export default function CustomPageLayout({
       isOpen: false,
       title: "",
       content: null,
+      tabs: [],
+      activeTab: "",
+      footer: null,
     });
+  };
+
+  const setActiveTab = (tab: string) => {
+    setSheetState((prev) => ({ ...prev, activeTab: tab }));
   };
 
   const sheetContextValue: SheetContextType = {
     isOpen: sheetState.isOpen,
     title: sheetState.title,
     content: sheetState.content,
+    tabs: sheetState.tabs,
+    activeTab: sheetState.activeTab,
     openSheet,
+    openSheetWithTabs,
     closeSheet,
+    setActiveTab,
+    footer: sheetState.footer,
   };
 
   return (
@@ -130,14 +187,54 @@ export default function CustomPageLayout({
 
         {/* Global Sheet */}
         <Sheet open={sheetState.isOpen} onOpenChange={closeSheet}>
-          <SheetContent className="md:min-w-[600px] w-screen">
+          <SheetContent className="md:min-w-[600px] w-screen flex flex-col gap-0 h-full">
             <SheetHeader className="border-b p-2">
               <SheetTitle className="uppercase text-primary">
                 {sheetState.title}
               </SheetTitle>
             </SheetHeader>
-            {sheetState.content}
+            {/* Body */}
+            <div className="flex-1 overflow-y-auto">
+              {sheetState.tabs.length > 0 ? (
+                <Tabs
+                  value={sheetState.activeTab}
+                  onValueChange={setActiveTab}
+                  className="w-full"
+                >
+                  <TabsList className="w-full flex border-b bg-background rounded-none p-0 mt-2">
+                    {sheetState.tabs.map((tab) => (
+                      <TabsTrigger
+                        key={tab.value}
+                        value={tab.value}
+                        className={cn(
+                          "text-sm font-medium border-b-2 rounded-none",
+                          "data-[state=active]:border-b-primary data-[state=active]:text-primary [state=active]:shadow-none"
+                        )}
+                      >
+                        {tab.label}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                  {sheetState.tabs.map((tab) => (
+                    <TabsContent key={tab.value} value={tab.value}>
+                      {tab.content}
+                    </TabsContent>
+                  ))}
+                </Tabs>
+              ) : (
+                sheetState.content
+              )}
+            </div>
+            <SheetFooter className="border-t p-2 flex flex-row justify-end gap-2">
+              <SheetClose asChild>
+                <Button variant="outline" size={"sm"} className="w-[80px]">
+                  Close
+                </Button>
+              </SheetClose>
+              {sheetState.footer}
+            </SheetFooter>
           </SheetContent>
+          {/* Footer */}
         </Sheet>
       </section>
     </SheetContext.Provider>

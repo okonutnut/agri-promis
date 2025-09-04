@@ -15,8 +15,6 @@ import {
 } from "react";
 import SkeletonLoading from "@/components/custom/layout/skeleton-loading";
 import { useParams } from "next/navigation";
-import { SheetClose, SheetFooter } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
 
 type SelectMemberTableProps = {
   assignedMembers: string[];
@@ -72,13 +70,6 @@ export default function SelectMemberTable({
           />
         </>
       )}
-      <SheetFooter className="flex-row justify-end border-t p-2">
-        <SheetClose asChild>
-          <Button variant={"outline"} size={"sm"} disabled={isPending}>
-            Close
-          </Button>
-        </SheetClose>
-      </SheetFooter>
     </>
   );
 }

@@ -1,3 +1,5 @@
+"use client";
+
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import {
@@ -37,7 +39,7 @@ export default function TeamMemberPanel({ userId }: TeamMemberPanelProps) {
 
   return (
     <>
-      <Label className="ms-3">Assigned Programs/Projects</Label>
+      <Label className="px-3 mb-2 text-xl">Assigned Programs/Projects</Label>
       {isLoading ? (
         <SkeletonLoading />
       ) : programs?.length === 0 && projects?.length === 0 ? (
@@ -45,7 +47,7 @@ export default function TeamMemberPanel({ userId }: TeamMemberPanelProps) {
           No assigned programs or projects.
         </span>
       ) : (
-        <div className="space-y-2 max-h-64 overflow-y-auto">
+        <div className="space-y-4 max-h-64 overflow-y-auto">
           {programs?.map((program) => (
             <Card
               className="mx-3 shadow-xs rounded-md p-2 flex flex-row justify-between items-start"

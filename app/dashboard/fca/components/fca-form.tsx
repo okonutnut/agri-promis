@@ -9,13 +9,12 @@ import FormSelect from "@/components/custom/select/form-select";
 import { Loader2, Send } from "lucide-react";
 import { useEditFCAHook, useInsertFCAHook } from "@/app/hooks/FCAHook";
 import { FCAType } from "@/components/types";
-import { SheetClose, SheetFooter } from "@/components/ui/sheet";
 import { Label } from "@/components/ui/label";
-import FCAPanel from "./fca-panel";
 
 const formSchema = z.object({
   id: z.string().optional(),
   description: z.string().min(1, "Name is required"),
+  member_count: z.coerce.number().min(1, "Member count is required"),
   active_status: z.coerce.number().min(0, "Role is required"),
 });
 
@@ -37,6 +36,7 @@ export function FCAForm({ isAddMode, data, setPanelOpen }: FCAFormProps) {
     defaultValues: {
       id: data?.id || "",
       description: data?.description || "",
+      member_count: data?.member_count || 0,
       active_status: data?.active_status || 0,
     },
   });
@@ -67,9 +67,9 @@ export function FCAForm({ isAddMode, data, setPanelOpen }: FCAFormProps) {
   };
   return (
     <>
-      <Label className="ms-3">FCA Info</Label>
+      <Label className="px-3 my-2 text-xl">FCA Info</Label>
       <form
-        className="p-3 space-y-4 overflow-auto border-b"
+        className="p-3 space-y-4 mb-4 overflow-auto"
         id="fca-form"
         onSubmit={form.handleSubmit(onSubmit)}
       >
@@ -77,6 +77,14 @@ export function FCAForm({ isAddMode, data, setPanelOpen }: FCAFormProps) {
           label="Farmer's Cooperative Association Name"
           name="description"
           form={form}
+          noPlaceholder
+        />
+        <FormInput
+          label="Total Member Count"
+          name="member_count"
+          type="number"
+          form={form}
+          noPlaceholder
         />
         {!isAddMode && (
           <FormSelect
@@ -90,16 +98,11 @@ export function FCAForm({ isAddMode, data, setPanelOpen }: FCAFormProps) {
           />
         )}
       </form>
-      <FCAPanel fcaID={data?.id as string} />
-      <SheetFooter className="border-t p-2 flex-row justify-end gap-2">
-        <SheetClose asChild>
-          <Button variant={"outline"} size={"sm"} disabled={isPending}>
-            Close
-          </Button>
-        </SheetClose>
+      <div className="w-full px-3 flex flex-row justify-end gap-2">
         <Button
           type="submit"
           form="fca-form"
+          className="w-full"
           size={"sm"}
           variant={isPending ? "ghost" : "default"}
           disabled={isPending}
@@ -112,7 +115,7 @@ export function FCAForm({ isAddMode, data, setPanelOpen }: FCAFormProps) {
             </>
           )}
         </Button>
-      </SheetFooter>
+      </div>
     </>
   );
 }

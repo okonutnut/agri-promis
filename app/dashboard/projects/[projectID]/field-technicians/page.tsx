@@ -10,6 +10,7 @@ import { useSelectFieldTechniciansByProjectIDHook } from "@/components/hooks";
 import { useParams } from "next/navigation";
 import { AssignedProjectsType } from "@/components/types";
 import { getProjectNavItems } from "@/components/sidebar/navitems";
+import FTTravelOrders from "./components/ft-travel-orders";
 const SelectMembersTable = dynamic(
   () => import("./components/members-sheet/select-members-table"),
   {
@@ -28,16 +29,21 @@ function FieldTechnicianContent({
 }: {
   data: AssignedProjectsType[] | undefined;
 }) {
-  const { openSheet, closeSheet } = useSheet();
+  const { openSheet, closeSheet, openSheetWithTabs } = useSheet();
 
   const handleRowSelect = (row: AssignedProjectsType) => {
-    openSheet(
-      "View Member Details",
-      <ViewFieldTechnicianPanel
-        selectedRow={row}
-        setPanelOpen={(open) => !open && closeSheet()}
-      />
-    );
+    openSheetWithTabs("View Member Details", [
+      {
+        label: "Current Info",
+        value: "details",
+        content: <ViewFieldTechnicianPanel selectedRow={row} />,
+      },
+      {
+        label: "Travel Orders",
+        value: "travel-orders",
+        content: <FTTravelOrders user_id={row.user_id as string} />,
+      },
+    ]);
   };
 
   const handleAdd = () => {

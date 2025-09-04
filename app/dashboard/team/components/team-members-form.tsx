@@ -1,6 +1,5 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -14,13 +13,7 @@ import {
   useUpdateMemberHook,
 } from "@/components/hooks";
 import { UserProfileType } from "@/components/types";
-import { SheetClose, SheetFooter } from "@/components/ui/sheet";
 import { Label } from "@/components/ui/label";
-import SkeletonLoading from "@/components/custom/layout/skeleton-loading";
-const TeamMemberPanel = dynamic(
-  () => import("./team-member-panel").then((mod) => mod.default),
-  { ssr: false, loading: () => <SkeletonLoading /> }
-);
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -94,9 +87,9 @@ export function TeamMemberForm({
   };
   return (
     <>
-      <Label className="ms-3">Account Info</Label>
+      <Label className="px-3 my-2 text-xl">Account Info</Label>
       <form
-        className="p-3 space-y-4 border-b"
+        className="p-3 space-y-4 mb-4"
         id="team-member-form"
         onSubmit={form.handleSubmit(onSubmit)}
       >
@@ -113,17 +106,11 @@ export function TeamMemberForm({
           form={form}
         />
       </form>
-      <TeamMemberPanel userId={data?.id as string} />
-      <SheetFooter className="border-t p-2 flex-row justify-end gap-2">
-        <SheetClose asChild>
-          <Button variant={"outline"} size={"sm"} disabled={isPending}>
-            Close
-          </Button>
-        </SheetClose>
+      <div className="w-full flex flex-row justify-end gap-2 px-3">
         {!isAddMode && (
           <Button
             size={"sm"}
-            className="text-red-500 hover:text-red-600"
+            className="w-1/2 text-red-500 hover:text-red-600"
             onClick={() => {
               statusMutate(
                 {
@@ -154,6 +141,7 @@ export function TeamMemberForm({
         <Button
           type="submit"
           form="team-member-form"
+          className={isAddMode ? `w-full` : `w-1/2`}
           size={"sm"}
           variant={isPending ? "ghost" : "default"}
           disabled={isPending}
@@ -166,7 +154,7 @@ export function TeamMemberForm({
             </>
           )}
         </Button>
-      </SheetFooter>
+      </div>
     </>
   );
 }

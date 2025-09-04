@@ -18,6 +18,10 @@ export const columns: ColumnDef<FCAType>[] = [
     header: "Name",
   },
   {
+    accessorKey: "member_count",
+    header: "Total Members",
+  },
+  {
     accessorKey: "active_status",
     header: "Active Status",
     cell: ({ getValue }) => {

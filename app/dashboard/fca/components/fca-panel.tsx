@@ -1,3 +1,5 @@
+"use client";
+
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { useSelectAllAssignedProjectsByFCAIDHook } from "@/app/hooks/FCAHook";
@@ -22,7 +24,7 @@ export default function FCAPanel({ fcaID }: FCAPanelProps) {
 
   return (
     <>
-      <Label className="ms-3">Assigned Projects</Label>
+      <Label className="px-3 my-2 text-xl">Assigned Projects</Label>
       {isLoading ? (
         <SkeletonLoading />
       ) : data?.length === 0 ? (
