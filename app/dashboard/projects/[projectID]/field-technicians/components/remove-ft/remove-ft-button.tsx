@@ -31,11 +31,7 @@ export default function RemoveFTButton({ userID }: RemoveFTButtonProps) {
       onSubmit={onSubmit}
       confirmText="CONFIRM"
       trigger={
-        <Button
-          variant={"outline"}
-          size={"sm"}
-          className="w-full px-3text-red-500"
-        >
+        <Button variant={"outline"} size={"sm"} className="px-3">
           {isPending ? (
             <Loader2 className="animate-spin" />
           ) : (

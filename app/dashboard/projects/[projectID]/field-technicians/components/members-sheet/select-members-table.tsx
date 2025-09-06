@@ -58,8 +58,9 @@ export default function SelectMemberTable({
 
   return (
     <>
-      {(isLoading || isError) && <SkeletonLoading />}
-      {!isLoading && !isError && (
+      {isLoading || isError ? (
+        <SkeletonLoading />
+      ) : (
         <>
           <DataTable
             columns={columns}

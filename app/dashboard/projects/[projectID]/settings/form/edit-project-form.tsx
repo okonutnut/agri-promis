@@ -59,9 +59,11 @@ export default function EditProjectNameForm({
   return (
     <>
       <form
-        className="w-full flex flex-col items-start space-y-6"
+        className="w-full flex flex-col items-start space-y-6 px-4"
+        id="edit-project-form"
         onSubmit={form.handleSubmit(handleSubmit)}
       >
+        <Label className="font-semibold w-full mb-4">General Settings</Label>
         <FormInput label="Project ID" name="id" form={form} readonly copy />
         <FormInput label="Project name" name="project_name" form={form} />
         <FCASelector
@@ -77,17 +79,17 @@ export default function EditProjectNameForm({
             }
           />
         </div>
-        <CardFooter className="w-full justify-end p-0">
-          <Button
-            type="submit"
-            size={"sm"}
-            variant={isPending ? "ghost" : "default"}
-            disabled={isPending}
-          >
-            {isPending ? <Loader2 className="animate-spin" /> : "Save Changes"}
-          </Button>
-        </CardFooter>
       </form>
+      <CardFooter className="w-full justify-end p-0 border-t mt-4 px-4">
+        <Button
+          form="edit-project-form"
+          size={"sm"}
+          variant={isPending ? "ghost" : "default"}
+          disabled={isPending || form.formState.isDirty}
+        >
+          {isPending ? <Loader2 className="animate-spin" /> : "Save Changes"}
+        </Button>
+      </CardFooter>
     </>
   );
 }

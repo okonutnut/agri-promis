@@ -1,3 +1,4 @@
+// components/layout/CustomPageLayout.tsx
 "use client";
 
 import { cn } from "@/lib/utils";
@@ -9,7 +10,9 @@ import {
   createContext,
   useContext,
   useState,
+  useEffect,
   ReactNode,
+  useCallback,
 } from "react";
 import SkeletonLoading from "./skeleton-loading";
 import CustomNavbar from "../navbar/custom-navbar";
@@ -32,16 +35,19 @@ interface SheetContextType {
   content: ReactNode;
   tabs: { label: string; value: string; content: ReactNode }[];
   activeTab: string;
-  footer: ReactNode;
-  openSheet: (title: string, content: ReactNode, footer?: ReactNode) => void;
+  footer: ReactNode | null;
+
+  openSheet: (title: string, content: ReactNode) => void;
   openSheetWithTabs: (
     title: string,
     tabs: { label: string; value: string; content: ReactNode }[],
-    defaultTab?: string,
-    footer?: ReactNode
+    defaultTab?: string
   ) => void;
   closeSheet: () => void;
   setActiveTab: (tab: string) => void;
+
+  setFooter: (node: ReactNode) => void;
+  clearFooter: () => void;
 }
 
 const SheetContext = createContext<SheetContextType | undefined>(undefined);
@@ -62,6 +68,18 @@ export const useActiveSheetTab = () => {
   const { activeTab, setActiveTab } = useSheet();
   return { activeTab, setActiveTab };
 };
+
+// Slot component for nested usage
+export function SheetFooterSlot({ children }: { children: ReactNode }) {
+  const { setFooter, clearFooter } = useSheet();
+
+  useEffect(() => {
+    setFooter(children);
+    return () => clearFooter();
+  }, [children, setFooter, clearFooter]);
+
+  return null;
+}
 
 type CustomPageLayoutProps = {
   children?: React.ReactNode;
@@ -95,7 +113,7 @@ export default function CustomPageLayout({
     content: null as ReactNode,
     tabs: [] as { label: string; value: string; content: ReactNode }[],
     activeTab: "",
-    footer: null as ReactNode,
+    footerNode: null as ReactNode | null,
   });
 
   const openSheet = (title: string, content: ReactNode, footer?: ReactNode) => {
@@ -105,7 +123,7 @@ export default function CustomPageLayout({
       content,
       tabs: [],
       activeTab: "",
-      footer: footer || null,
+      footerNode: footer ?? null,
     });
   };
 
@@ -121,7 +139,7 @@ export default function CustomPageLayout({
       content: null,
       tabs,
       activeTab: defaultTab || (tabs[0]?.value ?? ""),
-      footer: footer || null,
+      footerNode: footer ?? null,
     });
   };
 
@@ -132,13 +150,23 @@ export default function CustomPageLayout({
       content: null,
       tabs: [],
       activeTab: "",
-      footer: null,
+      footerNode: null,
     });
   };
 
   const setActiveTab = (tab: string) => {
     setSheetState((prev) => ({ ...prev, activeTab: tab }));
   };
+
+  const [footer, setFooterState] = useState<ReactNode>(null);
+
+  const setFooter = useCallback((node: ReactNode) => {
+    setFooterState(node);
+  }, []);
+
+  const clearFooter = useCallback(() => {
+    setFooterState(null);
+  }, []);
 
   const sheetContextValue: SheetContextType = {
     isOpen: sheetState.isOpen,
@@ -150,7 +178,9 @@ export default function CustomPageLayout({
     openSheetWithTabs,
     closeSheet,
     setActiveTab,
-    footer: sheetState.footer,
+    footer,
+    setFooter,
+    clearFooter,
   };
 
   return (
@@ -201,14 +231,15 @@ export default function CustomPageLayout({
                   onValueChange={setActiveTab}
                   className="w-full"
                 >
-                  <TabsList className="w-full flex border-b bg-background rounded-none p-0 mt-2">
+                  <TabsList className="w-full flex border-b bg-transparent rounded-none p-0 mt-2">
                     {sheetState.tabs.map((tab) => (
                       <TabsTrigger
                         key={tab.value}
                         value={tab.value}
                         className={cn(
-                          "text-sm font-medium border-b-2 rounded-none",
-                          "data-[state=active]:border-b-primary data-[state=active]:text-primary [state=active]:shadow-none"
+                          "px-4 py-2 text-base transition-colors rounded-none",
+                          "data-[state=active]:border-b-2 data-[state=active]:border-b-primary data-[state=active]:shadow-none",
+                          "border-b-2 border-transparent text-muted-foreground"
                         )}
                       >
                         {tab.label}
@@ -227,14 +258,13 @@ export default function CustomPageLayout({
             </div>
             <SheetFooter className="border-t p-2 flex flex-row justify-end gap-2">
               <SheetClose asChild>
-                <Button variant="outline" size={"sm"} className="w-[80px]">
+                <Button variant={"outline"} size={"sm"}>
                   Close
                 </Button>
               </SheetClose>
-              {sheetState.footer}
+              {footer}
             </SheetFooter>
           </SheetContent>
-          {/* Footer */}
         </Sheet>
       </section>
     </SheetContext.Provider>

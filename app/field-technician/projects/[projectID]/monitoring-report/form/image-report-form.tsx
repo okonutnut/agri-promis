@@ -15,6 +15,12 @@ import {
   getLongtitudeLatitudeFromGPS,
 } from "@/lib/utils";
 import { MonitoringReportType } from "@/components/types";
+import { useSelectUserProfileHook } from "@/app/hooks/UserProfileHook";
+import {
+  useSelectProgramByIDHook,
+  useSelectProjectDetailsHook,
+} from "@/components/hooks";
+import { useParams } from "next/navigation";
 const ImageModal = dynamic(() => import("@/components/ui/image-modal"), {
   ssr: false,
 });
@@ -37,9 +43,14 @@ export default function ImageCaptureForm({
   images,
   setImages,
 }: ImageCaptureFormProps) {
+  const { projectID } = useParams();
   const [isCompressing, setIsCompressing] = useState(false);
   const [fullScreenImage, setFullScreenImage] = useState<ImageData | null>(
     null
+  );
+  const fullname = useSelectUserProfileHook().data?.fullname;
+  const { data: project, isLoading } = useSelectProjectDetailsHook(
+    projectID as string
   );
 
   const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,7 +75,9 @@ export default function ImageCaptureForm({
         const overlayedFile = await addOverlayToImage(
           file,
           dateTimeCaptured,
-          await getLongtitudeLatitudeFromGPS()
+          await getLongtitudeLatitudeFromGPS(),
+          fullname as string,
+          project?.project_name as string
         );
 
         const compressedFile =
@@ -161,7 +174,11 @@ export default function ImageCaptureForm({
               <div className="flex gap-4 justify-start overflow-x-auto pb-4">
                 {/* Camera Trigger Card */}
                 <div className="min-w-[128px] max-w-[200px] h-50">
-                  <Card className="h-full w-full flex flex-col items-center justify-center border-2 border-dashed shadow-none transition-colors cursor-pointer relative overflow-hidden">
+                  <Card
+                    className={`h-full w-full flex flex-col items-center justify-center border-2 border-dashed shadow-none transition-colors cursor-pointer relative overflow-hidden ${
+                      isLoading ? "opacity-50 pointer-events-none" : ""
+                    }`}
+                  >
                     <Input
                       type="file"
                       accept="image/*"
@@ -169,7 +186,7 @@ export default function ImageCaptureForm({
                       multiple
                       onChange={handleInputChange}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                      disabled={isCompressing}
+                      disabled={isCompressing || isLoading}
                     />
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <Camera className="text-gray-400" />
@@ -182,14 +199,18 @@ export default function ImageCaptureForm({
 
                 {/* File Upload Card */}
                 <div className="min-w-[128px] max-w-[200px] h-50">
-                  <Card className="h-full w-full flex flex-col items-center justify-center border-2 border-dashed shadow-none transition-colors cursor-pointer relative overflow-hidden">
+                  <Card
+                    className={`h-full w-full flex flex-col items-center justify-center border-2 border-dashed shadow-none transition-colors cursor-pointer relative overflow-hidden ${
+                      isLoading ? "opacity-50 pointer-events-none" : ""
+                    }`}
+                  >
                     <Input
                       type="file"
                       accept="image/*"
                       multiple
                       onChange={handleFileUpload}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                      disabled={isCompressing}
+                      disabled={isCompressing || isLoading}
                     />
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <Images className="text-gray-400" />
@@ -199,26 +220,6 @@ export default function ImageCaptureForm({
                     </div>
                   </Card>
                 </div>
-
-                {/* Open Camera App Card */}
-                {/* <div
-                  className={`${
-                    images.length === 0
-                      ? "w-full"
-                      : "min-w-[128px] max-w-[200px]"
-                  } h-40`}
-                >
-                  <Card className="h-full w-full flex flex-col items-center justify-center border-2 border-dashed shadow-none transition-colors cursor-pointer relative overflow-hidden">
-                    <a
-                      href="intent://#Intent;action=android.media.action.IMAGE_CAPTURE;end"
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                    ></a>
-                    <div className="flex flex-col items-center justify-center space-y-2">
-                      <Plus className="text-gray-400" />
-                      <p className="text-xs text-gray-500">Open Camera App</p>
-                    </div>
-                  </Card>
-                </div> */}
 
                 {/* Uploaded Images */}
                 {images.map((image) => (

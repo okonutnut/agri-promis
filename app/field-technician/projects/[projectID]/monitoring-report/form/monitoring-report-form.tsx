@@ -7,7 +7,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useParams } from "next/navigation";
-import { SheetClose, SheetFooter } from "@/components/ui/sheet";
 import { ImageData } from "@/components/interfaces";
 import { MonitoringReportType } from "@/components/types";
 import { useInsertMonitoringReportHook } from "@/components/hooks";
@@ -16,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Send } from "lucide-react";
 import PrintDownloadDropdown from "@/components/custom/print/print-download-dropdown";
 import MonitoringReportDocument from "@/components/custom/pdf/monitoring-reports-document";
+import { SheetFooterSlot } from "@/components/custom/layout/custom-page-layout";
 const TravelOrderDropdown = dynamic(
   () => import("../components/travel-order-combobox"),
   {
@@ -151,8 +151,6 @@ export default function UploadFieldReportForm({
           .filter((item) => item && item.trim().length > 0),
       };
 
-      console.log("Cleaned data:", cleanedData); // Debug cleaned data
-
       await deleteDraft(values?.key as string);
 
       mutate(
@@ -232,12 +230,7 @@ export default function UploadFieldReportForm({
           )}
         </form>
       </section>
-      <SheetFooter className="border-t flex-row justify-end p-2">
-        <SheetClose asChild>
-          <Button variant="outline" disabled={isPending} size={"sm"}>
-            Close
-          </Button>
-        </SheetClose>
+      <SheetFooterSlot>
         {!isAddMode && values?.remarks && (
           <PrintDownloadDropdown
             data={<MonitoringReportDocument data={values ?? null} />}
@@ -275,7 +268,7 @@ export default function UploadFieldReportForm({
             )}
           </Button>
         )}
-      </SheetFooter>
+      </SheetFooterSlot>
     </>
   );
 }

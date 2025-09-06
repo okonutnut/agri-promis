@@ -3,14 +3,18 @@
 import dynamic from "next/dynamic";
 import { DataTable } from "./table/data-table";
 import { columns } from "./table/columns";
-import { useSelectAllMonitoringReportsByProjectIDAndUserHook } from "@/components/hooks";
+import {
+  useSelectAllMonitoringReportsByProjectIDAndUserHook,
+  useSelectProjectDetailsHook,
+} from "@/components/hooks";
 import { MonitoringReportType } from "@/components/types";
 import { useParams } from "next/navigation";
 import { getUserProjectNavItems } from "@/components/sidebar/navitems";
 import CustomPageLayout, {
   useSheet,
 } from "@/components/custom/layout/custom-page-layout";
-
+import { useMemo } from "react";
+import SkeletonLoading from "@/components/custom/layout/skeleton-loading";
 const UploadFieldReportForm = dynamic(
   () => import("./form/monitoring-report-form"),
   { ssr: false }
@@ -22,8 +26,10 @@ const ViewDraftsSheet = dynamic(
 
 function MonitoringReportContent({
   data,
+  projectID,
 }: {
   data: MonitoringReportType[] | undefined;
+  projectID?: string;
 }) {
   const { openSheet, closeSheet } = useSheet();
 
@@ -63,7 +69,24 @@ function MonitoringReportContent({
     );
   };
 
-  if (!data) return null;
+  if (!data) return <SkeletonLoading />;
+
+  const { data: projectData } = useSelectProjectDetailsHook(
+    projectID as string
+  );
+
+  const isEnabledReports = useMemo(() => {
+    const currentDate = new Date().toDateString();
+    if (
+      projectData?.start_date &&
+      projectData?.end_date &&
+      currentDate >= new Date(projectData.start_date).toDateString() &&
+      currentDate <= new Date(projectData.end_date).toDateString()
+    ) {
+      return true;
+    }
+    return false;
+  }, [projectData]);
 
   return (
     <DataTable
@@ -71,6 +94,7 @@ function MonitoringReportContent({
       data={data || []}
       onRowSelect={handleRowSelect}
       onAdd={handleAdd}
+      enableUpload={isEnabledReports}
       topLeftComponent={<ViewDraftsSheet handleModify={handleModify} />}
     />
   );
@@ -89,7 +113,10 @@ export default function MonitoringReportPage() {
       navItems={getUserProjectNavItems(projectID as string)}
       role="user"
     >
-      <MonitoringReportContent data={data ?? undefined} />
+      <MonitoringReportContent
+        data={data ?? undefined}
+        projectID={projectID as string}
+      />
     </CustomPageLayout>
   );
 }

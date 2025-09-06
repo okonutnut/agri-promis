@@ -28,6 +28,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   onRowSelect?: (row: TData) => void;
   onAdd?: () => void;
+  enableUpload?: boolean;
   topLeftComponent?: React.ReactNode;
 }
 
@@ -36,6 +37,7 @@ export function DataTable<TData, TValue>({
   data,
   onRowSelect,
   onAdd,
+  enableUpload,
   topLeftComponent,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -65,10 +67,12 @@ export function DataTable<TData, TValue>({
           />
           <Search className="absolute left-2 top-1/2 w-4 h-4 transform -translate-y-1/2 text-gray-500" />
         </div>
-        <div className="flex items-center gap-2">
-          <Button onClick={onAdd}>New Report</Button>
-          {topLeftComponent}
-        </div>
+        {enableUpload && (
+          <div className={`flex items-center gap-2`}>
+            <Button onClick={onAdd}>New Report</Button>
+            {topLeftComponent}
+          </div>
+        )}
       </div>
 
       {/* Table */}

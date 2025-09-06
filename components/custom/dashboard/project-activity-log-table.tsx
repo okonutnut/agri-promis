@@ -20,14 +20,18 @@ export default function ProjectActivityLogTable(value: { project_id: string }) {
   return (
     <div className="m-4 flex flex-col">
       <span className="text-lg font-semibold mb-4">Project Logs</span>
-      {isLoading ? (
-        <SkeletonLoading />
-      ) : error ? (
-        <span className="italic">Error fetching activity logs</span>
-      ) : data?.length === 0 ? (
-        <span className="italic">No logs yet</span>
-      ) : (
-        <Card className="p-0 rounded-md shadow-xs max-h-[300px] overflow-y-auto">
+      <Card className="p-0 rounded-md shadow-xs max-h-[300px] overflow-y-auto">
+        {isLoading ? (
+          <SkeletonLoading />
+        ) : error ? (
+          <div className="p-4 text-center text-gray-500">
+            Error fetching activity logs.
+          </div>
+        ) : data?.length === 0 ? (
+          <div className="p-4 text-center text-gray-500">
+            No activity logs found.
+          </div>
+        ) : (
           <Table>
             <TableHeader>
               <TableRow>
@@ -49,8 +53,8 @@ export default function ProjectActivityLogTable(value: { project_id: string }) {
                 ))}
             </TableBody>
           </Table>
-        </Card>
-      )}
+        )}
+      </Card>
     </div>
   );
 }

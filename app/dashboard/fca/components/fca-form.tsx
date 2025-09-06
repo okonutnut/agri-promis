@@ -10,6 +10,7 @@ import { Loader2, Send } from "lucide-react";
 import { useEditFCAHook, useInsertFCAHook } from "@/app/hooks/FCAHook";
 import { FCAType } from "@/components/types";
 import { Label } from "@/components/ui/label";
+import { SheetFooterSlot } from "@/components/custom/layout/custom-page-layout";
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -67,7 +68,7 @@ export function FCAForm({ isAddMode, data, setPanelOpen }: FCAFormProps) {
   };
   return (
     <>
-      <Label className="px-3 my-2 text-xl">FCA Info</Label>
+      <Label className="px-3 my-2 text-xl">FCA Information</Label>
       <form
         className="p-3 space-y-4 mb-4 overflow-auto"
         id="fca-form"
@@ -98,11 +99,10 @@ export function FCAForm({ isAddMode, data, setPanelOpen }: FCAFormProps) {
           />
         )}
       </form>
-      <div className="w-full px-3 flex flex-row justify-end gap-2">
+      <SheetFooterSlot>
         <Button
           type="submit"
           form="fca-form"
-          className="w-full"
           size={"sm"}
           variant={isPending ? "ghost" : "default"}
           disabled={isPending}
@@ -115,7 +115,7 @@ export function FCAForm({ isAddMode, data, setPanelOpen }: FCAFormProps) {
             </>
           )}
         </Button>
-      </div>
+      </SheetFooterSlot>
     </>
   );
 }

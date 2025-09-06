@@ -74,27 +74,17 @@ export default function FCASelector({
       <Label>Farmers&apos; Cooperatives and Associations</Label>
 
       {/* Selected FCAs Display */}
-      {selectedFCAs.length > 0 && (
-        <div className="flex flex-wrap gap-1 p-2 border rounded-md">
-          {getSelectedFCANames().map((name, index) => (
-            <Badge
-              key={selectedFCAs[index]}
-              variant="outline"
-              className="text-xs"
-            >
-              {name}
-            </Badge>
-          ))}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
-            onClick={clearAll}
+      <div className="flex flex-wrap gap-1">
+        {getSelectedFCANames().map((name, index) => (
+          <Badge
+            key={selectedFCAs[index]}
+            variant="outline"
+            className="text-xs"
           >
-            Clear all
-          </Button>
-        </div>
-      )}
+            {name}
+          </Badge>
+        ))}
+      </div>
 
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
@@ -119,25 +109,33 @@ export default function FCASelector({
               <CommandEmpty>No FCA found.</CommandEmpty>
               <CommandGroup>
                 {fcas &&
-                  fcas.map((fca) => (
-                    <CommandItem
-                      key={fca.id}
-                      value={fca.description}
-                      onSelect={() => fca.id && handleFCAToggle(fca.id)}
-                    >
-                      <div
-                        className={cn(
-                          "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
-                          selectedFCAs.includes(fca.id || "")
-                            ? "bg-primary text-primary-foreground"
-                            : "opacity-50 [&_svg]:invisible"
-                        )}
+                  // Sort: selected first, then unselected
+                  [...fcas]
+                    .sort((a, b) => {
+                      const aSelected = selectedFCAs.includes(a.id as string);
+                      const bSelected = selectedFCAs.includes(b.id as string);
+                      if (aSelected === bSelected) return 0;
+                      return aSelected ? -1 : 1;
+                    })
+                    .map((fca) => (
+                      <CommandItem
+                        key={fca.id}
+                        value={fca.description}
+                        onSelect={() => fca.id && handleFCAToggle(fca.id)}
                       >
-                        <Check className="h-4 w-4" />
-                      </div>
-                      {fca.description}
-                    </CommandItem>
-                  ))}
+                        <div
+                          className={cn(
+                            "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
+                            selectedFCAs.includes(fca.id || "")
+                              ? "bg-primary text-primary-foreground"
+                              : "opacity-50 [&_svg]:invisible"
+                          )}
+                        >
+                          <Check className="h-4 w-4" />
+                        </div>
+                        {fca.description}
+                      </CommandItem>
+                    ))}
               </CommandGroup>
             </CommandList>
           </Command>

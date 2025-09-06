@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import NonFormInput from "@/components/custom/input/non-form-input";
-import { SheetClose, SheetFooter } from "@/components/ui/sheet";
 import { useInsertRemarksInMonitoringReportHook } from "@/components/hooks";
 import { MonitoringReportType } from "@/components/types";
 import { Loader2, Send } from "lucide-react";
@@ -15,6 +14,7 @@ import FormTextarea from "@/components/custom/input/form-textarea";
 import NonFormTextarea from "@/components/custom/input/non-form-textarea";
 import dynamic from "next/dynamic";
 import MonitoringReportDocument from "@/components/custom/pdf/monitoring-reports-document";
+import { SheetFooterSlot } from "@/components/custom/layout/custom-page-layout";
 const ImageCarousel = dynamic(
   () => import("@/components/custom/images/image-carousel"),
   { ssr: false }
@@ -58,7 +58,7 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
 
   return (
     <>
-      <section className="space-y-4 h-[calc(100vh)] overflow-y-auto overflow-x-hidden">
+      <section className="space-y-4 h-[calc(90vh)] overflow-y-auto overflow-x-hidden">
         <ImageCarousel images={data?.photo_url || []} />
         <div className="p-2 space-y-4 border-t">
           <NonFormInput
@@ -93,17 +93,7 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
           </form>
         </div>
       </section>
-      <SheetFooter className="border-t flex-row justify-end p-2">
-        <SheetClose asChild>
-          <Button
-            variant="outline"
-            disabled={isPending}
-            ref={closeButtonRef}
-            size={"sm"}
-          >
-            Close
-          </Button>
-        </SheetClose>
+      <SheetFooterSlot>
         {data?.reviewed_by_id && (
           <PrintDownloadDropdown
             data={<MonitoringReportDocument data={data} />}
@@ -126,7 +116,7 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
             )}
           </Button>
         )}
-      </SheetFooter>
+      </SheetFooterSlot>
     </>
   );
 }

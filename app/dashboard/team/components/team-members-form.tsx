@@ -14,6 +14,7 @@ import {
 } from "@/components/hooks";
 import { UserProfileType } from "@/components/types";
 import { Label } from "@/components/ui/label";
+import { SheetFooterSlot } from "@/components/custom/layout/custom-page-layout";
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -106,11 +107,11 @@ export function TeamMemberForm({
           form={form}
         />
       </form>
-      <div className="w-full flex flex-row justify-end gap-2 px-3">
+      <SheetFooterSlot>
         {!isAddMode && (
           <Button
             size={"sm"}
-            className="w-1/2 text-red-500 hover:text-red-600"
+            className="text-red-500 hover:text-red-600"
             onClick={() => {
               statusMutate(
                 {
@@ -141,7 +142,6 @@ export function TeamMemberForm({
         <Button
           type="submit"
           form="team-member-form"
-          className={isAddMode ? `w-full` : `w-1/2`}
           size={"sm"}
           variant={isPending ? "ghost" : "default"}
           disabled={isPending}
@@ -154,7 +154,7 @@ export function TeamMemberForm({
             </>
           )}
         </Button>
-      </div>
+      </SheetFooterSlot>
     </>
   );
 }

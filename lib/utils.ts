@@ -77,13 +77,14 @@ export const compressImage = (
 export const addOverlayToImage = (
   file: File,
   timestamp: string,
-  location: LocationData
+  location: LocationData,
+  fullname: string,
+  projectName: string
 ): Promise<File> => {
   return new Promise((resolve, reject) => {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     const img = new window.Image();
-
     if (!ctx) {
       reject(new Error("Canvas context not available"));
       return;
@@ -137,8 +138,9 @@ export const addOverlayToImage = (
           overlayLines.push(...locationLines);
         }
 
-        // Add "Captured by Agri-Promis" to the overlay
-        overlayLines.push("Captured by Agri-ProMIS");
+        // Add "Captured by <fullname>" to the overlay
+        overlayLines.push(`Project: ${projectName}`);
+        overlayLines.push(`Captured by ${fullname}`);
 
         const padding = fontSize * 1.0;
         const lineHeight = fontSize * 1.5;
@@ -152,18 +154,19 @@ export const addOverlayToImage = (
         const overlayY = img.height - overlayHeight - margin;
         const totalWidth = maxTextWidth + padding * 2;
 
-        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
-        ctx.fillRect(margin, overlayY, totalWidth, overlayHeight);
+        // Remove the black canvas overlay
+        // ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+        // ctx.fillRect(margin, overlayY, totalWidth, overlayHeight);
 
         ctx.fillStyle = "white";
         ctx.strokeStyle = "black";
-        ctx.lineWidth = Math.max(1.2, fontSize / 14);
+        ctx.lineWidth = Math.max(2, fontSize / 10); // Thicker outline for visibility
 
         overlayLines.forEach((line, index) => {
           const textX = margin + padding;
           const textY = overlayY + padding + index * lineHeight;
-          ctx.strokeText(line, textX, textY);
-          ctx.fillText(line, textX, textY);
+          ctx.strokeText(line, textX, textY); // Black outline
+          ctx.fillText(line, textX, textY); // White fill
         });
 
         canvas.toBlob(

@@ -4,7 +4,6 @@ import FormInput from "@/components/custom/input/form-input";
 import FormTextarea from "@/components/custom/input/form-textarea";
 import FormSelect from "@/components/custom/select/form-select";
 import { Button } from "@/components/ui/button";
-import { SheetClose, SheetFooter } from "@/components/ui/sheet";
 import { useForm } from "react-hook-form";
 import { UserComboBox } from "./user-combobox";
 import { ProjectDropdown } from "./project-combobox";
@@ -15,6 +14,7 @@ import * as z from "zod";
 import { useInsertTravelOrderHook } from "@/components/hooks";
 import { Loader2, Send } from "lucide-react";
 import { useParams } from "next/navigation";
+import { SheetFooterSlot } from "@/components/custom/layout/custom-page-layout";
 
 const formSchema = z
   .object({
@@ -108,7 +108,7 @@ export default function IssueTravelOrderForm({
   return (
     <>
       <form
-        className="space-y-4 p-2 overflow-y-auto h-[calc(100vh)]"
+        className="space-y-4 p-2 overflow-y-auto h-[calc(90vh)]"
         id="travel-order-form"
         onSubmit={form.handleSubmit(onSubmit)}
       >
@@ -197,12 +197,7 @@ export default function IssueTravelOrderForm({
           />
         )}
       </form>
-      <SheetFooter className="border-t flex-row justify-end p-2">
-        <SheetClose asChild>
-          <Button variant={"outline"} disabled={isPending} size={"sm"}>
-            Close
-          </Button>
-        </SheetClose>
+      <SheetFooterSlot>
         {isAddMode && (
           <Button
             form="travel-order-form"
@@ -220,7 +215,7 @@ export default function IssueTravelOrderForm({
             )}
           </Button>
         )}
-      </SheetFooter>
+      </SheetFooterSlot>
     </>
   );
 }

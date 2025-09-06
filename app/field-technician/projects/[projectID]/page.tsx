@@ -3,18 +3,20 @@
 import dynamic from "next/dynamic";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import { useSelectProgramAndProjectDetailsByProgjectIDHook } from "@/components/hooks";
-import {
-  getProjectNavItems,
-  getUserProjectNavItems,
-} from "@/components/sidebar/navitems";
+import { getUserProjectNavItems } from "@/components/sidebar/navitems";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
 import { useParams } from "next/navigation";
 import { ProjectType } from "@/components/types";
-import ProjectActivityLogTable from "@/components/custom/dashboard/project-activity-log-table";
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+const ProjectActivityLogTable = dynamic(
+  () => import("@/components/custom/dashboard/project-activity-log-table"),
+  {
+    ssr: false,
+  }
+);
 const ProjectDashboardItems = dynamic(
   () => import("@/components/custom/dashboard/admin/dashboard-summary-items"),
   {

@@ -30,8 +30,7 @@ export default function ProgramSettingsPage() {
       navItems={getProjectNavItems(projectID as string)}
     >
       <Card className="shadow-xs mb-4">
-        <CardContent className="flex flex-wrap justify-between items-start">
-          <div className="font-semibold w-full mb-4">General Settings</div>
+        <CardContent className="flex flex-wrap justify-between items-start p-0">
           <EditProjectForm
             project={data as ProjectType & { programs: ProgramType }}
           />

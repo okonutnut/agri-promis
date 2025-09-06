@@ -44,10 +44,10 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
 
   return (
     <>
-      <Carousel className="mx-auto" setApi={setApi}>
+      <Carousel className="mx-auto p-1 my-0" setApi={setApi}>
         {/* Progress indicator lines */}
         {images.length > 1 && (
-          <div className="flex gap-1 mb-4 px-4">
+          <div className="flex gap-1 mb-2 px-4">
             {images.map((_, index) => (
               <div
                 key={index}
@@ -58,11 +58,11 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
             ))}
           </div>
         )}
-        <CarouselContent>
+        <CarouselContent className="relative h-full">
           {images.map((image, index) => (
             <CarouselItem key={index}>
               <div
-                className="cursor-pointer hover:opacity-80 transition-opacity max-h-50"
+                className="cursor-pointer hover:opacity-80 transition-opacity h-[20vh]"
                 onClick={() => handleImageClick(image)}
               >
                 <Image
@@ -70,14 +70,13 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
                   alt={`Image ${index + 1}`}
                   width={100}
                   height={100}
-                  className="object-contain mx-auto rounded-sm"
+                  className="mx-auto h-[20vh]"
                 />
               </div>
             </CarouselItem>
           ))}
         </CarouselContent>
       </Carousel>
-
       {selectedImage && (
         <ImageModal
           imageSrc={selectedImage}

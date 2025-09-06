@@ -1,7 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { SheetClose, SheetFooter } from "@/components/ui/sheet";
 import NonFormInput from "@/components/custom/input/non-form-input";
 import { TravelOrderType } from "@/components/types";
 import NonFormTextarea from "@/components/custom/input/non-form-textarea";
@@ -17,7 +15,7 @@ export default function IssueTravelOrderForm({
   return (
     <>
       <section
-        className="space-y-4 p-2 overflow-y-auto h-[calc(100vh)]"
+        className="space-y-4 p-2 overflow-y-auto h-[calc(90vh)]"
         id="travel-order-form"
       >
         <NonFormInput
@@ -76,13 +74,6 @@ export default function IssueTravelOrderForm({
           readonly
         />
       </section>
-      <SheetFooter className="border-t flex-row justify-end p-2">
-        <SheetClose asChild>
-          <Button variant={"outline"} size={"sm"}>
-            Close
-          </Button>
-        </SheetClose>
-      </SheetFooter>
     </>
   );
 }

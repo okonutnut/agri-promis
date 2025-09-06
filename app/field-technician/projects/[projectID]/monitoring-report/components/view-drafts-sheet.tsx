@@ -15,7 +15,6 @@ import { loadDrafts } from "@/hooks/use-draft";
 import { format } from "date-fns";
 import { Archive } from "lucide-react";
 import { useEffect, useState } from "react";
-import { SheetClose, SheetFooter } from "@/components/ui/sheet";
 
 type ViewDraftsSheetProps = {
   handleModify: (row: MonitoringReportType | null) => void;
@@ -70,13 +69,6 @@ function DraftsContent({ handleModify }: ViewDraftsSheetProps) {
           ))}
         </TableBody>
       </Table>
-      <SheetFooter className="p-2 border-t flex-row justify-end gap-2">
-        <SheetClose asChild>
-          <Button size={"sm"} variant={"outline"}>
-            Close
-          </Button>
-        </SheetClose>
-      </SheetFooter>
     </>
   );
 }
