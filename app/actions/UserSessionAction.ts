@@ -1,5 +1,5 @@
 "use server";
-import { getLongtitudeLatitudeFromGPS } from "@/lib/utils";
+import { getCurrentCoords } from "@/lib/utils";
 import { decodeSupabaseJWT } from "@/utils/helpers/decodeSupabaseJwt";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
@@ -31,16 +31,16 @@ export async function UpdateUserCurrentLocationAction() {
     return;
   }
 
-  const locationData = await getLongtitudeLatitudeFromGPS();
+  const locationCoords = await getCurrentCoords();
   const response = await fetch("https://api.ipify.org?format=json");
   const ipAddress = await response.json();
 
   const { error } = await supabase.from("user_session").upsert(
     {
       user_id: user?.user?.id,
-      longitude: locationData.longitude,
+      longitude: locationCoords?.longitude || 0,
       ip_address: ipAddress.ip,
-      latitude: locationData.latitude,
+      latitude: locationCoords?.latitude || 0,
       modified_at: new Date(),
     },
     {

@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2, Search } from "lucide-react";
+import { useModal } from "@/components/custom/layout/custom-page-layout";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -66,8 +67,11 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  // Modal Hook
+  const { openModal, closeModal } = useModal();
+
   return (
-    <div className="space-y-4 m-2 h-[calc(100vh)]">
+    <div className="space-y-4 m-2">
       <div className="flex items-center justify-between gap-2">
         <div className="relative w-full max-w-md">
           <Input
@@ -79,8 +83,22 @@ export function DataTable<TData, TValue>({
           <Search className="absolute left-2 top-1/2 w-4 h-4 transform -translate-y-1/2 text-gray-500" />
         </div>
         <Button
-          onClick={onAdd}
-          disabled={isPending}
+          onClick={() =>
+            openModal(
+              "Add the user",
+              "Are you sure you want to add this user?",
+              <Button
+                className="w-full"
+                onClick={() => {
+                  onAdd && onAdd();
+                  closeModal();
+                }}
+              >
+                {isPending ? <Loader2 className="animate-spin" /> : "Proceed"}
+              </Button>
+            )
+          }
+          disabled={isPending || Object.keys(rowSelection).length === 0}
           variant={isPending ? "ghost" : "default"}
         >
           {isPending ? <Loader2 className="animate-spin" /> : "Assign"}

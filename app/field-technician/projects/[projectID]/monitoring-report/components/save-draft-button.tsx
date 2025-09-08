@@ -10,13 +10,13 @@ import { useSelectCurrentUserSessionHook } from "@/app/hooks/UserProfileHook";
 import { MonitoringReportType } from "@/components/types";
 import { upsertDraft } from "@/hooks/use-draft";
 import { useParams } from "next/navigation";
+import { useSheet } from "@/components/custom/layout/custom-page-layout";
 
 interface SaveDraftButtonProps {
   draftKey: string;
   form: UseFormReturn<any>;
   images: ImageData[];
   isPending: boolean;
-  onOpenChange: () => void;
 }
 
 // Helper function to create draft data
@@ -52,9 +52,10 @@ export default function SaveDraftButton({
   form,
   images,
   isPending,
-  onOpenChange,
 }: SaveDraftButtonProps) {
   const { projectID } = useParams();
+  const { closeSheet } = useSheet();
+
   const { data, isFetched } = useSelectCurrentUserSessionHook();
   const [isSaving, setIsSaving] = useState(false);
 
@@ -80,7 +81,7 @@ export default function SaveDraftButton({
       // Save draft
       await upsertDraft(key, draftData);
       toast.success("Draft saved successfully");
-      onOpenChange();
+      closeSheet();
     } catch (error) {
       console.error("Error saving draft:", error);
       toast.error("Failed to save draft. Please try again.");

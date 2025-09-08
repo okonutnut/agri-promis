@@ -11,3 +11,9 @@ export interface ImageData {
   file: File;
   dateTimeCaptured: string;
 }
+
+export interface CropDiseaseData {
+  title: string;
+  description?: string;
+  possibleSolution: string[];
+}

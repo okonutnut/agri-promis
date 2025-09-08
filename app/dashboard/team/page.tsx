@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { DataTable } from "./table/data-table";
 import { columns } from "./table/columns";
 import { TeamMemberForm } from "./components/team-members-form";
@@ -9,7 +10,10 @@ import CustomPageLayout, {
   useSheet,
 } from "@/components/custom/layout/custom-page-layout";
 import { getDashboardNavItems } from "@/components/sidebar/navitems";
-import TeamMemberPanel from "./components/team-member-panel";
+const TeamMemberPanel = dynamic(
+  () => import("./components/team-member-panel"),
+  { ssr: false }
+);
 
 function TeamMembersContent({
   values,

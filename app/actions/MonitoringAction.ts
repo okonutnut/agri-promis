@@ -5,7 +5,6 @@ import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { MonitoringReportType } from "../../components/types";
 
 // MONITORING REPORT ACTIONS
-
 export async function SelectAllMonitoringReportsByProjectIDAction(
   projectID: string
 ) {

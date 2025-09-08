@@ -6,15 +6,12 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import FormInput from "@/components/custom/input/form-input";
 import FormSelect from "@/components/custom/select/form-select";
-import { CircleAlert, Loader2, Send } from "lucide-react";
-import {
-  useInsertMemberHook,
-  useUpdateActiveStatusMemberHook,
-  useUpdateMemberHook,
-} from "@/components/hooks";
+import { Loader2, Send } from "lucide-react";
+import { useInsertMemberHook, useUpdateMemberHook } from "@/components/hooks";
 import { UserProfileType } from "@/components/types";
 import { Label } from "@/components/ui/label";
 import { SheetFooterSlot } from "@/components/custom/layout/custom-page-layout";
+import ChangeStatusButton from "./change-status-button";
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -63,11 +60,8 @@ export function TeamMemberForm({
   // UPDATE MEMBER HOOK
   const { mutate: updateMutate, isPending: isUpdatePending } =
     useUpdateMemberHook();
-  // ACTIVE STATUS HOOK
-  const { mutate: statusMutate, isPending: isStatusPending } =
-    useUpdateActiveStatusMemberHook();
 
-  const isPending = isInsertPending || isUpdatePending || isStatusPending;
+  const isPending = isInsertPending || isUpdatePending;
 
   const onSubmit = (data: MemberType) => {
     if (isAddMode) {
@@ -108,37 +102,7 @@ export function TeamMemberForm({
         />
       </form>
       <SheetFooterSlot>
-        {!isAddMode && (
-          <Button
-            size={"sm"}
-            className="text-red-500 hover:text-red-600"
-            onClick={() => {
-              statusMutate(
-                {
-                  userID: data?.id as string,
-                  status: data?.active_status == 1 ? 0 : 1,
-                },
-                {
-                  onSuccess: () => {
-                    form.reset();
-                    setPanelOpen(false);
-                  },
-                }
-              );
-            }}
-            variant={isPending ? "ghost" : "outline"}
-            disabled={isPending}
-          >
-            {isStatusPending ? (
-              <Loader2 className="animate-spin" />
-            ) : (
-              <>
-                <CircleAlert />
-                Set as {data?.active_status == 1 ? "Inactive" : "Active"}
-              </>
-            )}
-          </Button>
-        )}
+        {!isAddMode && <ChangeStatusButton data={data} form={form} />}
         <Button
           type="submit"
           form="team-member-form"

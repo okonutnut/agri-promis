@@ -6,6 +6,7 @@ import {
   Contact,
   House,
   LayoutDashboard,
+  ScanSearch,
   Settings,
   UserPen,
   Users,
@@ -23,6 +24,11 @@ export function getDashboardNavItems() {
       href: "/dashboard/programs",
       icon: BookOpen,
     },
+    // {
+    //   title: "Crop Detector",
+    //   href: "/dashboard/crop-detector",
+    //   icon: ScanSearch,
+    // },
     {
       title: "Team",
       href: "/dashboard/team",

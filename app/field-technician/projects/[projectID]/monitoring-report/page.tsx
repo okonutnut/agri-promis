@@ -24,48 +24,35 @@ const ViewDraftsSheet = dynamic(
   { ssr: false }
 );
 
+type MonitoringReportContentType = {
+  data: MonitoringReportType[] | undefined;
+  projectID?: string;
+};
+
 function MonitoringReportContent({
   data,
   projectID,
-}: {
-  data: MonitoringReportType[] | undefined;
-  projectID?: string;
-}) {
-  const { openSheet, closeSheet } = useSheet();
+}: MonitoringReportContentType) {
+  const { openSheet } = useSheet();
 
   const handleRowSelect = (row: MonitoringReportType) => {
     openSheet(
       "View Monitoring Report",
-      <UploadFieldReportForm
-        isAddMode={false}
-        isDraft={false}
-        values={row}
-        onOpenChange={closeSheet}
-      />
+      <UploadFieldReportForm isAddMode={false} isDraft={false} values={row} />
     );
   };
 
   const handleAdd = () => {
     openSheet(
-      "Add Monitoring Report",
-      <UploadFieldReportForm
-        isAddMode={true}
-        isDraft={false}
-        values={null}
-        onOpenChange={closeSheet}
-      />
+      "Upload Monitoring Report",
+      <UploadFieldReportForm isAddMode={true} isDraft={false} values={null} />
     );
   };
 
   const handleModify = (row: MonitoringReportType | null) => {
     openSheet(
-      "Modify Draft Report",
-      <UploadFieldReportForm
-        isAddMode={true}
-        isDraft={true}
-        values={row}
-        onOpenChange={closeSheet}
-      />
+      "Modify Report Draft",
+      <UploadFieldReportForm isAddMode={true} isDraft={true} values={row} />
     );
   };
 

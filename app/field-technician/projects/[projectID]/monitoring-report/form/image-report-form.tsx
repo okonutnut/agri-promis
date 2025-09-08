@@ -16,10 +16,7 @@ import {
 } from "@/lib/utils";
 import { MonitoringReportType } from "@/components/types";
 import { useSelectUserProfileHook } from "@/app/hooks/UserProfileHook";
-import {
-  useSelectProgramByIDHook,
-  useSelectProjectDetailsHook,
-} from "@/components/hooks";
+import { useSelectProjectDetailsHook } from "@/components/hooks";
 import { useParams } from "next/navigation";
 const ImageModal = dynamic(() => import("@/components/ui/image-modal"), {
   ssr: false,

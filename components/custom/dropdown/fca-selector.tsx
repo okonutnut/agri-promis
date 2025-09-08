@@ -57,11 +57,6 @@ export default function FCASelector({
     onChange?.(newSelection);
   }
 
-  function clearAll() {
-    setSelectedFCAs([]);
-    onChange?.([]);
-  }
-
   const getSelectedFCANames = () => {
     if (!fcas || selectedFCAs.length === 0) return [];
     return selectedFCAs

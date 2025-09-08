@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -15,7 +15,15 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Send } from "lucide-react";
 import PrintDownloadDropdown from "@/components/custom/print/print-download-dropdown";
 import MonitoringReportDocument from "@/components/custom/pdf/monitoring-reports-document";
-import { SheetFooterSlot } from "@/components/custom/layout/custom-page-layout";
+import FormInput from "@/components/custom/input/form-input";
+import FormTextarea from "@/components/custom/input/form-textarea";
+import FormMultiInput from "@/components/custom/input/form-multi-input";
+import NonFormTextarea from "@/components/custom/input/non-form-textarea";
+import {
+  SheetFooterSlot,
+  useModal,
+  useSheet,
+} from "@/components/custom/layout/custom-page-layout";
 const TravelOrderDropdown = dynamic(
   () => import("../components/travel-order-combobox"),
   {
@@ -25,24 +33,6 @@ const TravelOrderDropdown = dynamic(
 const ImageCaptureForm = dynamic(() => import("./image-report-form"), {
   ssr: false,
 });
-const FormInput = dynamic(
-  () => import("@/components/custom/input/form-input"),
-  {
-    ssr: false,
-  }
-);
-const FormTextarea = dynamic(
-  () => import("@/components/custom/input/form-textarea"),
-  { ssr: false }
-);
-const FormMultiInput = dynamic(
-  () => import("@/components/custom/input/form-multi-input"),
-  { ssr: false }
-);
-const NonFormTextarea = dynamic(
-  () => import("@/components/custom/input/non-form-textarea"),
-  { ssr: false }
-);
 const SaveDraftButton = dynamic(
   () => import("../components/save-draft-button"),
   { ssr: false }
@@ -71,7 +61,6 @@ const fieldReportSchema = z.object({
 type FieldReportFormData = z.infer<typeof fieldReportSchema>;
 
 type UploadFieldReportFormProps = {
-  onOpenChange: () => void;
   isAddMode?: boolean;
   isDraft?: boolean;
   values?: MonitoringReportType | null;
@@ -108,68 +97,60 @@ const validateImages = (images: ImageData[]) => {
 };
 
 export default function UploadFieldReportForm({
-  onOpenChange,
   isAddMode,
   isDraft,
   values,
 }: UploadFieldReportFormProps) {
   const { projectID } = useParams();
+  const { closeSheet } = useSheet();
+  const { closeModal } = useModal();
 
   const [images, setImages] = useState<ImageData[]>(values?.images || []);
 
-  const defaultValues = useMemo(
-    () => ({
+  const form = useForm<FieldReportFormData>({
+    resolver: zodResolver(fieldReportSchema),
+    defaultValues: {
       purpose: values?.purpose || "",
-      // Add empty string at index 0 for input field, then add existing values
       findings: values?.findings ? ["", ...values.findings] : [""],
       issues_concern: values?.issues_concern
         ? ["", ...values.issues_concern]
         : [""],
       observation: values?.observation || "",
-    }),
-    [values]
-  );
-
-  const form = useForm<FieldReportFormData>({
-    resolver: zodResolver(fieldReportSchema),
-    defaultValues,
+    },
   });
 
   const { mutate, isPending } = useInsertMonitoringReportHook();
-  const onSubmit = useCallback(
-    async (data: FieldReportFormData) => {
-      if (!validateImages(images)) return;
+  const onSubmit = async (data: FieldReportFormData) => {
+    if (!validateImages(images)) return;
 
-      // Filter out empty strings from arrays and remove the first element (input field)
-      const cleanedData = {
-        ...data,
-        findings: (data.findings || [])
-          .slice(1) // Remove the input field value at index 0
-          .filter((item) => item && item.trim().length > 0),
-        issues_concern: (data.issues_concern || [])
-          .slice(1) // Remove the input field value at index 0
-          .filter((item) => item && item.trim().length > 0),
-      };
+    const cleanedData = {
+      ...data,
+      findings: (data.findings || [])
+        .slice(1) // Remove the input field value at index 0
+        .filter((item) => item && item.trim().length > 0),
+      issues_concern: (data.issues_concern || [])
+        .slice(1) // Remove the input field value at index 0
+        .filter((item) => item && item.trim().length > 0),
+    };
 
-      await deleteDraft(values?.key as string);
+    await deleteDraft(values?.key as string);
 
-      mutate(
-        {
-          ...cleanedData,
-          project_id: projectID as string,
-          images,
+    mutate(
+      {
+        ...cleanedData,
+        project_id: projectID as string,
+        images,
+      },
+      {
+        onSuccess: () => {
+          form.reset();
+          setImages([]);
+          closeModal();
+          closeSheet();
         },
-        {
-          onSuccess: () => {
-            form.reset();
-            setImages([]);
-            onOpenChange();
-          },
-        }
-      );
-    },
-    [images, mutate, projectID, values?.key, form, onOpenChange]
-  );
+      }
+    );
+  };
 
   return (
     <>
@@ -237,10 +218,7 @@ export default function UploadFieldReportForm({
           />
         )}
         {values?.key != null && (
-          <DeleteDraftButton
-            draftKey={values?.key as string}
-            onOpenChange={onOpenChange}
-          />
+          <DeleteDraftButton draftKey={values?.key as string} />
         )}
         {isAddMode && (
           <SaveDraftButton
@@ -248,27 +226,49 @@ export default function UploadFieldReportForm({
             form={form}
             images={images}
             isPending={isPending}
-            onOpenChange={onOpenChange}
           />
         )}
-        {isAddMode && (
-          <Button
-            variant={isPending ? "ghost" : "default"}
-            form="upload-monitoring-report-form"
-            size={"sm"}
-            disabled={isPending || !images || images.length === 0}
-          >
-            {isPending ? (
-              <Loader2 className="animate-spin" />
-            ) : (
-              <>
-                <Send />
-                Submit
-              </>
-            )}
-          </Button>
-        )}
+        {isAddMode && <SubmitButton isPending={isPending} images={images} />}
       </SheetFooterSlot>
     </>
+  );
+}
+
+type SubmitButtonProps = {
+  isPending: boolean;
+  images: ImageData[];
+};
+function SubmitButton({ isPending, images }: SubmitButtonProps) {
+  const { openModal } = useModal();
+
+  return (
+    <Button
+      variant={isPending ? "ghost" : "default"}
+      type="button"
+      onClick={() => {
+        openModal(
+          "Attention",
+          "You confirm that all information provided is correct.",
+          <Button
+            className="w-full"
+            type="submit"
+            form="upload-monitoring-report-form"
+          >
+            Confirm
+          </Button>
+        );
+      }}
+      size={"sm"}
+      disabled={isPending || !images || images.length === 0}
+    >
+      {isPending ? (
+        <Loader2 className="animate-spin" />
+      ) : (
+        <>
+          <Send />
+          Submit
+        </>
+      )}
+    </Button>
   );
 }
