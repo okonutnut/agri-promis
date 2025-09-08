@@ -19,6 +19,7 @@ export async function InsertProjectAction(values: ProjectType) {
     .from("projects")
     .insert({
       created_by: userId,
+      progress_indicator: 1,
       status: 1,
       ...values,
     })
@@ -158,6 +159,7 @@ export async function EditProjectAction(data: ProjectType) {
     .from("projects")
     .update({
       project_name: data.project_name,
+      progress_indicator: data.progress_indicator,
       status: data.status,
       fca_ids: data.fca_ids,
     })

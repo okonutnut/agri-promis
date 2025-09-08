@@ -46,6 +46,8 @@ export type ProjectType = {
   start_date?: string;
   end_date?: string;
   status?: number;
+  total_alloted_area?: number;
+  progress_indicator?: number;
   location_id?: string;
   location?: string;
   fca?: FCAType[];

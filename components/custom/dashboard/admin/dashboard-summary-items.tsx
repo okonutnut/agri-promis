@@ -3,7 +3,8 @@
 import dynamic from "next/dynamic";
 import { useSelectDashboardItemsHook } from "@/components/hooks";
 import { ChartLine, Contact, FileStack } from "lucide-react";
-import { ChartRadialText } from "../project-progress-chart";
+import cornGrowthStages from "@/data/growth-stages.json";
+
 const SummaryCard = dynamic(() => import("../../card/summary-cards"), {
   ssr: false,
 });
@@ -22,11 +23,17 @@ export default function ProjectDashboardItems({
     <section className="flex flex-wrap md:flex-nowrap justify-between gap-5 p-4">
       <SummaryCard
         title="Progress"
-        description="Total Project Progress"
+        description="Project Stage"
         icon={ChartLine}
         isLoading={isLoading || error ? true : false}
       >
-        <ChartRadialText />
+        <strong className="text-xl">
+          {
+            cornGrowthStages.find(
+              (stage) => stage.value === data?.pi?.toString()
+            )?.label
+          }
+        </strong>
       </SummaryCard>
       <SummaryCard
         title="Operators"

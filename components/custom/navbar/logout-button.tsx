@@ -8,6 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { DoorOpen } from "lucide-react";
 import { useState } from "react";
 import LoadingPage from "../layout/loading-page";
+import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 
 export default function SidebarLogoutButton() {
   const [isLoading, setIsLoading] = useState(false);
@@ -19,13 +20,20 @@ export default function SidebarLogoutButton() {
     try {
       setIsLoading(true);
       // Sign out the user
+      // Log the logout event
+      await InsertActivityLogAction(
+        "Logout",
+        "Has signed out the system",
+        undefined
+      );
+
       const { error } = await supabase.auth.signOut();
       if (error) throw new Error("Error logging out");
 
       // Clean up and redirect
       qc.removeQueries();
       toast.success("You've been logged out");
-      router.replace("/login");
+      window.location.href = "/login";
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "An error occurred");
       console.error(error);

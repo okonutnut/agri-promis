@@ -34,7 +34,10 @@ const formSchema = z
     description: z.string().optional(),
     location: z.string().min(1, "Location is required"),
     fca_ids: z.array(z.string()).min(1, "At least one FCA is required"),
-    start_date: z.string().refine(
+    total_alloted_area: z.coerce
+      .number()
+      .min(1, "At least one hectare per person is required"),
+    start_date: z.coerce.string().refine(
       (val) => {
         const date = new Date(val);
         const today = new Date();
@@ -43,7 +46,7 @@ const formSchema = z
       },
       { message: "Start date cannot be in the past" }
     ),
-    end_date: z.string(),
+    end_date: z.coerce.string(),
   })
   .superRefine((data, ctx) => {
     const start = new Date(data.start_date);
@@ -71,6 +74,7 @@ export default function CreateProjectForm() {
       description: "",
       location: "",
       fca_ids: [],
+      total_alloted_area: 1,
       start_date: new Date().toISOString().slice(0, 10),
       end_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1))
         .toISOString()
@@ -84,7 +88,7 @@ export default function CreateProjectForm() {
       {
         ...data,
         program_id: programUID as string,
-        description: data.description ?? "",
+        description: data.description || "",
         fca_ids: data.fca_ids,
       },
       {
@@ -109,6 +113,12 @@ export default function CreateProjectForm() {
           rows={3}
         />
         <FCASelector onChange={(fca) => form.setValue("fca_ids", fca)} />
+        <FormInput
+          label="Total Alloted Area"
+          name="total_alloted_area"
+          type="number"
+          form={form}
+        />
         <LocationSelector
           onChange={(location) => form.setValue("location", location)}
         />

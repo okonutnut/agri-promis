@@ -11,6 +11,15 @@ import { Loader2 } from "lucide-react";
 import { ProjectType } from "@/components/types";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import cornGrowthStages from "@/data/growth-stages.json";
+
 const FCASelector = dynamic(
   () => import("@/components/custom/dropdown/fca-selector"),
   {
@@ -27,6 +36,9 @@ const FormInput = dynamic(
 const formSchema = z.object({
   id: z.string().min(1, "Project ID is required"),
   project_name: z.string().min(1, "Project name is required"),
+  progress_indicator: z.coerce
+    .number()
+    .min(1, "Progress indicator is required"),
   fca_ids: z.array(z.string()).min(1, "FCA is required"),
   status: z
     .number()
@@ -48,6 +60,7 @@ export default function EditProjectNameForm({
     defaultValues: {
       id: project.id as string,
       project_name: project.project_name || "",
+      progress_indicator: project.progress_indicator || 1,
       fca_ids: project.fca_ids || [],
       status: project.status || 0,
     },
@@ -78,6 +91,26 @@ export default function EditProjectNameForm({
               form.setValue("status", checked ? 1 : 0)
             }
           />
+        </div>
+        <div className="w-full flex justify-between items-center">
+          <Label>Project's Progress</Label>
+          <Select
+            defaultValue={project.progress_indicator?.toString()}
+            onValueChange={(value) =>
+              form.setValue("progress_indicator", parseInt(value))
+            }
+          >
+            <SelectTrigger className="w-[230px]">
+              <SelectValue placeholder="Progress" />
+            </SelectTrigger>
+            <SelectContent>
+              {cornGrowthStages.map((stage) => (
+                <SelectItem key={stage.value} value={stage.value}>
+                  {stage.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </form>
       <CardFooter className="w-full justify-end p-0 border-t mt-4 px-4">

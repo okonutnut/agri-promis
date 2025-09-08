@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
+import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 
 export default function GoogleSignInButton() {
   const supabase = createClient();
@@ -15,10 +16,6 @@ export default function GoogleSignInButton() {
       provider: "google",
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
-        // queryParams: {
-        //   access_type: "offline",
-        //   prompt: "consent",
-        // },
       },
     });
   };
@@ -27,7 +24,13 @@ export default function GoogleSignInButton() {
     async function checkUser() {
       setState("loading");
       const user = (await supabase.auth.getUser()).data.user;
+
       if (user !== null) {
+        await InsertActivityLogAction(
+          "Login",
+          `Has signed into the system.`,
+          undefined
+        );
         setState("disabled");
       } else {
         setState("ready");

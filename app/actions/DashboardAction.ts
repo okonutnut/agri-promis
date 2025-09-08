@@ -27,7 +27,22 @@ export async function SelectDashboardItemsAction(projectID: string) {
     throw new Error("Failed fetching monitoring reports");
   }
 
-  return { ap: APData, m: MData };
+  // 3. project progress indicator
+  const { data: PData, error: projectError } = await supabase
+    .from("projects")
+    .select("progress_indicator")
+    .eq("id", projectID)
+    .single();
+  if (projectError) {
+    console.error(projectError.message);
+    throw new Error("Failed fetching project data");
+  }
+
+  return {
+    ap: APData,
+    m: MData,
+    pi: PData.progress_indicator,
+  };
 }
 
 export async function SelectUserDashboardItemsAction() {

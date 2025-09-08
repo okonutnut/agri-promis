@@ -16,6 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import cornGrowthStages from "@/data/growth-stages.json";
 
 const Badge = dynamic(
   () => import("@/components/ui/badge").then((mod) => mod.Badge),
@@ -119,7 +120,15 @@ export default function ProgramDashboardPage() {
                 >
                   {project.status == 1 ? "active" : "inactive"}
                 </Badge>
-                <span className="font-medium text-xs">72% Completed</span>
+                <span className="font-medium text-xs">
+                  {
+                    cornGrowthStages.find(
+                      (stage) =>
+                        stage.value === project.progress_indicator?.toString()
+                    )?.label
+                  }
+                  &nbsp; Stage
+                </span>
               </div>
             </CardLink>
           ))}
