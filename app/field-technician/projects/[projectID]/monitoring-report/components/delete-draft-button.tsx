@@ -25,7 +25,7 @@ export default function DeleteDraftButton({
   return (
     <Button
       variant="outline"
-      className="text-red-500 hover:text-red-500"
+      className="w-full text-red-500 hover:text-red-500"
       size={"sm"}
       disabled={state === "pending"}
       onClick={() => handleDelete()}

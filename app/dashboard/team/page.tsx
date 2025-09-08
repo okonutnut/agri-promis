@@ -57,7 +57,6 @@ function TeamMembersContent({
   };
 
   if (!values) return null;
-  console.log("Program ID Ref:", programID);
 
   const filteredValues = useMemo(() => {
     if (programID !== "all")
@@ -80,7 +79,7 @@ function TeamMembersContent({
 
 export default function TeamMemberPage() {
   const { data, isLoading, error } = useSelectAllMembersHook();
-  console.log("All Members:", data);
+
   return (
     <CustomPageLayout
       pageTitle="Team Members"

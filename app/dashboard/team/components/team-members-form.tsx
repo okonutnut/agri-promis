@@ -10,8 +10,8 @@ import { Loader2, Send } from "lucide-react";
 import { useInsertMemberHook, useUpdateMemberHook } from "@/components/hooks";
 import { UserProfileType } from "@/components/types";
 import { Label } from "@/components/ui/label";
-import { SheetFooterSlot } from "@/components/custom/layout/custom-page-layout";
 import ChangeStatusButton from "./change-status-button";
+import { SheetFooterSlot } from "@/components/custom/layout/custom-page-layout";
 
 const formSchema = z.object({
   id: z.string().optional(),

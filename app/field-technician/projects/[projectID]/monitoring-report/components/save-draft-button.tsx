@@ -96,6 +96,7 @@ export default function SaveDraftButton({
       disabled={isDisabled}
       onClick={handleSaveDraft}
       type="button"
+      className="w-full"
       size={"sm"}
     >
       {isSaving ? (

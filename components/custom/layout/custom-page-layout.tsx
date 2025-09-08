@@ -1,25 +1,31 @@
 "use client";
 
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { AppSidebar } from "@/components/sidebar/appSidebar";
+import { NavigationItemType } from "@/components/types";
 import {
-  useState,
-  useRef,
-  useCallback,
-  useEffect,
+  Suspense,
   createContext,
   useContext,
+  useState,
+  useEffect,
   ReactNode,
-  PropsWithChildren,
-  Suspense,
+  useCallback,
 } from "react";
-import { toast } from "sonner";
+import SkeletonLoading from "./skeleton-loading";
+import CustomNavbar from "../navbar/custom-navbar";
+import { useUpdateUserCurrentLocationHook } from "@/components/hooks";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
-  SheetFooter,
-  SheetClose,
 } from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -28,40 +34,28 @@ import {
   AlertDialogDescription,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
-import CustomNavbar from "../navbar/custom-navbar";
-import SkeletonLoading from "./skeleton-loading";
-import { useUpdateUserCurrentLocationHook } from "@/components/hooks";
-import { cn } from "@/lib/utils";
-import { AppSidebar } from "@/components/sidebar/appSidebar";
-import { UpdateUserCurrentLocationAction } from "@/app/actions/UserSessionAction";
 
-// Define types
-interface Tab {
-  label: string;
-  value: string;
-  content: ReactNode;
-}
-
+// Sheet Context
 interface SheetContextType {
   isOpen: boolean;
   title: string;
-  content: ReactNode | null;
-  tabs: Tab[];
+  content: ReactNode;
+  tabs: { label: string; value: string; content: ReactNode }[];
   activeTab: string;
   footer: ReactNode | null;
-  openSheet: (title: string, content: ReactNode, footer?: ReactNode) => void;
+
+  openSheet: (title: string, content: ReactNode) => void;
   openSheetWithTabs: (
     title: string,
-    tabs: Tab[],
-    defaultTab?: string,
-    footer?: ReactNode
+    tabs: { label: string; value: string; content: ReactNode }[],
+    defaultTab?: string
   ) => void;
   closeSheet: () => void;
   setActiveTab: (tab: string) => void;
-  setFooter: (node: ReactNode | null) => void;
+
+  setFooter: (node: ReactNode) => void;
+  clearFooter: () => void;
 }
 
 interface ModalContextType {
@@ -69,16 +63,8 @@ interface ModalContextType {
   title: string;
   description: string;
   content: ReactNode | null;
-  triggerNode: ReactNode | null;
-  openModal: (
-    title: string,
-    description: string,
-    content: ReactNode,
-    trigger?: ReactNode
-  ) => void;
+  openModal: (title: string, description: string, content: ReactNode) => void;
   closeModal: () => void;
-  setTrigger: (node: ReactNode | null) => void;
-  clearTrigger: () => void;
 }
 
 const SheetContext = createContext<SheetContextType | undefined>(undefined);
@@ -86,55 +72,52 @@ const ModalContext = createContext<ModalContextType | undefined>(undefined);
 
 export const useSheet = () => {
   const context = useContext(SheetContext);
-  if (!context)
-    throw new Error("useSheet must be used within CustomPageLayout");
+  if (!context) {
+    throw new Error("useSheet must be used within a CustomPageLayout");
+  }
   return context;
 };
 
 export const useModal = () => {
   const context = useContext(ModalContext);
-  if (!context)
-    throw new Error("useModal must be used within CustomPageLayout");
+  if (!context) {
+    throw new Error("useModal must be used within a CustomPageLayout");
+  }
   return context;
+};
+
+// convenience hooks
+export const useOpenSheet = () => useSheet().openSheet;
+export const useOpenSheetWithTabs = () => useSheet().openSheetWithTabs;
+export const useCloseSheet = () => useSheet().closeSheet;
+export const useActiveSheetTab = () => {
+  const { activeTab, setActiveTab } = useSheet();
+  return { activeTab, setActiveTab };
 };
 
 // Slot component for nested usage
 export function SheetFooterSlot({ children }: { children: ReactNode }) {
-  const { setFooter } = useSheet();
-  const childRef = useRef<ReactNode>(children);
+  const { setFooter, clearFooter } = useSheet();
 
   useEffect(() => {
-    childRef.current = children;
-    setFooter(childRef.current);
-    return () => setFooter(null);
-  }, [setFooter]);
+    setFooter(children);
+    return () => clearFooter();
+  }, [children, setFooter, clearFooter]);
 
   return null;
 }
 
-export function ModalTriggerSlot({ children }: { children: ReactNode }) {
-  const { setTrigger, clearTrigger } = useModal();
-  const childRef = useRef<ReactNode>(children);
-
-  useEffect(() => {
-    childRef.current = children;
-    setTrigger(childRef.current);
-    return () => clearTrigger();
-  }, [setTrigger, clearTrigger]);
-
-  return null;
-}
-
-type CustomPageLayoutProps = PropsWithChildren<{
+type CustomPageLayoutProps = {
+  children?: React.ReactNode;
   className?: string;
   pageTitle?: string;
   isLoading?: boolean;
   error?: Error | null;
   noSidebar?: boolean;
-  navItems?: any[];
-  topRightComponent?: ReactNode;
+  navItems?: NavigationItemType[];
+  topRightComponent?: React.ReactNode;
   role?: "admin" | "user";
-}>;
+};
 
 export default function CustomPageLayout({
   children,
@@ -147,155 +130,134 @@ export default function CustomPageLayout({
   topRightComponent,
   role,
 }: CustomPageLayoutProps) {
-  // Hook to update user location
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      console.log("User location updated");
-      await UpdateUserCurrentLocationAction();
-    }, 600000); // 10 minutes in milliseconds
+  useUpdateUserCurrentLocationHook();
 
-    return () => clearInterval(interval);
-  }, []);
-
-  // Internal sheet state not tied to rendering
-  const sheetRef = useRef<{
-    title: string;
-    content: ReactNode | null;
-    tabs: Tab[];
-  }>({
+  // Sheet state management
+  const [sheetState, setSheetState] = useState({
+    isOpen: false,
     title: "",
-    content: null,
-    tabs: [],
+    content: null as ReactNode,
+    tabs: [] as { label: string; value: string; content: ReactNode }[],
+    activeTab: "",
+    footerNode: null as ReactNode | null,
   });
 
-  // UI-controlling states
-  const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<string>("");
-  const [footer, setFooterState] = useState<ReactNode | null>(null);
+  const openSheet = (title: string, content: ReactNode, footer?: ReactNode) => {
+    setSheetState({
+      isOpen: true,
+      title,
+      content,
+      tabs: [],
+      activeTab: "",
+      footerNode: footer ?? null,
+    });
+  };
 
-  const openSheet = useCallback(
-    (title: string, content: ReactNode, footerNode?: ReactNode) => {
-      sheetRef.current = { title, content, tabs: [] };
-      setIsSheetOpen(true);
-      setFooterState(footerNode ?? null);
-    },
-    []
-  );
+  const openSheetWithTabs = (
+    title: string,
+    tabs: { label: string; value: string; content: ReactNode }[],
+    defaultTab?: string,
+    footer?: ReactNode
+  ) => {
+    setSheetState({
+      isOpen: true,
+      title,
+      content: null,
+      tabs,
+      activeTab: defaultTab || (tabs[0]?.value ?? ""),
+      footerNode: footer ?? null,
+    });
+  };
 
-  const openSheetWithTabs = useCallback(
-    (
-      title: string,
-      tabs: Tab[],
-      defaultTab?: string,
-      footerNode?: ReactNode
-    ) => {
-      sheetRef.current = { title, content: null, tabs };
-      setIsSheetOpen(true);
-      setActiveTab(defaultTab ?? tabs[0]?.value ?? "");
-      setFooterState(footerNode ?? null);
-    },
-    []
-  );
+  const closeSheet = () => {
+    setSheetState({
+      isOpen: false,
+      title: "",
+      content: null,
+      tabs: [],
+      activeTab: "",
+      footerNode: null,
+    });
+  };
 
-  const closeSheet = useCallback(() => {
-    setIsSheetOpen(false);
+  const setActiveTab = (tab: string) => {
+    setSheetState((prev) => ({ ...prev, activeTab: tab }));
+  };
+
+  const [footer, setFooterState] = useState<ReactNode>(null);
+
+  const setFooter = useCallback((node: ReactNode) => {
+    setFooterState(node);
+  }, []);
+
+  const clearFooter = useCallback(() => {
     setFooterState(null);
   }, []);
 
+  const sheetContextValue: SheetContextType = {
+    isOpen: sheetState.isOpen,
+    title: sheetState.title,
+    content: sheetState.content,
+    tabs: sheetState.tabs,
+    activeTab: sheetState.activeTab,
+    openSheet,
+    openSheetWithTabs,
+    closeSheet,
+    setActiveTab,
+    footer,
+    setFooter,
+    clearFooter,
+  };
+
+  // Modal state management
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     title: string;
     description: string;
     content: ReactNode | null;
-    triggerNode: ReactNode | null;
   }>({
     isOpen: false,
     title: "",
     description: "",
     content: null,
-    triggerNode: null,
   });
 
   const openModal = useCallback(
-    (
-      title: string,
-      description: string,
-      content: ReactNode,
-      trigger?: ReactNode
-    ) => {
-      setModalState({
-        isOpen: true,
-        title,
-        description,
-        content,
-        triggerNode: trigger ?? null,
-      });
+    (title: string, description: string, content: ReactNode) => {
+      setModalState({ isOpen: true, title, description, content });
     },
     []
   );
 
   const closeModal = useCallback(() => {
-    setModalState({
-      isOpen: false,
-      title: "",
-      description: "",
-      content: null,
-      triggerNode: null,
-    });
+    setModalState({ isOpen: false, title: "", description: "", content: null });
   }, []);
-
-  const setTrigger = useCallback((node: ReactNode | null) => {
-    setModalState((prev) => ({ ...prev, triggerNode: node }));
-  }, []);
-
-  const clearTrigger = useCallback(() => {
-    setModalState((prev) => ({ ...prev, triggerNode: null }));
-  }, []);
-
-  const sheetContextValue: SheetContextType = {
-    isOpen: isSheetOpen,
-    title: sheetRef.current.title,
-    content: sheetRef.current.content,
-    tabs: sheetRef.current.tabs,
-    activeTab,
-    footer,
-    openSheet,
-    openSheetWithTabs,
-    closeSheet,
-    setActiveTab,
-    setFooter: setFooterState,
-  };
 
   const modalContextValue: ModalContextType = {
     isOpen: modalState.isOpen,
     title: modalState.title,
     description: modalState.description,
     content: modalState.content,
-    triggerNode: modalState.triggerNode,
     openModal,
     closeModal,
-    setTrigger,
-    clearTrigger,
   };
-
-  useEffect(() => {
-    if (error)
-      toast.error(`Error: ${error.message ?? "An unexpected error occurred"}`);
-  }, [error]);
 
   return (
     <SheetContext.Provider value={sheetContextValue}>
       <ModalContext.Provider value={modalContextValue}>
         <section className="w-full h-screen flex flex-col relative text-sm overflow-hidden">
+          {error &&
+            toast.error(
+              `Error: ${error.message || "An unexpected error occurred"}`
+            )}
           <CustomNavbar
-            navItems={navItems ?? []}
+            navItems={navItems || []}
             noSidebar={noSidebar}
             pageTitle={pageTitle}
-            role={role ?? "admin"}
+            role={role || "admin"}
           />
-
           <div className="flex flex-1 overflow-hidden">
-            {!noSidebar && <AppSidebar navItems={navItems ?? []} />}
+            {!noSidebar && <AppSidebar navItems={navItems || []} />}
             <div className="flex-1 w-full overflow-hidden">
               <div className={cn("pl-4 pr-2 h-full flex flex-col", className)}>
                 <div className="flex-1 overflow-y-auto py-4">
@@ -315,58 +277,49 @@ export default function CustomPageLayout({
             </div>
           </div>
 
-          <Sheet
-            open={isSheetOpen}
-            onOpenChange={(open) => !open && closeSheet()}
-          >
+          {/* Global Sheet */}
+          <Sheet open={sheetState.isOpen} onOpenChange={closeSheet}>
             <SheetContent className="md:min-w-[600px] w-screen flex flex-col gap-0 h-full">
               <SheetHeader className="border-b p-2">
-                <SheetTitle>{sheetRef.current.title}</SheetTitle>
+                <SheetTitle className="uppercase text-primary">
+                  {sheetState.title}
+                </SheetTitle>
               </SheetHeader>
-              <div className="flex-1 overflow-y-auto">
-                {sheetRef.current.tabs.length > 0 ? (
+              <div className="flex-1 overflow-y-auto relative">
+                {sheetState.tabs.length > 0 ? (
                   <Tabs
-                    value={activeTab}
+                    value={sheetState.activeTab}
                     onValueChange={setActiveTab}
-                    className="w-full relative"
+                    className="w-full"
                   >
-                    <TabsList className="w-full flex h-[46px] items-center border-b border-gray-200 relative bg-white rounded-none p-0">
-                      {sheetRef.current.tabs.map((tab) => (
+                    <TabsList className="w-full flex border-b bg-transparent rounded-none p-0 mt-2">
+                      {sheetState.tabs.map((tab) => (
                         <TabsTrigger
                           key={tab.value}
                           value={tab.value}
-                          className="relative inline-block select-none px-3 py-4 text-sm font-normal
-    text-gray-900 hover:text-black
-    data-[state=active]:text-black data-[state=active]:font-medium
-    transition-colors duration-200
-    bg-transparent border-none shadow-none rounded-none
-    ring-0 focus:outline-none focus:ring-0
-    after:content-[''] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full
-    after:scale-x-0 after:bg-primary after:transition-transform after:duration-200 after:origin-left
-    data-[state=active]:after:scale-x-100"
+                          className={cn(
+                            "px-4 py-2 text-base transition-colors rounded-none",
+                            "data-[state=active]:border-b-2 data-[state=active]:border-b-primary data-[state=active]:shadow-none",
+                            "border-b-2 border-transparent text-muted-foreground"
+                          )}
                         >
                           {tab.label}
                         </TabsTrigger>
                       ))}
                     </TabsList>
-
-                    {sheetRef.current.tabs.map((tab) => (
-                      <TabsContent
-                        key={tab.value}
-                        value={tab.value}
-                        className="p-0"
-                      >
+                    {sheetState.tabs.map((tab) => (
+                      <TabsContent key={tab.value} value={tab.value}>
                         {tab.content}
                       </TabsContent>
                     ))}
                   </Tabs>
                 ) : (
-                  sheetRef.current.content
+                  sheetState.content
                 )}
               </div>
               <SheetFooter className="border-t p-2 flex flex-row justify-end gap-2">
                 <SheetClose asChild>
-                  <Button variant="outline" size="sm">
+                  <Button variant={"outline"} size={"sm"}>
                     Close
                   </Button>
                 </SheetClose>
@@ -375,6 +328,7 @@ export default function CustomPageLayout({
             </SheetContent>
           </Sheet>
 
+          {/* Modal */}
           <AlertDialog
             open={modalState.isOpen}
             onOpenChange={(open) => !open && closeModal()}

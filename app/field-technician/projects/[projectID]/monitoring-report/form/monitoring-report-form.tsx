@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -13,26 +13,11 @@ import { useInsertMonitoringReportHook } from "@/components/hooks";
 import { deleteDraft } from "@/hooks/use-draft";
 import { Button } from "@/components/ui/button";
 import { Loader2, Send } from "lucide-react";
-import PrintDownloadDropdown from "@/components/custom/print/print-download-dropdown";
-import MonitoringReportDocument from "@/components/custom/pdf/monitoring-reports-document";
 import FormInput from "@/components/custom/input/form-input";
 import FormTextarea from "@/components/custom/input/form-textarea";
 import FormMultiInput from "@/components/custom/input/form-multi-input";
 import NonFormTextarea from "@/components/custom/input/non-form-textarea";
-import {
-  SheetFooterSlot,
-  useModal,
-  useSheet,
-} from "@/components/custom/layout/custom-page-layout";
-const TravelOrderDropdown = dynamic(
-  () => import("../components/travel-order-combobox"),
-  {
-    ssr: false,
-  }
-);
-const ImageCaptureForm = dynamic(() => import("./image-report-form"), {
-  ssr: false,
-});
+import NonFormInput from "@/components/custom/input/non-form-input";
 const SaveDraftButton = dynamic(
   () => import("../components/save-draft-button"),
   { ssr: false }
@@ -41,10 +26,25 @@ const DeleteDraftButton = dynamic(
   () => import("../components/delete-draft-button"),
   { ssr: false }
 );
-const NonFormInput = dynamic(
-  () => import("@/components/custom/input/non-form-input"),
+const PrintDownloadDropdown = dynamic(
+  () => import("@/components/custom/print/print-download-dropdown"),
   { ssr: false }
 );
+const MonitoringReportDocument = dynamic(
+  () => import("@/components/custom/pdf/monitoring-reports-document"),
+  { ssr: false }
+);
+const TravelOrderDropdown = dynamic(
+  () => import("../components/travel-order-combobox"),
+  { ssr: false }
+);
+const ImageCaptureForm = dynamic(() => import("./image-report-form"), {
+  ssr: false,
+});
+import {
+  useModal,
+  useSheet,
+} from "@/components/custom/layout/custom-page-layout";
 
 const fieldReportSchema = z.object({
   travel_order_no: z.string().min(1, "Travel order number is required"),
@@ -66,23 +66,24 @@ type UploadFieldReportFormProps = {
   values?: MonitoringReportType | null;
 };
 
+// Image validation
 const validateImages = (images: ImageData[]) => {
   const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-  const maxSize = 3 * 1024 * 1024; // 3MB per image
-  const maxTotalSize = 20 * 1024 * 1024; // 20MB total limit
+  const maxSize = 3 * 1024 * 1024; // 3MB
+  const maxTotalSize = 20 * 1024 * 1024; // 20MB
 
   if (!images || images.length === 0) {
     toast.error("At least one image is required");
     return false;
   }
 
-  for (const imageData of images) {
-    if (!allowedTypes.includes(imageData.file.type)) {
+  for (const img of images) {
+    if (!allowedTypes.includes(img.file.type)) {
       toast.error("Please upload valid image files (JPEG, PNG, or WebP)");
       return false;
     }
-    if (imageData.file.size > maxSize) {
-      toast.error("Each image file must be less than 1MB");
+    if (img.file.size > maxSize) {
+      toast.error("Each image file must be less than 3MB");
       return false;
     }
   }
@@ -103,7 +104,7 @@ export default function UploadFieldReportForm({
 }: UploadFieldReportFormProps) {
   const { projectID } = useParams();
   const { closeSheet } = useSheet();
-  const { closeModal } = useModal();
+  const { openModal, closeModal } = useModal();
 
   const [images, setImages] = useState<ImageData[]>(values?.images || []);
 
@@ -111,46 +112,58 @@ export default function UploadFieldReportForm({
     resolver: zodResolver(fieldReportSchema),
     defaultValues: {
       purpose: values?.purpose || "",
-      findings: values?.findings ? ["", ...values.findings] : [""],
-      issues_concern: values?.issues_concern
-        ? ["", ...values.issues_concern]
-        : [""],
+      findings: values?.findings ? [...values.findings] : [],
+      issues_concern: values?.issues_concern ? [...values.issues_concern] : [],
       observation: values?.observation || "",
     },
   });
 
   const { mutate, isPending } = useInsertMonitoringReportHook();
-  const onSubmit = async (data: FieldReportFormData) => {
-    if (!validateImages(images)) return;
 
-    const cleanedData = {
-      ...data,
-      findings: (data.findings || [])
-        .slice(1) // Remove the input field value at index 0
-        .filter((item) => item && item.trim().length > 0),
-      issues_concern: (data.issues_concern || [])
-        .slice(1) // Remove the input field value at index 0
-        .filter((item) => item && item.trim().length > 0),
-    };
+  // Memoized submit function
+  const onSubmit = useCallback(
+    async (data: FieldReportFormData) => {
+      closeModal();
+      if (!validateImages(images)) return;
 
-    await deleteDraft(values?.key as string);
+      const cleanedData = {
+        ...data,
+        findings: (data.findings || []).filter((item) => item !== ""),
+        issues_concern: (data.issues_concern || []).filter(
+          (item) => item !== ""
+        ),
+      };
 
-    mutate(
-      {
-        ...cleanedData,
-        project_id: projectID as string,
-        images,
-      },
-      {
-        onSuccess: () => {
-          form.reset();
-          setImages([]);
-          closeModal();
-          closeSheet();
-        },
-      }
+      await deleteDraft(values?.key as string);
+
+      mutate(
+        { ...cleanedData, project_id: projectID as string, images },
+        {
+          onSuccess: () => {
+            form.reset();
+            setImages([]);
+            closeSheet();
+          },
+        }
+      );
+    },
+    [images, values?.key, projectID, mutate, form, closeModal, closeSheet]
+  );
+
+  // Memoized modal opener
+  const handleOpenModal = useCallback(() => {
+    openModal(
+      "Attention",
+      "You confirm that all information provided is correct.",
+      <Button
+        className="w-full"
+        type="submit"
+        form="upload-monitoring-report-form"
+      >
+        Confirm
+      </Button>
     );
-  };
+  }, [openModal]);
 
   return (
     <>
@@ -162,7 +175,7 @@ export default function UploadFieldReportForm({
           setImages={setImages}
         />
         <form
-          className="space-y-3 p-2 border-t pt-4 overflow-x-hidden"
+          className="space-y-3 p-2 border-t pt-4 mb-4 overflow-x-hidden"
           id="upload-monitoring-report-form"
           onSubmit={form.handleSubmit(onSubmit)}
         >
@@ -211,64 +224,42 @@ export default function UploadFieldReportForm({
           )}
         </form>
       </section>
-      <SheetFooterSlot>
-        {!isAddMode && values?.remarks && (
+      <div className="flex flex-col p-2 text-sm text-muted-foreground gap-1">
+        {values?.key && <DeleteDraftButton draftKey={values.key} />}
+        {values?.reviewed_by_id && (
           <PrintDownloadDropdown
-            data={<MonitoringReportDocument data={values ?? null} />}
+            data={<MonitoringReportDocument data={values} />}
           />
-        )}
-        {values?.key != null && (
-          <DeleteDraftButton draftKey={values?.key as string} />
         )}
         {isAddMode && (
-          <SaveDraftButton
-            draftKey={values?.key as string}
-            form={form}
-            images={images}
-            isPending={isPending}
-          />
+          <>
+            <Button
+              variant={isPending ? "ghost" : "default"}
+              type="button"
+              className="w-full"
+              onClick={handleOpenModal}
+              size="sm"
+              disabled={
+                isPending || !form.formState.isValid || images.length === 0
+              }
+            >
+              {isPending ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <>
+                  <Send /> Submit
+                </>
+              )}
+            </Button>
+            <SaveDraftButton
+              draftKey={values?.key as string}
+              form={form}
+              images={[]}
+              isPending={isPending}
+            />
+          </>
         )}
-        {isAddMode && <SubmitButton isPending={isPending} images={images} />}
-      </SheetFooterSlot>
+      </div>
     </>
-  );
-}
-
-type SubmitButtonProps = {
-  isPending: boolean;
-  images: ImageData[];
-};
-function SubmitButton({ isPending, images }: SubmitButtonProps) {
-  const { openModal } = useModal();
-
-  return (
-    <Button
-      variant={isPending ? "ghost" : "default"}
-      type="button"
-      onClick={() => {
-        openModal(
-          "Attention",
-          "You confirm that all information provided is correct.",
-          <Button
-            className="w-full"
-            type="submit"
-            form="upload-monitoring-report-form"
-          >
-            Confirm
-          </Button>
-        );
-      }}
-      size={"sm"}
-      disabled={isPending || !images || images.length === 0}
-    >
-      {isPending ? (
-        <Loader2 className="animate-spin" />
-      ) : (
-        <>
-          <Send />
-          Submit
-        </>
-      )}
-    </Button>
   );
 }

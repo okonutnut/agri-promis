@@ -9,32 +9,34 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { PDFDownloadLink, pdf } from "@react-pdf/renderer";
 import { ChevronDown, Download, Printer } from "lucide-react";
+import React, { useCallback } from "react";
+import { DocumentProps } from "@react-pdf/renderer";
 
 type PrintDownloadDropdownProps = {
-  data: React.ReactElement<import("@react-pdf/renderer").DocumentProps>;
+  data: React.ReactElement<DocumentProps>;
 };
 
-export default function PrintDownloadDropdown({
+const PrintDownloadDropdown = React.memo(function PrintDownloadDropdown({
   data,
 }: PrintDownloadDropdownProps) {
-  const handleOpenInNewTab = async () => {
-    const blob = await pdf(data).toBlob(); // Generate the PDF as a Blob
-    const url = URL.createObjectURL(blob); // Create a URL for the Blob
-    window.open(url, "_blank"); // Open the URL in a new tab
-  };
+  const handleOpenInNewTab = useCallback(async () => {
+    const blob = await pdf(data).toBlob();
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank");
+  }, [data]);
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          size={"sm"}
-          className="flex items-center gap-2"
+          size="sm"
+          className="w-full flex items-center gap-2"
         >
           Export <ChevronDown />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="m-1 min-w-[150px]">
+      <DropdownMenuContent className="m-1 w-[--radix-dropdown-menu-trigger-width]">
         <DropdownMenuItem>
           <PDFDownloadLink
             document={data}
@@ -52,4 +54,6 @@ export default function PrintDownloadDropdown({
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
+});
+
+export default PrintDownloadDropdown;

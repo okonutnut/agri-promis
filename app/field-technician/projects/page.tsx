@@ -11,7 +11,6 @@ import CardLink from "@/components/custom/link/card-link";
 export default function FieldTechnicianPage() {
   const { data, isLoading, error } =
     useSelectAssignedProjectsByFieldTechnicianHook();
-  console.log("Assigned Projects Data:", data);
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredData = data?.filter((project) =>
