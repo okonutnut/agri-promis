@@ -9,7 +9,6 @@ import {
   getFilteredRowModel,
   ColumnFiltersState,
 } from "@tanstack/react-table";
-
 import {
   Table,
   TableBody,
@@ -22,12 +21,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { FilterByProgram } from "../components/filter-by-program";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   onRowSelect?: (row: TData) => void;
   onAdd?: () => void;
+  programID: (id: string) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -35,6 +36,7 @@ export function DataTable<TData, TValue>({
   data,
   onRowSelect,
   onAdd,
+  programID,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
@@ -53,14 +55,17 @@ export function DataTable<TData, TValue>({
   return (
     <div className="space-y-4">
       {/* Global Search Bar and Add Button */}
-      <div className="flex items-center justify-between gap-2">
-        <Input
-          placeholder="Search..."
-          value={table.getState().globalFilter ?? ""}
-          onChange={(event) => table.setGlobalFilter(event.target.value)}
-          className="max-w-sm"
-        />
-        <Button onClick={onAdd} size={"sm"}>
+      <div className="flex items-start justify-between gap-2 flex-col md:flex-row">
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          <Input
+            placeholder="Search..."
+            value={table.getState().globalFilter ?? ""}
+            onChange={(event) => table.setGlobalFilter(event.target.value)}
+            className="max-w-sm"
+          />
+          <FilterByProgram programID={programID} />
+        </div>
+        <Button onClick={onAdd} size={"sm"} className="w-full md:w-auto">
           Invite member
         </Button>
       </div>

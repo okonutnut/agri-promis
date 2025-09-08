@@ -56,9 +56,10 @@ import {
   EditProgramNameAction,
   DeleteProgramAction,
   SelectAllProgramsByUserIDAction,
+  SelectAllProgramsAction,
+  SelectUserByProgramAssignedAction,
 } from "@/app/actions/ProgramAction";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   MonitoringReportType,
@@ -99,7 +100,6 @@ export function useSelectAllProgramsByUserIDHook(userID: string) {
 
 export function useInsertProgramHook() {
   const qc = useQueryClient();
-  const router = useRouter();
 
   return useMutation({
     mutationFn: async (data: ProgramType) => await InsertProgramAction(data),
@@ -108,7 +108,7 @@ export function useInsertProgramHook() {
         queryKey: ["allProgramsByAgriculturist"],
       });
       toast("Program created successfully!");
-      router.push(`/dashboard/programs/${data.id}/`);
+      window.location.href = `/dashboard/programs/${data.id}`;
     },
     onError: (error) => {
       toast.error(`Failed to create program: ${error.message}`);
@@ -142,7 +142,7 @@ export function useEditProgramNameHook() {
 
 export function useDeleteProgramHook(programId: string) {
   const qc = useQueryClient();
-  const router = useRouter();
+
   return useMutation({
     mutationFn: async () => await DeleteProgramAction(programId),
     onSuccess: () => {
@@ -150,11 +150,28 @@ export function useDeleteProgramHook(programId: string) {
         queryKey: ["allProgramsByAgriculturist"],
       });
       toast("Program deleted successfully!");
-      router.push("/dashboard/programs");
+      window.location.href = "/dashboard/programs";
     },
     onError: (error) => {
       toast.error(`Failed to delete program: ${error.message}`);
     },
+  });
+}
+
+export function useSelectAllProgramsHook() {
+  return useQuery({
+    queryKey: ["programs"],
+    queryFn: async () => await SelectAllProgramsAction(),
+    refetchInterval: 3000,
+    networkMode: "online",
+  });
+}
+
+export function useSelectUsersByProgramAssignedHook(programId?: string) {
+  return useQuery({
+    queryKey: ["programs", programId],
+    queryFn: async () => await SelectUserByProgramAssignedAction(programId),
+    networkMode: "online",
   });
 }
 
@@ -201,7 +218,6 @@ export function useSelectProjectDetailsHook(projectId: string) {
 }
 
 export function useInsertProjectHook() {
-  const router = useRouter();
   const qc = useQueryClient();
 
   return useMutation({
@@ -211,7 +227,7 @@ export function useInsertProjectHook() {
         queryKey: ["allProjectsByProgramId"],
       });
       toast("Project created successfully!");
-      router.push(`/dashboard/projects/${data.id}`);
+      window.location.href = `/dashboard/projects/${data.id}`;
     },
     onError: (error) => {
       toast.error(`${error.message}`, {
@@ -242,7 +258,7 @@ export function useEditProjectHook() {
 
 export function useDeleteProjectHook(projectId: string, programId: string) {
   const qc = useQueryClient();
-  const router = useRouter();
+
   return useMutation({
     mutationFn: async () => await DeleteProjectAction(projectId),
     onSuccess: () => {
@@ -250,7 +266,7 @@ export function useDeleteProjectHook(projectId: string, programId: string) {
         queryKey: ["allProjectsByProgramId"],
       });
       toast.error("Project deleted successfully!");
-      router.push("/dashboard/programs/" + programId);
+      window.location.href = "/dashboard/programs/" + programId;
     },
     onError: (error) => {
       toast.error(`Failed to delete project: ${error.message}`);

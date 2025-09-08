@@ -2,7 +2,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
-import { ProgramType } from "../../components/types";
+import { ProgramType, UserProfileType } from "../../components/types";
 
 // PROGRAM ACTIONS
 
@@ -171,4 +171,53 @@ export async function DeleteProgramAction(programID: string) {
   );
 
   return;
+}
+
+export async function SelectAllProgramsAction() {
+  const supabase = await createClient(cookies());
+  const { data, error } = await supabase
+    .from("programs")
+    .select("*")
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("Error fetching programs:", error);
+    throw new Error(error.message);
+  }
+
+  return data as ProgramType[];
+}
+
+export async function SelectUserByProgramAssignedAction(programId?: string) {
+  if (programId === "all") return [];
+
+  const supabase = await createClient(cookies());
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !userData?.user?.id) {
+    console.error("Error fetching user:", userError);
+    throw new Error(userError?.message || "User not authenticated");
+  }
+
+  if (!programId) return [];
+
+  const { data, error } = await supabase
+    .from("assigned_projects")
+    .select("user:user_profile(*), projects!inner(*)") // use inner join here
+    .eq("projects.program_id", programId);
+
+  if (error) {
+    console.error(error);
+    return [];
+  }
+
+  // filter out null projects (shouldn’t happen if you use !inner)
+  const validRows = data.filter((item) => item.projects !== null);
+
+  if (validRows.length === 0) return [];
+
+  const users = validRows.map(
+    (item) => item.user
+  ) as unknown as UserProfileType[];
+  return users;
 }

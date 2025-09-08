@@ -139,7 +139,21 @@ export async function SelectAllMembersAction() {
 
   const { data, error } = await supabase
     .from("user_profile")
-    .select("*")
+    .select(
+      `
+      *,
+      assigned_projects (
+        project_id,
+        projects (
+          id,
+          program_id
+        )
+      ),
+      programs:programs!programs_admin_id_fkey (
+        id
+      )
+    `
+    )
     .order("role");
 
   if (error) {
@@ -147,7 +161,22 @@ export async function SelectAllMembersAction() {
     throw new Error(`Failed to fetch members: ${error.message}`);
   }
 
-  return data as UserProfileType[];
+  return data.map((user) => {
+    // programs from assigned projects
+    const programFromAssigned =
+      user.assigned_projects
+        ?.map((ap: any) => ap.projects?.program_id)
+        .filter(Boolean) ?? [];
+
+    // programs where user is admin
+    const programFromAdmin =
+      user.programs?.map((p: { id: string }) => p.id).filter(Boolean) ?? [];
+
+    return {
+      ...user,
+      program_ids: [...new Set([...programFromAssigned, ...programFromAdmin])],
+    };
+  }) as (UserProfileType & { program_ids: string[] })[];
 }
 
 export async function SelectAllMembersByRoleAction(role: number) {

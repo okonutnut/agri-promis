@@ -7,6 +7,7 @@ export type UserProfileType = {
   phone?: string;
   role?: number;
   position?: string;
+  program_ids?: string[];
   active_status?: number;
   created_at?: string;
 };
@@ -104,6 +105,7 @@ export type AssignedProjectsType = {
   user_id?: string;
   fullname?: string;
   project_id?: string;
+  projects?: ProjectType;
   created_at?: string;
   user_profile?: UserProfileType;
 };

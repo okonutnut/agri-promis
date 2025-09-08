@@ -10,6 +10,7 @@ import CustomPageLayout, {
   useSheet,
 } from "@/components/custom/layout/custom-page-layout";
 import { getDashboardNavItems } from "@/components/sidebar/navitems";
+import { useMemo, useState } from "react";
 const TeamMemberPanel = dynamic(
   () => import("./components/team-member-panel"),
   { ssr: false }
@@ -21,6 +22,7 @@ function TeamMembersContent({
   values: UserProfileType[] | undefined;
 }) {
   const { openSheet, closeSheet, openSheetWithTabs } = useSheet();
+  const [programID, setProgramID] = useState<string>("");
 
   const handleRowSelect = (row: UserProfileType) => {
     openSheetWithTabs("View Member Details", [
@@ -55,19 +57,30 @@ function TeamMembersContent({
   };
 
   if (!values) return null;
+  console.log("Program ID Ref:", programID);
+
+  const filteredValues = useMemo(() => {
+    if (programID !== "all")
+      return values.filter((v) => v.program_ids?.includes(programID));
+    else {
+      return values;
+    }
+  }, [values, programID]);
 
   return (
     <DataTable
       columns={columns}
-      data={values || []}
+      data={filteredValues || []}
       onRowSelect={handleRowSelect}
       onAdd={handleAdd}
+      programID={setProgramID}
     />
   );
 }
 
 export default function TeamMemberPage() {
   const { data, isLoading, error } = useSelectAllMembersHook();
+  console.log("All Members:", data);
   return (
     <CustomPageLayout
       pageTitle="Team Members"

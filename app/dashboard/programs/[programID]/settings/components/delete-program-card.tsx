@@ -8,16 +8,61 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useState } from "react";
-import CustomAlertDialog from "@/components/custom/alert/custom-alert";
+import { useModal } from "@/components/custom/layout/custom-page-layout";
 
 type DeleteProgramCardProps = {
   data: ProgramType;
 };
 export default function DeleteProgramCard({ data }: DeleteProgramCardProps) {
-  const [confirm, setConfirm] = useState(false);
-  const { mutate, isPending, isSuccess } = useDeleteProgramHook(
-    data.id as string
-  );
+  const { openModal, closeModal } = useModal();
+  const { mutate, isPending } = useDeleteProgramHook(data.id as string);
+
+  const DeleteModalContent = ({
+    programName,
+    onConfirm,
+  }: {
+    programName: string;
+    onConfirm: () => void;
+  }) => {
+    const [inputValue, setInputValue] = useState("");
+    const confirm =
+      inputValue.toLowerCase().trim() === programName.toLowerCase().trim();
+
+    return (
+      <>
+        <center className="text-sm mb-4">
+          Type <strong>{programName}</strong> to continue.
+        </center>
+        <Input
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+        />
+        <Separator className="my-4" />
+        <Button
+          className="w-full"
+          variant={"destructive"}
+          onClick={onConfirm}
+          disabled={!confirm}
+        >
+          Confirm
+        </Button>
+      </>
+    );
+  };
+
+  const handleOpenModal = () => {
+    openModal(
+      "Delete Program",
+      "Are you sure you want to delete this program? This action cannot be undone.",
+      <DeleteModalContent
+        programName={data.program_name}
+        onConfirm={() => {
+          mutate();
+          closeModal();
+        }}
+      />
+    );
+  };
 
   return (
     <Card className="shadow-xs bg-red-50 border-red-200">
@@ -30,43 +75,18 @@ export default function DeleteProgramCard({ data }: DeleteProgramCardProps) {
           To remove this program, please delete all the associated projects and
           data. This action cannot be undone.
         </span>
-        <CustomAlertDialog
-          trigger={
-            <Button variant={"destructive"} size="sm">
-              Delete Program
-            </Button>
-          }
-          title="Delete Program"
-          description="Are you sure you want to delete this program? This action cannot be undone."
-          onClose={() => {
-            if (isSuccess) {
-              setConfirm(false);
-            }
-            setConfirm(false);
-          }}
+        <Button
+          variant={isPending ? "ghost" : "destructive"}
+          size="sm"
+          disabled={isPending}
+          onClick={handleOpenModal}
         >
-          <Separator />
-          <center className="text-sm">
-            Type <strong>{data.program_name}</strong> to continue.
-          </center>
-          <Input
-            onChange={(e) =>
-              setConfirm(e.target.value === data.program_name.trim())
-            }
-          />
-          <Separator />
-          <Button
-            variant={isPending ? "ghost" : "destructive"}
-            disabled={!confirm || isPending}
-            onClick={() => mutate()}
-          >
-            {isPending ? (
-              <Loader2 className="animate-spin" />
-            ) : (
-              "Confirm Delete"
-            )}
-          </Button>
-        </CustomAlertDialog>
+          {isPending ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            "Delete Program"
+          )}
+        </Button>
       </CardContent>
     </Card>
   );
