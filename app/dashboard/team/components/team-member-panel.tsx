@@ -51,7 +51,6 @@ export default function TeamMemberPanel({ userId }: TeamMemberPanelProps) {
 
   return (
     <>
-      <Label className="px-3 mb-2 text-xl">Assigned Programs/Projects</Label>
       {isLoading ? (
         <SkeletonLoading />
       ) : programs?.length === 0 && projects?.length === 0 ? (
@@ -59,7 +58,8 @@ export default function TeamMemberPanel({ userId }: TeamMemberPanelProps) {
           No assigned programs or projects.
         </span>
       ) : (
-        <div className="space-y-4 max-h-64 overflow-y-auto px-3">
+        <div className="space-y-2 max-h-64 overflow-y-auto px-3">
+          <Label className="mt-2 text-xl">Assigned Programs/Projects</Label>
           <Input
             placeholder="Search..."
             className="w-full"

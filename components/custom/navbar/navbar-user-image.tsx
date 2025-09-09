@@ -4,6 +4,7 @@ import Image from "next/image";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -13,6 +14,8 @@ import {
   useSelectCurrentUserSessionHook,
   useSelectUserProfileHook,
 } from "@/app/hooks/UserProfileHook";
+import { TabletSmartphone } from "lucide-react";
+import Link from "next/link";
 
 export default function NavbarUserImage() {
   const { data } = useSelectUserProfileHook();
@@ -39,6 +42,12 @@ export default function NavbarUserImage() {
           <span className="text-xs">{data?.position}</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <Link href={"/mobile-app"}>
+          <DropdownMenuItem className="text-xs">
+            <TabletSmartphone className="h-2 w-2" />
+            Mobile App
+          </DropdownMenuItem>
+        </Link>
         <SidebarLogoutButton />
       </DropdownMenuContent>
     </DropdownMenu>

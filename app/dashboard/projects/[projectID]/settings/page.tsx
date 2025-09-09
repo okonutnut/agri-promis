@@ -3,10 +3,12 @@
 import dynamic from "next/dynamic";
 import { Card, CardContent } from "@/components/ui/card";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
-import { useSelectProgramAndProjectDetailsByProgjectIDHook } from "@/components/hooks";
+import { useSelectProjectDetailsHook } from "@/components/hooks";
 import { useParams } from "next/navigation";
 import { getProjectNavItems } from "@/components/sidebar/navitems";
 import { ProgramType, ProjectType } from "@/components/types";
+import { useSelectCurrentUserSessionHook } from "@/app/hooks/UserProfileHook";
+import { useMemo } from "react";
 const DeleteProjectCard = dynamic(
   () => import("./components/delete-project-card"),
   {
@@ -19,8 +21,15 @@ const EditProjectForm = dynamic(() => import("./form/edit-project-form"), {
 
 export default function ProgramSettingsPage() {
   const { projectID } = useParams();
-  const { data, isLoading, error } =
-    useSelectProgramAndProjectDetailsByProgjectIDHook(projectID as string);
+
+  const { data: userData } = useSelectCurrentUserSessionHook();
+  const { data, isLoading, error } = useSelectProjectDetailsHook(
+    projectID as string
+  );
+
+  const isAdmin = useMemo(() => {
+    return userData?.user.id === data?.programs?.admin_id;
+  }, [userData, data]);
 
   return (
     <CustomPageLayout
@@ -33,13 +42,16 @@ export default function ProgramSettingsPage() {
         <CardContent className="flex flex-wrap justify-between items-start p-0">
           <EditProjectForm
             project={data as ProjectType & { programs: ProgramType }}
+            isAdmin={isAdmin}
           />
         </CardContent>
       </Card>
-      <DeleteProjectCard
-        data={data as ProjectType}
-        programID={(data && (data.program_id as string)) ?? ""}
-      />
+      {isAdmin && (
+        <DeleteProjectCard
+          data={data as ProjectType}
+          programID={(data && (data.program_id as string)) ?? ""}
+        />
+      )}
     </CustomPageLayout>
   );
 }

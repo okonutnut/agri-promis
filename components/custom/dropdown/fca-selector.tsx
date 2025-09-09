@@ -24,13 +24,15 @@ import { useSelectAllFCAByStatusHook } from "@/app/hooks/FCAHook";
 interface FCASelectorProps {
   onChange?: (fcas: string[]) => void;
   value?: string[];
-  defaultValue?: string[]; // Add defaultValue prop
+  defaultValue?: string[];
+  readOnly?: boolean;
 }
 
 export default function FCASelector({
   onChange,
   value = [],
-  defaultValue = [], // Add defaultValue with empty array as default
+  defaultValue = [],
+  readOnly = false,
 }: FCASelectorProps) {
   const { data: fcas } = useSelectAllFCAByStatusHook(1);
   const [selectedFCAs, setSelectedFCAs] = useState<string[]>(
@@ -71,71 +73,68 @@ export default function FCASelector({
       {/* Selected FCAs Display */}
       <div className="flex flex-wrap gap-1">
         {getSelectedFCANames().map((name, index) => (
-          <Badge
-            key={selectedFCAs[index]}
-            variant="outline"
-            className="text-xs"
-          >
+          <Badge key={selectedFCAs[index]} variant="outline" className="h-9">
             {name}
           </Badge>
         ))}
       </div>
-
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="secondary"
-            role="combobox"
-            aria-expanded={open}
-            className="w-full justify-between shadow-xs font-normal"
-          >
-            {selectedFCAs.length === 0
-              ? "Select FCAs..."
-              : `${selectedFCAs.length} FCA${
-                  selectedFCAs.length > 1 ? "s" : ""
-                } selected`}
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
-          <Command>
-            <CommandInput placeholder="Search FCAs..." />
-            <CommandList>
-              <CommandEmpty>No FCA found.</CommandEmpty>
-              <CommandGroup>
-                {fcas &&
-                  // Sort: selected first, then unselected
-                  [...fcas]
-                    .sort((a, b) => {
-                      const aSelected = selectedFCAs.includes(a.id as string);
-                      const bSelected = selectedFCAs.includes(b.id as string);
-                      if (aSelected === bSelected) return 0;
-                      return aSelected ? -1 : 1;
-                    })
-                    .map((fca) => (
-                      <CommandItem
-                        key={fca.id}
-                        value={fca.description}
-                        onSelect={() => fca.id && handleFCAToggle(fca.id)}
-                      >
-                        <div
-                          className={cn(
-                            "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
-                            selectedFCAs.includes(fca.id || "")
-                              ? "bg-primary text-primary-foreground"
-                              : "opacity-50 [&_svg]:invisible"
-                          )}
+      {!readOnly && (
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="secondary"
+              role="combobox"
+              aria-expanded={open}
+              className="w-full justify-between shadow-xs font-normal"
+            >
+              {selectedFCAs.length === 0
+                ? "Select FCAs..."
+                : `${selectedFCAs.length} FCA${
+                    selectedFCAs.length > 1 ? "s" : ""
+                  } selected`}
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+            <Command>
+              <CommandInput placeholder="Search FCAs..." />
+              <CommandList>
+                <CommandEmpty>No FCA found.</CommandEmpty>
+                <CommandGroup>
+                  {fcas &&
+                    // Sort: selected first, then unselected
+                    [...fcas]
+                      .sort((a, b) => {
+                        const aSelected = selectedFCAs.includes(a.id as string);
+                        const bSelected = selectedFCAs.includes(b.id as string);
+                        if (aSelected === bSelected) return 0;
+                        return aSelected ? -1 : 1;
+                      })
+                      .map((fca) => (
+                        <CommandItem
+                          key={fca.id}
+                          value={fca.description}
+                          onSelect={() => fca.id && handleFCAToggle(fca.id)}
                         >
-                          <Check className="h-4 w-4" />
-                        </div>
-                        {fca.description}
-                      </CommandItem>
-                    ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+                          <div
+                            className={cn(
+                              "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
+                              selectedFCAs.includes(fca.id || "")
+                                ? "bg-primary text-primary-foreground"
+                                : "opacity-50 [&_svg]:invisible"
+                            )}
+                          >
+                            <Check className="h-4 w-4" />
+                          </div>
+                          {fca.description}
+                        </CommandItem>
+                      ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+      )}
     </div>
   );
 }

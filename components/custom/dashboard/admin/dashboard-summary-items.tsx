@@ -4,6 +4,8 @@ import dynamic from "next/dynamic";
 import { useSelectDashboardItemsHook } from "@/components/hooks";
 import { ChartLine, Contact, FileStack } from "lucide-react";
 import cornGrowthStages from "@/data/growth-stages.json";
+import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const SummaryCard = dynamic(() => import("../../card/summary-cards"), {
   ssr: false,
@@ -27,13 +29,13 @@ export default function ProjectDashboardItems({
         icon={ChartLine}
         isLoading={isLoading || error ? true : false}
       >
-        <strong className="text-xl">
-          {
-            cornGrowthStages.find(
+        <Suspense fallback={<Skeleton className="h-6 w-20" />}>
+          <strong className="text-xl">
+            {cornGrowthStages.find(
               (stage) => stage.value === data?.pi?.toString()
-            )?.label
-          }
-        </strong>
+            )?.label ?? "Not Available"}
+          </strong>
+        </Suspense>
       </SummaryCard>
       <SummaryCard
         title="Operators"

@@ -13,7 +13,6 @@ import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 export default function SidebarLogoutButton() {
   const [isLoading, setIsLoading] = useState(false);
   const supabase = createClient();
-  const router = useRouter();
   const qc = useQueryClient();
 
   const handleLogout = async () => {
@@ -23,7 +22,7 @@ export default function SidebarLogoutButton() {
       // Log the logout event
       await InsertActivityLogAction(
         "Logout",
-        "Has signed out the system",
+        "Signed out the system",
         undefined
       );
 

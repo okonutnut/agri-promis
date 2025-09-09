@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { ClipboardIcon } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -19,6 +18,7 @@ type FormInputType = {
   copy?: boolean;
   noPlaceholder?: boolean;
 };
+
 export default function FormInput({
   label,
   type,
@@ -31,37 +31,45 @@ export default function FormInput({
   noPlaceholder = false,
 }: FormInputType) {
   return (
-    <div className={cn(`w-full`, className)}>
-      <div className="text-sm font-medium flex justify-between items-center mb-1">
-        <Label htmlFor={name} className="capitalize">
-          {label}
-        </Label>
+    <div className={cn("w-full", className)}>
+      <Label
+        htmlFor={name}
+        className="capitalize mb-1 block text-sm font-medium"
+      >
+        {label}
+      </Label>
+
+      <div className="relative">
+        <Input
+          {...form.register(name)}
+          type={type || "text"}
+          placeholder={noPlaceholder ? "" : `Enter ${label.toLowerCase()}`}
+          disabled={disabled}
+          tabIndex={-1}
+          readOnly={
+            form.formState.isSubmitting ||
+            form.formState.isValidating ||
+            readonly
+          }
+          className={cn(copy ? "pr-10" : "")} // extra space for button
+        />
+
         {copy && (
           <Button
-            size={"sm"}
+            size="icon"
             type="button"
-            variant="ghost"
+            variant="outline"
+            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-20 text-xs"
             onClick={() => {
-              if (copy) {
-                navigator.clipboard.writeText(form.getValues(name));
-                toast.info(`Copied ${label} to clipboard`);
-              }
+              navigator.clipboard.writeText(form.getValues(name));
+              toast.info(`Copied ${label} to clipboard`);
             }}
           >
-            <ClipboardIcon />
+            COPY
           </Button>
         )}
       </div>
-      <Input
-        {...form.register(name)}
-        type={type || "text"}
-        placeholder={noPlaceholder ? "" : `Enter ${label.toLowerCase()}`}
-        disabled={disabled}
-        tabIndex={-1}
-        readOnly={
-          form.formState.isSubmitting || form.formState.isValidating || readonly
-        }
-      />
+
       <span className="text-xs text-red-500">
         {(form.formState.errors[name] as { message?: string })?.message}
       </span>

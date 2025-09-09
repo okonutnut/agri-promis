@@ -2,7 +2,6 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import * as tf from "@tensorflow/tfjs";
-// import type { io } from "@tensorflow/tfjs";
 import * as mobilenet from "@tensorflow-models/mobilenet";
 import type { CropDiseaseData } from "@/components/interfaces";
 import { createClient } from "@/utils/supabase/client";
@@ -357,6 +356,8 @@ export default function Page() {
             <Image
               src={previewUrl}
               alt="Preview"
+              width={100}
+              height={100}
               style={{ marginTop: 12, maxWidth: 220, borderRadius: 8 }}
             />
           )}

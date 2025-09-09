@@ -126,7 +126,7 @@ export async function SelectProjectDetailsByProjectIDAction(projectID: string) {
   const supabase = await createClient(cookies());
   const { data, error } = await supabase
     .from("projects")
-    .select("*")
+    .select("*, programs (*)")
     .eq("id", projectID)
     .single();
 

@@ -32,11 +32,11 @@ export default function FCAPanel({ fcaID }: FCAPanelProps) {
 
   return (
     <>
-      <Label className="px-3 my-2 text-xl">Assigned Projects</Label>
       {isLoading ? (
         <SkeletonLoading />
       ) : (
         <div className="space-y-2 max-h-64 overflow-y-auto px-3">
+          <Label className="mt-2 text-xl">Assigned Projects</Label>
           <Input
             placeholder="Search...."
             className="mb-4"

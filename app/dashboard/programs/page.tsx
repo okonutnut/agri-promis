@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useSelectAllProgramsByAgriculturistHook } from "@/components/hooks";
+import { useSelectAllProgramsHook } from "@/components/hooks";
 import Link from "next/link";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import { Boxes, ChevronRight, Search } from "lucide-react";
@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input";
 import CardLink from "@/components/custom/link/card-link";
 
 export default function ProgramsPage() {
-  const { data, isLoading, error } = useSelectAllProgramsByAgriculturistHook();
+  const { data, isLoading, error } = useSelectAllProgramsHook();
+  console.log("Programs data:", data);
   const [searchQuery, setSearchQuery] = useState("");
 
   // Filter programs based on the search query

@@ -134,7 +134,9 @@ export async function SelectAdminDashboardItemsAction() {
   // Fetch future travel orders based on departure_date or return_date
   const { data: futureOrders, error: futureError } = await supabase
     .from("travel_order")
-    .select("*, user:user_profile!travel_order_user_id_fkey (fullname)")
+    .select(
+      "*, user:user_profile!travel_order_user_id_fkey (fullname), projects (project_name)"
+    )
     .or(`departure_date.gte.${todayStart},return_date.gte.${todayStart}`)
     .limit(10);
 

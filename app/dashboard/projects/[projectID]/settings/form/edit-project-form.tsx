@@ -19,15 +19,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import cornGrowthStages from "@/data/growth-stages.json";
+import FormInput from "@/components/custom/input/form-input";
 
 const FCASelector = dynamic(
   () => import("@/components/custom/dropdown/fca-selector"),
-  {
-    ssr: false,
-  }
-);
-const FormInput = dynamic(
-  () => import("@/components/custom/input/form-input"),
   {
     ssr: false,
   }
@@ -51,9 +46,11 @@ type FormSchemaType = z.infer<typeof formSchema>;
 
 type EditProjectNameFormProps = {
   project: ProjectType;
+  isAdmin: boolean;
 };
 export default function EditProjectNameForm({
   project,
+  isAdmin,
 }: EditProjectNameFormProps) {
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
@@ -78,10 +75,16 @@ export default function EditProjectNameForm({
       >
         <Label className="font-semibold w-full mb-4">General Settings</Label>
         <FormInput label="Project ID" name="id" form={form} readonly copy />
-        <FormInput label="Project name" name="project_name" form={form} />
+        <FormInput
+          label="Project name"
+          name="project_name"
+          form={form}
+          readonly={!isAdmin}
+        />
         <FCASelector
           onChange={(value) => form.setValue("fca_ids", value)}
           defaultValue={project.fca_ids || []}
+          readOnly={!isAdmin}
         />
         <div className="w-full flex justify-between items-center">
           <Label>Set Active</Label>
@@ -90,15 +93,17 @@ export default function EditProjectNameForm({
             onCheckedChange={(checked) =>
               form.setValue("status", checked ? 1 : 0)
             }
+            disabled={!isAdmin}
           />
         </div>
         <div className="w-full flex justify-between items-center">
-          <Label>Project's Progress</Label>
+          <Label>Project&apos;s Progress</Label>
           <Select
             defaultValue={project.progress_indicator?.toString()}
             onValueChange={(value) =>
               form.setValue("progress_indicator", parseInt(value))
             }
+            disabled={!isAdmin}
           >
             <SelectTrigger className="w-[230px]">
               <SelectValue placeholder="Progress" />
@@ -113,16 +118,18 @@ export default function EditProjectNameForm({
           </Select>
         </div>
       </form>
-      <CardFooter className="w-full justify-end p-0 border-t mt-4 px-4">
-        <Button
-          form="edit-project-form"
-          size={"sm"}
-          variant={isPending ? "ghost" : "default"}
-          disabled={isPending || form.formState.isDirty}
-        >
-          {isPending ? <Loader2 className="animate-spin" /> : "Save Changes"}
-        </Button>
-      </CardFooter>
+      {isAdmin && (
+        <CardFooter className="w-full justify-end p-0 border-t mt-4 px-4">
+          <Button
+            form="edit-project-form"
+            size={"sm"}
+            variant={isPending ? "ghost" : "default"}
+            disabled={isPending || form.formState.isDirty}
+          >
+            {isPending ? <Loader2 className="animate-spin" /> : "Save Changes"}
+          </Button>
+        </CardFooter>
+      )}
     </>
   );
 }

@@ -23,7 +23,7 @@ export default function AdminDashboardItems() {
         <SummaryCard
           isLoading={isLoading}
           title="Program"
-          description="Total Created Programs"
+          description="Total Programs"
           icon={BookOpen}
         >
           <strong className="text-4xl">{data?.totalPrograms ?? 0}</strong>
@@ -31,7 +31,7 @@ export default function AdminDashboardItems() {
         <SummaryCard
           isLoading={isLoading}
           title="Projects"
-          description="Total Created Projects"
+          description="Total Projects"
           icon={FolderKanban}
         >
           <strong className="text-4xl">{data?.totalProjects ?? 0}</strong>

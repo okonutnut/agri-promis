@@ -81,7 +81,7 @@ export async function SelectProgramByIdAction(programId: string) {
   const supabase = await createClient(cookies());
   const { data, error } = await supabase
     .from("programs")
-    .select("*")
+    .select("*, user_profile (fullname)")
     .eq("id", programId)
     .single();
 
@@ -105,7 +105,6 @@ export async function SelectAllProgramsByAgriculturistAction() {
   const { data, error } = await supabase
     .from("programs")
     .select("*, project_count:projects(count)")
-    .eq("admin_id", userData.user.id)
     .order("created_at", { ascending: true });
 
   if (error) {
@@ -177,7 +176,7 @@ export async function SelectAllProgramsAction() {
   const supabase = await createClient(cookies());
   const { data, error } = await supabase
     .from("programs")
-    .select("*")
+    .select("*, project_count:projects(count)")
     .order("created_at", { ascending: true });
 
   if (error) {

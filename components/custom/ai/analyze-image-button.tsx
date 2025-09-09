@@ -34,24 +34,33 @@ export default function AnalyzeImageButton({
     label: string;
     prob: number;
   } | null>(null);
+  const [metadata, setMetadata] = useState<any[]>([]);
   const [metadataResult, setMetadataResult] = useState<any | null>(null);
+
+  // Retraining form states
+  const [showTrainForm, setShowTrainForm] = useState(false);
+  const [trainLabel, setTrainLabel] = useState("");
+  const [trainDescription, setTrainDescription] = useState("");
+  const [trainPossibleSolutions, setTrainPossibleSolutions] = useState("");
+  const [trainingData, setTrainingData] = useState<Record<string, tf.Tensor[]>>(
+    {}
+  );
 
   const supabase = createClient();
 
-  // Load mobilenet on mount
+  // Load mobilenet
   useEffect(() => {
     let mounted = true;
     (async () => {
       const m = await mobilenet.load({ version: 2, alpha: 1.0 });
-      if (!mounted) return;
-      setMobilenetModel(m);
+      if (mounted) setMobilenetModel(m);
     })();
     return () => {
       mounted = false;
     };
   }, []);
 
-  // Load classifier model and metadata from Supabase
+  // Load classifier + metadata
   async function loadClassifierFromSupabase(basePath = "models/crop-model") {
     try {
       const res = await fetch(
@@ -64,21 +73,18 @@ export default function AnalyzeImageButton({
       const modelJson = await (await fetch(modelUrl)).json();
       modelJson.weightsManifest[0].paths = [weightsUrl];
 
-      const ioHandler: tf.io.IOHandler = {
-        load: async () => modelJson,
-      };
-
+      const ioHandler: tf.io.IOHandler = { load: async () => modelJson };
       const m = await tf.loadLayersModel(ioHandler);
       setClassifierModel(m);
 
-      // Fetch metadata
       if (metadataUrl) {
         const metaRes = await fetch(metadataUrl);
         const metaJson = await metaRes.json();
         setLabels(metaJson.map((m: any) => m.title));
+        setMetadata(metaJson);
       }
     } catch (e) {
-      // handle error
+      console.error("Error loading classifier:", e);
     }
   }
 
@@ -86,16 +92,17 @@ export default function AnalyzeImageButton({
     loadClassifierFromSupabase().catch(() => {});
   }, []);
 
-  // Helper: convert imageSrc to HTMLImageElement
+  // Helpers
   async function imageSrcToElement(src: string): Promise<HTMLImageElement> {
-    return await new Promise<HTMLImageElement>((resolve) => {
+    return new Promise<HTMLImageElement>((resolve, reject) => {
       const img = document.createElement("img");
+      img.crossOrigin = "anonymous";
       img.onload = () => resolve(img);
+      img.onerror = (err) => reject(err);
       img.src = src;
     });
   }
 
-  // Helper: get mobilenet embedding
   async function mobileEmbedding(imageEl: HTMLImageElement) {
     if (!mobilenetModel) throw new Error("mobilenet not ready");
     const activation = mobilenetModel.infer(imageEl, true) as tf.Tensor;
@@ -104,7 +111,7 @@ export default function AnalyzeImageButton({
     return flat;
   }
 
-  // Main: Predict image
+  // Predict image
   async function predictImage(src?: string) {
     if (!src) return;
     setIsAnalyzing(true);
@@ -126,33 +133,152 @@ export default function AnalyzeImageButton({
       const bestIdx = arrList.indexOf(Math.max(...arrList));
       const bestProb = arrList[bestIdx];
       const label = labels[bestIdx] ?? `class_${bestIdx}`;
-      setPrediction({ label, prob: bestProb });
 
-      // Fetch metadata from Supabase if confident
-      if (bestProb > 0.35) {
-        const { data, error } = await supabase
-          .from("disease_models")
-          .select("*")
-          .eq("title", label)
-          .order("version", { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        if (!error && data) setMetadataResult(data);
+      if (bestProb >= 0.4) {
+        setPrediction({ label, prob: bestProb });
+        const meta = metadata.find((m) => m.title === label);
+        if (meta) setMetadataResult(meta);
+      } else {
+        setPrediction({ label: "Can't analyze", prob: bestProb });
       }
 
       emb.dispose();
       pred.dispose();
     } catch (e) {
-      // handle error
-      console.log(e);
+      console.error("Prediction error:", e);
     }
     setIsAnalyzing(false);
     setIsDrawerOpen(true);
   }
 
+  // Save new label + retrain + upload
+  async function saveNewTraining() {
+    if (!imageSrc || !mobilenetModel || !trainLabel) return;
+
+    // Collect example
+    const imgEl = await imageSrcToElement(imageSrc);
+    const emb = await mobileEmbedding(imgEl);
+    setTrainingData((prev) => {
+      const arr = prev[trainLabel] || [];
+      return { ...prev, [trainLabel]: [...arr, emb] };
+    });
+
+    const xs: tf.Tensor[] = [];
+    const ys: number[] = [];
+    const labelList = Object.keys(trainingData);
+
+    labelList.forEach((label, i) => {
+      trainingData[label].forEach((emb) => {
+        xs.push(emb);
+        ys.push(i);
+      });
+    });
+
+    // include current collected embedding
+    xs.push(emb);
+    ys.push(labelList.length);
+
+    const xsTensor = tf.concat(xs);
+    const ysTensor = tf.tensor1d(ys, "int32");
+    const ysOneHot = tf.oneHot(ysTensor, labelList.length + 1);
+
+    // Train new classifier
+    const model = tf.sequential();
+    model.add(
+      tf.layers.dense({
+        inputShape: [xsTensor.shape[1] || null],
+        units: 100,
+        activation: "relu",
+      })
+    );
+    model.add(
+      tf.layers.dense({ units: labelList.length + 1, activation: "softmax" })
+    );
+
+    model.compile({
+      optimizer: "adam",
+      loss: "categoricalCrossentropy",
+      metrics: ["accuracy"],
+    });
+    await model.fit(xsTensor, ysOneHot, { epochs: 20 });
+
+    setClassifierModel(model);
+    setLabels([...labelList, trainLabel]);
+
+    // Save to Supabase
+    const saveHandler: tf.io.IOHandler = {
+      save: async (modelArtifacts) => {
+        // model.json
+        const modelBlob = new Blob(
+          [JSON.stringify(modelArtifacts.modelTopology)],
+          {
+            type: "application/json",
+          }
+        );
+
+        // weights.bin
+        const weightsBlob = new Blob(
+          [new Uint8Array(modelArtifacts.weightData as ArrayBuffer)],
+          { type: "application/octet-stream" }
+        );
+
+        // Upload files
+        await supabase.storage
+          .from("models")
+          .upload("crop-model/model.json", modelBlob, { upsert: true });
+        await supabase.storage
+          .from("models")
+          .upload("crop-model/weights.bin", weightsBlob, { upsert: true });
+
+        // metadata.json
+        const newEntry = {
+          title: trainLabel,
+          description: trainDescription,
+          possible_solution: trainPossibleSolutions
+            .split("\n")
+            .map((s) => s.trim())
+            .filter(Boolean),
+        };
+
+        const updatedMeta = [...metadata, newEntry];
+        const metaBlob = new Blob([JSON.stringify(updatedMeta, null, 2)], {
+          type: "application/json",
+        });
+
+        await supabase.storage
+          .from("models")
+          .upload("crop-model/metadata.json", metaBlob, { upsert: true });
+
+        setMetadata(updatedMeta);
+        alert("Model retrained and saved!");
+
+        return {
+          modelArtifactsInfo: {
+            dateSaved: new Date(),
+            modelTopologyType: "JSON",
+            modelTopologyBytes: modelBlob.size,
+            weightDataBytes: weightsBlob.size,
+          },
+        };
+      },
+    };
+
+    await model.save(saveHandler);
+
+    xsTensor.dispose();
+    ysTensor.dispose();
+    ysOneHot.dispose();
+    emb.dispose();
+
+    setShowTrainForm(false);
+    setTrainLabel("");
+    setTrainDescription("");
+    setTrainPossibleSolutions("");
+  }
+
   return (
     <>
-      {isAIFeatureEnabled && (
+      {isAIFeatureEnabled && mobilenetModel != null && (
         <Button
           onClick={() => predictImage(imageSrc)}
           variant="ghost"
@@ -167,8 +293,9 @@ export default function AnalyzeImageButton({
           )}
         </Button>
       )}
+
       <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <DrawerTrigger asChild></DrawerTrigger>
+        <DrawerTrigger asChild />
         <DrawerContent className="min-h-[300px] text-center">
           <DrawerHeader>
             <DrawerTitle className="text-lg">
@@ -177,9 +304,12 @@ export default function AnalyzeImageButton({
             <DrawerDescription>
               {metadataResult
                 ? metadataResult.description
-                : "No metadata found or prediction confidence too low."}
+                : prediction?.label === "Can't analyze"
+                ? "Confidence too low to analyze."
+                : "No metadata found."}
             </DrawerDescription>
           </DrawerHeader>
+
           {metadataResult && (
             <>
               <strong>Possible Solution:</strong>
@@ -191,6 +321,48 @@ export default function AnalyzeImageButton({
                 )}
               </ul>
             </>
+          )}
+
+          {prediction && (
+            <div className="mt-4">
+              <Button
+                variant="outline"
+                onClick={() => setShowTrainForm((p) => !p)}
+              >
+                Not correct?
+              </Button>
+            </div>
+          )}
+
+          {showTrainForm && (
+            <center>
+              <div className="max-w-sm mt-4 p-4 space-y-2">
+                <input
+                  className="w-full p-2 border rounded"
+                  placeholder="Correct Label"
+                  value={trainLabel}
+                  onChange={(e) => setTrainLabel(e.target.value)}
+                />
+                <textarea
+                  className="w-full p-2 border rounded"
+                  placeholder="Description"
+                  value={trainDescription}
+                  onChange={(e) => setTrainDescription(e.target.value)}
+                />
+                <textarea
+                  className="w-full p-2 border rounded"
+                  placeholder="Possible Solutions (one per line)"
+                  value={trainPossibleSolutions}
+                  onChange={(e) => setTrainPossibleSolutions(e.target.value)}
+                />
+
+                <div className="flex gap-2">
+                  <Button className="w-full" onClick={saveNewTraining}>
+                    Save
+                  </Button>
+                </div>
+              </div>
+            </center>
           )}
         </DrawerContent>
       </Drawer>

@@ -13,6 +13,7 @@ type ScheduledMonitoringTableProps = {
   data: {
     id: string;
     travel_order_no?: string;
+    projects?: { project_name: string };
     user?: { fullname: string };
     purpose?: string;
   }[];
@@ -22,15 +23,18 @@ export default function ScheduledMonitoringTable({
 }: ScheduledMonitoringTableProps) {
   return (
     <>
-      <span className="text-lg font-semibold">Scheduled Monitoring</span>
+      <span className="text-lg font-semibold">
+        Scheduled Monitoring ({new Date().toLocaleDateString()})
+      </span>
       <div className="flex justify-center items-center border shadow-xs rounded-md">
         {/* TODAY */}
         <Table className="border-r">
           <TableHeader>
             <TableRow>
               <TableHead>Travel Order No</TableHead>
-              <TableHead>Field Operator</TableHead>
+              <TableHead>Project</TableHead>
               <TableHead>Activity</TableHead>
+              <TableHead className="text-end">Field Operator</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -41,14 +45,17 @@ export default function ScheduledMonitoringTable({
                     {item.travel_order_no || "Unknown Travel Order No"}
                   </TableCell>
                   <TableCell>
-                    {item.user?.fullname || "Unknown Operator"}
+                    {item.projects?.project_name || "Unknown Project"}
                   </TableCell>
                   <TableCell>{item.purpose ?? "No Purpose Provided"}</TableCell>
+                  <TableCell className="text-end">
+                    {item.user?.fullname || "Unknown Operator"}
+                  </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={3} className="text-center">
+                <TableCell colSpan={4} className="text-center">
                   No activities scheduled for today.
                 </TableCell>
               </TableRow>

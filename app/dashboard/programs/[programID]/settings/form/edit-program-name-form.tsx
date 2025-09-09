@@ -9,6 +9,7 @@ import { CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { ProgramType } from "@/components/types";
+import NonFormInput from "@/components/custom/input/non-form-input";
 const FormInput = dynamic(
   () => import("@/components/custom/input/form-input"),
   {
@@ -23,9 +24,11 @@ const formSchema = z.object({
 
 type EditProgramNameFormProps = {
   programData: ProgramType;
+  isAdmin: boolean;
 };
 export default function EditProgramNameForm({
   programData,
+  isAdmin,
 }: EditProgramNameFormProps) {
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -46,17 +49,28 @@ export default function EditProgramNameForm({
         onSubmit={form.handleSubmit(handleSubmit)}
       >
         <FormInput label="Program ID" name="id" form={form} readonly copy />
-        <FormInput label="Program name" name="program_name" form={form} />
-        <CardFooter className="w-full justify-end p-0">
-          <Button
-            type="submit"
-            size={"sm"}
-            variant={isPending ? "ghost" : "default"}
-            disabled={isPending}
-          >
-            {isPending ? <Loader2 className="animate-spin" /> : "Save"}
-          </Button>
-        </CardFooter>
+        <FormInput
+          label="Program name"
+          name="program_name"
+          form={form}
+          readonly={!isAdmin}
+        />
+        <NonFormInput
+          label="Program Admin / Creator"
+          defaultValue={programData.user_profile?.fullname ?? "N/A"}
+        />
+        {isAdmin && (
+          <CardFooter className="w-full justify-end p-0">
+            <Button
+              type="submit"
+              size={"sm"}
+              variant={isPending ? "ghost" : "default"}
+              disabled={isPending}
+            >
+              {isPending ? <Loader2 className="animate-spin" /> : "Save"}
+            </Button>
+          </CardFooter>
+        )}
       </form>
     </>
   );

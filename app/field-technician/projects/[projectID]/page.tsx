@@ -45,9 +45,15 @@ function ProjectDashboardInfo(data: ProjectType) {
           Location: {data.location ?? "Not specified"}
         </span>
         {data.fca && (
-          <span className="text-sm text-muted-foreground">
-            FCA: {data.fca?.map((fca) => fca.description).join(", ")}
-          </span>
+          <>
+            <span className="text-sm text-muted-foreground">
+              FCA: {data.fca?.map((fca) => fca.description).join(", ")}
+            </span>
+            <span className="text-sm text-muted-foreground">
+              Total Alloted Land:&nbsp;
+              {data.total_alloted_area} hectares
+            </span>
+          </>
         )}
       </div>
       <Badge variant="outline" className={`h-7 px-4 text-xs gap-2`}>

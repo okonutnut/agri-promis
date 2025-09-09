@@ -7,6 +7,8 @@ import { useSelectProgramByIDHook } from "@/components/hooks";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import { getProgramNavItems } from "@/components/sidebar/navitems";
 import { ProgramType } from "@/components/types";
+import { useSelectCurrentUserSessionHook } from "@/app/hooks/UserProfileHook";
+import { useMemo } from "react";
 
 const EditProgramNameForm = dynamic(
   () => import("./form/edit-program-name-form"),
@@ -23,9 +25,17 @@ const DeleteProgramCard = dynamic(
 
 export default function ProgramSettingsPage() {
   const { programID } = useParams();
+
+  const { data: userData } = useSelectCurrentUserSessionHook();
   const { data, isLoading, error } = useSelectProgramByIDHook(
     programID as string
   );
+  console.log("Program Data:", data);
+
+  const isAdmin = useMemo(() => {
+    return userData?.user.id === data?.admin_id;
+  }, [userData, data]);
+
   return (
     <CustomPageLayout
       pageTitle="Program Settings"
@@ -38,10 +48,13 @@ export default function ProgramSettingsPage() {
           <span className="text-xl font-semibold w-full mb-4">
             General Settings
           </span>
-          <EditProgramNameForm programData={data as ProgramType} />
+          <EditProgramNameForm
+            programData={data as ProgramType}
+            isAdmin={isAdmin}
+          />
         </CardContent>
       </Card>
-      <DeleteProgramCard data={data as ProgramType} />
+      {isAdmin && <DeleteProgramCard data={data as ProgramType} />}
     </CustomPageLayout>
   );
 }

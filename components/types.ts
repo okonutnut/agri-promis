@@ -32,9 +32,10 @@ export type FCAType = {
 
 export type ProgramType = {
   id?: string;
-  agriculturist_id?: string;
+  admin_id?: string;
   program_name: string;
   description?: string;
+  user_profile?: UserProfileType;
   project_count: { count: number }[];
   created_at?: string;
 };
@@ -52,6 +53,7 @@ export type ProjectType = {
   location?: string;
   fca?: FCAType[];
   fca_ids?: string[];
+  programs?: ProgramType;
   locationData?: LocationType;
   program_id?: string;
   created_by?: string;

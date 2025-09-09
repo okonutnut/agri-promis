@@ -28,7 +28,7 @@ export default function GoogleSignInButton() {
       if (user !== null) {
         await InsertActivityLogAction(
           "Login",
-          `Has signed into the system.`,
+          `Signed into the system.`,
           undefined
         );
         setState("disabled");
