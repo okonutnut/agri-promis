@@ -22,43 +22,43 @@ const FCASelector = dynamic(() => import("../dropdown/fca-selector"), {
   ssr: false,
 });
 
-const formSchema = z
-  .object({
-    project_name: z
-      .string()
-      .min(1, "Project name is required")
-      .max(50, "Project name cannot exceed 20 characters")
-      .refine((val) => !/\d/.test(val), {
-        message: "Project name cannot contain numbers",
-      }),
-    description: z.string().optional(),
-    location: z.string().min(1, "Location is required"),
-    fca_ids: z.array(z.string()).min(1, "At least one FCA is required"),
-    total_alloted_area: z.coerce
-      .number()
-      .min(1, "At least one hectare per person is required"),
-    start_date: z.coerce.string().refine(
-      (val) => {
-        const date = new Date(val);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        return !isNaN(date.getTime()) && date >= today;
-      },
-      { message: "Start date cannot be in the past" }
-    ),
-    end_date: z.coerce.string(),
-  })
-  .superRefine((data, ctx) => {
-    const start = new Date(data.start_date);
-    const end = new Date(data.end_date);
-    if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && end < start) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "End date must be after start date",
-        path: ["end_date"],
-      });
-    }
-  });
+const formSchema = z.object({
+  project_name: z
+    .string()
+    .min(1, "Project name is required")
+    .max(50, "Project name cannot exceed 20 characters")
+    .refine((val) => !/\d/.test(val), {
+      message: "Project name cannot contain numbers",
+    }),
+  description: z.string().optional(),
+  location: z.string().min(1, "Location is required"),
+  fca_ids: z.array(z.string()).min(1, "At least one FCA is required"),
+  total_alloted_area: z.coerce
+    .number()
+    .min(1, "At least one hectare per person is required"),
+  start_date: z.coerce.string(),
+  // .refine(
+  //   (val) => {
+  //     const date = new Date(val);
+  //     const today = new Date();
+  //     today.setHours(0, 0, 0, 0);
+  //     return !isNaN(date.getTime()) && date >= today;
+  //   },
+  //   { message: "Start date cannot be in the past" }
+  // ),
+  end_date: z.coerce.string(),
+});
+// .superRefine((data, ctx) => {
+//   const start = new Date(data.start_date);
+//   const end = new Date(data.end_date);
+//   if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && end < start) {
+//     ctx.addIssue({
+//       code: z.ZodIssueCode.custom,
+//       message: "End date must be after start date",
+//       path: ["end_date"],
+//     });
+//   }
+// });
 type FormData = z.infer<typeof formSchema>;
 
 export default function CreateProjectForm() {

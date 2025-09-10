@@ -15,7 +15,6 @@ import {
 } from "react";
 import SkeletonLoading from "./skeleton-loading";
 import CustomNavbar from "../navbar/custom-navbar";
-import { useUpdateUserCurrentLocationHook } from "@/components/hooks";
 import {
   Sheet,
   SheetClose,
@@ -35,6 +34,9 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { X } from "lucide-react";
+import { useSelectUserProfileHook } from "@/app/hooks/UserProfileHook";
+import { UpdateUserCurrentLocationAction } from "@/app/actions/UserSessionAction";
+import { createClient } from "@/utils/supabase/client";
 
 // Sheet Context
 interface SheetContextType {
@@ -130,7 +132,12 @@ export default function CustomPageLayout({
   topRightComponent,
   role,
 }: CustomPageLayoutProps) {
-  useUpdateUserCurrentLocationHook();
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      await UpdateUserCurrentLocationAction();
+    }, 600000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Sheet state management
   const [sheetState, setSheetState] = useState({
@@ -241,6 +248,21 @@ export default function CustomPageLayout({
     openModal,
     closeModal,
   };
+
+  // USER SESSION MANAGEMENT
+  const supabase = createClient();
+  const { data } = useSelectUserProfileHook();
+  useEffect(() => {
+    if (data?.active_status === 0) {
+      toast.error("Your account is inactive. Please contact support.");
+      async function signOutInactiveUser() {
+        console.log("Signing out inactive user...");
+        await supabase.auth.signOut();
+        window.location.href = "/login";
+      }
+      signOutInactiveUser();
+    }
+  }, [data]);
 
   return (
     <SheetContext.Provider value={sheetContextValue}>

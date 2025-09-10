@@ -67,7 +67,11 @@ export default function EditProgramNameForm({
               variant={isPending ? "ghost" : "default"}
               disabled={isPending}
             >
-              {isPending ? <Loader2 className="animate-spin" /> : "Save"}
+              {isPending ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                "Save Changes"
+              )}
             </Button>
           </CardFooter>
         )}

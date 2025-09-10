@@ -12,6 +12,8 @@ import { UserProfileType } from "@/components/types";
 import { Label } from "@/components/ui/label";
 import ChangeStatusButton from "./change-status-button";
 import { SheetFooterSlot } from "@/components/custom/layout/custom-page-layout";
+import { useSelectCurrentUserSessionHook } from "@/app/hooks/UserProfileHook";
+import { useMemo } from "react";
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -60,6 +62,11 @@ export function TeamMemberForm({
   // UPDATE MEMBER HOOK
   const { mutate: updateMutate, isPending: isUpdatePending } =
     useUpdateMemberHook();
+  // CURRENT USER SESSION
+  const { data: userData } = useSelectCurrentUserSessionHook();
+  const isUserProfile = useMemo(() => {
+    return userData?.user.id == data?.id;
+  }, [data, userData?.user.id]);
 
   const isPending = isInsertPending || isUpdatePending;
 
@@ -102,7 +109,9 @@ export function TeamMemberForm({
         />
       </form>
       <SheetFooterSlot>
-        {!isAddMode && <ChangeStatusButton data={data} form={form} />}
+        {(!isAddMode || !isUserProfile) && (
+          <ChangeStatusButton data={data} form={form} />
+        )}
         <Button
           type="submit"
           form="team-member-form"
@@ -110,7 +119,7 @@ export function TeamMemberForm({
           variant={isPending ? "ghost" : "default"}
           disabled={isPending}
         >
-          {isInsertPending ? (
+          {isPending ? (
             <Loader2 className="animate-spin" />
           ) : (
             <>

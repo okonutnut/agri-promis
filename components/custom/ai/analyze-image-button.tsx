@@ -296,10 +296,14 @@ export default function AnalyzeImageButton({
 
       <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
         <DrawerTrigger asChild />
-        <DrawerContent className="min-h-[300px] text-center">
+        <DrawerContent className="min-h-[400px] text-center">
           <DrawerHeader>
             <DrawerTitle className="text-lg">
-              {prediction ? prediction.label : "Analyzing..."}
+              Issue Analysis:
+              <br />
+              <span className="text-md font-semibold">
+                {prediction ? prediction.label : "Analyzing..."}
+              </span>
             </DrawerTitle>
             <DrawerDescription>
               {metadataResult
@@ -313,8 +317,8 @@ export default function AnalyzeImageButton({
           {metadataResult && (
             <>
               <strong>Possible Solution:</strong>
-              <ul>
-                {(metadataResult.possible_solution || []).map(
+              <ul className="list-disc list-inside text-left max-w-sm mx-auto">
+                {(metadataResult.possibleSolution || []).map(
                   (s: string, i: number) => (
                     <li key={i}>{s}</li>
                   )
