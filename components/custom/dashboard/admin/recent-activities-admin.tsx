@@ -23,7 +23,7 @@ type RecentActivitiesProps = {
 export default function RecentActivities({ data }: RecentActivitiesProps) {
   return (
     <>
-      <span className="text-lg font-semibold">Recent Activities</span>
+      <span className="text-lg font-semibold">Activity Logs</span>
       <div className="border shadow-xs rounded-md">
         <div className="flex justify-end">
           {data && data.length > 0 && (
