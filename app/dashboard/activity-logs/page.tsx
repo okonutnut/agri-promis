@@ -2,12 +2,17 @@
 
 import { DataTable } from "./table/data-table";
 import { columns } from "./table/columns";
-import { useSelectAllActivityLogsHook } from "@/components/hooks";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import { getDashboardNavItems } from "@/components/sidebar/navitems";
+import { useRealtimeQuery } from "@/hooks/use-realtime";
+import { SelectAllActivityLogsAction } from "@/app/actions/ActivityLogAction";
 
 export default function ActivityLogsPage() {
-  const { data, isLoading, error } = useSelectAllActivityLogsHook();
+  const { data, isLoading, error } = useRealtimeQuery({
+    queryKey: ["activity-logs"],
+    table: "activity_logs",
+    queryFn: SelectAllActivityLogsAction,
+  });
 
   return (
     <CustomPageLayout
@@ -16,7 +21,7 @@ export default function ActivityLogsPage() {
       error={error}
       navItems={getDashboardNavItems()}
     >
-      <DataTable columns={columns} data={data || []} />
+      <DataTable columns={columns} data={data ?? []} />
     </CustomPageLayout>
   );
 }

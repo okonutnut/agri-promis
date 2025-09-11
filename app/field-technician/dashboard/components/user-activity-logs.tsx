@@ -1,7 +1,7 @@
 "use client";
 
+import { SelectAllActivityLogsByCurrentUserAction } from "@/app/actions/ActivityLogAction";
 import SkeletonLoading from "@/components/custom/layout/skeleton-loading";
-import { useSelectAllActivityLogsByCurrentUserHook } from "@/components/hooks";
 import { Card } from "@/components/ui/card";
 import {
   Table,
@@ -11,10 +11,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { format } from "date-fns";
 
 export default function UserActivityLogs() {
-  const { data, isLoading } = useSelectAllActivityLogsByCurrentUserHook();
+  const { data, isLoading } = useRealtimeQuery({
+    queryKey: ["activity-logs"],
+    queryFn: SelectAllActivityLogsByCurrentUserAction,
+    table: "activity_logs",
+  });
+
   return (
     <>
       {isLoading ? (

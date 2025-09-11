@@ -91,48 +91,23 @@ export async function SelectUserDashboardItemsAction() {
 
 export async function SelectAdminDashboardItemsAction() {
   const supabase = await createClient(cookies());
-  const { data: userData, error: userError } = await supabase.auth.getUser();
 
-  if (userError || !userData?.user) {
-    console.error("Error fetching user:", userError);
-    throw new Error(userError?.message || "User not authenticated");
-  }
-
-  // Get total users
-  const { data: userCount, error: userCountError } = await supabase
+  const { count: userCount } = await supabase
     .from("user_profile")
-    .select("*", { count: "exact" });
+    .select("*", { count: "exact", head: true });
 
-  if (userCountError) {
-    console.error("Error fetching user count:", userCountError);
-    throw new Error(userCountError.message);
-  }
-
-  // Get total programs
-  const { data: programCount, error: programCountError } = await supabase
+  const { count: programCount } = await supabase
     .from("programs")
-    .select("*", { count: "exact" });
+    .select("*", { count: "exact", head: true });
 
-  if (programCountError) {
-    console.error("Error fetching program count:", programCountError);
-    throw new Error(programCountError.message);
-  }
-
-  // Get total projects
-  const { data: projectCount, error: projectCountError } = await supabase
+  const { count: projectCount } = await supabase
     .from("projects")
-    .select("*", { count: "exact" });
+    .select("*", { count: "exact", head: true });
 
-  if (projectCountError) {
-    console.error("Error fetching project count:", projectCountError);
-    throw new Error(projectCountError.message);
-  }
-
-  // Scheduled travel orders
-  const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split("T")[0];
   const todayStart = `${today}T00:00:00`;
-  // Fetch future travel orders based on departure_date or return_date
-  const { data: futureOrders, error: futureError } = await supabase
+
+  const { data: futureOrders } = await supabase
     .from("travel_order")
     .select(
       "*, user:user_profile!travel_order_user_id_fkey (fullname), projects (project_name)"
@@ -140,29 +115,18 @@ export async function SelectAdminDashboardItemsAction() {
     .or(`departure_date.gte.${todayStart},return_date.gte.${todayStart}`)
     .limit(10);
 
-  if (futureError) {
-    console.error("Error fetching future travel orders:", futureError);
-    throw new Error("Failed fetching future travel orders");
-  }
-
-  // Get last 10 activity logs
-  const { data: activityLogs, error: activityLogsError } = await supabase
+  const { data: activityLogs } = await supabase
     .from("activity_logs")
     .select("*, user:user_profile (fullname)")
     .order("created_at", { ascending: false })
     .limit(10);
 
-  if (activityLogsError) {
-    console.error("Error fetching activity logs:", activityLogsError);
-    throw new Error(activityLogsError.message);
-  }
-
   return {
-    totalUsers: userCount?.length || 0,
-    totalPrograms: programCount?.length || 0,
-    totalProjects: projectCount?.length || 0,
-    recentActivityLogs: activityLogs || [],
-    futureTravelOrders: futureOrders || [],
+    totalUsers: userCount ?? 0,
+    totalPrograms: programCount ?? 0,
+    totalProjects: projectCount ?? 0,
+    recentActivityLogs: activityLogs ?? [],
+    futureTravelOrders: futureOrders ?? [],
   };
 }
 

@@ -4,12 +4,13 @@ import { DataTable } from "./table/data-table";
 import { columns } from "./table/columns";
 import { FCAForm } from "./components/fca-form";
 import { FCAType } from "@/components/types";
-import { useSelectAllFCAHook } from "@/app/hooks/FCAHook";
 import CustomPageLayout, {
   useSheet,
 } from "@/components/custom/layout/custom-page-layout";
 import { getDashboardNavItems } from "@/components/sidebar/navitems";
 import FCAPanel from "./components/fca-panel";
+import { useRealtimeQuery } from "@/hooks/use-realtime";
+import { SelectAllFCAAction } from "@/app/actions/FCAAction";
 
 function FCAContent({ values }: { values: FCAType[] | undefined }) {
   const { openSheet, closeSheet, openSheetWithTabs } = useSheet();
@@ -61,7 +62,11 @@ function FCAContent({ values }: { values: FCAType[] | undefined }) {
 }
 
 export default function FCAPage() {
-  const { data, isLoading, error } = useSelectAllFCAHook();
+  const { data, isLoading, error } = useRealtimeQuery({
+    queryKey: ["farmers"],
+    table: "farmers",
+    queryFn: SelectAllFCAAction,
+  });
 
   return (
     <CustomPageLayout

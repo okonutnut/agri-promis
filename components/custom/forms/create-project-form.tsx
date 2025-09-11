@@ -114,7 +114,7 @@ export default function CreateProjectForm() {
         />
         <FCASelector onChange={(fca) => form.setValue("fca_ids", fca)} />
         <FormInput
-          label="Total Alloted Area"
+          label="Total Alloted Area (Hectares)"
           name="total_alloted_area"
           type="number"
           form={form}

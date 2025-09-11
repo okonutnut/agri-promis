@@ -1,15 +1,13 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
-import { useSelectAllProjectsByProgramIDHook } from "@/components/hooks";
+import { useMemo, useState } from "react";
 import { ProjectType } from "@/components/types";
 import { Check, ChevronRight, Funnel, Search } from "lucide-react";
 import { useParams } from "next/navigation";
 import { getProgramNavItems } from "@/components/sidebar/navitems";
 import Link from "next/link";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +15,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import cornGrowthStages from "@/data/growth-stages.json";
+import { useRealtimeQuery } from "@/hooks/use-realtime";
+import { SelectAllProjectsByProgramIDAction } from "@/app/actions/ProjectAction";
 
 const Badge = dynamic(
   () => import("@/components/ui/badge").then((mod) => mod.Badge),
@@ -30,18 +30,23 @@ const Input = dynamic(
   () => import("@/components/ui/input").then((mod) => mod.Input),
   { ssr: false }
 );
-const CardLink = dynamic(() => import("@/components/custom/link/card-link"));
+const CardLink = dynamic(() => import("@/components/custom/link/card-link"), {
+  ssr: false,
+});
 
 export default function ProgramDashboardPage() {
   const { programID } = useParams();
-  const qc = useQueryClient();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [projectStatus, setProjectStatus] = useState<number>(1);
 
-  const { data, isLoading, error } = useSelectAllProjectsByProgramIDHook(
-    programID as string
-  );
+  const { data, isLoading, error } = useRealtimeQuery({
+    queryKey: ["allProjectsByProgramId", programID as string],
+    queryFn: () => {
+      return SelectAllProjectsByProgramIDAction(programID as string);
+    },
+    table: "projects",
+  });
 
   const filteredProjects = useMemo(
     () =>
@@ -54,10 +59,6 @@ export default function ProgramDashboardPage() {
         .filter((project: ProjectType) => project.status === projectStatus),
     [data, searchQuery, projectStatus]
   );
-
-  useEffect(() => {
-    qc.invalidateQueries({ queryKey: ["allProjectsByProgramId"] });
-  }, []);
 
   return (
     <CustomPageLayout

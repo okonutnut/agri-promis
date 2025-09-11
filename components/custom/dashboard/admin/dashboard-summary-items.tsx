@@ -25,7 +25,7 @@ export default function ProjectDashboardItems({
     <section className="flex flex-wrap md:flex-nowrap justify-between gap-5 p-4">
       <SummaryCard
         title="Progress"
-        description="Project Stage"
+        description="Current Project Stage"
         icon={ChartLine}
         isLoading={isLoading || error ? true : false}
       >
@@ -33,7 +33,7 @@ export default function ProjectDashboardItems({
           <strong className="text-xl">
             {cornGrowthStages.find(
               (stage) => stage.value === data?.pi?.toString()
-            )?.label ?? "Not Available"}
+            )?.label ?? "Not Set"}
           </strong>
         </Suspense>
       </SummaryCard>

@@ -21,11 +21,11 @@ export async function InsertActivityLogAction(
   const data = await response.json();
 
   const { error } = await supabase.from("activity_logs").insert({
-    user_id: userData.user.id,
-    ip_address: data.ip,
     code,
     description,
     project_id: project_id || null,
+    user_id: userData.user.id,
+    ip_address: data.ip,
   });
 
   if (error) {

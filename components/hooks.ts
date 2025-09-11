@@ -68,6 +68,7 @@ import {
   TravelOrderType,
   UserProfileType,
 } from "./types";
+import { useRouter } from "next/navigation";
 
 // PROGRAM HOOKS
 export function useSelectProgramByIDHook(programId: string) {
@@ -100,6 +101,7 @@ export function useSelectAllProgramsByUserIDHook(userID: string) {
 
 export function useInsertProgramHook() {
   const qc = useQueryClient();
+  const router = useRouter();
 
   return useMutation({
     mutationFn: async (data: ProgramType) => await InsertProgramAction(data),
@@ -108,7 +110,7 @@ export function useInsertProgramHook() {
         queryKey: ["allProgramsByAgriculturist"],
       });
       toast("Program created successfully!");
-      window.location.href = `/dashboard/programs/${data.id}`;
+      router.push(`/dashboard/programs/${data.id}`);
     },
     onError: (error) => {
       toast.error(`Failed to create program: ${error.message}`);
@@ -117,21 +119,13 @@ export function useInsertProgramHook() {
 }
 
 export function useEditProgramNameHook() {
-  const qc = useQueryClient();
-
   return useMutation({
     mutationFn: async (data: ProgramType) =>
       await EditProgramNameAction({
         program_id: data.id ?? "",
         program_name: data.program_name,
       }),
-    onSuccess: (data) => {
-      qc.invalidateQueries({
-        queryKey: ["programById", data.id],
-      });
-      qc.invalidateQueries({
-        queryKey: ["allProgramsByAgriculturist"],
-      });
+    onSuccess: () => {
       toast("Program name updated successfully!");
     },
     onError: (error) => {
@@ -219,6 +213,7 @@ export function useSelectProjectDetailsHook(projectId: string) {
 
 export function useInsertProjectHook() {
   const qc = useQueryClient();
+  const router = useRouter();
 
   return useMutation({
     mutationFn: async (data: ProjectType) => await InsertProjectAction(data),
@@ -227,7 +222,7 @@ export function useInsertProjectHook() {
         queryKey: ["allProjectsByProgramId"],
       });
       toast("Project created successfully!");
-      window.location.href = `/dashboard/projects/${data.id}`;
+      router.push(`/dashboard/projects/${data.id}`);
     },
     onError: (error) => {
       toast.error(`${error.message}`, {
@@ -238,16 +233,9 @@ export function useInsertProjectHook() {
 }
 
 export function useEditProjectHook() {
-  const qc = useQueryClient();
   return useMutation({
     mutationFn: async (data: ProjectType) => await EditProjectAction(data),
     onSuccess: () => {
-      qc.invalidateQueries({
-        queryKey: ["programAndProjectDetailsByProjectId"],
-      });
-      qc.invalidateQueries({
-        queryKey: ["allProjectsByProgramId"],
-      });
       toast("Project updated successfully!");
     },
     onError: (error) => {
@@ -257,14 +245,9 @@ export function useEditProjectHook() {
 }
 
 export function useDeleteProjectHook(projectId: string, programId: string) {
-  const qc = useQueryClient();
-
   return useMutation({
     mutationFn: async () => await DeleteProjectAction(projectId),
     onSuccess: () => {
-      qc.invalidateQueries({
-        queryKey: ["allProjectsByProgramId"],
-      });
       toast.error("Project deleted successfully!");
       window.location.href = "/dashboard/programs/" + programId;
     },
@@ -326,14 +309,10 @@ export function useSelectAllMonitoringReportsByProjectIDHook(
 }
 
 export function useInsertMonitoringReportHook() {
-  const qc = useQueryClient();
   return useMutation({
     mutationFn: async (data: MonitoringReportType) =>
       await InsertMonitoringReportAction(data),
     onSuccess: () => {
-      qc.invalidateQueries({
-        queryKey: ["allMonitoringReportsByUser"],
-      });
       toast("Monitoring report created successfully!");
     },
     onError: (error) => {
@@ -349,7 +328,7 @@ export function useInsertRemarksInMonitoringReportHook(reportId: string) {
       await InsertRemarksInMonitoringReportAction(reportId, remarks),
     onSuccess: () => {
       qc.invalidateQueries({
-        queryKey: ["allMonitoringReportsByProjectId"],
+        queryKey: ["monitoring-reports"],
       });
       toast("Remarks added successfully!");
     },
@@ -382,13 +361,9 @@ export function useSelectAllMonitoringReportsByCurrentUserHook() {
 
 // MEMBER HOOKS
 export function useInsertMemberHook() {
-  const qc = useQueryClient();
   return useMutation({
     mutationFn: async (data: UserProfileType) => await InsertMemberAction(data),
     onSuccess: () => {
-      qc.invalidateQueries({
-        queryKey: ["members"],
-      });
       toast("Member invited successfully!");
     },
     onError: () => {
@@ -399,18 +374,13 @@ export function useInsertMemberHook() {
 }
 
 export function useUpdateMemberHook() {
-  const qc = useQueryClient();
   return useMutation({
     mutationFn: async (data: UserProfileType) =>
       await UpdateMemberAction(data.id as string, data),
     onSuccess: () => {
-      qc.invalidateQueries({
-        queryKey: ["members"],
-      });
       toast("Member updated successfully!");
     },
     onError: () => {
-      console.error("Failed to update member.");
       toast.error("Failed to update member.");
     },
   });
@@ -465,9 +435,7 @@ export function useInsertFieldTechniciansToProjectHook(project_id: string) {
     mutationFn: async (data: string[]) =>
       await InsertFieldTechniciansToProjectAction(data, project_id),
     onSuccess: () => {
-      qc.invalidateQueries({
-        queryKey: ["fieldTechnicians", project_id],
-      });
+      qc.invalidateQueries({ queryKey: ["project-field-technicians"] });
       toast("Field technician added to project successfully!");
     },
     onError: (error) => {
@@ -478,14 +446,10 @@ export function useInsertFieldTechniciansToProjectHook(project_id: string) {
 }
 
 export function useDeleteFieldTechnicianToProjectHook(projectID: string) {
-  const qc = useQueryClient();
   return useMutation({
     mutationFn: async (userID: string) =>
       await DeleteFieldTechnicianFromProjectAction(userID, projectID),
     onSuccess: () => {
-      qc.invalidateQueries({
-        queryKey: ["fieldTechnicians", projectID],
-      });
       toast("Field technician removed from project successfully!");
     },
     onError: (error) => {

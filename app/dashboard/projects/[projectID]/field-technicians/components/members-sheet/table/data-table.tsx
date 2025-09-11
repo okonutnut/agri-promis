@@ -106,8 +106,11 @@ export function DataTable<TData, TValue>({
       </div>
 
       {/* Table */}
-      <div className="rounded-md border">
-        <Table>
+      <div className="relative rounded-md border">
+        {isPending && (
+          <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10"></div>
+        )}
+        <Table className={isPending ? "opacity-50 pointer-events-none" : ""}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>

@@ -3,13 +3,13 @@
 import dynamic from "next/dynamic";
 import { Card, CardContent } from "@/components/ui/card";
 import { useParams } from "next/navigation";
-import { useSelectProgramByIDHook } from "@/components/hooks";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import { getProgramNavItems } from "@/components/sidebar/navitems";
 import { ProgramType } from "@/components/types";
-import { useSelectCurrentUserSessionHook } from "@/app/hooks/UserProfileHook";
 import { useMemo } from "react";
-
+import { useSupabaseSession } from "@/hooks/use-session";
+import { useRealtimeQuery } from "@/hooks/use-realtime";
+import { SelectProgramByIdAction } from "@/app/actions/ProgramAction";
 const EditProgramNameForm = dynamic(
   () => import("./form/edit-program-name-form"),
   {
@@ -26,11 +26,12 @@ const DeleteProgramCard = dynamic(
 export default function ProgramSettingsPage() {
   const { programID } = useParams();
 
-  const { data: userData } = useSelectCurrentUserSessionHook();
-  const { data, isLoading, error } = useSelectProgramByIDHook(
-    programID as string
-  );
-  console.log("Program Data:", data);
+  const { data: userData } = useSupabaseSession();
+  const { data, isLoading, error } = useRealtimeQuery({
+    queryKey: ["programDetails"],
+    queryFn: () => SelectProgramByIdAction(programID as string),
+    table: "programs",
+  });
 
   const isAdmin = useMemo(() => {
     return userData?.user.id === data?.admin_id;

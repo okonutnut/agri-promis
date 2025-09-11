@@ -1,10 +1,11 @@
 "use client";
 
+import { SelectAllTravelOrdersByUserIDAction } from "@/app/actions/TravelOrderAction";
 import SkeletonLoading from "@/components/custom/layout/skeleton-loading";
-import { useSelectAllTravelOrdersByUserIDHook } from "@/components/hooks";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { format } from "date-fns";
 import { useState } from "react";
 
@@ -12,8 +13,11 @@ type FTTravelOrdersProps = {
   user_id: string;
 };
 export default function FTTravelOrders({ user_id }: FTTravelOrdersProps) {
-  const { data, isLoading, error } =
-    useSelectAllTravelOrdersByUserIDHook(user_id);
+  const { data, isLoading, error } = useRealtimeQuery({
+    queryKey: ["travel_order", user_id],
+    queryFn: () => SelectAllTravelOrdersByUserIDAction(user_id),
+    table: "travel_order",
+  });
 
   const [search, setSearch] = useState("");
   const values = data

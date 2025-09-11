@@ -92,6 +92,7 @@ export async function SelectProgramAndProjectDetailsByProjectIDAction(
   projectID: string
 ) {
   const supabase = await createClient(cookies());
+
   const { data, error } = await supabase
     .from("projects")
     .select(`*,programs ("*")`)

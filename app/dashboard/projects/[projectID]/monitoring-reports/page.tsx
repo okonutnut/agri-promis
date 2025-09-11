@@ -9,7 +9,8 @@ import CustomPageLayout, {
 import { useParams } from "next/navigation";
 import { getProjectNavItems } from "@/components/sidebar/navitems";
 import { MonitoringReportType } from "@/components/types";
-import { useSelectAllMonitoringReportsByProjectIDHook } from "@/components/hooks";
+import { useRealtimeQuery } from "@/hooks/use-realtime";
+import { SelectAllMonitoringReportsByProjectIDAction } from "@/app/actions/MonitoringAction";
 
 function MonitoringReportContent({
   data,
@@ -38,8 +39,12 @@ function MonitoringReportContent({
 
 export default function MonitoringReportPage() {
   const { projectID } = useParams();
-  const { data, isLoading, error } =
-    useSelectAllMonitoringReportsByProjectIDHook(projectID as string);
+  const { data, isLoading, error } = useRealtimeQuery({
+    queryKey: ["monitoring-reports"],
+    queryFn: () =>
+      SelectAllMonitoringReportsByProjectIDAction(projectID as string),
+    table: "monitoring",
+  });
 
   return (
     <CustomPageLayout

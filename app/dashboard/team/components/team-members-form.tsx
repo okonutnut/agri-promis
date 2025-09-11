@@ -12,8 +12,8 @@ import { UserProfileType } from "@/components/types";
 import { Label } from "@/components/ui/label";
 import ChangeStatusButton from "./change-status-button";
 import { SheetFooterSlot } from "@/components/custom/layout/custom-page-layout";
-import { useSelectCurrentUserSessionHook } from "@/app/hooks/UserProfileHook";
 import { useMemo } from "react";
+import { useSupabaseSession } from "@/hooks/use-session";
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -62,8 +62,9 @@ export function TeamMemberForm({
   // UPDATE MEMBER HOOK
   const { mutate: updateMutate, isPending: isUpdatePending } =
     useUpdateMemberHook();
+
   // CURRENT USER SESSION
-  const { data: userData } = useSelectCurrentUserSessionHook();
+  const { data: userData } = useSupabaseSession();
   const isUserProfile = useMemo(() => {
     return userData?.user.id == data?.id;
   }, [data, userData?.user.id]);

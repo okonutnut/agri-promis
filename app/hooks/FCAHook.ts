@@ -1,7 +1,7 @@
 "use client";
 
 import { FCAType } from "@/components/types";
-import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   InsertFCAAction,
@@ -13,13 +13,9 @@ import {
 
 // FCA HOOKS
 export function useInsertFCAHook() {
-  const qc = useQueryClient();
   return useMutation({
     mutationFn: async (data: FCAType) => await InsertFCAAction(data),
     onSuccess: () => {
-      qc.invalidateQueries({
-        queryKey: ["farmers"],
-      });
       toast("FCA created successfully!");
     },
     onError: (error) => {
@@ -44,13 +40,9 @@ export function useSelectAllFCAByStatusHook(status: number) {
   });
 }
 export function useEditFCAHook() {
-  const qc = useQueryClient();
   return useMutation({
     mutationFn: async (data: FCAType) => await EditFCAAction(data),
     onSuccess: () => {
-      qc.invalidateQueries({
-        queryKey: ["farmers"],
-      });
       toast("FCA updated successfully!");
     },
     onError: (error) => {

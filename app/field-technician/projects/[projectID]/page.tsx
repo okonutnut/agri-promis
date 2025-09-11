@@ -2,15 +2,14 @@
 
 import dynamic from "next/dynamic";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
-import { useSelectProgramAndProjectDetailsByProgjectIDHook } from "@/components/hooks";
 import { getUserProjectNavItems } from "@/components/sidebar/navitems";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
 import { useParams } from "next/navigation";
 import { ProjectType } from "@/components/types";
-import { useEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { SelectProgramAndProjectDetailsByProjectIDAction } from "@/app/actions/ProjectAction";
+import { useUniversalRealtime } from "@/hooks/use-universal-realtime";
 const ProjectActivityLogTable = dynamic(
   () => import("@/components/custom/dashboard/project-activity-log-table"),
   {
@@ -70,12 +69,13 @@ function ProjectDashboardInfo(data: ProjectType) {
 
 export default function ProjectDashboard() {
   const { projectID } = useParams();
-  const qc = useQueryClient();
-  const { data, isLoading, error } =
-    useSelectProgramAndProjectDetailsByProgjectIDHook(projectID as string);
-  useEffect(() => {
-    qc.invalidateQueries({ queryKey: ["programAndProjectDetailsByProjectId"] });
-  }, []);
+
+  const { data, isLoading, error } = useUniversalRealtime({
+    queryKey: ["project-dashboard-items", projectID as string],
+    queryFn: () =>
+      SelectProgramAndProjectDetailsByProjectIDAction(projectID as string),
+    tables: ["projects", "farmers"],
+  });
 
   return (
     <CustomPageLayout

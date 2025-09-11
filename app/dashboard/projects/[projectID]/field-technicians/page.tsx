@@ -6,11 +6,12 @@ import { columns } from "./table/columns";
 import CustomPageLayout, {
   useSheet,
 } from "@/components/custom/layout/custom-page-layout";
-import { useSelectFieldTechniciansByProjectIDHook } from "@/components/hooks";
 import { useParams } from "next/navigation";
 import { AssignedProjectsType } from "@/components/types";
 import { getProjectNavItems } from "@/components/sidebar/navitems";
 import FTTravelOrders from "./components/ft-travel-orders";
+import { useRealtimeQuery } from "@/hooks/use-realtime";
+import { SelectAllFieldTechniciansByProjectIDAction } from "@/app/actions/AssignedProjectAction";
 const SelectMembersTable = dynamic(
   () => import("./components/members-sheet/select-members-table"),
   {
@@ -70,9 +71,12 @@ function FieldTechnicianContent({
 
 export default function FieldTechnicianPage() {
   const { projectID } = useParams();
-  const { data, isLoading, error } = useSelectFieldTechniciansByProjectIDHook(
-    projectID as string
-  );
+  const { data, isLoading, error } = useRealtimeQuery({
+    queryKey: ["project-field-technicians"],
+    queryFn: () =>
+      SelectAllFieldTechniciansByProjectIDAction(projectID as string),
+    table: "assigned_projects",
+  });
 
   return (
     <CustomPageLayout

@@ -166,8 +166,8 @@ export default function UploadFieldReportForm({
   }, [openModal]);
 
   return (
-    <>
-      <section className="overflow-y-auto">
+    <div className="flex flex-col h-full">
+      <section>
         <ImageCaptureForm
           isAddMode={isAddMode}
           values={values}
@@ -224,7 +224,7 @@ export default function UploadFieldReportForm({
           )}
         </form>
       </section>
-      <div className="flex flex-col p-2 text-sm text-muted-foreground gap-1">
+      <div className="flex flex-col p-2 text-sm text-muted-foreground gap-1 mt-auto">
         {values?.key && <DeleteDraftButton draftKey={values.key} />}
         {values?.reviewed_by_id && (
           <PrintDownloadDropdown
@@ -260,6 +260,6 @@ export default function UploadFieldReportForm({
           </>
         )}
       </div>
-    </>
+    </div>
   );
 }

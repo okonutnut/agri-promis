@@ -5,12 +5,13 @@ import { DataTable } from "./table/data-table";
 import { columns } from "./table/columns";
 import { TeamMemberForm } from "./components/team-members-form";
 import { UserProfileType } from "@/components/types";
-import { useSelectAllMembersHook } from "@/components/hooks";
 import CustomPageLayout, {
   useSheet,
 } from "@/components/custom/layout/custom-page-layout";
 import { getDashboardNavItems } from "@/components/sidebar/navitems";
 import { useMemo, useState } from "react";
+import { useRealtimeQuery } from "@/hooks/use-realtime";
+import { SelectAllMembersAction } from "@/app/actions/MemberAction";
 const TeamMemberPanel = dynamic(
   () => import("./components/team-member-panel"),
   { ssr: false }
@@ -78,7 +79,11 @@ function TeamMembersContent({
 }
 
 export default function TeamMemberPage() {
-  const { data, isLoading, error } = useSelectAllMembersHook();
+  const { data, isLoading, error } = useRealtimeQuery({
+    queryKey: ["members"],
+    table: "user_profile",
+    queryFn: SelectAllMembersAction,
+  });
 
   return (
     <CustomPageLayout
@@ -87,7 +92,7 @@ export default function TeamMemberPage() {
       error={error}
       navItems={getDashboardNavItems()}
     >
-      <TeamMembersContent values={data} />
+      <TeamMembersContent values={data ?? undefined} />
     </CustomPageLayout>
   );
 }

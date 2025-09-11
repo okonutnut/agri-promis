@@ -1,17 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { useSelectAssignedProjectsByFieldTechnicianHook } from "@/components/hooks";
 import { Box, ChevronRight, Search } from "lucide-react";
 import { getUserDashboardNavItems } from "@/components/sidebar/navitems";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import { Input } from "@/components/ui/input";
 import CardLink from "@/components/custom/link/card-link";
+import { useRealtimeQuery } from "@/hooks/use-realtime";
+import { SelectAllAssignedProjectsByFieldTechnicianIDAction } from "@/app/actions/AssignedProjectAction";
 
 export default function FieldTechnicianPage() {
-  const { data, isLoading, error } =
-    useSelectAssignedProjectsByFieldTechnicianHook();
   const [searchTerm, setSearchTerm] = useState("");
+
+  const { data, isLoading, error } = useRealtimeQuery({
+    queryKey: ["assigned-projects"],
+    queryFn: SelectAllAssignedProjectsByFieldTechnicianIDAction,
+    table: "assigned_projects",
+  });
 
   const filteredData = data?.filter((project) =>
     project.project_name?.toLowerCase().includes(searchTerm.toLowerCase())

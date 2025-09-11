@@ -2,8 +2,9 @@
 
 import dynamic from "next/dynamic";
 import SkeletonLoading from "../../layout/skeleton-loading";
-import { useSelectAdminDashboardItemsHook } from "@/components/hooks";
 import { BookOpen, FolderKanban, Users } from "lucide-react";
+import { useUniversalRealtime } from "@/hooks/use-universal-realtime";
+import { SelectAdminDashboardItemsAction } from "@/app/actions/DashboardAction";
 const RecentActivities = dynamic(() => import("./recent-activities-admin"), {
   ssr: false,
 });
@@ -16,7 +17,17 @@ const ScheduledMonitoringTable = dynamic(
 );
 
 export default function AdminDashboardItems() {
-  const { data, isLoading } = useSelectAdminDashboardItemsHook();
+  const { data, isLoading } = useUniversalRealtime({
+    queryKey: ["admin-dashboard-items"],
+    queryFn: SelectAdminDashboardItemsAction,
+    tables: [
+      "user_profile",
+      "programs",
+      "projects",
+      "travel_order",
+      "activity_logs",
+    ],
+  });
   return (
     <>
       <section className="flex flex-wrap md:flex-nowrap justify-between gap-5">

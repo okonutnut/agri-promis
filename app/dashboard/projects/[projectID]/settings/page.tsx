@@ -3,12 +3,13 @@
 import dynamic from "next/dynamic";
 import { Card, CardContent } from "@/components/ui/card";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
-import { useSelectProjectDetailsHook } from "@/components/hooks";
 import { useParams } from "next/navigation";
 import { getProjectNavItems } from "@/components/sidebar/navitems";
 import { ProgramType, ProjectType } from "@/components/types";
-import { useSelectCurrentUserSessionHook } from "@/app/hooks/UserProfileHook";
 import { useMemo } from "react";
+import { useRealtimeQuery } from "@/hooks/use-realtime";
+import { SelectProjectDetailsByProjectIDAction } from "@/app/actions/ProjectAction";
+import { useSupabaseSession } from "@/hooks/use-session";
 const DeleteProjectCard = dynamic(
   () => import("./components/delete-project-card"),
   {
@@ -22,10 +23,12 @@ const EditProjectForm = dynamic(() => import("./form/edit-project-form"), {
 export default function ProgramSettingsPage() {
   const { projectID } = useParams();
 
-  const { data: userData } = useSelectCurrentUserSessionHook();
-  const { data, isLoading, error } = useSelectProjectDetailsHook(
-    projectID as string
-  );
+  const { data: userData } = useSupabaseSession();
+  const { data, isLoading, error } = useRealtimeQuery({
+    queryKey: ["project_details"],
+    queryFn: () => SelectProjectDetailsByProjectIDAction(projectID as string),
+    table: "projects",
+  });
 
   const isAdmin = useMemo(() => {
     return userData?.user.id === data?.programs?.admin_id;

@@ -2,12 +2,12 @@
 
 import dynamic from "next/dynamic";
 import { Icon } from "leaflet";
-import { useSelectUserLocationHook } from "@/components/hooks";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import "leaflet/dist/leaflet.css";
 import { Loader2 } from "lucide-react";
+import { useRealtimeQuery } from "@/hooks/use-realtime";
+import { SelectUserCurrentLocationAction } from "@/app/actions/UserSessionAction";
 
 // Dynamically import the map components with SSR disabled
 const MapContainer = dynamic(
@@ -39,8 +39,11 @@ export default function FTGPSCard({ user_id }: FTGPSCardProps) {
     className: "leaflet-custom-icon",
   });
 
-  const { data, isLoading, error, refetch, isRefetching } =
-    useSelectUserLocationHook(user_id as string);
+  const { data, isLoading, error } = useRealtimeQuery({
+    queryKey: ["user_session", user_id],
+    queryFn: () => SelectUserCurrentLocationAction(user_id as string),
+    table: "user_session",
+  });
 
   const MapComponent = () => {
     if (!data?.latitude || !data?.longitude) return null;
@@ -76,7 +79,7 @@ export default function FTGPSCard({ user_id }: FTGPSCardProps) {
         )}
       </Label>
       <div className="w-full h-[20vh] relative rounded-md flex flex-col items-center justify-center">
-        {isLoading || isRefetching ? (
+        {isLoading ? (
           <Loader2 className="animate-spin text-primary" />
         ) : error ? (
           <p>Error loading GPS data</p>
@@ -85,16 +88,9 @@ export default function FTGPSCard({ user_id }: FTGPSCardProps) {
         ) : (
           <>
             <center className="text-xs text-red-500 mx-auto">
-              Cannot locate user.
+              Cannot locate user. <br /> GPS might be turned off or no data
+              available.
             </center>
-            <Button
-              variant={"link"}
-              onClick={() => refetch()}
-              className="w-full px-4 py-2"
-              disabled={isLoading}
-            >
-              Retry
-            </Button>
           </>
         )}
       </div>

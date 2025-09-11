@@ -1,3 +1,4 @@
+import { MonitoringReportType } from "@/components/types";
 import localforage from "localforage";
 
 // Save draft to IndexedDB
@@ -37,7 +38,11 @@ export const upsertDraft = async (key: string, draftData: object) => {
 export const loadDrafts = async (userId: string) => {
   const keys = await localforage.keys();
   const draftKeys = keys.filter((key) => key.startsWith(`draft_${userId}_`));
-  return Promise.all(draftKeys.map((key) => localforage.getItem(key)));
+  return Promise.all(
+    draftKeys.map(
+      async (key) => (await localforage.getItem(key)) as MonitoringReportType
+    )
+  );
 };
 
 // Delete a draft

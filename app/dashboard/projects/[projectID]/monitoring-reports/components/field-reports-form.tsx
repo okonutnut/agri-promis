@@ -13,7 +13,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import FormTextarea from "@/components/custom/input/form-textarea";
 import NonFormTextarea from "@/components/custom/input/non-form-textarea";
 import dynamic from "next/dynamic";
-import MonitoringReportDocument from "@/components/custom/pdf/monitoring-reports-document";
+const MonitoringReportDocument = dynamic(
+  () => import("@/components/custom/pdf/monitoring-reports-document"),
+  { ssr: false }
+);
 import { SheetFooterSlot } from "@/components/custom/layout/custom-page-layout";
 const ImageCarousel = dynamic(
   () => import("@/components/custom/images/image-carousel"),

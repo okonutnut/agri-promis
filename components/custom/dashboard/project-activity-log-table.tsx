@@ -1,6 +1,5 @@
 "use client";
 
-import { useSelectActivityLogsByProjectIDHook } from "@/components/hooks";
 import {
   Table,
   TableBody,
@@ -12,14 +11,19 @@ import {
 import SkeletonLoading from "../layout/skeleton-loading";
 import { Card } from "@/components/ui/card";
 import { format } from "date-fns";
+import { useRealtimeQuery } from "@/hooks/use-realtime";
+import { SelectActivityLogsByProjectIDAction } from "@/app/actions/ActivityLogAction";
 
 export default function ProjectActivityLogTable(value: { project_id: string }) {
-  const { data, isLoading, error } = useSelectActivityLogsByProjectIDHook(
-    value.project_id
-  );
+  const { data, isLoading, error } = useRealtimeQuery({
+    queryKey: ["project-activity-logs", value.project_id],
+    queryFn: () => SelectActivityLogsByProjectIDAction(value.project_id),
+    table: "activity_logs",
+  });
+
   return (
     <div className="m-4 flex flex-col">
-      <span className="text-lg font-semibold mb-4">Project Logs</span>
+      <span className="text-lg font-semibold mb-4">Activity Logs</span>
       <Card className="p-0 rounded-md shadow-xs max-h-[300px] overflow-y-auto">
         {isLoading ? (
           <SkeletonLoading />

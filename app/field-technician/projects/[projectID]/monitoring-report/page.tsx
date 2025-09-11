@@ -3,10 +3,6 @@
 import dynamic from "next/dynamic";
 import { DataTable } from "./table/data-table";
 import { columns } from "./table/columns";
-import {
-  useSelectAllMonitoringReportsByProjectIDAndUserHook,
-  useSelectProjectDetailsHook,
-} from "@/components/hooks";
 import { MonitoringReportType } from "@/components/types";
 import { useParams } from "next/navigation";
 import { getUserProjectNavItems } from "@/components/sidebar/navitems";
@@ -15,6 +11,9 @@ import CustomPageLayout, {
 } from "@/components/custom/layout/custom-page-layout";
 import { useMemo } from "react";
 import SkeletonLoading from "@/components/custom/layout/skeleton-loading";
+import { useRealtimeQuery } from "@/hooks/use-realtime";
+import { SelectAllMonitoringReportsByProjectIDAndUserAction } from "@/app/actions/MonitoringAction";
+import { SelectProjectDetailsByProjectIDAction } from "@/app/actions/ProjectAction";
 const UploadFieldReportForm = dynamic(
   () => import("./form/monitoring-report-form"),
   { ssr: false }
@@ -58,17 +57,28 @@ function MonitoringReportContent({
 
   if (!data) return <SkeletonLoading />;
 
-  const { data: projectData } = useSelectProjectDetailsHook(
-    projectID as string
-  );
+  const { data: projectData } = useRealtimeQuery({
+    queryKey: ["project-details"],
+    queryFn: () => SelectProjectDetailsByProjectIDAction(projectID as string),
+    table: "projects",
+  });
 
   const isEnabledReports = useMemo(() => {
-    const currentDate = new Date().toDateString();
+    const currentDate = new Date();
+    const startDate = projectData?.start_date
+      ? new Date(projectData.start_date)
+      : null;
+    const endDate = projectData?.end_date
+      ? new Date(projectData.end_date)
+      : null;
+
     if (
-      projectData?.start_date &&
-      projectData?.end_date &&
-      currentDate >= new Date(projectData.start_date).toDateString() &&
-      currentDate <= new Date(projectData.end_date).toDateString()
+      startDate &&
+      endDate &&
+      !isNaN(startDate.getTime()) &&
+      !isNaN(endDate.getTime()) &&
+      currentDate >= startDate &&
+      currentDate <= endDate
     ) {
       return true;
     }
@@ -89,8 +99,13 @@ function MonitoringReportContent({
 
 export default function MonitoringReportPage() {
   const { projectID } = useParams();
-  const { data, isLoading, error } =
-    useSelectAllMonitoringReportsByProjectIDAndUserHook(projectID as string);
+
+  const { data, isLoading, error } = useRealtimeQuery({
+    queryKey: ["monitoring-report"],
+    queryFn: () =>
+      SelectAllMonitoringReportsByProjectIDAndUserAction(projectID as string),
+    table: "monitoring",
+  });
 
   return (
     <CustomPageLayout

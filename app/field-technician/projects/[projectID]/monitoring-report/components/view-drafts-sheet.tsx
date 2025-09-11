@@ -1,6 +1,5 @@
 "use client";
 
-import { useSelectCurrentUserSessionHook } from "@/app/hooks/UserProfileHook";
 import { MonitoringReportType } from "@/components/types";
 import { Button } from "@/components/ui/button";
 import { useSheet } from "@/components/custom/layout/custom-page-layout";
@@ -15,20 +14,27 @@ import { loadDrafts } from "@/hooks/use-draft";
 import { format } from "date-fns";
 import { Archive } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useSupabaseSession } from "@/hooks/use-session";
+import { useParams } from "next/navigation";
 
 type ViewDraftsSheetProps = {
   handleModify: (row: MonitoringReportType | null) => void;
 };
 
 function DraftsContent({ handleModify }: ViewDraftsSheetProps) {
-  const { data } = useSelectCurrentUserSessionHook();
+  const { projectID } = useParams();
+  const { data } = useSupabaseSession();
   const [drafts, setDrafts] = useState<MonitoringReportType[]>([]);
 
   useEffect(() => {
     if (data?.user?.id) {
       async function fetchDrafts() {
         const res = await loadDrafts(data?.user?.id as string);
-        setDrafts(res as MonitoringReportType[]);
+        setDrafts(
+          res.filter(
+            (d) => d.project_id === projectID
+          ) as MonitoringReportType[]
+        );
       }
       fetchDrafts();
     }

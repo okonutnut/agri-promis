@@ -2,6 +2,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { FCAType } from "../../components/types";
+import { InsertActivityLogAction } from "./ActivityLogAction";
 
 // FCA ACTIONS
 
@@ -16,6 +17,12 @@ export async function InsertFCAAction(data: FCAType) {
     console.error("Error inserting FCA:", error);
     throw new Error(error.message);
   }
+
+  // Log activity
+  await InsertActivityLogAction(
+    "Inserted new FCA record",
+    `Inserted FCA: ${data.description}`
+  );
 
   return;
 }
@@ -58,6 +65,12 @@ export async function EditFCAAction(data: FCAType) {
     console.error("Error updating FCA:", error);
     throw new Error(error.message);
   }
+
+  // Log activity
+  await InsertActivityLogAction(
+    "Updated FCA record",
+    `Updated FCA: ${data.description}`
+  );
 
   return;
 }

@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  useInsertFieldTechniciansToProjectHook,
-  useSelectAllMembersByRoleHook,
-} from "@/components/hooks";
+import { useInsertFieldTechniciansToProjectHook } from "@/components/hooks";
 import { DataTable } from "./table/data-table";
 import { columns } from "./table/columns";
 import {
@@ -15,6 +12,8 @@ import {
 } from "react";
 import SkeletonLoading from "@/components/custom/layout/skeleton-loading";
 import { useParams } from "next/navigation";
+import { useRealtimeQuery } from "@/hooks/use-realtime";
+import { SelectAllMembersByRoleAction } from "@/app/actions/MemberAction";
 
 type SelectMemberTableProps = {
   assignedMembers: string[];
@@ -28,7 +27,11 @@ export default function SelectMemberTable({
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
 
   // GET
-  const { data, isLoading, isError } = useSelectAllMembersByRoleHook(2);
+  const { data, isLoading, isError } = useRealtimeQuery({
+    queryKey: ["field-project-field-technicians"],
+    queryFn: () => SelectAllMembersByRoleAction(2),
+    table: "user_profile",
+  });
 
   const tableData = useMemo(() => {
     if (!data) return [];

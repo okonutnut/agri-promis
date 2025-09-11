@@ -9,7 +9,8 @@ import CustomPageLayout, {
 import { useParams } from "next/navigation";
 import { TravelOrderType } from "@/components/types";
 import { getProgramNavItems } from "@/components/sidebar/navitems";
-import { useSelectAllTravelOrdersByProgramIDHook } from "@/components/hooks";
+import { useRealtimeQuery } from "@/hooks/use-realtime";
+import { SelectAllTravelOrdersByProgramIDAction } from "@/app/actions/TravelOrderAction";
 const IssueTravelOrderForm = dynamic(
   () => import("./components/travel-order-form"),
   {
@@ -62,9 +63,11 @@ function TravelOrderContent({
 
 export default function TravelOrderPage() {
   const { programID } = useParams();
-  const { data, isLoading, error } = useSelectAllTravelOrdersByProgramIDHook(
-    programID as string
-  );
+  const { data, isLoading, error } = useRealtimeQuery({
+    queryKey: ["travel_order"],
+    queryFn: () => SelectAllTravelOrdersByProgramIDAction(programID as string),
+    table: "travel_order",
+  });
 
   return (
     <CustomPageLayout

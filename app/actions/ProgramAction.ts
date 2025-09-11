@@ -49,6 +49,7 @@ export async function EditProgramNameAction({
     .select("program_name")
     .eq("id", program_id)
     .single();
+
   if (currentError) {
     console.error("Error fetching current program details:", currentError);
     throw new Error(
@@ -57,7 +58,7 @@ export async function EditProgramNameAction({
   }
 
   // Update the program name
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("programs")
     .update({ program_name })
     .eq("id", program_id)
@@ -74,7 +75,7 @@ export async function EditProgramNameAction({
     `Program ${currentProgram.program_name} name updated to ${program_name}.`
   );
 
-  return data as ProgramType;
+  return;
 }
 
 export async function SelectProgramByIdAction(programId: string) {

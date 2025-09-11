@@ -2,17 +2,22 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useSelectAllProgramsHook } from "@/components/hooks";
 import Link from "next/link";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import { Boxes, ChevronRight, Search } from "lucide-react";
 import { getDashboardNavItems } from "@/components/sidebar/navitems";
 import { Input } from "@/components/ui/input";
 import CardLink from "@/components/custom/link/card-link";
+import { useRealtimeQuery } from "@/hooks/use-realtime";
+import { SelectAllProgramsAction } from "@/app/actions/ProgramAction";
 
 export default function ProgramsPage() {
-  const { data, isLoading, error } = useSelectAllProgramsHook();
-  console.log("Programs data:", data);
+  const { data, isLoading, error } = useRealtimeQuery({
+    queryKey: ["programs"],
+    queryFn: SelectAllProgramsAction,
+    table: "programs",
+  });
+
   const [searchQuery, setSearchQuery] = useState("");
 
   // Filter programs based on the search query

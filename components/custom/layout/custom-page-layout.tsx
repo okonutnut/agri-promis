@@ -37,6 +37,7 @@ import { X } from "lucide-react";
 import { useSelectUserProfileHook } from "@/app/hooks/UserProfileHook";
 import { UpdateUserCurrentLocationAction } from "@/app/actions/UserSessionAction";
 import { createClient } from "@/utils/supabase/client";
+import { div } from "@tensorflow/tfjs";
 
 // Sheet Context
 interface SheetContextType {
@@ -307,7 +308,7 @@ export default function CustomPageLayout({
                   {sheetState.title}
                 </SheetTitle>
               </SheetHeader>
-              <div className="flex-1 overflow-y-auto relative">
+              <>
                 {sheetState.tabs.length > 0 ? (
                   <Tabs
                     value={sheetState.activeTab}
@@ -330,15 +331,21 @@ export default function CustomPageLayout({
                       ))}
                     </TabsList>
                     {sheetState.tabs.map((tab) => (
-                      <TabsContent key={tab.value} value={tab.value}>
+                      <TabsContent
+                        key={tab.value}
+                        value={tab.value}
+                        className="flex-1 overflow-y-auto relative"
+                      >
                         {tab.content}
                       </TabsContent>
                     ))}
                   </Tabs>
                 ) : (
-                  sheetState.content
+                  <div className="flex-1 overflow-y-auto relative">
+                    {sheetState.content}
+                  </div>
                 )}
-              </div>
+              </>
               <SheetFooter className="border-t p-2 flex flex-row justify-end gap-2">
                 <SheetClose asChild>
                   <Button variant={"outline"} size={"sm"}>
