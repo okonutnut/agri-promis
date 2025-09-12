@@ -265,7 +265,7 @@ export function useInsertTravelOrderHook() {
       await InsertTravelOrderAction(data),
     onSuccess: () => {
       qc.invalidateQueries({
-        queryKey: ["travelOrders"],
+        queryKey: ["travel_order"],
       });
       toast("Travel order issued successfully!");
     },
@@ -277,7 +277,7 @@ export function useInsertTravelOrderHook() {
 
 export function useSelectAllTravelOrdersByUserIDHook(user_id?: string) {
   return useQuery({
-    queryKey: ["travelOrders", user_id],
+    queryKey: ["travel_order"],
     queryFn: async () => await SelectAllTravelOrdersByUserIDAction(user_id),
     refetchInterval: 3000,
     networkMode: "online",
@@ -286,7 +286,7 @@ export function useSelectAllTravelOrdersByUserIDHook(user_id?: string) {
 
 export function useSelectAllTravelOrdersByProgramIDHook(programID: string) {
   return useQuery({
-    queryKey: ["travelOrders"],
+    queryKey: ["travel_order"],
     queryFn: async () =>
       await SelectAllTravelOrdersByProgramIDAction(programID),
     enabled: !!programID,

@@ -20,7 +20,8 @@ const formSchema = z
   .object({
     travel_order_no: z
       .string()
-      .min(1, { message: "Travel order number is required" }),
+      .min(1, { message: "Travel order number is required" })
+      .regex(/^\d+-\d+$/, { message: "Must be numbers separated by a single dash" }),
     purpose: z.string().min(1, { message: "Purpose is required" }),
     user_id: z.string().min(1, { message: "User is required" }),
     office: z.string().min(1, { message: "Office is required" }),
@@ -108,7 +109,7 @@ export default function IssueTravelOrderForm({
   return (
     <>
       <form
-        className="space-y-4 p-2 overflow-y-auto h-[calc(90vh)]"
+        className="space-y-4 p-2 h-full"
         id="travel-order-form"
         onSubmit={form.handleSubmit(onSubmit)}
       >

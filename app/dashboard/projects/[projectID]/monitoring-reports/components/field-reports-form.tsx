@@ -62,6 +62,11 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
   return (
     <>
       <section className="space-y-4 h-[calc(90vh)] overflow-y-auto overflow-x-hidden">
+        {data?.reviewed_by_id && (
+          <PrintDownloadDropdown
+            data={<MonitoringReportDocument data={data} />}
+          />
+        )}
         <ImageCarousel images={data?.photo_url || []} />
         <div className="p-2 space-y-4 border-t">
           <NonFormInput
@@ -97,11 +102,6 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
         </div>
       </section>
       <SheetFooterSlot>
-        {data?.reviewed_by_id && (
-          <PrintDownloadDropdown
-            data={<MonitoringReportDocument data={data} />}
-          />
-        )}
         {!data?.reviewed_by_id && (
           <Button
             form="remarks-form"

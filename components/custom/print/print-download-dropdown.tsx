@@ -29,7 +29,7 @@ const PrintDownloadDropdown = React.memo(function PrintDownloadDropdown({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
           className="w-full flex items-center gap-2"
         >

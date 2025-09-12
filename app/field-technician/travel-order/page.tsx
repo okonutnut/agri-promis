@@ -11,6 +11,7 @@ import CustomPageLayout, {
 import { dataTagErrorSymbol } from "@tanstack/react-query";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllTravelOrdersByUserIDAction } from "@/app/actions/TravelOrderAction";
+import { useSupabaseSession } from "@/hooks/use-session";
 
 function TravelOrderContent({ data }: { data: TravelOrderType[] | undefined }) {
   const { openSheet } = useSheet();
@@ -34,11 +35,13 @@ function TravelOrderContent({ data }: { data: TravelOrderType[] | undefined }) {
 }
 
 export default function FieldTechnicianPage() {
+  const {data: userData} = useSupabaseSession();
   const { data, isLoading, error } = useRealtimeQuery({
     queryKey: ["travel_order"],
-    queryFn: SelectAllTravelOrdersByUserIDAction,
+    queryFn: () => SelectAllTravelOrdersByUserIDAction(userData?.user.id),
     table: "travel_order",
   });
+  
   return (
     <CustomPageLayout
       pageTitle="Travel Orders"
