@@ -66,12 +66,6 @@ export async function EditFCAAction(data: FCAType) {
     `Updated FCA: ${data.description}`
   );
 
-  // Sent notification to all users
-  await SendPushNotificationToUserAction(
-    "d904c6a2-d586-435c-9ebd-0c4358df9119",
-    "An FCA record has been updated."
-  );
-
   return;
 }
 

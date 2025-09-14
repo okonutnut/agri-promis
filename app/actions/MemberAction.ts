@@ -1,9 +1,9 @@
 "use server";
+
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { UserProfileType } from "../../components/types";
-import { SendPushNotificationToUserAction } from "./SubscriptionAction";
 
 // MEMBERS ACTIONS
 
@@ -125,14 +125,6 @@ export async function UpdateActiveStatusMemberAction(
     "Updated Member Status",
     `Member ${data.fullname?.toString()} status updated to ${
       status === 0 ? "Inactive" : "Active"
-    }.`
-  );
-
-  // Send Notification
-  await SendPushNotificationToUserAction(
-    userId,
-    `Your account status has been updated to ${
-      status === 1 ? "Active" : "Inactive"
     }.`
   );
 

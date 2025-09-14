@@ -1,10 +1,10 @@
 "use server";
+
 import { SelectUserProfileByIDAction } from "@/app/actions/UserProfileAction";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { AssignedProjectsType, ProjectType } from "../../components/types";
-import { SendPushNotificationToUserAction } from "./SubscriptionAction";
 
 // ASSIGNED PROJECTS ACTIONS
 export async function InsertFieldTechniciansToProjectAction(
@@ -57,14 +57,6 @@ export async function InsertFieldTechniciansToProjectAction(
         `Field technician ${userProfile?.fullname} was added to project ${projectData.project_name}.`,
         project_id
       );
-
-      // Send Notification
-      for (const user_id of data) {
-        await SendPushNotificationToUserAction(
-          user_id,
-          `You have been assigned to project ${projectData.project_name.toString()}.`
-        );
-      }
     }
   }
 
@@ -105,11 +97,6 @@ export async function DeleteFieldTechnicianFromProjectAction(
     "Removed a Field Technician from Project",
     `Field technician ${existingUserData.fullname} was removed from project ${projectData.project_name}.`,
     project_id
-  );
-
-  await SendPushNotificationToUserAction(
-    user_id,
-    `You have been removed from project ${projectData.project_name.toString()}.`
   );
 
   return;
