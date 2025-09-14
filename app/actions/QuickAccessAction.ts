@@ -11,7 +11,7 @@ export async function SelectProjectByIDsAction(projectIDs: string[]) {
     .in("id", projectIDs)
     .order("created_at", { ascending: true });
 
-  if (error) return Promise.reject();
+  if (error) throw new Error();
 
   return data as ProjectType[];
 }

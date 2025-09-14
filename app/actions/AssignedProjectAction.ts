@@ -23,7 +23,7 @@ export async function InsertFieldTechniciansToProjectAction(
       .maybeSingle();
 
     if (selectError) {
-      return Promise.reject();
+      throw new Error();
     }
 
     if (!existingAssignment) {
@@ -36,7 +36,7 @@ export async function InsertFieldTechniciansToProjectAction(
         });
 
       if (insertError) {
-        return Promise.reject();
+        throw new Error();
       }
 
       // Get project details for logging
@@ -46,7 +46,7 @@ export async function InsertFieldTechniciansToProjectAction(
         .eq("id", project_id)
         .single();
       if (projectError) {
-        return Promise.reject();
+        throw new Error();
       }
 
       const userProfile = await SelectUserProfileByIDAction(technician_id);
@@ -85,7 +85,7 @@ export async function DeleteFieldTechnicianFromProjectAction(
     .eq("project_id", project_id);
 
   if (deleteError) {
-    return Promise.reject();
+    throw new Error();
   }
 
   // Get project details for logging
@@ -95,7 +95,7 @@ export async function DeleteFieldTechnicianFromProjectAction(
     .eq("id", project_id)
     .single();
   if (projectError) {
-    return Promise.reject();
+    throw new Error();
   }
 
   const existingUserData = await SelectUserProfileByIDAction(user_id);
@@ -126,7 +126,7 @@ export async function SelectAllFieldTechniciansByProjectIDAction(
     .order("created_at", { ascending: true });
 
   if (error) {
-    return Promise.reject();
+    throw new Error();
   }
 
   return data as AssignedProjectsType[];
@@ -137,7 +137,7 @@ export async function SelectAllAssignedProjectsByFieldTechnicianIDAction() {
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError) {
-    return Promise.reject();
+    throw new Error();
   }
 
   const { data, error } = await supabase
@@ -146,7 +146,7 @@ export async function SelectAllAssignedProjectsByFieldTechnicianIDAction() {
     .eq("user_id", userData.user.id);
 
   if (error) {
-    return Promise.reject();
+    throw new Error();
   }
 
   return data.map((item) => item.project) as ProjectType[];

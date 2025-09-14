@@ -14,7 +14,7 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
   } = await supabase.auth.getUser();
 
   if (userError || !user?.id) {
-    return Promise.reject();
+    throw new Error();
   }
 
   const { error } = await supabase.from("travel_order").insert({
@@ -24,7 +24,7 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
   });
 
   if (error) {
-    return Promise.reject();
+    throw new Error();
   }
 
   // Fetch user profile for logging
@@ -35,7 +35,7 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
     .single();
 
   if (profileError) {
-    return Promise.reject();
+    throw new Error();
   }
 
   // Log the activity
@@ -58,7 +58,7 @@ export async function SelectAllTravelOrdersByUserIDAction(user_id?: string) {
   if (!user_id) {
     const { data: userData, error: userError } = await supabase.auth.getUser();
 
-    if (userError) return Promise.reject();
+    if (userError) throw new Error();
 
     user_id = userData.user.id;
   }
@@ -73,7 +73,7 @@ export async function SelectAllTravelOrdersByUserIDAction(user_id?: string) {
     .order("created_at", { ascending: false });
 
   if (error) {
-    return Promise.reject();
+    throw new Error();
   }
 
   return data as TravelOrderType[];
@@ -93,7 +93,7 @@ export async function SelectAllTravelOrdersByProgramIDAction(
     .order("created_at", { ascending: false });
 
   if (error) {
-    return Promise.reject();
+    throw new Error();
   }
 
   return data as TravelOrderType[];

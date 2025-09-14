@@ -12,8 +12,8 @@ export async function InsertActivityLogAction(
   const supabase = await createClient(cookies());
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
-  if (userError || !userData?.user) {
-    return Promise.reject();
+  if (userError) {
+    throw new Error();
   }
   const response = await fetch("https://api.ipify.org?format=json");
   const data = await response.json();
@@ -27,7 +27,7 @@ export async function InsertActivityLogAction(
   });
 
   if (error) {
-    return Promise.reject();
+    throw new Error();
   }
 
   return;
@@ -43,7 +43,7 @@ export async function SelectActivityLogsByUserIDAction(user_id: string) {
     .order("created_at", { ascending: false });
 
   if (error) {
-    return Promise.reject();
+    throw new Error();
   }
 
   return data;
@@ -59,7 +59,7 @@ export async function SelectActivityLogsByProjectIDAction(project_id: string) {
     .order("created_at", { ascending: false });
 
   if (error) {
-    return Promise.reject();
+    throw new Error();
   }
 
   return data;
@@ -73,7 +73,7 @@ export async function SelectAllActivityLogsAction() {
     .select("*, user:user_profile (fullname)")
     .order("created_at", { ascending: false });
   if (error) {
-    return Promise.reject();
+    throw new Error();
   }
 
   return data as ActivityLogType[];
@@ -83,7 +83,7 @@ export async function SelectAllActivityLogsByCurrentUserAction() {
   const supabase = await createClient(cookies());
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError || !userData?.user) {
-    return Promise.reject();
+    throw new Error();
   }
   const { data, error } = await supabase
     .from("activity_logs")
@@ -91,7 +91,7 @@ export async function SelectAllActivityLogsByCurrentUserAction() {
     .eq("user_id", userData.user.id)
     .order("created_at", { ascending: false });
   if (error) {
-    return Promise.reject();
+    throw new Error();
   }
   return data as ActivityLogType[];
 }

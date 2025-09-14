@@ -13,7 +13,7 @@ export async function InsertProjectAction(values: ProjectType) {
 
   // Auth check
   if (!userId) {
-    return Promise.reject();
+    throw new Error();
   }
 
   const { data, error } = await supabase
@@ -28,7 +28,7 @@ export async function InsertProjectAction(values: ProjectType) {
     .single();
 
   if (error) {
-    return Promise.reject();
+    throw new Error();
   }
 
   // Log the activity
@@ -54,7 +54,7 @@ export async function SelectAllProjectsByProgramIDAction(programID: string) {
     .order("created_at", { ascending: true });
 
   if (error) {
-    return Promise.reject();
+    throw new Error();
   }
 
   return data as ProjectType[];
@@ -70,7 +70,7 @@ export async function SelectAllProjectsByUserIDAction(userID: string) {
     .eq("user_id", userID);
 
   if (assignedError) {
-    return Promise.reject();
+    throw new Error();
   }
 
   // Fetch project details for the assigned project IDs
@@ -84,7 +84,7 @@ export async function SelectAllProjectsByUserIDAction(userID: string) {
     .order("created_at", { ascending: true });
 
   if (error) {
-    return Promise.reject();
+    throw new Error();
   }
 
   return data as ProjectType[];
@@ -102,7 +102,7 @@ export async function SelectProgramAndProjectDetailsByProjectIDAction(
     .single();
 
   if (error) {
-    return Promise.reject();
+    throw new Error();
   }
 
   // GET FCA Info
@@ -112,7 +112,7 @@ export async function SelectProgramAndProjectDetailsByProjectIDAction(
     .in("id", data.fca_ids);
 
   if (fcaError) {
-    return Promise.reject();
+    throw new Error();
   }
 
   const res = {
@@ -132,7 +132,7 @@ export async function SelectProjectDetailsByProjectIDAction(projectID: string) {
     .single();
 
   if (error) {
-    return Promise.reject();
+    throw new Error();
   }
 
   return data as ProjectType;
@@ -148,7 +148,7 @@ export async function EditProjectAction(data: ProjectType) {
     .single();
 
   if (currentError) {
-    return Promise.reject();
+    throw new Error();
   }
 
   // Update the project name and status
@@ -163,7 +163,7 @@ export async function EditProjectAction(data: ProjectType) {
     .eq("id", data.id);
 
   if (error) {
-    return Promise.reject();
+    throw new Error();
   }
 
   // Log the activity
@@ -191,7 +191,7 @@ export async function DeleteProjectAction(projectID: string) {
     .single();
 
   if (projectError) {
-    return Promise.reject();
+    throw new Error();
   }
 
   const projectName = projectData?.project_name;
@@ -203,7 +203,7 @@ export async function DeleteProjectAction(projectID: string) {
     .eq("id", projectID);
 
   if (error) {
-    return Promise.reject();
+    throw new Error();
   }
 
   // Log the activity

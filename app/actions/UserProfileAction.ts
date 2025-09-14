@@ -12,7 +12,7 @@ export async function SelectAllUserProfilesAction() {
     .select("*")
     .order("fullname", { ascending: true });
   if (error) {
-    return Promise.reject();
+    throw new Error();
   }
   return data as UserProfileType[];
 }
@@ -26,7 +26,7 @@ export async function SelectUserProfileByIDAction(userID: string) {
     .single();
 
   if (error) {
-    return Promise.reject();
+    throw new Error();
   }
 
   return data as UserProfileType;
@@ -37,7 +37,7 @@ export async function SelectUserProfileAction() {
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user) {
-    return Promise.reject();
+    throw new Error();
   }
 
   const { data: user } = await supabase
@@ -47,7 +47,7 @@ export async function SelectUserProfileAction() {
     .single();
 
   if (!user) {
-    return Promise.reject();
+    throw new Error();
   }
 
   return user as UserProfileType;

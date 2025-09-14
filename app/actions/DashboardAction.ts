@@ -13,7 +13,7 @@ export async function SelectDashboardItemsAction(projectID: string) {
     .eq("project_id", projectID);
 
   if (APError) {
-    return Promise.reject();
+    throw new Error();
   }
 
   // 2. total monitoring reports
@@ -22,7 +22,7 @@ export async function SelectDashboardItemsAction(projectID: string) {
     .select("*")
     .eq("project_id", projectID);
   if (MError) {
-    return Promise.reject();
+    throw new Error();
   }
 
   // 3. project progress indicator
@@ -32,7 +32,7 @@ export async function SelectDashboardItemsAction(projectID: string) {
     .eq("id", projectID)
     .single();
   if (projectError) {
-    return Promise.reject();
+    throw new Error();
   }
 
   return {
@@ -47,7 +47,7 @@ export async function SelectUserDashboardItemsAction() {
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user) {
-    return Promise.reject();
+    throw new Error();
   }
 
   // Get travel orders
@@ -58,7 +58,7 @@ export async function SelectUserDashboardItemsAction() {
     .gte("return_date", new Date().toISOString())
     .order("created_at", { ascending: false });
   if (TError) {
-    return Promise.reject();
+    throw new Error();
   }
 
   // Get assigned projects
@@ -67,7 +67,7 @@ export async function SelectUserDashboardItemsAction() {
     .select("*")
     .eq("user_id", userData.user.id);
   if (APError) {
-    return Promise.reject();
+    throw new Error();
   }
 
   // Get monitoring reports
@@ -76,7 +76,7 @@ export async function SelectUserDashboardItemsAction() {
     .select("*")
     .eq("reporter_id", userData.user.id);
   if (MError) {
-    return Promise.reject();
+    throw new Error();
   }
 
   return { ap: APData, m: MData, to: TData };
@@ -128,7 +128,7 @@ export async function SelectTravelOrdersByDateAction() {
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user) {
-    return Promise.reject();
+    throw new Error();
   }
 
   const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
@@ -141,7 +141,7 @@ export async function SelectTravelOrdersByDateAction() {
     .limit(10);
 
   if (futureError) {
-    return Promise.reject();
+    throw new Error();
   }
 
   return futureOrders;

@@ -22,7 +22,7 @@ export async function InsertMemberAction(data: UserProfileType) {
     });
 
   if (authError) {
-    return Promise.reject();
+    throw new Error();
   }
 
   // Get the user ID from the auth data
@@ -34,7 +34,7 @@ export async function InsertMemberAction(data: UserProfileType) {
   });
 
   if (userError) {
-    return Promise.reject();
+    throw new Error();
   }
 
   // Log the activity
@@ -60,7 +60,7 @@ export async function UpdateMemberAction(
     .single();
 
   if (userError) {
-    return Promise.reject();
+    throw new Error();
   }
 
   // Update auth metadata if name or role changed
@@ -76,7 +76,7 @@ export async function UpdateMemberAction(
     );
 
     if (authError) {
-      return Promise.reject();
+      throw new Error();
     }
   }
 
@@ -103,7 +103,7 @@ export async function UpdateActiveStatusMemberAction(
     .single();
 
   if (userError) {
-    return Promise.reject();
+    throw new Error();
   }
 
   // Update auth metadata if name or role changed
@@ -117,7 +117,7 @@ export async function UpdateActiveStatusMemberAction(
   );
 
   if (authError) {
-    return Promise.reject();
+    throw new Error();
   }
 
   // Log the activity
@@ -162,7 +162,7 @@ export async function SelectAllMembersAction() {
     .order("created_at", { ascending: true });
 
   if (error) {
-    return Promise.reject();
+    throw new Error();
   }
 
   return data.map((user) => {
@@ -192,7 +192,7 @@ export async function SelectAllMembersByRoleAction(role: number) {
     .eq("role", role);
 
   if (error) {
-    return Promise.reject();
+    throw new Error();
   }
 
   // Get user email from auth
@@ -200,7 +200,7 @@ export async function SelectAllMembersByRoleAction(role: number) {
   const { data: userData, error: emailError } =
     await supabase.auth.admin.listUsers();
   if (emailError) {
-    return Promise.reject();
+    throw new Error();
   }
   const emailMap = new Map(
     (userData?.users ?? [])
