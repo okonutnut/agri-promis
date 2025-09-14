@@ -6,13 +6,13 @@ import { BookOpen, FolderKanban, Users } from "lucide-react";
 import { useUniversalRealtime } from "@/hooks/use-universal-realtime";
 import { SelectAdminDashboardItemsAction } from "@/app/actions/DashboardAction";
 import ProjectQuickAccessCard from "./project-quick-access-card";
-const ChartBarInteractive = dynamic(
-  () =>
-    import("../../charts/bar-chart-interactive").then(
-      (mod) => mod.ChartBarInteractive
-    ),
-  { ssr: false }
-);
+// const ChartBarInteractive = dynamic(
+//   () =>
+//     import("../../charts/bar-chart-interactive").then(
+//       (mod) => mod.ChartBarInteractive
+//     ),
+//   { ssr: false }
+// );
 const RecentActivities = dynamic(() => import("./recent-activities-admin"), {
   ssr: false,
 });
@@ -78,9 +78,9 @@ export default function AdminDashboardItems() {
       </section>
 
       {/* BAR CHART */}
-      <section className="mt-7">
+      {/* <section className="mt-7">
         {isLoading ? <SkeletonLoading /> : <ChartBarInteractive />}
-      </section>
+      </section> */}
 
       {/* RECENT ACTIVITIES */}
       <section className="mt-7">
