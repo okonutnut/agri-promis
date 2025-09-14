@@ -23,7 +23,7 @@ export async function InsertFieldTechniciansToProjectAction(
       .maybeSingle();
 
     if (selectError) {
-      throw new Error();
+      throw selectError;
     }
 
     if (!existingAssignment) {
@@ -36,7 +36,7 @@ export async function InsertFieldTechniciansToProjectAction(
         });
 
       if (insertError) {
-        throw new Error();
+        throw insertError;
       }
 
       // Get project details for logging
@@ -46,7 +46,7 @@ export async function InsertFieldTechniciansToProjectAction(
         .eq("id", project_id)
         .single();
       if (projectError) {
-        throw new Error();
+        throw projectError;
       }
 
       const userProfile = await SelectUserProfileByIDAction(technician_id);
@@ -85,7 +85,7 @@ export async function DeleteFieldTechnicianFromProjectAction(
     .eq("project_id", project_id);
 
   if (deleteError) {
-    throw new Error();
+    throw deleteError;
   }
 
   // Get project details for logging
@@ -95,7 +95,7 @@ export async function DeleteFieldTechnicianFromProjectAction(
     .eq("id", project_id)
     .single();
   if (projectError) {
-    throw new Error();
+    throw projectError;
   }
 
   const existingUserData = await SelectUserProfileByIDAction(user_id);
@@ -126,7 +126,7 @@ export async function SelectAllFieldTechniciansByProjectIDAction(
     .order("created_at", { ascending: true });
 
   if (error) {
-    throw new Error();
+    throw error;
   }
 
   return data as AssignedProjectsType[];
@@ -137,7 +137,7 @@ export async function SelectAllAssignedProjectsByFieldTechnicianIDAction() {
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError) {
-    throw new Error();
+    throw userError;
   }
 
   const { data, error } = await supabase
@@ -146,7 +146,7 @@ export async function SelectAllAssignedProjectsByFieldTechnicianIDAction() {
     .eq("user_id", userData.user.id);
 
   if (error) {
-    throw new Error();
+    throw error;
   }
 
   return data.map((item) => item.project) as ProjectType[];

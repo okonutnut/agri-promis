@@ -13,7 +13,7 @@ export async function InsertFCAAction(data: FCAType) {
     .from("farmers")
     .insert({ ...rest, active_status: 1 });
 
-  if (error) throw new Error();
+  if (error) throw error;
 
   // Log activity
   await InsertActivityLogAction(
@@ -29,7 +29,7 @@ export async function SelectAllFCAAction() {
   const { data, error } = await supabase.from("farmers").select("*");
 
   if (error) {
-    throw new Error();
+    throw error;
   }
 
   return data as FCAType[];
@@ -43,7 +43,7 @@ export async function SelectAllFCAByStatusAction(status: number) {
     .eq("active_status", status);
 
   if (error) {
-    throw new Error();
+    throw error;
   }
 
   return data as FCAType[];
@@ -57,7 +57,7 @@ export async function EditFCAAction(data: FCAType) {
     .eq("id", data.id);
 
   if (error) {
-    throw new Error();
+    throw error;
   }
 
   // Log activity
@@ -85,7 +85,7 @@ export async function EditFCAActiveStatusAction(fcaID: string, status: number) {
     .single();
 
   if (error) {
-    throw new Error();
+    throw error;
   }
 
   // Log activity
@@ -107,7 +107,7 @@ export async function SelectAllAssignedProjectsByFCAIDAction(fcaID: string) {
     .contains("fca_ids", [fcaID]);
 
   if (error) {
-    throw new Error();
+    throw error;
   }
 
   return data;
