@@ -112,8 +112,8 @@ export function useInsertProgramHook() {
       toast("Program created successfully!");
       router.push(`/dashboard/programs/${data.id}`);
     },
-    onError: (error) => {
-      toast.error(`Failed to create program: ${error.message}`);
+    onError: () => {
+      toast.error("Something went wrong. Please try again.");
     },
   });
 }
@@ -128,8 +128,8 @@ export function useEditProgramNameHook() {
     onSuccess: () => {
       toast("Program name updated successfully!");
     },
-    onError: (error) => {
-      toast.error(`Failed to update program name: ${error.message}`);
+    onError: () => {
+      toast.error("Something went wrong. Please try again.");
     },
   });
 }
@@ -146,8 +146,8 @@ export function useDeleteProgramHook(programId: string) {
       toast("Program deleted successfully!");
       window.location.href = "/dashboard/programs";
     },
-    onError: (error) => {
-      toast.error(`Failed to delete program: ${error.message}`);
+    onError: () => {
+      toast.error("Something went wrong. Please try again.");
     },
   });
 }
@@ -224,8 +224,8 @@ export function useInsertProjectHook() {
       toast("Project created successfully!");
       router.push(`/dashboard/projects/${data.id}`);
     },
-    onError: (error) => {
-      toast.error(`${error.message}`, {
+    onError: () => {
+      toast.error("Something went wrong. Please try again.", {
         duration: 2000,
       });
     },
@@ -238,8 +238,8 @@ export function useEditProjectHook() {
     onSuccess: () => {
       toast("Project updated successfully!");
     },
-    onError: (error) => {
-      toast.error(`Failed to update project name: ${error.message}`);
+    onError: () => {
+      toast.error("Something went wrong. Please try again.");
     },
   });
 }
@@ -251,8 +251,8 @@ export function useDeleteProjectHook(projectId: string, programId: string) {
       toast.error("Project deleted successfully!");
       window.location.href = "/dashboard/programs/" + programId;
     },
-    onError: (error) => {
-      toast.error(`Failed to delete project: ${error.message}`);
+    onError: () => {
+      toast.error("Something went wrong. Please try again.");
     },
   });
 }
@@ -269,8 +269,8 @@ export function useInsertTravelOrderHook() {
       });
       toast("Travel order issued successfully!");
     },
-    onError: (error) => {
-      toast.error(`Failed to issue travel order: ${error.message}`);
+    onError: () => {
+      toast.error("Something went wrong. Please try again.");
     },
   });
 }
@@ -315,8 +315,8 @@ export function useInsertMonitoringReportHook() {
     onSuccess: () => {
       toast("Monitoring report created successfully!");
     },
-    onError: (error) => {
-      toast.error(`Failed to create monitoring report: ${error.message}`);
+    onError: () => {
+      toast.error("Something went wrong. Please try again.");
     },
   });
 }
@@ -332,8 +332,8 @@ export function useInsertRemarksInMonitoringReportHook(reportId: string) {
       });
       toast("Remarks added successfully!");
     },
-    onError: (error) => {
-      toast.error(`Failed to add remarks: ${error.message}`);
+    onError: () => {
+      toast.error("Something went wrong. Please try again.");
     },
   });
 }
@@ -368,7 +368,7 @@ export function useInsertMemberHook() {
     },
     onError: () => {
       console.error("Failed to invite member.");
-      toast.error("Failed to invite member.");
+      toast.error("Something went wrong. Please try again.");
     },
   });
 }
@@ -381,7 +381,7 @@ export function useUpdateMemberHook() {
       toast("Member updated successfully!");
     },
     onError: () => {
-      toast.error("Failed to update member.");
+      toast.error("Something went wrong. Please try again.");
     },
   });
 }
@@ -404,7 +404,7 @@ export function useUpdateActiveStatusMemberHook() {
     },
     onError: () => {
       console.error("Failed to update member.");
-      toast.error("Failed to update member.");
+      toast.error("Something went wrong. Please try again.");
     },
   });
 }
@@ -438,9 +438,9 @@ export function useInsertFieldTechniciansToProjectHook(project_id: string) {
       qc.invalidateQueries({ queryKey: ["project-field-technicians"] });
       toast("Field technician added to project successfully!");
     },
-    onError: (error) => {
-      console.error("Failed to add field technician to project:", error);
-      toast.error(`Failed to add field technician: ${error.message}`);
+    onError: () => {
+      console.error("Failed to add field technician to project.");
+      toast.error("Something went wrong. Please try again.");
     },
   });
 }
@@ -452,9 +452,9 @@ export function useDeleteFieldTechnicianToProjectHook(projectID: string) {
     onSuccess: () => {
       toast("Field technician removed from project successfully!");
     },
-    onError: (error) => {
-      console.error("Failed to remove field technician from project:", error);
-      toast.error(`Failed to remove field technician: ${error.message}`);
+    onError: () => {
+      console.error("Failed to remove field technician from project.");
+      toast.error("Something went wrong. Please try again.");
     },
   });
 }
@@ -495,6 +495,7 @@ export function useUpdateUserCurrentLocationHook() {
     },
     onError: () => {
       UpdateUserCurrentLocationAction();
+      toast.error("Something went wrong. Please try again.");
     },
   });
 }

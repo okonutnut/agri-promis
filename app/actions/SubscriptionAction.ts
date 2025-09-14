@@ -3,6 +3,11 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import webpush from "web-push";
 
+const vapidKeys = {
+  publicKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "",
+  privateKey: process.env.VAPID_PRIVATE_KEY || "",
+};
+
 // PUSH SUBSCRIPTION ACTIONS
 export async function InsertSubscribeEndPoint(subscription: string) {
   const supabase = await createClient(cookies());
@@ -38,10 +43,6 @@ export async function DeleteSubscrptionEndpoint() {
 }
 
 export async function SendPushNotificationToAllAction(message: string) {
-  const vapidKeys = {
-    publicKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "",
-    privateKey: process.env.VAPID_PRIVATE_KEY || "",
-  };
   webpush.setVapidDetails(
     "mailto:" + process.env.VAPID_ADMIN_EMAIL,
     vapidKeys.publicKey,
@@ -61,8 +62,8 @@ export async function SendPushNotificationToAllAction(message: string) {
         JSON.parse(subscription.subscription),
         JSON.stringify({
           title: "New Notification",
-          icon: "/icons/favicon-96x96.png",
           body: message,
+          icon: "/icons/favicon-96x96.png",
         })
       )
     )
@@ -75,10 +76,6 @@ export async function SendPushNotificationToUserAction(
   user_id: string,
   message: string
 ) {
-  const vapidKeys = {
-    publicKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "",
-    privateKey: process.env.VAPID_PRIVATE_KEY || "",
-  };
   webpush.setVapidDetails(
     "mailto:" + process.env.VAPID_ADMIN_EMAIL,
     vapidKeys.publicKey,

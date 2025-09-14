@@ -19,8 +19,8 @@ export function useInsertFCAHook() {
     onSuccess: () => {
       toast("FCA created successfully!");
     },
-    onError: (error) => {
-      toast.error(`Failed to create FCA: ${error.message}`);
+    onError: () => {
+      toast.error(`Something went wrong. Please try again.`);
     },
   });
 }
@@ -49,8 +49,8 @@ export function useEditFCAHook() {
     onSuccess: () => {
       toast("FCA updated successfully!");
     },
-    onError: (error) => {
-      toast.error(`Failed to update FCA: ${error.message}`);
+    onError: () => {
+      toast.error(`Something went wrong. Please try again.`);
     },
   });
 }
@@ -62,8 +62,8 @@ export function useEditFCAActiveStatusHook() {
     onSuccess: () => {
       toast("FCA updated successfully!");
     },
-    onError: (error) => {
-      toast.error(`Failed to update FCA: ${error.message}`);
+    onError: () => {
+      toast.error(`Something went wrong. Please try again.`);
     },
   });
 }
