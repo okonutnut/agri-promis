@@ -10,6 +10,8 @@ import FormTextarea from "../input/form-textarea";
 import { CardFooter } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { SendPushNotificationToAllAction } from "@/app/actions/SubscriptionAction";
+import { sendNotification } from "@/lib/utils";
 
 const formSchema = z.object({
   program_name: z
@@ -35,7 +37,12 @@ export default function CreateProgramForm() {
 
   const { mutate, isPending } = useInsertProgramHook();
   const handleSubmit = (data: FormData) =>
-    mutate({ ...data, project_count: [] });
+    mutate(
+      { ...data, project_count: [] },
+      {
+        onSuccess: () => sendNotification("A new program has been created."),
+      }
+    );
 
   return (
     <>

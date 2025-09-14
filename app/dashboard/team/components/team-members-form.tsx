@@ -18,6 +18,7 @@ import {
   useModal,
   useSheet,
 } from "@/components/custom/layout/custom-page-layout";
+import { sendNotification, sendNotificationToUser } from "@/lib/utils";
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -79,6 +80,7 @@ export function TeamMemberForm({ isAddMode, data }: TeamMemberFormProps) {
     if (isAddMode) {
       insertMutate(data, {
         onSuccess: () => {
+          sendNotification("A new team member has been added.");
           form.reset();
           setPageState("idle");
           closeSheet();
@@ -87,6 +89,10 @@ export function TeamMemberForm({ isAddMode, data }: TeamMemberFormProps) {
     } else {
       updateMutate(data, {
         onSuccess: () => {
+          sendNotificationToUser(
+            data.id!,
+            "Your account information has been updated."
+          );
           form.reset();
           setPageState("idle");
           closeSheet();

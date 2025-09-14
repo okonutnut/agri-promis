@@ -12,6 +12,7 @@ import { CardFooter } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import FormTextarea from "../input/form-textarea";
 import { useState } from "react";
+import { sendNotification } from "@/lib/utils";
 const LocationSelector = dynamic(
   () => import("@/components/custom/dropdown/location-selector"),
   {
@@ -93,6 +94,7 @@ export default function CreateProjectForm() {
       },
       {
         onSuccess: () => {
+          sendNotification("A new project has been created.");
           setIsDisabled(true);
         },
       }
