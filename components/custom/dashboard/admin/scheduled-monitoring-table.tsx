@@ -22,7 +22,7 @@ export default function ScheduledMonitoringTable({
   data,
 }: ScheduledMonitoringTableProps) {
   return (
-    <>
+    <section className="col-span-2">
       <span className="text-lg font-semibold">
         Scheduled Monitoring ({new Date().toLocaleDateString()})
       </span>
@@ -33,7 +33,7 @@ export default function ScheduledMonitoringTable({
             <TableRow>
               <TableHead>Travel Order No</TableHead>
               <TableHead>Project</TableHead>
-              <TableHead>Activity</TableHead>
+              <TableHead>Purpose</TableHead>
               <TableHead className="text-end">Field Operator</TableHead>
             </TableRow>
           </TableHeader>
@@ -63,6 +63,6 @@ export default function ScheduledMonitoringTable({
           </TableBody>
         </Table>
       </div>
-    </>
+    </section>
   );
 }

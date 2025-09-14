@@ -11,6 +11,8 @@ import { ProjectType } from "@/components/types";
 import ProjectActivityLogTable from "@/components/custom/dashboard/project-activity-log-table";
 import { useUniversalRealtime } from "@/hooks/use-universal-realtime";
 import { SelectProgramAndProjectDetailsByProjectIDAction } from "@/app/actions/ProjectAction";
+import { useEffect } from "react";
+import { addProjectToQuickAccess } from "@/utils/helpers/quickAccessHooks";
 const ProjectDashboardItems = dynamic(
   () => import("@/components/custom/dashboard/admin/dashboard-summary-items"),
   {
@@ -72,6 +74,13 @@ export default function ProjectDashboard() {
       SelectProgramAndProjectDetailsByProjectIDAction(projectID as string),
     tables: ["projects", "farmers"],
   });
+
+  // Add to quick access
+  useEffect(() => {
+    if (projectID) {
+      addProjectToQuickAccess(projectID as string);
+    }
+  }, [projectID]);
 
   return (
     <CustomPageLayout

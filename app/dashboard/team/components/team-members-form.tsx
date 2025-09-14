@@ -11,9 +11,13 @@ import { useInsertMemberHook, useUpdateMemberHook } from "@/components/hooks";
 import { UserProfileType } from "@/components/types";
 import { Label } from "@/components/ui/label";
 import ChangeStatusButton from "./change-status-button";
-import { SheetFooterSlot } from "@/components/custom/layout/custom-page-layout";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useSupabaseSession } from "@/hooks/use-session";
+import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
+import {
+  useModal,
+  useSheet,
+} from "@/components/custom/layout/custom-page-layout";
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -33,13 +37,12 @@ type MemberType = z.infer<typeof formSchema>;
 type TeamMemberFormProps = {
   isAddMode: boolean;
   data: UserProfileType | null;
-  setPanelOpen: (open: boolean) => void;
 };
-export function TeamMemberForm({
-  isAddMode,
-  data,
-  setPanelOpen,
-}: TeamMemberFormProps) {
+export function TeamMemberForm({ isAddMode, data }: TeamMemberFormProps) {
+  const { openModal, closeModal } = useModal();
+  const { closeSheet } = useSheet();
+  const [pageState, setPageState] = useState<"idle" | "loading">("idle");
+
   const roles = [
     { value: 1, label: "System Admin" },
     { value: 2, label: "System User" },
@@ -72,22 +75,26 @@ export function TeamMemberForm({
   const isPending = isInsertPending || isUpdatePending;
 
   const onSubmit = (data: MemberType) => {
+    setPageState("loading");
     if (isAddMode) {
       insertMutate(data, {
         onSuccess: () => {
           form.reset();
-          setPanelOpen(false);
+          setPageState("idle");
+          closeSheet();
         },
       });
     } else {
       updateMutate(data, {
         onSuccess: () => {
           form.reset();
-          setPanelOpen(false);
+          setPageState("idle");
+          closeSheet();
         },
       });
     }
   };
+
   return (
     <>
       <Label className="px-3 my-2 text-xl">Account Info</Label>
@@ -109,16 +116,36 @@ export function TeamMemberForm({
           form={form}
         />
       </form>
-      <SheetFooterSlot>
-        {(!isAddMode || !isUserProfile) && (
-          <ChangeStatusButton data={data} form={form} />
+      <CustomSheetFooter isPending={isPending || pageState === "loading"}>
+        {!isAddMode && !isUserProfile && (
+          <ChangeStatusButton
+            pageState={pageState}
+            setPageState={setPageState}
+            data={data}
+            form={form}
+          />
         )}
         <Button
-          type="submit"
-          form="team-member-form"
           size={"sm"}
+          onClick={() =>
+            openModal(
+              "Attention!!!",
+              "Are you sure you want to submit this form?",
+              <Button
+                className="w-full"
+                onClick={() => {
+                  form.handleSubmit(onSubmit)();
+                  closeModal();
+                }}
+              >
+                Submit
+              </Button>
+            )
+          }
           variant={isPending ? "ghost" : "default"}
-          disabled={isPending}
+          disabled={
+            isPending || pageState == "loading" || !form.formState.isValid
+          }
         >
           {isPending ? (
             <Loader2 className="animate-spin" />
@@ -128,7 +155,7 @@ export function TeamMemberForm({
             </>
           )}
         </Button>
-      </SheetFooterSlot>
+      </CustomSheetFooter>
     </>
   );
 }

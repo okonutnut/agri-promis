@@ -14,6 +14,7 @@ import SkeletonLoading from "@/components/custom/layout/skeleton-loading";
 import { useParams } from "next/navigation";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllMembersByRoleAction } from "@/app/actions/MemberAction";
+import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
 
 type SelectMemberTableProps = {
   assignedMembers: string[];
@@ -72,6 +73,7 @@ export default function SelectMemberTable({
             onAdd={onSubmit}
             onRowSelectionChange={handleRowSelectionChange}
           />
+          <CustomSheetFooter />
         </>
       )}
     </>

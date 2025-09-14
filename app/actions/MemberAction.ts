@@ -154,7 +154,7 @@ export async function SelectAllMembersAction() {
       )
     `
     )
-    .order("role");
+    .order("created_at", { ascending: true });
 
   if (error) {
     console.error("Error fetching members:", error);

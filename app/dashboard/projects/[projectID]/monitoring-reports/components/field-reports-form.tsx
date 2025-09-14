@@ -13,11 +13,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import FormTextarea from "@/components/custom/input/form-textarea";
 import NonFormTextarea from "@/components/custom/input/non-form-textarea";
 import dynamic from "next/dynamic";
+import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
+
 const MonitoringReportDocument = dynamic(
   () => import("@/components/custom/pdf/monitoring-reports-document"),
   { ssr: false }
 );
-import { SheetFooterSlot } from "@/components/custom/layout/custom-page-layout";
 const ImageCarousel = dynamic(
   () => import("@/components/custom/images/image-carousel"),
   { ssr: false }
@@ -62,11 +63,6 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
   return (
     <>
       <section className="space-y-4 h-[calc(90vh)] overflow-y-auto overflow-x-hidden">
-        {data?.reviewed_by_id && (
-          <PrintDownloadDropdown
-            data={<MonitoringReportDocument data={data} />}
-          />
-        )}
         <ImageCarousel images={data?.photo_url || []} />
         <div className="p-2 space-y-4 border-t">
           <NonFormInput
@@ -101,8 +97,8 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
           </form>
         </div>
       </section>
-      <SheetFooterSlot>
-        {!data?.reviewed_by_id && (
+      <CustomSheetFooter>
+        {!data?.reviewed_by_id ? (
           <Button
             form="remarks-form"
             variant={isPending ? "ghost" : "default"}
@@ -118,8 +114,12 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
               </>
             )}
           </Button>
+        ) : (
+          <PrintDownloadDropdown
+            data={<MonitoringReportDocument data={data} />}
+          />
         )}
-      </SheetFooterSlot>
+      </CustomSheetFooter>
     </>
   );
 }

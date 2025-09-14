@@ -5,12 +5,17 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import FormInput from "@/components/custom/input/form-input";
-import FormSelect from "@/components/custom/select/form-select";
 import { Loader2, Send } from "lucide-react";
 import { useEditFCAHook, useInsertFCAHook } from "@/app/hooks/FCAHook";
 import { FCAType } from "@/components/types";
 import { Label } from "@/components/ui/label";
-import { SheetFooterSlot } from "@/components/custom/layout/custom-page-layout";
+import {
+  useModal,
+  useSheet,
+} from "@/components/custom/layout/custom-page-layout";
+import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
+import FCAActiveStatusButton from "./active-status-button";
+import { useState } from "react";
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -24,13 +29,11 @@ type FormType = z.infer<typeof formSchema>;
 type FCAFormProps = {
   isAddMode: boolean;
   data: FCAType | null;
-  setPanelOpen: () => void;
 };
-export function FCAForm({ isAddMode, data, setPanelOpen }: FCAFormProps) {
-  const status = [
-    { value: 0, label: "Inactive" },
-    { value: 1, label: "Active" },
-  ];
+export function FCAForm({ isAddMode, data }: FCAFormProps) {
+  const [pageState, setPageState] = useState<"idle" | "loading">("idle");
+  const { openModal, closeModal } = useModal();
+  const { closeSheet } = useSheet();
 
   const form = useForm<FormType>({
     resolver: zodResolver(formSchema),
@@ -49,28 +52,47 @@ export function FCAForm({ isAddMode, data, setPanelOpen }: FCAFormProps) {
   const { mutate: updateMutate, isPending: isUpdatePending } = useEditFCAHook();
 
   const isPending = isInsertPending || isUpdatePending;
+
   const onSubmit = (data: FormType) => {
     if (isAddMode) {
       insertMutate(data, {
         onSuccess: () => {
-          setPanelOpen();
+          closeSheet();
           form.reset();
         },
       });
     } else {
       updateMutate(data, {
         onSuccess: () => {
-          setPanelOpen();
+          closeSheet();
           form.reset();
         },
       });
     }
   };
+
+  const handleOpenModal = () => {
+    openModal(
+      "Attention!!!",
+      "Are you sure you want to submit this form?",
+      <Button
+        className="w-full"
+        onClick={() => {
+          setPageState("loading");
+          form.handleSubmit(onSubmit)();
+          closeModal();
+        }}
+      >
+        Confirm
+      </Button>
+    );
+  };
+
   return (
     <>
       <Label className="px-3 my-2 text-xl">FCA Information</Label>
       <form
-        className="p-3 space-y-4 mb-4 overflow-auto"
+        className="p-3 space-y-4"
         id="fca-form"
         onSubmit={form.handleSubmit(onSubmit)}
       >
@@ -87,25 +109,21 @@ export function FCAForm({ isAddMode, data, setPanelOpen }: FCAFormProps) {
           form={form}
           noPlaceholder
         />
+      </form>
+      <CustomSheetFooter isPending={isPending || pageState === "loading"}>
         {!isAddMode && (
-          <FormSelect
-            options={status.map((status) => ({
-              value: status.value,
-              label: status.label,
-            }))}
-            label="Active Status"
-            name="active_status"
-            form={form}
+          <FCAActiveStatusButton
+            pageState={pageState}
+            setPageState={setPageState}
+            fcaID={data?.id as string}
+            status={data?.active_status as number}
           />
         )}
-      </form>
-      <SheetFooterSlot>
         <Button
-          type="submit"
-          form="fca-form"
-          size={"sm"}
           variant={isPending ? "ghost" : "default"}
-          disabled={isPending}
+          size="sm"
+          onClick={handleOpenModal}
+          disabled={isPending || pageState === "loading"}
         >
           {isPending ? (
             <Loader2 className="animate-spin" />
@@ -115,7 +133,7 @@ export function FCAForm({ isAddMode, data, setPanelOpen }: FCAFormProps) {
             </>
           )}
         </Button>
-      </SheetFooterSlot>
+      </CustomSheetFooter>
     </>
   );
 }

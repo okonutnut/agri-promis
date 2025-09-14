@@ -14,14 +14,17 @@ import * as z from "zod";
 import { useInsertTravelOrderHook } from "@/components/hooks";
 import { Loader2, Send } from "lucide-react";
 import { useParams } from "next/navigation";
-import { SheetFooterSlot } from "@/components/custom/layout/custom-page-layout";
+import { useModal } from "@/components/custom/layout/custom-page-layout";
+import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
 
 const formSchema = z
   .object({
     travel_order_no: z
       .string()
       .min(1, { message: "Travel order number is required" })
-      .regex(/^\d+-\d+$/, { message: "Must be numbers separated by a single dash" }),
+      .regex(/^\d+-\d+$/, {
+        message: "Must be numbers separated by a single dash",
+      }),
     purpose: z.string().min(1, { message: "Purpose is required" }),
     user_id: z.string().min(1, { message: "User is required" }),
     office: z.string().min(1, { message: "Office is required" }),
@@ -65,6 +68,8 @@ export default function IssueTravelOrderForm({
   setPanelOpen,
 }: IssueTravelOrderFormProps) {
   const { programID } = useParams();
+  const { openModal, closeModal } = useModal();
+
   const form = useForm<TravelOrderSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -109,7 +114,7 @@ export default function IssueTravelOrderForm({
   return (
     <>
       <form
-        className="space-y-4 p-2 h-full"
+        className="space-y-4 overflow-y-scroll p-2 h-[calc(90vh)]"
         id="travel-order-form"
         onSubmit={form.handleSubmit(onSubmit)}
       >
@@ -198,14 +203,27 @@ export default function IssueTravelOrderForm({
           />
         )}
       </form>
-      <SheetFooterSlot>
+      <CustomSheetFooter>
         {isAddMode && (
           <Button
-            form="travel-order-form"
             variant={isPending ? "ghost" : "default"}
-            type="submit"
             disabled={isPending || !form.formState.isValid}
             size={"sm"}
+            onClick={() => {
+              openModal(
+                "Attention!!!",
+                "Are you sure you want to submit?",
+                <Button
+                  className="w-full"
+                  onClick={() => {
+                    form.handleSubmit(onSubmit)();
+                    closeModal();
+                  }}
+                >
+                  Confirm
+                </Button>
+              );
+            }}
           >
             {isPending ? (
               <Loader2 className="animate-spin" />
@@ -216,7 +234,7 @@ export default function IssueTravelOrderForm({
             )}
           </Button>
         )}
-      </SheetFooterSlot>
+      </CustomSheetFooter>
     </>
   );
 }

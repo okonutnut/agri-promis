@@ -1,6 +1,5 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { DataTable } from "./table/data-table";
 import { columns } from "./table/columns";
 import { MonitoringReportType } from "@/components/types";
@@ -14,14 +13,8 @@ import SkeletonLoading from "@/components/custom/layout/skeleton-loading";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllMonitoringReportsByProjectIDAndUserAction } from "@/app/actions/MonitoringAction";
 import { SelectProjectDetailsByProjectIDAction } from "@/app/actions/ProjectAction";
-const UploadFieldReportForm = dynamic(
-  () => import("./form/monitoring-report-form"),
-  { ssr: false }
-);
-const ViewDraftsSheet = dynamic(
-  () => import("./components/view-drafts-sheet"),
-  { ssr: false }
-);
+import UploadFieldReportForm from "./form/monitoring-report-form";
+import ViewDraftsSheet from "./components/view-drafts-sheet";
 
 type MonitoringReportContentType = {
   data: MonitoringReportType[] | undefined;

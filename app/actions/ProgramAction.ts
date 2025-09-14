@@ -177,15 +177,22 @@ export async function SelectAllProgramsAction() {
   const supabase = await createClient(cookies());
   const { data, error } = await supabase
     .from("programs")
-    .select("*, project_count:projects(count)")
+    .select(
+      `
+      *,
+      project_count:projects(count),
+      projects(*),
+      user_profile:admin_id(fullname)
+    `
+    )
     .order("created_at", { ascending: true });
 
   if (error) {
     console.error("Error fetching programs:", error);
-    throw new Error(error.message);
+    throw new Error("Failed to fetch programs. Please try again.");
   }
 
-  return data as ProgramType[];
+  return data;
 }
 
 export async function SelectUserByProgramAssignedAction(programId?: string) {

@@ -15,9 +15,10 @@ import {
   getLongtitudeLatitudeFromGPS,
 } from "@/lib/utils";
 import { MonitoringReportType } from "@/components/types";
-import { useSelectUserProfileHook } from "@/app/hooks/UserProfileHook";
-import { useSelectProjectDetailsHook } from "@/components/hooks";
 import { useParams } from "next/navigation";
+import { useRealtimeQuery } from "@/hooks/use-realtime";
+import { SelectUserProfileAction } from "@/app/actions/UserProfileAction";
+import { SelectProjectDetailsByProjectIDAction } from "@/app/actions/ProjectAction";
 const ImageModal = dynamic(() => import("@/components/ui/image-modal"), {
   ssr: false,
 });
@@ -41,14 +42,21 @@ export default function ImageCaptureForm({
   setImages,
 }: ImageCaptureFormProps) {
   const { projectID } = useParams();
+
   const [isCompressing, setIsCompressing] = useState(false);
   const [fullScreenImage, setFullScreenImage] = useState<ImageData | null>(
     null
   );
-  const fullname = useSelectUserProfileHook().data?.fullname;
-  const { data: project, isLoading } = useSelectProjectDetailsHook(
-    projectID as string
-  );
+  const { data: userProfile } = useRealtimeQuery({
+    queryKey: ["user_profile"],
+    queryFn: SelectUserProfileAction,
+    table: "user_profile",
+  });
+  const { data: project, isLoading } = useRealtimeQuery({
+    queryKey: ["project_details"],
+    queryFn: () => SelectProjectDetailsByProjectIDAction(projectID as string),
+    table: "projects",
+  });
 
   const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -73,7 +81,7 @@ export default function ImageCaptureForm({
           file,
           dateTimeCaptured,
           await getLongtitudeLatitudeFromGPS(),
-          fullname as string,
+          userProfile?.fullname as string,
           project?.project_name as string
         );
 
@@ -165,7 +173,6 @@ export default function ImageCaptureForm({
       <div className="space-y-4 m-2">
         {isAddMode ? (
           <>
-            {/* <GetCurrentLocation location={location} setLocation={setLocation} /> */}
             {/* Image Gallery with Camera Trigger */}
             <div className="space-y-2">
               <div className="flex gap-4 justify-start overflow-x-auto pb-4">

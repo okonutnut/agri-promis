@@ -16,6 +16,7 @@ import { Archive } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSupabaseSession } from "@/hooks/use-session";
 import { useParams } from "next/navigation";
+import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
 
 type ViewDraftsSheetProps = {
   handleModify: (row: MonitoringReportType | null) => void;
@@ -75,6 +76,7 @@ function DraftsContent({ handleModify }: ViewDraftsSheetProps) {
           ))}
         </TableBody>
       </Table>
+      <CustomSheetFooter />
     </>
   );
 }

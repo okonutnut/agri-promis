@@ -9,7 +9,6 @@ import CustomPageLayout, {
 import { useParams } from "next/navigation";
 import { AssignedProjectsType } from "@/components/types";
 import { getProjectNavItems } from "@/components/sidebar/navitems";
-import FTTravelOrders from "./components/ft-travel-orders";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllFieldTechniciansByProjectIDAction } from "@/app/actions/AssignedProjectAction";
 const SelectMembersTable = dynamic(
@@ -30,21 +29,13 @@ function FieldTechnicianContent({
 }: {
   data: AssignedProjectsType[] | undefined;
 }) {
-  const { openSheet, closeSheet, openSheetWithTabs } = useSheet();
+  const { openSheet, closeSheet } = useSheet();
 
   const handleRowSelect = (row: AssignedProjectsType) => {
-    openSheetWithTabs("View Member Details", [
-      {
-        label: "Current Info",
-        value: "details",
-        content: <ViewFieldTechnicianPanel selectedRow={row} />,
-      },
-      {
-        label: "Travel Orders",
-        value: "travel-orders",
-        content: <FTTravelOrders user_id={row.user_id as string} />,
-      },
-    ]);
+    openSheet(
+      "View Member Details",
+      <ViewFieldTechnicianPanel selectedRow={row} />
+    );
   };
 
   const handleAdd = () => {

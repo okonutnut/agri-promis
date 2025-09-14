@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
-
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +19,10 @@ import {
 } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
 import { UseFormReturn } from "react-hook-form";
-import { useSelectAllTravelOrdersByUserIDHook } from "@/components/hooks";
+import { useRealtimeQuery } from "@/hooks/use-realtime";
+import { SelectAllTravelOrdersByUserIDAction } from "@/app/actions/TravelOrderAction";
+import { useParams } from "next/navigation";
+import { useSupabaseSession } from "@/hooks/use-session";
 
 type TravelOrderDropdownProps = {
   form: UseFormReturn<any>;
@@ -28,9 +30,21 @@ type TravelOrderDropdownProps = {
 export default function TravelOrderDropdown({
   form,
 }: TravelOrderDropdownProps) {
-  const { data, isLoading } = useSelectAllTravelOrdersByUserIDHook();
+  const { projectID } = useParams();
+  const { data: userData } = useSupabaseSession();
+
+  const { data, isLoading } = useRealtimeQuery({
+    queryKey: ["travel-orders"],
+    queryFn: () => SelectAllTravelOrdersByUserIDAction(userData?.user.id),
+    table: "travel-order",
+  });
+
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
+
+  const options = React.useMemo(() => {
+    return data?.filter((to) => to.project_id === projectID);
+  }, [data, projectID]);
 
   return (
     <>
@@ -45,8 +59,8 @@ export default function TravelOrderDropdown({
           >
             {value
               ? `${
-                  data?.find((order) => order.id === value)?.travel_order_no
-                }: ${data?.find((order) => order.id === value)?.purpose}`
+                  options?.find((order) => order.id === value)?.travel_order_no
+                }: ${options?.find((order) => order.id === value)?.purpose}`
               : "Select travel order..."}
             <ChevronsUpDown className="opacity-50" />
           </Button>
@@ -65,7 +79,7 @@ export default function TravelOrderDropdown({
               <CommandList>
                 <CommandEmpty>No travel order found.</CommandEmpty>
                 <CommandGroup>
-                  {data?.map((order) => (
+                  {options?.map((order) => (
                     <CommandItem
                       key={order.id}
                       value={order.id}

@@ -75,6 +75,31 @@ export async function EditFCAAction(data: FCAType) {
   return;
 }
 
+export async function EditFCAActiveStatusAction(fcaID: string, status: number) {
+  const supabase = await createClient(cookies());
+  const { data, error } = await supabase
+    .from("farmers")
+    .update({ active_status: status })
+    .eq("id", fcaID)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error updating FCA:", error);
+    throw new Error(error.message);
+  }
+
+  // Log activity
+  await InsertActivityLogAction(
+    "Updated FCA record",
+    `Update ${data.description}'s active status to ${
+      status == 0 ? "Inactive" : "Active"
+    }`
+  );
+
+  return;
+}
+
 export async function SelectAllAssignedProjectsByFCAIDAction(fcaID: string) {
   const supabase = await createClient(cookies());
   const { data, error } = await supabase

@@ -8,11 +8,12 @@ import SkeletonLoading from "@/components/custom/layout/skeleton-loading";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
+import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
 
-type FCAPanelProps = {
+type FCAProjectsProps = {
   fcaID: string;
 };
-export default function FCAPanel({ fcaID }: FCAPanelProps) {
+export default function FCAProjects({ fcaID }: FCAProjectsProps) {
   const { data, isLoading, refetch } =
     useSelectAllAssignedProjectsByFCAIDHook(fcaID);
 
@@ -68,6 +69,7 @@ export default function FCAPanel({ fcaID }: FCAPanelProps) {
           )}
         </div>
       )}
+      <CustomSheetFooter />
     </>
   );
 }

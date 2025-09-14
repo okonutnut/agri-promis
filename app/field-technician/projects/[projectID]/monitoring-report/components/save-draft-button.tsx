@@ -68,19 +68,18 @@ export default function SaveDraftButton({
     try {
       setIsSaving(true);
 
-      // Get current form data
       const formData = form.getValues();
-
-      // Create draft data
       const draftData = createDraftData(projectID as string, formData, images);
 
-      // Generate draft key
+      console.log("Saving draft data:", draftData); // <-- Add this line
+
       const key =
         draftKey || `draft_${data?.user.id}_${new Date().toISOString()}`;
 
-      // Save draft
       await upsertDraft(key, draftData);
+
       toast.success("Draft saved successfully");
+
       closeSheet();
     } catch (error) {
       console.error("Error saving draft:", error);
@@ -96,7 +95,6 @@ export default function SaveDraftButton({
       disabled={isDisabled}
       onClick={handleSaveDraft}
       type="button"
-      className="w-full"
       size={"sm"}
     >
       {isSaving ? (

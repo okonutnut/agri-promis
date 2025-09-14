@@ -2,7 +2,8 @@
 
 import dynamic from "next/dynamic";
 import { AssignedProjectsType } from "@/components/types";
-import { SheetFooterSlot } from "@/components/custom/layout/custom-page-layout";
+import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
+import FTTravelOrders from "./ft-travel-orders";
 const FTGPSCard = dynamic(() => import("./gps/gps-card"), {
   ssr: false,
 });
@@ -19,9 +20,10 @@ export default function ViewFieldTechnicianPanel({
   return (
     <section className="space-y-4 overflow-y-auto">
       <FTGPSCard user_id={selectedRow?.user_id as string} />
-      <SheetFooterSlot>
+      <FTTravelOrders user_id={selectedRow?.user_id as string} />
+      <CustomSheetFooter>
         <RemoveFTButton userID={selectedRow?.user_id as string} />
-      </SheetFooterSlot>
+      </CustomSheetFooter>
     </section>
   );
 }

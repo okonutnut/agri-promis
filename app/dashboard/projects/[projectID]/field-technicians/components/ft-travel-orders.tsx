@@ -45,7 +45,7 @@ export default function FTTravelOrders({ user_id }: FTTravelOrdersProps) {
       ) : values?.length === 0 ? (
         <center className="italic text-sm">No active travel orders.</center>
       ) : (
-        <div className="space-y-2 max-h-64 overflow-y-auto">
+        <div className="space-y-2 overflow-y-auto">
           {values &&
             values.map((order) => (
               <Card

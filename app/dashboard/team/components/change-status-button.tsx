@@ -11,10 +11,14 @@ import { Loader2, TriangleAlert } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 
 type ChangeStatusButtonProps = {
+  pageState: "idle" | "loading";
+  setPageState: (state: "idle" | "loading") => void;
   data?: UserProfileType | null;
   form: UseFormReturn<any>;
 };
 export default function ChangeStatusButton({
+  pageState,
+  setPageState,
   data,
   form,
 }: ChangeStatusButtonProps) {
@@ -25,6 +29,7 @@ export default function ChangeStatusButton({
   const { mutate, isPending } = useUpdateActiveStatusMemberHook();
 
   const statusSubmit = (userID: string, status: number) => {
+    setPageState("loading");
     mutate(
       {
         userID: userID,
@@ -32,6 +37,7 @@ export default function ChangeStatusButton({
       },
       {
         onSuccess: () => {
+          setPageState("idle");
           form.reset();
           closeSheet();
         },
@@ -47,7 +53,6 @@ export default function ChangeStatusButton({
           "Change Active Status",
           "Are you sure you want to change the active status of this member?",
           <Button
-            size={"sm"}
             className="w-full"
             onClick={() => {
               statusSubmit(
@@ -62,7 +67,7 @@ export default function ChangeStatusButton({
         );
       }}
       variant={isPending ? "ghost" : "outline"}
-      disabled={isPending}
+      disabled={isPending || pageState == "loading"}
     >
       {isPending ? (
         <Loader2 className="animate-spin" />

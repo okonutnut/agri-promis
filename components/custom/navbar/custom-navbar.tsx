@@ -187,6 +187,17 @@ const ProjectDropdown = ({
             All Projects
           </DropdownMenuItem>
         </Link>
+        {role === "admin" && (
+          <>
+            <Separator />
+            <Link href={`/dashboard/new/${projects?.[0]?.program_id}`}>
+              <DropdownMenuItem>
+                <Plus />
+                New Project
+              </DropdownMenuItem>
+            </Link>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

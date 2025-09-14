@@ -6,6 +6,14 @@ import { format } from "date-fns";
 
 export const columns: ColumnDef<MonitoringReportType>[] = [
   {
+    id: "count",
+    header: "#",
+    cell: (info) => info.row.index + 1,
+    enableSorting: false,
+    enableColumnFilter: false,
+    size: 10,
+  },
+  {
     accessorKey: "travel_order.travel_order_no",
     header: "Travel Order No",
   },

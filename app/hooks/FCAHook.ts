@@ -9,6 +9,7 @@ import {
   SelectAllFCAByStatusAction,
   EditFCAAction,
   SelectAllAssignedProjectsByFCAIDAction,
+  EditFCAActiveStatusAction,
 } from "../actions/FCAAction";
 
 // FCA HOOKS
@@ -23,6 +24,7 @@ export function useInsertFCAHook() {
     },
   });
 }
+
 export function useSelectAllFCAHook() {
   return useQuery({
     queryKey: ["farmers"],
@@ -31,6 +33,7 @@ export function useSelectAllFCAHook() {
     networkMode: "online",
   });
 }
+
 export function useSelectAllFCAByStatusHook(status: number) {
   return useQuery({
     queryKey: ["farmers"],
@@ -39,6 +42,7 @@ export function useSelectAllFCAByStatusHook(status: number) {
     networkMode: "online",
   });
 }
+
 export function useEditFCAHook() {
   return useMutation({
     mutationFn: async (data: FCAType) => await EditFCAAction(data),
@@ -50,6 +54,20 @@ export function useEditFCAHook() {
     },
   });
 }
+
+export function useEditFCAActiveStatusHook() {
+  return useMutation({
+    mutationFn: async ({ fcaID, status }: { fcaID: string; status: number }) =>
+      await EditFCAActiveStatusAction(fcaID, status),
+    onSuccess: () => {
+      toast("FCA updated successfully!");
+    },
+    onError: (error) => {
+      toast.error(`Failed to update FCA: ${error.message}`);
+    },
+  });
+}
+
 export function useSelectAllAssignedProjectsByFCAIDHook(fcaID: string) {
   return useQuery({
     queryKey: ["assignedProjectsByFCA", fcaID],

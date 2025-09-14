@@ -4,6 +4,7 @@ import NonFormInput from "@/components/custom/input/non-form-input";
 import { TravelOrderType } from "@/components/types";
 import NonFormTextarea from "@/components/custom/input/non-form-textarea";
 import { format } from "date-fns";
+import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
 
 type IssueTravelOrderFormProps = {
   values?: TravelOrderType | null;
@@ -74,6 +75,7 @@ export default function IssueTravelOrderForm({
           readonly
         />
       </section>
+      <CustomSheetFooter />
     </>
   );
 }

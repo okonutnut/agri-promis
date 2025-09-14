@@ -84,6 +84,11 @@ export function getProjectNavItems(id: string) {
       icon: Cctv,
     },
     {
+      title: "Activity Logs",
+      href: `/dashboard/projects/${id}/activity-logs`,
+      icon: ChartLine,
+    },
+    {
       title: "Project Settings",
       href: `/dashboard/projects/${id}/settings`,
       icon: Settings,

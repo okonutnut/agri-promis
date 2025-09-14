@@ -5,7 +5,6 @@ import { ProjectType } from "@/components/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useModal } from "@/components/custom/layout/custom-page-layout";
@@ -38,15 +37,14 @@ export default function DeleteProjectCard({
 
     return (
       <>
-        <Separator />
         <center className="text-sm mb-4">
           Type <strong>{projectName}</strong> to continue.
         </center>
         <Input
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
+          className="mb-4"
         />
-        <Separator className="my-4" />
         <Button
           className="w-full"
           variant={"destructive"}
