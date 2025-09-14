@@ -24,7 +24,7 @@ export async function InsertProgramAction({
     .single();
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   // Log the activity
@@ -57,7 +57,7 @@ export async function EditProgramNameAction({
     .single();
 
   if (currentError) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   // Update the program name
@@ -69,7 +69,7 @@ export async function EditProgramNameAction({
     .single();
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   // Log the activity
@@ -95,7 +95,7 @@ export async function SelectProgramByIdAction(programId: string) {
     .single();
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   return data as ProgramType;
@@ -106,7 +106,7 @@ export async function SelectAllProgramsByAgriculturistAction() {
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user?.id) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   const { data, error } = await supabase
@@ -115,7 +115,7 @@ export async function SelectAllProgramsByAgriculturistAction() {
     .order("created_at", { ascending: true });
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   return data as ProgramType[];
@@ -126,7 +126,7 @@ export async function SelectAllProgramsByUserIDAction(userID: string) {
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user?.id) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   const { data, error } = await supabase
@@ -136,7 +136,7 @@ export async function SelectAllProgramsByUserIDAction(userID: string) {
     .order("created_at", { ascending: true });
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   return data as ProgramType[];
@@ -152,7 +152,7 @@ export async function DeleteProgramAction(programID: string) {
     .eq("id", programID)
     .single();
   if (programError) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   // Delete the program
@@ -162,7 +162,7 @@ export async function DeleteProgramAction(programID: string) {
     .eq("id", programID);
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   // Log the activity
@@ -194,7 +194,7 @@ export async function SelectAllProgramsAction() {
     .order("created_at", { ascending: true });
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   return data;
@@ -207,7 +207,7 @@ export async function SelectUserByProgramAssignedAction(programId?: string) {
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user?.id) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   if (!programId) return [];

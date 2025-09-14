@@ -14,7 +14,7 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
   } = await supabase.auth.getUser();
 
   if (userError || !user?.id) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   const { error } = await supabase.from("travel_order").insert({
@@ -24,7 +24,7 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
   });
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   // Fetch user profile for logging
@@ -35,7 +35,7 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
     .single();
 
   if (profileError) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   // Log the activity
@@ -58,9 +58,7 @@ export async function SelectAllTravelOrdersByUserIDAction(user_id?: string) {
   if (!user_id) {
     const { data: userData, error: userError } = await supabase.auth.getUser();
 
-    if (userError || !userData?.user) {
-      throw new Error(userError?.message || "User not authenticated");
-    }
+    if (userError) return Promise.reject();
 
     user_id = userData.user.id;
   }
@@ -75,7 +73,7 @@ export async function SelectAllTravelOrdersByUserIDAction(user_id?: string) {
     .order("created_at", { ascending: false });
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   return data as TravelOrderType[];
@@ -95,7 +93,7 @@ export async function SelectAllTravelOrdersByProgramIDAction(
     .order("created_at", { ascending: false });
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   return data as TravelOrderType[];

@@ -3,13 +3,9 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { FCAType } from "../../components/types";
 import { InsertActivityLogAction } from "./ActivityLogAction";
-import {
-  SendPushNotificationToAllAction,
-  SendPushNotificationToUserAction,
-} from "./SubscriptionAction";
+import { SendPushNotificationToUserAction } from "./SubscriptionAction";
 
 // FCA ACTIONS
-
 export async function InsertFCAAction(data: FCAType) {
   const supabase = await createClient(cookies());
   const { id, ...rest } = data;
@@ -17,9 +13,7 @@ export async function InsertFCAAction(data: FCAType) {
     .from("farmers")
     .insert({ ...rest, active_status: 1 });
 
-  if (error) {
-    throw new Error("Something went wrong. Please try again.");
-  }
+  if (error) return Promise.reject();
 
   // Log activity
   await InsertActivityLogAction(
@@ -35,7 +29,7 @@ export async function SelectAllFCAAction() {
   const { data, error } = await supabase.from("farmers").select("*");
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   return data as FCAType[];
@@ -49,7 +43,7 @@ export async function SelectAllFCAByStatusAction(status: number) {
     .eq("active_status", status);
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   return data as FCAType[];
@@ -63,7 +57,7 @@ export async function EditFCAAction(data: FCAType) {
     .eq("id", data.id);
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   // Log activity
@@ -91,7 +85,7 @@ export async function EditFCAActiveStatusAction(fcaID: string, status: number) {
     .single();
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   // Log activity
@@ -113,7 +107,7 @@ export async function SelectAllAssignedProjectsByFCAIDAction(fcaID: string) {
     .contains("fca_ids", [fcaID]);
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   return data;

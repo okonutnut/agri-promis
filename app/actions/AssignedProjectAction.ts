@@ -23,7 +23,7 @@ export async function InsertFieldTechniciansToProjectAction(
       .maybeSingle();
 
     if (selectError) {
-      throw new Error("Something went wrong. Please try again.");
+      return Promise.reject();
     }
 
     if (!existingAssignment) {
@@ -36,7 +36,7 @@ export async function InsertFieldTechniciansToProjectAction(
         });
 
       if (insertError) {
-        throw new Error("Something went wrong. Please try again.");
+        return Promise.reject();
       }
 
       // Get project details for logging
@@ -46,7 +46,7 @@ export async function InsertFieldTechniciansToProjectAction(
         .eq("id", project_id)
         .single();
       if (projectError) {
-        throw new Error("Failed to fetch project details. Please try again.");
+        return Promise.reject();
       }
 
       const userProfile = await SelectUserProfileByIDAction(technician_id);
@@ -85,7 +85,7 @@ export async function DeleteFieldTechnicianFromProjectAction(
     .eq("project_id", project_id);
 
   if (deleteError) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   // Get project details for logging
@@ -95,7 +95,7 @@ export async function DeleteFieldTechnicianFromProjectAction(
     .eq("id", project_id)
     .single();
   if (projectError) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   const existingUserData = await SelectUserProfileByIDAction(user_id);
@@ -126,7 +126,7 @@ export async function SelectAllFieldTechniciansByProjectIDAction(
     .order("created_at", { ascending: true });
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   return data as AssignedProjectsType[];
@@ -136,8 +136,8 @@ export async function SelectAllAssignedProjectsByFieldTechnicianIDAction() {
   const supabase = await createClient(cookies());
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
-  if (userError || !userData?.user) {
-    throw new Error(userError?.message || "User not authenticated");
+  if (userError) {
+    return Promise.reject();
   }
 
   const { data, error } = await supabase
@@ -146,7 +146,7 @@ export async function SelectAllAssignedProjectsByFieldTechnicianIDAction() {
     .eq("user_id", userData.user.id);
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   return data.map((item) => item.project) as ProjectType[];

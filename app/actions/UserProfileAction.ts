@@ -12,7 +12,7 @@ export async function SelectAllUserProfilesAction() {
     .select("*")
     .order("fullname", { ascending: true });
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
   return data as UserProfileType[];
 }
@@ -26,7 +26,7 @@ export async function SelectUserProfileByIDAction(userID: string) {
     .single();
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   return data as UserProfileType;
@@ -37,7 +37,7 @@ export async function SelectUserProfileAction() {
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   const { data: user } = await supabase
@@ -47,7 +47,7 @@ export async function SelectUserProfileAction() {
     .single();
 
   if (!user) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   return user as UserProfileType;

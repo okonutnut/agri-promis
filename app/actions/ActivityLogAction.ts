@@ -13,7 +13,7 @@ export async function InsertActivityLogAction(
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user) {
-    throw new Error("User not authenticated");
+    return Promise.reject();
   }
   const response = await fetch("https://api.ipify.org?format=json");
   const data = await response.json();
@@ -27,7 +27,7 @@ export async function InsertActivityLogAction(
   });
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   return;
@@ -43,7 +43,7 @@ export async function SelectActivityLogsByUserIDAction(user_id: string) {
     .order("created_at", { ascending: false });
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   return data;
@@ -59,7 +59,7 @@ export async function SelectActivityLogsByProjectIDAction(project_id: string) {
     .order("created_at", { ascending: false });
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   return data;
@@ -73,7 +73,7 @@ export async function SelectAllActivityLogsAction() {
     .select("*, user:user_profile (fullname)")
     .order("created_at", { ascending: false });
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   return data as ActivityLogType[];
@@ -83,7 +83,7 @@ export async function SelectAllActivityLogsByCurrentUserAction() {
   const supabase = await createClient(cookies());
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError || !userData?.user) {
-    throw new Error(userError?.message || "User not authenticated");
+    return Promise.reject();
   }
   const { data, error } = await supabase
     .from("activity_logs")
@@ -91,7 +91,7 @@ export async function SelectAllActivityLogsByCurrentUserAction() {
     .eq("user_id", userData.user.id)
     .order("created_at", { ascending: false });
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
   return data as ActivityLogType[];
 }

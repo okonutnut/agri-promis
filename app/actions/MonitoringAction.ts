@@ -25,7 +25,7 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
     .order("created_at", { ascending: false });
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   // Step 2: Collect all FCA IDs from projects
@@ -44,7 +44,7 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
     .in("id", projectFCAIds);
 
   if (fcaError) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   // Step 3: Map FCA + convert photo paths -> signed URLs
@@ -86,7 +86,7 @@ export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
   // Get logged-in user
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError || !userData?.user) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   // Fetch reports by this user for the project
@@ -104,7 +104,7 @@ export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
     .order("created_at", { ascending: false });
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   // Collect unique FCA IDs from all reports
@@ -123,7 +123,7 @@ export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
     .in("id", projectFCAIds);
 
   if (fcaError) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   // Map FCA details + signed URLs
@@ -162,7 +162,7 @@ export async function SelectAllMonitoringReportsByCurrentUserAction() {
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   // Fetch reports for this user
@@ -179,7 +179,7 @@ export async function SelectAllMonitoringReportsByCurrentUserAction() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   // Collect FCA IDs
@@ -198,7 +198,7 @@ export async function SelectAllMonitoringReportsByCurrentUserAction() {
     .in("id", projectFCAIds);
 
   if (fcaError) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   // Resolve signed image URLs + map FCA details
@@ -304,7 +304,7 @@ export async function InsertMonitoringReportAction({
     .single();
 
   if (projectError) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   // Log the activity
@@ -325,7 +325,7 @@ export async function InsertMonitoringReportAction({
     .single();
 
   if (programError) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   for (const admin of programData.programs[0].admin_id) {
@@ -348,7 +348,7 @@ export async function InsertRemarksInMonitoringReportAction(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) throw new Error("User not authenticated");
+  if (!user) return Promise.reject();
 
   const { data, error } = await supabase
     .from("monitoring")
@@ -362,7 +362,7 @@ export async function InsertRemarksInMonitoringReportAction(
     .single();
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   const { data: toData, error: toError } = await supabase
@@ -372,7 +372,7 @@ export async function InsertRemarksInMonitoringReportAction(
     .single();
 
   if (toError) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   // Log the activity

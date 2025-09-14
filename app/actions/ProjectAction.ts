@@ -13,7 +13,7 @@ export async function InsertProjectAction(values: ProjectType) {
 
   // Auth check
   if (!userId) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   const { data, error } = await supabase
@@ -28,7 +28,7 @@ export async function InsertProjectAction(values: ProjectType) {
     .single();
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   // Log the activity
@@ -54,7 +54,7 @@ export async function SelectAllProjectsByProgramIDAction(programID: string) {
     .order("created_at", { ascending: true });
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   return data as ProjectType[];
@@ -70,7 +70,7 @@ export async function SelectAllProjectsByUserIDAction(userID: string) {
     .eq("user_id", userID);
 
   if (assignedError) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   // Fetch project details for the assigned project IDs
@@ -84,7 +84,7 @@ export async function SelectAllProjectsByUserIDAction(userID: string) {
     .order("created_at", { ascending: true });
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   return data as ProjectType[];
@@ -102,7 +102,7 @@ export async function SelectProgramAndProjectDetailsByProjectIDAction(
     .single();
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   // GET FCA Info
@@ -112,7 +112,7 @@ export async function SelectProgramAndProjectDetailsByProjectIDAction(
     .in("id", data.fca_ids);
 
   if (fcaError) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   const res = {
@@ -132,7 +132,7 @@ export async function SelectProjectDetailsByProjectIDAction(projectID: string) {
     .single();
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   return data as ProjectType;
@@ -148,7 +148,7 @@ export async function EditProjectAction(data: ProjectType) {
     .single();
 
   if (currentError) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   // Update the project name and status
@@ -163,7 +163,7 @@ export async function EditProjectAction(data: ProjectType) {
     .eq("id", data.id);
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   // Log the activity
@@ -191,7 +191,7 @@ export async function DeleteProjectAction(projectID: string) {
     .single();
 
   if (projectError) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   const projectName = projectData?.project_name;
@@ -203,7 +203,7 @@ export async function DeleteProjectAction(projectID: string) {
     .eq("id", projectID);
 
   if (error) {
-    throw new Error("Something went wrong. Please try again.");
+    return Promise.reject();
   }
 
   // Log the activity
