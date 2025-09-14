@@ -23,8 +23,7 @@ export async function InsertFieldTechniciansToProjectAction(
       .maybeSingle();
 
     if (selectError) {
-      console.error("Error checking existing assignment:", selectError);
-      throw new Error("Failed to check existing assignment. Please try again.");
+      throw new Error("Something went wrong. Please try again.");
     }
 
     if (!existingAssignment) {
@@ -37,13 +36,7 @@ export async function InsertFieldTechniciansToProjectAction(
         });
 
       if (insertError) {
-        console.error(
-          "Error inserting field technician to project:",
-          insertError
-        );
-        throw new Error(
-          "Failed to add field technician to project. Please try again."
-        );
+        throw new Error("Something went wrong. Please try again.");
       }
 
       // Get project details for logging
@@ -53,7 +46,6 @@ export async function InsertFieldTechniciansToProjectAction(
         .eq("id", project_id)
         .single();
       if (projectError) {
-        console.error("Error fetching project details:", projectError);
         throw new Error("Failed to fetch project details. Please try again.");
       }
 
@@ -93,10 +85,7 @@ export async function DeleteFieldTechnicianFromProjectAction(
     .eq("project_id", project_id);
 
   if (deleteError) {
-    console.error("Error removing field technician:", deleteError);
-    throw new Error(
-      "Failed to remove field technician from project. Please try again."
-    );
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Get project details for logging
@@ -106,8 +95,7 @@ export async function DeleteFieldTechnicianFromProjectAction(
     .eq("id", project_id)
     .single();
   if (projectError) {
-    console.error("Error fetching project details:", projectError);
-    throw new Error("Failed to fetch project details. Please try again.");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   const existingUserData = await SelectUserProfileByIDAction(user_id);
@@ -138,8 +126,7 @@ export async function SelectAllFieldTechniciansByProjectIDAction(
     .order("created_at", { ascending: true });
 
   if (error) {
-    console.error("Error fetching field technicians:", error);
-    throw new Error(error.message);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   return data as AssignedProjectsType[];
@@ -150,7 +137,6 @@ export async function SelectAllAssignedProjectsByFieldTechnicianIDAction() {
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user) {
-    console.error("Error fetching user:", userError);
     throw new Error(userError?.message || "User not authenticated");
   }
 
@@ -160,8 +146,7 @@ export async function SelectAllAssignedProjectsByFieldTechnicianIDAction() {
     .eq("user_id", userData.user.id);
 
   if (error) {
-    console.error("Error fetching assigned projects:", error);
-    throw new Error(error.message);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   return data.map((item) => item.project) as ProjectType[];

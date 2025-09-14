@@ -13,7 +13,6 @@ export async function InsertSubscribeEndPoint(subscription: string) {
   });
 
   if (error) {
-    console.error("Error saving subscription:", error);
     return false;
   }
 
@@ -87,7 +86,6 @@ export async function SendPushNotificationToUserAction(
   );
 
   if (!user_id) {
-    console.error("Invalid user ID for push notification");
     return;
   }
 

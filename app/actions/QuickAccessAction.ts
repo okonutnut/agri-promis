@@ -12,8 +12,7 @@ export async function SelectProjectByIDsAction(projectIDs: string[]) {
     .order("created_at", { ascending: true });
 
   if (error) {
-    console.error("Error fetching projects by IDs:", error);
-    throw new Error(error.message);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   return data as ProjectType[];

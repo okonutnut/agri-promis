@@ -24,7 +24,7 @@ export async function InsertProgramAction({
     .single();
 
   if (error) {
-    throw new Error("Failed to create program. Please try again.");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Log the activity
@@ -57,10 +57,7 @@ export async function EditProgramNameAction({
     .single();
 
   if (currentError) {
-    console.error("Error fetching current program details:", currentError);
-    throw new Error(
-      "Failed to fetch current program details. Please try again."
-    );
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Update the program name
@@ -72,7 +69,7 @@ export async function EditProgramNameAction({
     .single();
 
   if (error) {
-    throw new Error("Failed to update program name. Please try again.");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Log the activity
@@ -98,8 +95,7 @@ export async function SelectProgramByIdAction(programId: string) {
     .single();
 
   if (error) {
-    console.error("Error fetching program:", error);
-    throw new Error(error.message);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   return data as ProgramType;
@@ -110,8 +106,7 @@ export async function SelectAllProgramsByAgriculturistAction() {
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user?.id) {
-    console.error("Error fetching user:", userError);
-    throw new Error(userError?.message || "User not authenticated");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   const { data, error } = await supabase
@@ -120,8 +115,7 @@ export async function SelectAllProgramsByAgriculturistAction() {
     .order("created_at", { ascending: true });
 
   if (error) {
-    console.error("Error fetching programs:", error);
-    throw new Error(error.message);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   return data as ProgramType[];
@@ -132,8 +126,7 @@ export async function SelectAllProgramsByUserIDAction(userID: string) {
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user?.id) {
-    console.error("Error fetching user:", userError);
-    throw new Error(userError?.message || "User not authenticated");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   const { data, error } = await supabase
@@ -143,8 +136,7 @@ export async function SelectAllProgramsByUserIDAction(userID: string) {
     .order("created_at", { ascending: true });
 
   if (error) {
-    console.error("Error fetching programs:", error);
-    throw new Error(error.message);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   return data as ProgramType[];
@@ -160,8 +152,7 @@ export async function DeleteProgramAction(programID: string) {
     .eq("id", programID)
     .single();
   if (programError) {
-    console.error("Error fetching program details:", programError);
-    throw new Error("Failed to fetch program details. Please try again.");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Delete the program
@@ -171,8 +162,7 @@ export async function DeleteProgramAction(programID: string) {
     .eq("id", programID);
 
   if (error) {
-    console.error("Error deleting program:", error);
-    throw new Error(error.code);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Log the activity
@@ -204,8 +194,7 @@ export async function SelectAllProgramsAction() {
     .order("created_at", { ascending: true });
 
   if (error) {
-    console.error("Error fetching programs:", error);
-    throw new Error("Failed to fetch programs. Please try again.");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   return data;
@@ -218,8 +207,7 @@ export async function SelectUserByProgramAssignedAction(programId?: string) {
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user?.id) {
-    console.error("Error fetching user:", userError);
-    throw new Error(userError?.message || "User not authenticated");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   if (!programId) return [];
@@ -230,7 +218,6 @@ export async function SelectUserByProgramAssignedAction(programId?: string) {
     .eq("projects.program_id", programId);
 
   if (error) {
-    console.error(error);
     return [];
   }
 

@@ -12,8 +12,7 @@ export async function SelectAllUserProfilesAction() {
     .select("*")
     .order("fullname", { ascending: true });
   if (error) {
-    console.error("Error fetching user profiles:", error);
-    throw new Error(error.message);
+    throw new Error("Something went wrong. Please try again.");
   }
   return data as UserProfileType[];
 }
@@ -27,8 +26,7 @@ export async function SelectUserProfileByIDAction(userID: string) {
     .single();
 
   if (error) {
-    console.error("Error fetching user profile:", error);
-    throw new Error(error.message);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   return data as UserProfileType;
@@ -39,8 +37,7 @@ export async function SelectUserProfileAction() {
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user) {
-    console.error("Error fetching user:", userError);
-    throw new Error(userError?.message || "User not authenticated");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   const { data: user } = await supabase
@@ -50,8 +47,7 @@ export async function SelectUserProfileAction() {
     .single();
 
   if (!user) {
-    console.error("User profile not found for ID:", userData.user.id);
-    throw new Error("User profile not found");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   return user as UserProfileType;

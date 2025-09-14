@@ -22,8 +22,7 @@ export async function InsertMemberAction(data: UserProfileType) {
     });
 
   if (authError) {
-    console.error("Error creating user:", authError);
-    throw new Error(`Failed to create user: ${authError.message}`);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Get the user ID from the auth data
@@ -35,8 +34,7 @@ export async function InsertMemberAction(data: UserProfileType) {
   });
 
   if (userError) {
-    console.error("Error creating member:", userError);
-    throw new Error(`Failed to create member: ${userError.message}`);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Log the activity
@@ -62,8 +60,7 @@ export async function UpdateMemberAction(
     .single();
 
   if (userError) {
-    console.error("Error updating member:", userError);
-    throw new Error(`Failed to update member: ${userError.message}`);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Update auth metadata if name or role changed
@@ -79,8 +76,7 @@ export async function UpdateMemberAction(
     );
 
     if (authError) {
-      console.error("Error updating user metadata:", authError);
-      throw new Error(`Failed to update user metadata: ${authError.message}`);
+      throw new Error("Something went wrong. Please try again.");
     }
   }
 
@@ -107,8 +103,7 @@ export async function UpdateActiveStatusMemberAction(
     .single();
 
   if (userError) {
-    console.error("Error updating member:", userError);
-    throw new Error(`Failed to update member: ${userError.message}`);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Update auth metadata if name or role changed
@@ -122,8 +117,7 @@ export async function UpdateActiveStatusMemberAction(
   );
 
   if (authError) {
-    console.error("Error updating user metadata:", authError);
-    throw new Error(`Failed to update user metadata: ${authError.message}`);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Log the activity
@@ -168,8 +162,7 @@ export async function SelectAllMembersAction() {
     .order("created_at", { ascending: true });
 
   if (error) {
-    console.error("Error fetching members:", error);
-    throw new Error(`Failed to fetch members: ${error.message}`);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   return data.map((user) => {
@@ -199,8 +192,7 @@ export async function SelectAllMembersByRoleAction(role: number) {
     .eq("role", role);
 
   if (error) {
-    console.error("Error fetching members:", error);
-    throw new Error(`Failed to fetch members: ${error.message}`);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Get user email from auth
@@ -208,8 +200,7 @@ export async function SelectAllMembersByRoleAction(role: number) {
   const { data: userData, error: emailError } =
     await supabase.auth.admin.listUsers();
   if (emailError) {
-    console.error("Error fetching user emails:", emailError);
-    throw new Error(`Failed to fetch user emails: ${emailError.message}`);
+    throw new Error("Something went wrong. Please try again.");
   }
   const emailMap = new Map(
     (userData?.users ?? [])

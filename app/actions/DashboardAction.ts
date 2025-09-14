@@ -13,8 +13,7 @@ export async function SelectDashboardItemsAction(projectID: string) {
     .eq("project_id", projectID);
 
   if (APError) {
-    console.error(APError.message);
-    throw new Error("Failed fetching assigned_projects");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // 2. total monitoring reports
@@ -23,8 +22,7 @@ export async function SelectDashboardItemsAction(projectID: string) {
     .select("*")
     .eq("project_id", projectID);
   if (MError) {
-    console.error(MError.message);
-    throw new Error("Failed fetching monitoring reports");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // 3. project progress indicator
@@ -34,8 +32,7 @@ export async function SelectDashboardItemsAction(projectID: string) {
     .eq("id", projectID)
     .single();
   if (projectError) {
-    console.error(projectError.message);
-    throw new Error("Failed fetching project data");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   return {
@@ -50,8 +47,7 @@ export async function SelectUserDashboardItemsAction() {
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user) {
-    console.error("Error fetching user:", userError);
-    throw new Error(userError?.message || "User not authenticated");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Get travel orders
@@ -62,8 +58,7 @@ export async function SelectUserDashboardItemsAction() {
     .gte("return_date", new Date().toISOString())
     .order("created_at", { ascending: false });
   if (TError) {
-    console.error(TError.message);
-    throw new Error("Failed fetching travel orders");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Get assigned projects
@@ -72,8 +67,7 @@ export async function SelectUserDashboardItemsAction() {
     .select("*")
     .eq("user_id", userData.user.id);
   if (APError) {
-    console.error(APError.message);
-    throw new Error("Failed fetching assigned_projects");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Get monitoring reports
@@ -82,8 +76,7 @@ export async function SelectUserDashboardItemsAction() {
     .select("*")
     .eq("reporter_id", userData.user.id);
   if (MError) {
-    console.error(MError.message);
-    throw new Error("Failed fetching monitoring reports");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   return { ap: APData, m: MData, to: TData };
@@ -135,8 +128,7 @@ export async function SelectTravelOrdersByDateAction() {
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user) {
-    console.error("Error fetching user:", userError);
-    throw new Error(userError?.message || "User not authenticated");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
@@ -149,8 +141,7 @@ export async function SelectTravelOrdersByDateAction() {
     .limit(10);
 
   if (futureError) {
-    console.error("Error fetching future travel orders:", futureError);
-    throw new Error("Failed fetching future travel orders");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   return futureOrders;

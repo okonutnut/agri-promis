@@ -13,7 +13,7 @@ export async function InsertProjectAction(values: ProjectType) {
 
   // Auth check
   if (!userId) {
-    throw new Error("User not authenticated");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   const { data, error } = await supabase
@@ -28,8 +28,7 @@ export async function InsertProjectAction(values: ProjectType) {
     .single();
 
   if (error) {
-    console.error("Error inserting project:", error);
-    throw new Error(`Failed to create project. ${error.message}`);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Log the activity
@@ -55,8 +54,7 @@ export async function SelectAllProjectsByProgramIDAction(programID: string) {
     .order("created_at", { ascending: true });
 
   if (error) {
-    console.error("Error fetching projects:", error);
-    throw new Error(error.message);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   return data as ProjectType[];
@@ -72,8 +70,7 @@ export async function SelectAllProjectsByUserIDAction(userID: string) {
     .eq("user_id", userID);
 
   if (assignedError) {
-    console.error("Error fetching assigned projects:", assignedError);
-    throw new Error(assignedError.message);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Fetch project details for the assigned project IDs
@@ -87,8 +84,7 @@ export async function SelectAllProjectsByUserIDAction(userID: string) {
     .order("created_at", { ascending: true });
 
   if (error) {
-    console.error("Error fetching projects:", error);
-    throw new Error(error.message);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   return data as ProjectType[];
@@ -106,8 +102,7 @@ export async function SelectProgramAndProjectDetailsByProjectIDAction(
     .single();
 
   if (error) {
-    console.error("Error fetching project details:", error);
-    throw new Error(error.message);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // GET FCA Info
@@ -117,8 +112,7 @@ export async function SelectProgramAndProjectDetailsByProjectIDAction(
     .in("id", data.fca_ids);
 
   if (fcaError) {
-    console.error("Error fetching FCA details:", fcaError);
-    throw new Error(fcaError.message);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   const res = {
@@ -138,8 +132,7 @@ export async function SelectProjectDetailsByProjectIDAction(projectID: string) {
     .single();
 
   if (error) {
-    console.error("Error fetching project details:", error);
-    throw new Error(error.message);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   return data as ProjectType;
@@ -155,10 +148,7 @@ export async function EditProjectAction(data: ProjectType) {
     .single();
 
   if (currentError) {
-    console.error("Error fetching current project details:", currentError);
-    throw new Error(
-      "Failed to fetch current project details. Please try again."
-    );
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Update the project name and status
@@ -173,8 +163,7 @@ export async function EditProjectAction(data: ProjectType) {
     .eq("id", data.id);
 
   if (error) {
-    console.error("Error updating project name:", error);
-    throw new Error("Failed to update project name. Please try again.");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Log the activity
@@ -202,8 +191,7 @@ export async function DeleteProjectAction(projectID: string) {
     .single();
 
   if (projectError) {
-    console.error("Error fetching project details:", projectError);
-    throw new Error("Failed to fetch project details. Please try again.");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   const projectName = projectData?.project_name;
@@ -215,8 +203,7 @@ export async function DeleteProjectAction(projectID: string) {
     .eq("id", projectID);
 
   if (error) {
-    console.error("Error deleting project:", error);
-    throw new Error(error.code);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Log the activity

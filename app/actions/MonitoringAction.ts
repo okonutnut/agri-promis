@@ -25,8 +25,7 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Error fetching field reports:", error);
-    throw new Error(error.message);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Step 2: Collect all FCA IDs from projects
@@ -45,8 +44,7 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
     .in("id", projectFCAIds);
 
   if (fcaError) {
-    console.error("Error fetching FCA details:", fcaError);
-    throw new Error(fcaError.message);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Step 3: Map FCA + convert photo paths -> signed URLs
@@ -88,8 +86,7 @@ export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
   // Get logged-in user
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError || !userData?.user) {
-    console.error("Error fetching user:", userError);
-    throw new Error(userError?.message || "User not authenticated");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Fetch reports by this user for the project
@@ -107,8 +104,7 @@ export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Error fetching monitoring reports:", error);
-    throw new Error(error.message);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Collect unique FCA IDs from all reports
@@ -127,8 +123,7 @@ export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
     .in("id", projectFCAIds);
 
   if (fcaError) {
-    console.error("Error fetching FCA details:", fcaError);
-    throw new Error(fcaError.message);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Map FCA details + signed URLs
@@ -167,8 +162,7 @@ export async function SelectAllMonitoringReportsByCurrentUserAction() {
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user) {
-    console.error("Error fetching user:", userError);
-    throw new Error(userError?.message || "User not authenticated");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Fetch reports for this user
@@ -185,8 +179,7 @@ export async function SelectAllMonitoringReportsByCurrentUserAction() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Error fetching monitoring reports:", error);
-    throw new Error(error.message);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Collect FCA IDs
@@ -205,8 +198,7 @@ export async function SelectAllMonitoringReportsByCurrentUserAction() {
     .in("id", projectFCAIds);
 
   if (fcaError) {
-    console.error("Error fetching FCA details:", fcaError);
-    throw new Error(fcaError.message);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Resolve signed image URLs + map FCA details
@@ -312,8 +304,7 @@ export async function InsertMonitoringReportAction({
     .single();
 
   if (projectError) {
-    console.error("Error fetching project data:", projectError);
-    throw new Error("Failed to fetch project data. Please try again.");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Log the activity
@@ -334,8 +325,7 @@ export async function InsertMonitoringReportAction({
     .single();
 
   if (programError) {
-    console.error("Error fetching project data:", programError);
-    throw new Error("Failed to fetch project data. Please try again.");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   for (const admin of programData.programs[0].admin_id) {
@@ -372,8 +362,7 @@ export async function InsertRemarksInMonitoringReportAction(
     .single();
 
   if (error) {
-    console.error("Error inserting remarks:", error);
-    throw new Error("Failed to insert remarks. Please try again.");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   const { data: toData, error: toError } = await supabase
@@ -383,8 +372,7 @@ export async function InsertRemarksInMonitoringReportAction(
     .single();
 
   if (toError) {
-    console.error("Error fetching report data:", toError);
-    throw new Error("Failed to fetch report data. Please try again.");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Log the activity

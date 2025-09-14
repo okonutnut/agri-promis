@@ -17,7 +17,6 @@ export async function SelectUserCurrentLocationAction(user_id: string) {
     .single();
 
   if (error) {
-    console.error("Error fetching user location:", error);
     return null;
   }
 
@@ -49,7 +48,7 @@ export async function UpdateUserCurrentLocationAction() {
   );
 
   if (error) {
-    console.error("Error updating user location:", error);
+    await UpdateUserCurrentLocationAction();
   }
 
   return;
@@ -67,7 +66,6 @@ export async function DeleteUserSessionAction() {
     );
 
   if (error) {
-    console.error("Error deleting user session:", error);
     return false;
   }
 

@@ -18,8 +18,7 @@ export async function InsertFCAAction(data: FCAType) {
     .insert({ ...rest, active_status: 1 });
 
   if (error) {
-    console.error("Error inserting FCA:", error);
-    throw new Error(error.message);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Log activity
@@ -36,8 +35,7 @@ export async function SelectAllFCAAction() {
   const { data, error } = await supabase.from("farmers").select("*");
 
   if (error) {
-    console.error("Error fetching all FCA:", error);
-    throw new Error(error.message);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   return data as FCAType[];
@@ -51,8 +49,7 @@ export async function SelectAllFCAByStatusAction(status: number) {
     .eq("active_status", status);
 
   if (error) {
-    console.error("Error fetching FCA by status:", error);
-    throw new Error(error.message);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   return data as FCAType[];
@@ -66,8 +63,7 @@ export async function EditFCAAction(data: FCAType) {
     .eq("id", data.id);
 
   if (error) {
-    console.error("Error updating FCA:", error);
-    throw new Error(error.message);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Log activity
@@ -95,8 +91,7 @@ export async function EditFCAActiveStatusAction(fcaID: string, status: number) {
     .single();
 
   if (error) {
-    console.error("Error updating FCA:", error);
-    throw new Error(error.message);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Log activity
@@ -118,8 +113,7 @@ export async function SelectAllAssignedProjectsByFCAIDAction(fcaID: string) {
     .contains("fca_ids", [fcaID]);
 
   if (error) {
-    console.error("Error fetching assigned projects by FCA ID:", error);
-    throw new Error(error.message);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   return data;

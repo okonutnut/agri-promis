@@ -6,7 +6,6 @@ import { TravelOrderType } from "../../components/types";
 import { SendPushNotificationToUserAction } from "./SubscriptionAction";
 
 // TRAVEL ORDER ACTIONS
-
 export async function InsertTravelOrderAction(data: TravelOrderType) {
   const supabase = await createClient(cookies());
   const {
@@ -15,8 +14,7 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
   } = await supabase.auth.getUser();
 
   if (userError || !user?.id) {
-    console.error("Error fetching user:", userError);
-    throw new Error(userError?.message || "User not authenticated");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   const { error } = await supabase.from("travel_order").insert({
@@ -26,8 +24,7 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
   });
 
   if (error) {
-    console.error("Error inserting travel order:", error);
-    throw new Error(`Failed to create travel order. ${error.message}`);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Fetch user profile for logging
@@ -38,8 +35,7 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
     .single();
 
   if (profileError) {
-    console.error("Error fetching user profile:", profileError);
-    throw new Error("Failed to fetch user profile. Please try again.");
+    throw new Error("Something went wrong. Please try again.");
   }
 
   // Log the activity
@@ -63,7 +59,6 @@ export async function SelectAllTravelOrdersByUserIDAction(user_id?: string) {
     const { data: userData, error: userError } = await supabase.auth.getUser();
 
     if (userError || !userData?.user) {
-      console.error("Error fetching user:", userError);
       throw new Error(userError?.message || "User not authenticated");
     }
 
@@ -80,8 +75,7 @@ export async function SelectAllTravelOrdersByUserIDAction(user_id?: string) {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Error fetching travel orders:", error);
-    throw new Error(error.message);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   return data as TravelOrderType[];
@@ -101,8 +95,7 @@ export async function SelectAllTravelOrdersByProgramIDAction(
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Error fetching travel orders:", error);
-    throw new Error(error.message);
+    throw new Error("Something went wrong. Please try again.");
   }
 
   return data as TravelOrderType[];
