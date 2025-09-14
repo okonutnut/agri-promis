@@ -37,7 +37,6 @@ import {
   ProgramType,
   ProjectType,
 } from "@/components/types";
-import NotificationsPanel from "../notifications/notification-bell";
 import NotificationRequest from "../notifications/notification";
 
 // Constants
