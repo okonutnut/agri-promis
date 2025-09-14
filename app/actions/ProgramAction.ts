@@ -3,6 +3,7 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { ProgramType, UserProfileType } from "../../components/types";
+import { SendPushNotificationToAllAction } from "./SubscriptionAction";
 
 // PROGRAM ACTIONS
 
@@ -30,6 +31,11 @@ export async function InsertProgramAction({
   await InsertActivityLogAction(
     "Created a Program",
     `Program ${program_name as string} has been created.`
+  );
+
+  // Send Notification
+  await SendPushNotificationToAllAction(
+    `A new program ${program_name as string} has been created.`
   );
 
   return data as ProgramType;
@@ -73,6 +79,11 @@ export async function EditProgramNameAction({
   await InsertActivityLogAction(
     "Updated Program Name",
     `Program ${currentProgram.program_name} name updated to ${program_name}.`
+  );
+
+  // Send Notification
+  await SendPushNotificationToAllAction(
+    `Program ${currentProgram.program_name} name has been updated to ${program_name}.`
   );
 
   return;
@@ -167,6 +178,11 @@ export async function DeleteProgramAction(programID: string) {
   // Log the activity
   await InsertActivityLogAction(
     "Deleted a Program",
+    `Program ${programData.program_name} has been deleted.`
+  );
+
+  // Send Notification
+  await SendPushNotificationToAllAction(
     `Program ${programData.program_name} has been deleted.`
   );
 

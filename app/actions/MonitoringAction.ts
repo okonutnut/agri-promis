@@ -3,6 +3,7 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { MonitoringReportType } from "../../components/types";
+import { SendPushNotificationToUserAction } from "./SubscriptionAction";
 
 // MONITORING REPORT ACTIONS
 export async function SelectAllMonitoringReportsByProjectIDAction(
@@ -322,6 +323,28 @@ export async function InsertMonitoringReportAction({
     project_id
   );
 
+  // Send Notification to admin
+  const { data: programData, error: programError } = await supabase
+    .from("projects")
+    .select(
+      "program_id, project_name, programs!projects_program_id_fkey(admin_id)"
+    )
+    .eq("id", project_id)
+    .limit(1, { foreignTable: "programs" })
+    .single();
+
+  if (programError) {
+    console.error("Error fetching project data:", programError);
+    throw new Error("Failed to fetch project data. Please try again.");
+  }
+
+  for (const admin of programData.programs[0].admin_id) {
+    await SendPushNotificationToUserAction(
+      admin,
+      `A new monitoring report has been submitted for project ${programData.project_name.toString()}.`
+    );
+  }
+
   return;
 }
 
@@ -369,6 +392,12 @@ export async function InsertRemarksInMonitoringReportAction(
     "Reviewed a Monitoring Report",
     `Monitoring report with T.O no ${toData.travel_order_no} has been reviewed.`,
     data?.project_id
+  );
+
+  // Send Notification to reporter
+  await SendPushNotificationToUserAction(
+    user.id,
+    `Your monitoring report with T.O no ${toData.travel_order_no.toString()} has been reviewed.`
   );
 
   return;

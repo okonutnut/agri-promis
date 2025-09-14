@@ -3,6 +3,10 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { FCAType } from "../../components/types";
 import { InsertActivityLogAction } from "./ActivityLogAction";
+import {
+  SendPushNotificationToAllAction,
+  SendPushNotificationToUserAction,
+} from "./SubscriptionAction";
 
 // FCA ACTIONS
 
@@ -70,6 +74,12 @@ export async function EditFCAAction(data: FCAType) {
   await InsertActivityLogAction(
     "Updated FCA record",
     `Updated FCA: ${data.description}`
+  );
+
+  // Sent notification to all users
+  await SendPushNotificationToUserAction(
+    "d904c6a2-d586-435c-9ebd-0c4358df9119",
+    "An FCA record has been updated."
   );
 
   return;

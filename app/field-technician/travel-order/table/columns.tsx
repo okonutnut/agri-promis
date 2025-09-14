@@ -34,12 +34,7 @@ export const columns: ColumnDef<TravelOrderType>[] = [
     header: () => <div className="text-end">Date Created</div>,
     cell: ({ getValue }) => (
       <div className="text-end">
-        {format(
-          new Date(
-            new Date(getValue() as string).getTime() + 8 * 60 * 60 * 1000
-          ),
-          "PPp"
-        )}
+        {format(new Date(getValue() as string), "PPp")}
       </div>
     ),
   },

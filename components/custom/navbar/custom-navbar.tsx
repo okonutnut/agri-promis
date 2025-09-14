@@ -37,7 +37,8 @@ import {
   ProgramType,
   ProjectType,
 } from "@/components/types";
-// import NotificationsPanel from "../notifications/notification-bell";
+import NotificationsPanel from "../notifications/notification-bell";
+import NotificationRequest from "../notifications/notification";
 
 // Constants
 const PATHS = {
@@ -304,8 +305,8 @@ export default function CustomNavbar({
           </div>
         </div>
 
-        <span className="hidden sm:flex items-center gap-2">
-          {/* <NotificationsPanel /> */}
+        <span className="hidden md:flex items-center gap-6">
+          <NotificationRequest />
           <NavbarUserImage />
         </span>
       </nav>

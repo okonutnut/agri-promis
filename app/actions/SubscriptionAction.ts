@@ -1,80 +1,69 @@
 "use server";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
-import webpush, {
-  type PushSubscription as WebPushSubscription,
-} from "web-push";
+import webpush from "web-push";
 
 // PUSH SUBSCRIPTION ACTIONS
-
-export async function InsertSubscriptionAction(
-  subscription: WebPushSubscription
-) {
+export async function InsertSubscribeEndPoint(subscription: string) {
   const supabase = await createClient(cookies());
-  const serializedSub = JSON.parse(JSON.stringify(subscription));
 
-  const { error } = await supabase.from("push_subscriptions").upsert({
-    ...serializedSub,
-    user_id: (await supabase.auth.getUser()).data.user?.id,
+  const { error } = await supabase.from("push_subscriptions").insert({
+    user_id: await supabase.auth.getUser().then(({ data }) => data.user?.id),
+    subscription: JSON.stringify(subscription),
   });
 
   if (error) {
-    console.error("Error inserting subscription:", error);
+    console.error("Error saving subscription:", error);
     return false;
   }
 
   return true;
 }
 
-export async function DeleteSubscriptionAction(endpoint?: string) {
+export async function DeleteSubscrptionEndpoint() {
   const supabase = await createClient(cookies());
 
   const { error } = await supabase
     .from("push_subscriptions")
     .delete()
-    .eq("endpoint", endpoint)
-    .select()
-    .single();
+    .eq(
+      "user_id",
+      await supabase.auth.getUser().then(({ data }) => data.user?.id)!
+    );
 
   if (error) {
-    console.error("Error deleting subscription:", error);
     return false;
   }
 
   return true;
 }
 
-export async function SelectIfSubscribedAction(endpoint?: string) {
-  const supabase = await createClient(cookies());
-  const { data, error } = await supabase
-    .from("push_subscriptions")
-    .select("created_at")
-    .eq("endpoint", endpoint);
-
-  if (error) {
-    console.error("Error checking subscription:", error);
-    return false;
-  }
-
-  return data ? true : false;
-}
-
 export async function SendPushNotificationToAllAction(message: string) {
-  const supabase = await createClient(cookies());
-  const { data: subscriptions } = await supabase
-    .from("push_subscriptions")
-    .select("endpoint, expirationTime, keys");
+  const vapidKeys = {
+    publicKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "",
+    privateKey: process.env.VAPID_PRIVATE_KEY || "",
+  };
+  webpush.setVapidDetails(
+    "mailto:" + process.env.VAPID_ADMIN_EMAIL,
+    vapidKeys.publicKey,
+    vapidKeys.privateKey
+  );
 
-  if (!subscriptions || subscriptions.length === 0) return;
+  const supabase = await createClient(cookies());
+  const { data: subscriptions, error } = await supabase
+    .from("push_subscriptions")
+    .select("subscription");
+
+  if (error) return;
 
   await Promise.all(
     subscriptions.map((subscription) =>
       webpush.sendNotification(
-        subscription,
+        JSON.parse(subscription.subscription),
         JSON.stringify({
-          title: "Agri-Promis Notification",
-          body: message,
+          title: "New Notification",
           icon: "/icons/favicon-96x96.png",
+          body: message,
         })
       )
     )
@@ -87,29 +76,37 @@ export async function SendPushNotificationToUserAction(
   user_id: string,
   message: string
 ) {
+  const vapidKeys = {
+    publicKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "",
+    privateKey: process.env.VAPID_PRIVATE_KEY || "",
+  };
+  webpush.setVapidDetails(
+    "mailto:" + process.env.VAPID_ADMIN_EMAIL,
+    vapidKeys.publicKey,
+    vapidKeys.privateKey
+  );
+
   if (!user_id) {
     console.error("Invalid user ID for push notification");
     return;
   }
+
   const supabase = await createClient(cookies());
-  const { data: subscriptions } = await supabase
+  const { data: subscriptions, error } = await supabase
     .from("push_subscriptions")
     .select("*")
-    .eq("user_id", user_id);
+    .eq("user_id", user_id)
+    .single();
 
-  if (!subscriptions || subscriptions.length === 0) return;
+  if (error) return;
 
-  await Promise.all(
-    subscriptions.map((subscription) =>
-      webpush.sendNotification(
-        subscription,
-        JSON.stringify({
-          title: "Agri-Promis Notification",
-          body: message,
-          icon: "/icons/favicon-96x96.png",
-        })
-      )
-    )
+  webpush.sendNotification(
+    JSON.parse(subscriptions.subscription),
+    JSON.stringify({
+      title: "New Notification",
+      body: message,
+      icon: "/icons/favicon-96x96.png",
+    })
   );
 
   return;

@@ -3,6 +3,7 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { UserProfileType } from "../../components/types";
+import { SendPushNotificationToUserAction } from "./SubscriptionAction";
 
 // MEMBERS ACTIONS
 
@@ -86,7 +87,7 @@ export async function UpdateMemberAction(
   // Log the activity
   await InsertActivityLogAction(
     "Updated a Member",
-    `Member ${data.fullname} updated.`
+    `Member ${data.fullname?.toString()} updated.`
   );
 
   return;
@@ -128,7 +129,17 @@ export async function UpdateActiveStatusMemberAction(
   // Log the activity
   await InsertActivityLogAction(
     "Updated Member Status",
-    `Member ${data.fullname} status updated to ${status}.`
+    `Member ${data.fullname?.toString()} status updated to ${
+      status === 0 ? "Inactive" : "Active"
+    }.`
+  );
+
+  // Send Notification
+  await SendPushNotificationToUserAction(
+    userId,
+    `Your account status has been updated to ${
+      status === 1 ? "Active" : "Inactive"
+    }.`
   );
 
   return;

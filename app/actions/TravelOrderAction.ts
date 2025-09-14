@@ -3,6 +3,7 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { TravelOrderType } from "../../components/types";
+import { SendPushNotificationToUserAction } from "./SubscriptionAction";
 
 // TRAVEL ORDER ACTIONS
 
@@ -45,6 +46,12 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
   await InsertActivityLogAction(
     "Created a Travel Order",
     `Travel order for ${userProfile.fullname} has been created.`
+  );
+
+  // Send Notification
+  await SendPushNotificationToUserAction(
+    user.id,
+    `Your travel order with T.O no ${data.travel_order_no} has been created.`
   );
 
   return;

@@ -37,21 +37,29 @@ export default function ProjectQuickAccessCard() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.map((project) => (
-                  <TableRow key={project.id} className="h-7">
-                    <TableCell className="text-xs">
-                      <strong>{project.project_name}</strong>
-                      <pre>{project.location}</pre>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Link href={`/dashboard/projects/${project.id}`}>
-                        <Button variant={"link"} size={"sm"}>
-                          Open
-                        </Button>
-                      </Link>
+                {data.length > 0 ? (
+                  data.map((project) => (
+                    <TableRow key={project.id} className="h-7">
+                      <TableCell className="text-xs">
+                        <strong>{project.project_name}</strong>
+                        <pre>{project.location}</pre>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Link href={`/dashboard/projects/${project.id}`}>
+                          <Button variant={"link"} size={"sm"}>
+                            Open
+                          </Button>
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow className="h-7">
+                    <TableCell className="text-xs text-center" colSpan={2}>
+                      No Quick Access Projects
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           )}
