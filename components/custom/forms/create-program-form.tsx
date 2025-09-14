@@ -10,7 +10,6 @@ import FormTextarea from "../input/form-textarea";
 import { CardFooter } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { SendPushNotificationToAllAction } from "@/app/actions/SubscriptionAction";
 import { sendNotification } from "@/lib/utils";
 
 const formSchema = z.object({
