@@ -1,37 +1,55 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { pdf } from "@react-pdf/renderer";
-import { Printer } from "lucide-react";
-import React, { useCallback } from "react";
-import { DocumentProps } from "@react-pdf/renderer";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { PDFDownloadLink, pdf } from "@react-pdf/renderer";
+import { ChevronDown, Download, Printer } from "lucide-react";
 
 type PrintDownloadDropdownProps = {
-  data: React.ReactElement<DocumentProps>;
+  data: React.ReactElement<import("@react-pdf/renderer").DocumentProps>;
 };
 
-const PrintDownloadDropdown = React.memo(function PrintDownloadDropdown({
+export default function PrintDownloadDropdown({
   data,
 }: PrintDownloadDropdownProps) {
-  const handleOpenInNewTab = useCallback(async () => {
-    if (!data) return;
-    const blob = await pdf(data).toBlob();
-    const url = URL.createObjectURL(blob);
-    window.open(url, "_blank");
-  }, [data]);
-  console.log("Rendering PrintDownloadDropdown");
+  const handleOpenInNewTab = async () => {
+    const blob = await pdf(data).toBlob(); // Generate the PDF as a Blob
+    const url = URL.createObjectURL(blob); // Create a URL for the Blob
+    window.open(url, "_blank"); // Open the URL in a new tab
+  };
 
   return (
-    <Button
-      variant="outline"
-      size="sm"
-      disabled={!data}
-      onClick={handleOpenInNewTab}
-    >
-      <Printer />
-      Print
-    </Button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="outline"
+          size={"sm"}
+          className="flex items-center gap-2"
+        >
+          Export <ChevronDown />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="m-1 min-w-[150px]">
+        <DropdownMenuItem>
+          <PDFDownloadLink
+            document={data}
+            fileName={`da-nves-report-${Date.now()}.pdf`}
+            className="flex items-center gap-2"
+          >
+            <Download />
+            Download
+          </PDFDownloadLink>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleOpenInNewTab}>
+          <Printer />
+          Print
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
-});
-
-export default PrintDownloadDropdown;
+}
