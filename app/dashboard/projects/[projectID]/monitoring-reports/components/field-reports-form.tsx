@@ -14,20 +14,12 @@ import FormTextarea from "@/components/custom/input/form-textarea";
 import NonFormTextarea from "@/components/custom/input/non-form-textarea";
 import dynamic from "next/dynamic";
 import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
-
-const MonitoringReportDocument = dynamic(
-  () => import("@/components/custom/pdf/monitoring-reports-document"),
-  { ssr: false }
-);
+import MonitoringReportDocument from "@/components/custom/pdf/monitoring-reports-document";
+import PrintDownloadDropdown from "@/components/custom/print/print-download-dropdown";
 const ImageCarousel = dynamic(
   () => import("@/components/custom/images/image-carousel"),
   { ssr: false }
 );
-const PrintDownloadDropdown = dynamic(
-  () => import("@/components/custom/print/print-download-dropdown"),
-  { ssr: false }
-);
-
 const formSchema = z.object({
   remarks: z
     .string()
