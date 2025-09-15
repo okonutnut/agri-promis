@@ -32,14 +32,8 @@ const DeleteDraftButton = dynamic(
   () => import("../components/delete-draft-button"),
   { ssr: false }
 );
-const PrintDownloadDropdown = dynamic(
-  () => import("@/components/custom/print/print-download-dropdown"),
-  { ssr: false }
-);
-const MonitoringReportDocument = dynamic(
-  () => import("@/components/custom/pdf/monitoring-reports-document"),
-  { ssr: false }
-);
+import PrintDownloadDropdown from "@/components/custom/print/print-download-dropdown";
+import MonitoringReportDocument from "@/components/custom/pdf/monitoring-reports-document";
 const TravelOrderDropdown = dynamic(
   () => import("../components/travel-order-combobox"),
   { ssr: false }
