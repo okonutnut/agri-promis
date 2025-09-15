@@ -22,7 +22,7 @@ export default function ScheduledMonitoringTable({
   data,
 }: ScheduledMonitoringTableProps) {
   return (
-    <section className="col-span-2">
+    <section className="col-span-1">
       <span className="text-lg font-semibold">
         Scheduled Monitoring ({new Date().toLocaleDateString()})
       </span>
@@ -31,23 +31,25 @@ export default function ScheduledMonitoringTable({
         <Table className="border-r">
           <TableHeader>
             <TableRow>
+              <TableHead className="font-medium">#</TableHead>
               <TableHead>Travel Order No</TableHead>
-              <TableHead>Project</TableHead>
-              <TableHead>Purpose</TableHead>
+              {/* <TableHead>Project</TableHead>
+              <TableHead>Purpose</TableHead> */}
               <TableHead className="text-end">Field Operator</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {data && data.length > 0 ? (
-              data.map((item) => (
+              data.map((item, index) => (
                 <TableRow key={item.id}>
+                  <TableCell className="font-medium">{index + 1}</TableCell>
                   <TableCell>
                     {item.travel_order_no || "Unknown Travel Order No"}
                   </TableCell>
-                  <TableCell>
+                  {/* <TableCell>
                     {item.projects?.project_name || "Unknown Project"}
                   </TableCell>
-                  <TableCell>{item.purpose ?? "No Purpose Provided"}</TableCell>
+                  <TableCell>{item.purpose ?? "No Purpose Provided"}</TableCell> */}
                   <TableCell className="text-end">
                     {item.user?.fullname || "Unknown Operator"}
                   </TableCell>

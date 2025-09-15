@@ -18,10 +18,6 @@ export const columns: ColumnDef<MonitoringReportType>[] = [
     header: "Travel Order No",
   },
   {
-    accessorKey: "purpose",
-    header: "Purpose",
-  },
-  {
     accessorKey: "reviewedBy.fullname",
     header: "Reviewed By",
     cell: ({ getValue }) => <div>{(getValue() as string) || "N/A"}</div>,

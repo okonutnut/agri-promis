@@ -16,7 +16,7 @@ export default function IssueTravelOrderForm({
   return (
     <>
       <section
-        className="space-y-4 p-2 overflow-y-auto h-[calc(90vh)]"
+        className="space-y-4 p-2 overflow-y-auto pb-12 h-[calc(90vh)]"
         id="travel-order-form"
       >
         <NonFormInput

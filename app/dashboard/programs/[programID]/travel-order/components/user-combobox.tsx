@@ -32,7 +32,7 @@ export function UserComboBox({ form }: UserComboBoxProps) {
 
   return (
     <>
-      <Label className="mb-1">Name</Label>
+      <Label className="mb-1">Issued To</Label>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button

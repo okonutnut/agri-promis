@@ -95,7 +95,7 @@ export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
     .select(
       `*, 
       project:projects(project_name, fca_ids),
-      travel_order:travel_order(travel_order_no, purpose),
+      travel_order:travel_order(travel_order_no),
       reporter:user_profile!monitoring_reporter_id_fkey(fullname),
       reviewedBy:user_profile!monitoring_reviewed_by_id_fkey(fullname)`
     )

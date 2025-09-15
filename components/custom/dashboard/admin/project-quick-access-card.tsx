@@ -23,7 +23,7 @@ export default function ProjectQuickAccessCard() {
     table: "projects",
   });
   return (
-    <section className="col-span-1 mr-5">
+    <section className="col-span-1">
       <span className="text-lg font-semibold">Quick Access</span>
       <Card className="p-1 rounded-md shadow-xs">
         <>

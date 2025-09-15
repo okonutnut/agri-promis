@@ -118,7 +118,6 @@ export type TravelOrderType = {
   id?: string;
   user_id?: string;
   travel_order_no?: string;
-  purpose?: string;
   user?: { fullname?: string };
   createdBy?: { fullname?: string };
   office?: string;
@@ -129,9 +128,20 @@ export type TravelOrderType = {
   estimated_cost?: number;
   departure_date?: string;
   return_date?: string;
-  destination?: string;
   mode_of_transport?: string;
   is_active?: number;
+  travel_itinerary: TravelOrderProjectsType[];
+  created_at?: string;
+};
+
+export type TravelOrderProjectsType = {
+  id?: string;
+  travel_order_id?: string;
+  date?: string;
+  destination?: string;
+  purpose?: string;
+  departure_time?: string;
+  arrival_time?: string;
   created_at?: string;
 };
 

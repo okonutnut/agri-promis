@@ -23,7 +23,7 @@ function TravelOrderContent({
 }: {
   values: TravelOrderType[] | undefined;
 }) {
-  const { openSheet, closeSheet } = useSheet();
+  const { openSheet } = useSheet();
 
   const handleRowSelect = (row: TravelOrderType) => {
     openSheet(
@@ -32,7 +32,6 @@ function TravelOrderContent({
         isAddMode={false}
         values={row}
         key={`view-${row.id}`}
-        setPanelOpen={() => closeSheet()}
       />
     );
   };
@@ -40,12 +39,7 @@ function TravelOrderContent({
   const handleAdd = () => {
     openSheet(
       "Issue Travel Order",
-      <IssueTravelOrderForm
-        isAddMode={true}
-        values={null}
-        key="add-mode"
-        setPanelOpen={() => closeSheet()}
-      />
+      <IssueTravelOrderForm isAddMode={true} values={null} key="add-mode" />
     );
   };
 
@@ -68,6 +62,7 @@ export default function TravelOrderPage() {
     queryFn: () => SelectAllTravelOrdersByProgramIDAction(programID as string),
     table: "travel_order",
   });
+  console.log({ data });
 
   return (
     <CustomPageLayout

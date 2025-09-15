@@ -15,10 +15,6 @@ export const columns: ColumnDef<TravelOrderType>[] = [
     header: "Issued To",
   },
   {
-    accessorKey: "destination",
-    header: "Destination",
-  },
-  {
     accessorKey: "is_active",
     header: "Status",
     cell: ({ getValue }) => {

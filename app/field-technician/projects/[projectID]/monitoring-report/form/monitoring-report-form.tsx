@@ -137,7 +137,7 @@ export default function UploadFieldReportForm({
 
   return (
     <>
-      <div>
+      <div className="flex-1 overflow-y-auto h-[calc(90vh)] pb-12">
         <ImageCaptureForm
           isAddMode={isAddMode}
           values={values}
@@ -145,7 +145,7 @@ export default function UploadFieldReportForm({
           setImages={setImages}
         />
         <form
-          className="space-y-3 p-2 border-t pt-4 mb-4 overflow-x-hidden"
+          className="space-y-3 p-2 border-t pt-4 mb-4"
           id="upload-monitoring-report-form"
           onSubmit={form.handleSubmit(onSubmit)}
         >

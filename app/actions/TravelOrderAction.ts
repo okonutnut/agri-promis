@@ -17,14 +17,34 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
     throw userError;
   }
 
-  const { error } = await supabase.from("travel_order").insert({
-    ...data,
-    is_active: 1,
-    created_by: user?.id,
-  });
+  // Insert travel order
+  const { travel_itinerary, ...rest } = data;
+  const { data: TOData, error } = await supabase
+    .from("travel_order")
+    .insert({
+      ...rest,
+      is_active: 1,
+      created_by: user?.id,
+    })
+    .select()
+    .single();
 
   if (error) {
     throw error;
+  }
+
+  // Insert Travel Itinerary
+  const { error: itineraryError } = await supabase
+    .from("travel_order_projects")
+    .insert(
+      travel_itinerary.map((item) => ({
+        ...item,
+        travel_order_id: TOData.id,
+      }))
+    );
+
+  if (itineraryError) {
+    throw itineraryError;
   }
 
   // Fetch user profile for logging
@@ -61,6 +81,7 @@ export async function SelectAllTravelOrdersByUserIDAction(user_id?: string) {
     .from("travel_order")
     .select(
       `*, project:projects(id, project_name), user:user_profile!travel_order_user_id_fkey(fullname),
+      travel_itinerary:travel_order_projects(*),
       created_by:user_profile!travel_order_created_by_fkey(fullname)`
     )
     .eq("user_id", user_id)
@@ -81,6 +102,7 @@ export async function SelectAllTravelOrdersByProgramIDAction(
     .from("travel_order")
     .select(
       `*, project:projects(id, project_name), user:user_profile!travel_order_user_id_fkey(fullname),
+      travel_itinerary:travel_order_projects(*),
       created_by:user_profile!travel_order_created_by_fkey(fullname)`
     )
     .eq("program_id", programID)

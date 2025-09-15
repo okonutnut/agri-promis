@@ -1,11 +1,8 @@
 [
-  { "value": "1", "label": "Germination (VE)" },
-  { "value": "2", "label": "Leaf Development (V1-V18)" },
-  { "value": "3", "label": "Tasseling (VT)" },
-  { "value": "4", "label": "Silking (R1)" },
-  { "value": "5", "label": "Blister (R2)" },
-  { "value": "6", "label": "Milk (R3)" },
-  { "value": "7", "label": "Dough (R4)" },
-  { "value": "8", "label": "Dent (R5)" },
-  { "value": "9", "label": "Physiological Maturity (R6)" }
+  { "value": "1", "label": "Newly Planted" },
+  { "value": "2", "label": "Seedling" },
+  { "value": "3", "label": "Repetitive" },
+  { "value": "4", "label": "Reproductive" },
+  { "value": "5", "label": "Maturity" },
+  { "value": "6", "label": "Harvested" }
 ]

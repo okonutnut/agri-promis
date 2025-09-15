@@ -30,7 +30,6 @@ type TravelOrderDropdownProps = {
 export default function TravelOrderDropdown({
   form,
 }: TravelOrderDropdownProps) {
-  const { projectID } = useParams();
   const { data: userData } = useSupabaseSession();
 
   const { data, isLoading } = useRealtimeQuery({
@@ -41,10 +40,6 @@ export default function TravelOrderDropdown({
 
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
-
-  const options = React.useMemo(() => {
-    return data?.filter((to) => to.project_id === projectID);
-  }, [data, projectID]);
 
   return (
     <>
@@ -58,9 +53,7 @@ export default function TravelOrderDropdown({
             className="w-full justify-between shadow-xs font-normal"
           >
             {value
-              ? `${
-                  options?.find((order) => order.id === value)?.travel_order_no
-                }: ${options?.find((order) => order.id === value)?.purpose}`
+              ? `${data?.find((order) => order.id === value)?.travel_order_no}`
               : "Select travel order..."}
             <ChevronsUpDown className="opacity-50" />
           </Button>
@@ -79,7 +72,7 @@ export default function TravelOrderDropdown({
               <CommandList>
                 <CommandEmpty>No travel order found.</CommandEmpty>
                 <CommandGroup>
-                  {options?.map((order) => (
+                  {data?.map((order) => (
                     <CommandItem
                       key={order.id}
                       value={order.id}
@@ -89,7 +82,7 @@ export default function TravelOrderDropdown({
                         setOpen(false);
                       }}
                     >
-                      {order.travel_order_no}: {order.purpose}
+                      Travel Order Number: {order.travel_order_no}
                       <Check
                         className={cn(
                           "ml-auto",
