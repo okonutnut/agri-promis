@@ -36,7 +36,7 @@ export const sendNotification = async (message: string, user_id: string) => {
         })
       );
       return "{}";
-    } catch (e) {
+    } catch {
       return JSON.stringify({ error: "failed to send notification" });
     }
   }

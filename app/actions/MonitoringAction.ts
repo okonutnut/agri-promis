@@ -17,7 +17,7 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
     .select(
       `*, 
       project:projects(project_name, location, fca_ids),
-      travel_order:travel_order(travel_order_no, purpose),
+      travel_order:travel_order(travel_order_no),
       reporter:user_profile!monitoring_reporter_id_fkey(fullname),
       remarkBy:user_profile!monitoring_reviewed_by_id_fkey(fullname)`
     )
@@ -315,18 +315,18 @@ export async function InsertMonitoringReportAction({
   );
 
   // Send Notification to admin
-  const { data: programData, error: programError } = await supabase
-    .from("projects")
-    .select(
-      "program_id, project_name, programs!projects_program_id_fkey(admin_id)"
-    )
-    .eq("id", project_id)
-    .limit(1, { foreignTable: "programs" })
-    .single();
+  // const { data: programData, error: programError } = await supabase
+  //   .from("projects")
+  //   .select(
+  //     "program_id, project_name, programs!projects_program_id_fkey(admin_id)"
+  //   )
+  //   .eq("id", project_id)
+  //   .limit(1, { foreignTable: "programs" })
+  //   .single();
 
-  if (programError) {
-    throw programError;
-  }
+  // if (programError) {
+  //   throw programError;
+  // }
 
   return;
 }

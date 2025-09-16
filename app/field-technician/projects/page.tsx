@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import CardLink from "@/components/custom/link/card-link";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllAssignedProjectsByFieldTechnicianIDAction } from "@/app/actions/AssignedProjectAction";
+import growthstages from "@/data/growth-stages.json";
 
 export default function FieldTechnicianPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -50,14 +51,19 @@ export default function FieldTechnicianPage() {
                   className="group min-w-sm flex flex-col items-start h-full p-4 space-y-2 gap-0"
                 >
                   <div className="w-full flex justify-between items-start">
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-start gap-4">
                       <span className="border rounded-full p-2">
                         <Box className="h-5 w-5 text-gray-500" />
                       </span>
-                      <div className="font-semibold">
-                        {project.project_name} <br />
-                        <small className="font-normal">
+                      <div className="font-semibold flex flex-col gap-2">
+                        {project.project_name}
+                        <pre className="text-xs font-normal">
                           {project.location}
+                        </pre>
+                        <small className="font-normal">
+                          {growthstages[project?.progress_indicator ?? 0]
+                            ?.label || "Unknown"}{" "}
+                          Stage
                         </small>
                       </div>
                     </div>

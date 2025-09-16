@@ -114,8 +114,10 @@ export const addOverlayToImage = (
 
         const minDimension = Math.min(img.width, img.height);
         const maxDimension = Math.max(img.width, img.height);
-        const baseFontSize = Math.min(minDimension / 20, maxDimension / 45);
-        const fontSize = Math.max(22, Math.min(38, baseFontSize));
+
+        // 🔹 Bigger font scaling (more readable)
+        const baseFontSize = Math.min(minDimension / 15, maxDimension / 35);
+        const fontSize = Math.max(28, Math.min(60, baseFontSize));
 
         ctx.font = `bold ${fontSize}px Arial, sans-serif`;
         ctx.textAlign = "left";
@@ -138,7 +140,7 @@ export const addOverlayToImage = (
           const maxChars = Math.floor(img.width / (fontSize * 0.55));
           const words = location.locationName.split(" ");
           let currentLine = "Location: ";
-          let locationLines = [];
+          let locationLines: string[] = [];
 
           words.forEach((word) => {
             const testLine = currentLine + word + " ";
@@ -153,55 +155,61 @@ export const addOverlayToImage = (
           overlayLines.push(...locationLines);
         }
 
-        // Add "Captured by <fullname>" to the overlay
         overlayLines.push(`Project: ${projectName}`);
         overlayLines.push(`Captured by ${fullname}`);
 
         const padding = fontSize * 1.0;
         const lineHeight = fontSize * 1.5;
         const overlayHeight = overlayLines.length * lineHeight + padding * 2;
-        const textWidths = overlayLines.map(
-          (line) => ctx.measureText(line).width
-        );
-        const maxTextWidth = Math.max(...textWidths);
 
         const margin = Math.max(12, fontSize * 0.7);
         const overlayY = img.height - overlayHeight - margin;
-        const totalWidth = maxTextWidth + padding * 2;
 
-        // Remove the black canvas overlay
-        // ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
-        // ctx.fillRect(margin, overlayY, totalWidth, overlayHeight);
+        // Load and draw logo from public folder
+        const logo = new window.Image();
+        logo.onload = () => {
+          // 🔹 Bigger auto-scale logo (8–10% of image height)
+          const logoTargetHeight = Math.max(
+            img.height * 0.1, // 10% of image height
+            overlayHeight * 0.7
+          );
+          const logoTargetWidth = (logo.width / logo.height) * logoTargetHeight;
 
-        ctx.fillStyle = "white";
-        ctx.strokeStyle = "black";
-        ctx.lineWidth = Math.max(2, fontSize / 10); // Thicker outline for visibility
+          const logoX = margin;
+          const logoY = overlayY + padding;
 
-        overlayLines.forEach((line, index) => {
-          const textX = margin + padding;
-          const textY = overlayY + padding + index * lineHeight;
-          ctx.strokeText(line, textX, textY); // Black outline
-          ctx.fillText(line, textX, textY); // White fill
-        });
+          ctx.drawImage(logo, logoX, logoY, logoTargetWidth, logoTargetHeight);
 
-        canvas.toBlob(
-          (blob) => {
-            if (blob) {
-              const overlayedFile = new File([blob], file.name, {
-                type: "image/jpeg",
-                lastModified: Date.now(),
-              });
-              resolve(overlayedFile);
-            } else {
-              console.warn("Blob creation failed, using original file");
-              resolve(file);
-            }
-          },
-          "image/jpeg",
-          0.9
-        );
+          ctx.fillStyle = "white";
+          ctx.strokeStyle = "black";
+          ctx.lineWidth = Math.max(3, fontSize / 8); // thicker outline
+
+          overlayLines.forEach((line, index) => {
+            const textX = logoX + logoTargetWidth + padding;
+            const textY = overlayY + padding + index * lineHeight;
+            ctx.strokeText(line, textX, textY);
+            ctx.fillText(line, textX, textY);
+          });
+
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                const overlayedFile = new File([blob], file.name, {
+                  type: "image/jpeg",
+                  lastModified: Date.now(),
+                });
+                resolve(overlayedFile);
+              } else {
+                resolve(file);
+              }
+            },
+            "image/jpeg",
+            0.9
+          );
+        };
+        logo.onerror = () => reject(new Error("Failed to load logo"));
+        logo.src = "/da-logo.png"; // from public folder
       } catch (error) {
-        console.error("Error in overlay creation:", error);
         resolve(file);
       }
     };

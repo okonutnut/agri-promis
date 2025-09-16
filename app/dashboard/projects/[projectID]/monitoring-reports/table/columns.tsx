@@ -33,10 +33,6 @@ export const columns: ColumnDef<MonitoringReportType>[] = [
     enableSorting: true,
   },
   {
-    accessorKey: "purpose",
-    header: "Purpose",
-  },
-  {
     accessorKey: "remarkBy.fullname",
     header: "Reviewed By",
     cell: ({ getValue }) => getValue() || "Not Reviewed",

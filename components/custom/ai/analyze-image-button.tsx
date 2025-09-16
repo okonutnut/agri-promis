@@ -296,51 +296,46 @@ export default function AnalyzeImageButton({
 
       <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
         <DrawerTrigger asChild />
-        <DrawerContent className="min-h-[400px] text-center">
-          <DrawerHeader>
-            <DrawerTitle className="text-lg">
-              Issue Analysis:
-              <br />
-              <span className="text-md font-semibold">
-                {prediction ? prediction.label : "Analyzing..."}
-              </span>
-            </DrawerTitle>
-            <DrawerDescription>
-              {metadataResult
-                ? metadataResult.description
-                : prediction?.label === "Can't analyze"
-                ? "Confidence too low to analyze."
-                : "No metadata found."}
-            </DrawerDescription>
-          </DrawerHeader>
-
-          {metadataResult && (
+        <DrawerContent className="min-h-[400px] text-center pb-4">
+          {!showTrainForm ? (
             <>
-              <strong>Possible Solution:</strong>
-              <ul className="list-disc list-inside text-left max-w-sm mx-auto">
-                {(metadataResult.possibleSolution || []).map(
-                  (s: string, i: number) => (
-                    <li key={i}>{s}</li>
-                  )
-                )}
-              </ul>
+              <DrawerHeader>
+                <DrawerTitle className="text-lg">
+                  Issue Analysis:
+                  <br />
+                  <span className="text-md font-semibold">
+                    {prediction ? prediction.label : "Analyzing..."}
+                  </span>
+                </DrawerTitle>
+                <DrawerDescription>
+                  {metadataResult
+                    ? metadataResult.description
+                    : prediction?.label === "Can't analyze"
+                    ? "Confidence too low to analyze."
+                    : "No metadata found."}
+                </DrawerDescription>
+              </DrawerHeader>
+
+              {metadataResult && (
+                <>
+                  <strong>Possible Solution:</strong>
+                  <ul className="list-disc list-inside text-left max-w-sm mx-auto">
+                    {(metadataResult.possibleSolution || []).map(
+                      (s: string, i: number) => (
+                        <li key={i}>{s}</li>
+                      )
+                    )}
+                  </ul>
+                  <div className="my-2" />
+                </>
+              )}
             </>
-          )}
-
-          {prediction && (
-            <div className="mt-4">
-              <Button
-                variant="outline"
-                onClick={() => setShowTrainForm((p) => !p)}
-              >
-                Not correct?
-              </Button>
-            </div>
-          )}
-
-          {showTrainForm && (
+          ) : (
             <center>
               <div className="max-w-sm mt-4 p-4 space-y-2">
+                <h2 className="text-lg font-semibold">
+                  Retrain Model with New Label
+                </h2>
                 <input
                   className="w-full p-2 border rounded"
                   placeholder="Correct Label"
@@ -367,6 +362,16 @@ export default function AnalyzeImageButton({
                 </div>
               </div>
             </center>
+          )}
+          {prediction && (
+            <div>
+              <Button
+                variant="outline"
+                onClick={() => setShowTrainForm((p) => !p)}
+              >
+                {showTrainForm ? "Cancel" : "Retrain with new label"}
+              </Button>
+            </div>
           )}
         </DrawerContent>
       </Drawer>

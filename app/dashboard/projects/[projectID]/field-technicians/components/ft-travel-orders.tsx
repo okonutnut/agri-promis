@@ -22,10 +22,8 @@ export default function FTTravelOrders({ user_id }: FTTravelOrdersProps) {
   const [search, setSearch] = useState("");
   const values = data
     ?.filter((order) => order.is_active === 1)
-    ?.filter(
-      (order) =>
-        order.travel_order_no?.toLowerCase().includes(search.toLowerCase()) ||
-        order.purpose?.toLowerCase().includes(search.toLowerCase())
+    ?.filter((order) =>
+      order.travel_order_no?.toLowerCase().includes(search.toLowerCase())
     );
 
   return (
@@ -52,10 +50,7 @@ export default function FTTravelOrders({ user_id }: FTTravelOrdersProps) {
                 className="p-2 rounded-md shadow-xs flex-row justify-between"
                 key={order.id}
               >
-                <div className="flex flex-1/2 flex-col gap-1">
-                  <small>Travel Order No. {order.travel_order_no}</small>
-                  <strong className="text-xs">Purpose: {order.purpose}</strong>
-                </div>
+                <strong>Travel Order No. {order.travel_order_no}</strong>
                 <small>
                   Return Date:&nbsp;
                   {format(new Date(order.return_date ?? ""), "PPp")}

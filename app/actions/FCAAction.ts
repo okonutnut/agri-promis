@@ -3,7 +3,6 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { FCAType } from "../../components/types";
 import { InsertActivityLogAction } from "./ActivityLogAction";
-import { SendPushNotificationToUserAction } from "./SubscriptionAction";
 
 // FCA ACTIONS
 export async function InsertFCAAction(data: FCAType) {
