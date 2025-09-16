@@ -309,10 +309,14 @@ export function useSelectAllMonitoringReportsByProjectIDHook(
 }
 
 export function useInsertMonitoringReportHook() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: async (data: MonitoringReportType) =>
       await InsertMonitoringReportAction(data),
     onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: ["monitoring-reports"],
+      });
       toast("Monitoring report created successfully!");
     },
     onError: () => {
@@ -324,8 +328,8 @@ export function useInsertMonitoringReportHook() {
 export function useInsertRemarksInMonitoringReportHook(reportId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (remarks: string) =>
-      await InsertRemarksInMonitoringReportAction(reportId, remarks),
+    mutationFn: async () =>
+      await InsertRemarksInMonitoringReportAction(reportId),
     onSuccess: () => {
       qc.invalidateQueries({
         queryKey: ["monitoring-reports"],

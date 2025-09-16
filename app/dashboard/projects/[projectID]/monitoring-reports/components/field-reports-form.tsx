@@ -6,42 +6,25 @@ import NonFormMultiInput from "@/components/custom/input/non-form-multi-input";
 import NonFormTextarea from "@/components/custom/input/non-form-textarea";
 import dynamic from "next/dynamic";
 import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
+import { useInsertRemarksInMonitoringReportHook } from "@/components/hooks";
+import { Button } from "@/components/ui/button";
+import { Loader2, Send } from "lucide-react";
+import { useModal } from "@/components/custom/layout/custom-page-layout";
 import MonitoringReportDocument from "@/components/custom/pdf/monitoring-reports-document";
 import PrintDownloadDropdown from "@/components/custom/print/print-download-dropdown";
 const ImageCarousel = dynamic(
   () => import("@/components/custom/images/image-carousel"),
   { ssr: false }
 );
-// const formSchema = z.object({
-//   remarks: z
-//     .string()
-//     .min(5, "Remarks must be at least 5 characters")
-//     .max(700, "Remarks must not exceed 700 characters"),
-// });
-// type formDataType = z.infer<typeof formSchema>;
 
 type FieldReportsFormProps = {
   data: MonitoringReportType | null;
 };
 export function FieldReportsForm({ data }: FieldReportsFormProps) {
-  // const form = useForm<formDataType>({
-  //   resolver: zodResolver(formSchema),
-  //   defaultValues: {
-  //     remarks: data?.remarks || "",
-  //   },
-  // });
-
-  // const { mutate, isPending } = useInsertRemarksInMonitoringReportHook(
-  //   data?.id as string
-  // );
-  // const onSubmit = (formData: formDataType) =>
-  //   mutate(formData.remarks, {
-  //     onSuccess: () => {
-  //       form.reset();
-  //       closeButtonRef.current?.click();
-  //     },
-  //   });
-
+  const { openModal, closeModal } = useModal();
+  const { mutate, isPending } = useInsertRemarksInMonitoringReportHook(
+    data?.id as string
+  );
   return (
     <>
       <section className="space-y-4 h-[calc(90vh)] overflow-y-auto overflow-x-hidden">
@@ -73,21 +56,42 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
             defaultValue={data?.remarks}
             readonly
           />
-          {/* <form id="remarks-form" onSubmit={form.handleSubmit(onSubmit)}>
-            <FormTextarea
-              label="Remarks"
-              form={form}
-              name="remarks"
-              readonly={data?.reviewed_by_id ? true : false}
-              noPlaceholder={data?.reviewed_by_id ? true : false}
-            />
-          </form> */}
         </div>
       </section>
       <CustomSheetFooter>
         <PrintDownloadDropdown
           data={<MonitoringReportDocument data={data} />}
         />
+        {!data?.reviewed_by_id && (
+          <Button
+            size={"sm"}
+            disabled={isPending}
+            onClick={() => {
+              openModal(
+                "Confirm Action",
+                "Are you sure you want to submit for review?",
+                <Button
+                  className="w-full"
+                  onClick={() => {
+                    mutate();
+                    closeModal();
+                  }}
+                >
+                  Confirm
+                </Button>
+              );
+            }}
+          >
+            {isPending ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              <>
+                <Send />
+                Review
+              </>
+            )}
+          </Button>
+        )}
       </CustomSheetFooter>
     </>
   );

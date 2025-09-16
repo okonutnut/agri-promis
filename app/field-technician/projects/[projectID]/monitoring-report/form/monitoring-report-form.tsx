@@ -109,6 +109,7 @@ export default function UploadFieldReportForm({
       findings: values?.findings ? [...values.findings] : [],
       issues_concern: values?.issues_concern ? [...values.issues_concern] : [],
       observation: values?.observation || "",
+      remarks: values?.remarks || "",
     },
   });
 
@@ -193,7 +194,7 @@ export default function UploadFieldReportForm({
           />
         </form>
       </div>
-      <CustomSheetFooter>
+      <CustomSheetFooter isPending={isPending}>
         {values?.reviewed_by_id && (
           <PrintDownloadDropdown
             data={<MonitoringReportDocument data={values} />}

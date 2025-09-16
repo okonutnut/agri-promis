@@ -291,7 +291,7 @@ export async function InsertMonitoringReportAction({
     reporter_id: user.id,
     observation,
     photo_url: photo_paths,
-    remarks: remarks || "",
+    remarks: remarks,
   });
 
   if (error) throw error;
@@ -331,10 +331,7 @@ export async function InsertMonitoringReportAction({
   return;
 }
 
-export async function InsertRemarksInMonitoringReportAction(
-  reportId: string,
-  remarks: string
-) {
+export async function InsertRemarksInMonitoringReportAction(reportId: string) {
   const supabase = await createClient(cookies());
 
   // auth check
@@ -346,7 +343,6 @@ export async function InsertRemarksInMonitoringReportAction(
   const { data, error } = await supabase
     .from("monitoring")
     .update({
-      remarks,
       reviewed_by_id: user.id,
       reviewed_at: new Date(),
     })

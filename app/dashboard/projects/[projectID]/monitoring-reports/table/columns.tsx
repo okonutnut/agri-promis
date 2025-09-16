@@ -38,6 +38,14 @@ export const columns: ColumnDef<MonitoringReportType>[] = [
     cell: ({ getValue }) => getValue() || "Not Reviewed",
   },
   {
+    accessorKey: "reviewed_at",
+    header: "Date Reviewed",
+    cell: ({ getValue }) =>
+      getValue()
+        ? format(new Date(getValue() as string), "PPpp")
+        : "Not Reviewed",
+  },
+  {
     accessorKey: "created_at",
     header: ({ column }) => {
       return (
