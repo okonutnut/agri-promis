@@ -50,6 +50,7 @@ const fieldReportSchema = z.object({
       message: "Observation must be between 5 and 700 characters if provided",
     }),
   issues_concern: z.array(z.string()),
+  remarks: z.string().min(1, "Remarks is required"),
 });
 type FieldReportFormData = z.infer<typeof fieldReportSchema>;
 
@@ -184,14 +185,12 @@ export default function UploadFieldReportForm({
             values={values?.issues_concern || null}
             readOnly={!isAddMode}
           />
-          {!isAddMode && (
-            <NonFormTextarea
-              label="Remarks"
-              defaultValue={values?.remarks || "N/A"}
-              readonly
-              noPlaceholder
-            />
-          )}
+          <FormTextarea
+            label="Remarks"
+            name="remarks"
+            form={form}
+            readonly={!isAddMode}
+          />
         </form>
       </div>
       <CustomSheetFooter>

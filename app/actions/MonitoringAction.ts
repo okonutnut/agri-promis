@@ -291,7 +291,7 @@ export async function InsertMonitoringReportAction({
     reporter_id: user.id,
     observation,
     photo_url: photo_paths,
-    remarks,
+    remarks: remarks || "",
   });
 
   if (error) throw error;
