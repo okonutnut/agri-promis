@@ -4,9 +4,9 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { ProjectType, FCAType } from "../../components/types";
+import { redirect, RedirectType } from "next/navigation";
 
 // PROJECT ACTIONS
-
 export async function InsertProjectAction(values: ProjectType) {
   const supabase = await createClient(cookies());
   const userId = (await supabase.auth.getUser()).data.user?.id;
@@ -37,7 +37,7 @@ export async function InsertProjectAction(values: ProjectType) {
     `Project ${values.project_name as string} has been created.`
   );
 
-  return data as ProjectType;
+  redirect(`/dashboard/projects/${data.id}`, RedirectType.replace);
 }
 
 export async function SelectAllProjectsByProgramIDAction(programID: string) {
@@ -167,7 +167,7 @@ export async function EditProjectAction(data: ProjectType) {
     `Project ${currentProject.project_name} updated successfully.`
   );
 
-  return;
+  redirect(`/dashboard/projects/${data.id}`, RedirectType.replace);
 }
 
 export async function DeleteProjectAction(projectID: string) {
@@ -176,7 +176,7 @@ export async function DeleteProjectAction(projectID: string) {
   // Get project details for logging
   const { data: projectData, error: projectError } = await supabase
     .from("projects")
-    .select("project_name")
+    .select("project_name, program_id")
     .eq("id", projectID)
     .single();
 
@@ -184,6 +184,7 @@ export async function DeleteProjectAction(projectID: string) {
     throw projectError;
   }
 
+  const program_id = projectData?.program_id;
   const projectName = projectData?.project_name;
 
   // Delete the project
@@ -202,5 +203,5 @@ export async function DeleteProjectAction(projectID: string) {
     `Project ${projectName} has been deleted.`
   );
 
-  return;
+  redirect(`/dashboard/programs/${program_id}`, RedirectType.replace);
 }

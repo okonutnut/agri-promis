@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { ProgramType, UserProfileType } from "../../components/types";
+import { redirect, RedirectType } from "next/navigation";
 
 // PROGRAM ACTIONS
 export async function InsertProgramAction({
@@ -32,7 +33,7 @@ export async function InsertProgramAction({
     `Program ${program_name as string} has been created.`
   );
 
-  return data as ProgramType;
+  redirect(`/dashboard/programs/${data.id}`, RedirectType.replace);
 }
 
 export async function EditProgramNameAction({
@@ -55,7 +56,7 @@ export async function EditProgramNameAction({
   }
 
   // Update the program name
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("programs")
     .update({ program_name })
     .eq("id", program_id)
@@ -72,7 +73,7 @@ export async function EditProgramNameAction({
     `Program ${currentProgram.program_name} name updated to ${program_name}.`
   );
 
-  return;
+  redirect(`/dashboard/programs/${data.id}`, RedirectType.replace);
 }
 
 export async function SelectProgramByIdAction(programId: string) {
@@ -140,9 +141,12 @@ export async function DeleteProgramAction(programID: string) {
     .select("program_name")
     .eq("id", programID)
     .single();
+
   if (programError) {
     throw programError;
   }
+
+  const programName = programData?.program_name;
 
   // Delete the program
   const { error } = await supabase
@@ -157,10 +161,10 @@ export async function DeleteProgramAction(programID: string) {
   // Log the activity
   await InsertActivityLogAction(
     "Deleted a Program",
-    `Program ${programData.program_name} has been deleted.`
+    `Program ${programName} has been deleted.`
   );
 
-  return;
+  redirect("/dashboard/programs", RedirectType.replace);
 }
 
 export async function SelectAllProgramsAction() {
