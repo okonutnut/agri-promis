@@ -124,7 +124,7 @@ export default function EditProjectNameForm({
             form="edit-project-form"
             size={"sm"}
             variant={isPending ? "ghost" : "default"}
-            disabled={isPending || form.formState.isDirty}
+            disabled={isPending}
           >
             {isPending ? <Loader2 className="animate-spin" /> : "Save Changes"}
           </Button>

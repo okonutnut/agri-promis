@@ -1,7 +1,5 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
-
 export default function FrameLoading() {
   return (
     <section className="w-full h-screen flex flex-col relative text-sm overflow-hidden">
