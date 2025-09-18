@@ -1,4 +1,4 @@
-'use client";';
+"use client";
 
 import dynamic from "next/dynamic";
 import { useForm } from "react-hook-form";
@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import cornGrowthStages from "@/data/growth-stages.json";
 import FormInput from "@/components/custom/input/form-input";
-
+import { useModal } from "@/components/custom/layout/custom-page-layout";
 const FCASelector = dynamic(
   () => import("@/components/custom/dropdown/fca-selector"),
   {
@@ -34,7 +34,7 @@ const formSchema = z.object({
   progress_indicator: z.coerce
     .number()
     .min(1, "Progress indicator is required"),
-  fca_ids: z.array(z.string()).min(1, "FCA is required"),
+  fca_ids: z.array(z.string()).optional(),
   status: z
     .number()
     .refine(
@@ -65,6 +65,8 @@ export default function EditProjectNameForm({
 
   const { mutate, isPending } = useEditProjectHook();
   const handleSubmit = (data: FormSchemaType) => mutate(data);
+
+  const { openModal, closeModal } = useModal();
 
   return (
     <>
@@ -121,7 +123,21 @@ export default function EditProjectNameForm({
       {isAdmin && (
         <CardFooter className="w-full justify-end p-0 border-t mt-4 px-4">
           <Button
-            form="edit-project-form"
+            onClick={() =>
+              openModal(
+                "Are you sure?",
+                "This action cannot be undone. Do you want to proceed?",
+                <Button
+                  onClick={() => {
+                    form.handleSubmit(handleSubmit)();
+                    closeModal();
+                  }}
+                  className="w-full"
+                >
+                  Confirm
+                </Button>
+              )
+            }
             size={"sm"}
             variant={isPending ? "ghost" : "default"}
             disabled={isPending}

@@ -9,7 +9,7 @@ import { CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { ProgramType } from "@/components/types";
-import NonFormInput from "@/components/custom/input/non-form-input";
+import { useModal } from "@/components/custom/layout/custom-page-layout";
 const FormInput = dynamic(
   () => import("@/components/custom/input/form-input"),
   {
@@ -42,6 +42,8 @@ export default function EditProgramNameForm({
   const handleSubmit = (data: z.infer<typeof formSchema>) =>
     mutate({ ...data, project_count: programData.project_count });
 
+  const { openModal, closeModal } = useModal();
+
   return (
     <>
       <form
@@ -63,7 +65,22 @@ export default function EditProgramNameForm({
         {isAdmin && (
           <CardFooter className="w-full justify-end p-0">
             <Button
-              type="submit"
+              type="button"
+              onClick={() =>
+                openModal(
+                  "Are you sure?",
+                  "This action cannot be undone. Do you want to proceed?",
+                  <Button
+                    onClick={() => {
+                      form.handleSubmit(handleSubmit)();
+                      closeModal();
+                    }}
+                    className="w-full"
+                  >
+                    Confirm
+                  </Button>
+                )
+              }
               size={"sm"}
               variant={isPending ? "ghost" : "default"}
               disabled={isPending}
