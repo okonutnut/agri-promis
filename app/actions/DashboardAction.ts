@@ -79,7 +79,18 @@ export async function SelectUserDashboardItemsAction() {
     throw MError;
   }
 
-  return { ap: APData, m: MData, to: TData };
+  // Get activity logs
+  const { data: ALData, error: ALError } = await supabase
+    .from("activity_logs")
+    .select("*")
+    .eq("user_id", userData.user.id)
+    .order("created_at", { ascending: false })
+    .limit(10);
+  if (ALError) {
+    throw ALError;
+  }
+
+  return { ap: APData, m: MData, to: TData, al: ALData };
 }
 
 export async function SelectAdminDashboardItemsAction() {
