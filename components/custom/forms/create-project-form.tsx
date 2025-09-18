@@ -33,7 +33,7 @@ const formSchema = z.object({
     }),
   description: z.string().optional(),
   location: z.string().min(1, "Location is required"),
-  fca_ids: z.array(z.string()).min(1, "At least one FCA is required"),
+  fca_ids: z.array(z.string()).optional(),
   total_alloted_area: z.coerce
     .number()
     .min(1, "At least one hectare per person is required"),
