@@ -25,6 +25,8 @@ function ProjectDashboardInfo(data: ProjectType) {
     <div className="py-10 px-4 flex justify-between items-start cursor-default">
       <div className="flex flex-col gap-1 text-2xl font-medium ">
         {data?.project_name}
+        <br />
+        <pre className="text-xs italic">{data?.description}</pre>
         <span className="text-sm text-muted-foreground mt-4">
           Start Date:&nbsp;
           {data?.start_date
