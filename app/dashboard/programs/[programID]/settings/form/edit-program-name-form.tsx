@@ -55,11 +55,11 @@ export default function EditProgramNameForm({
           form={form}
           readonly={!isAdmin}
         />
-        <NonFormInput
+        {/* <NonFormInput
           label="Program Creator"
           defaultValue={programData.user_profile?.fullname ?? "N/A"}
           readonly
-        />
+        /> */}
         {isAdmin && (
           <CardFooter className="w-full justify-end p-0">
             <Button
