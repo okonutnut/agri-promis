@@ -83,6 +83,7 @@ const ProgramDropdown = ({
         <Link
           href={`/dashboard/programs/${currentProgramID}`}
           className="text-black flex items-center gap-2 cursor-pointer whitespace-nowrap"
+          prefetch={true}
         >
           <Boxes className="h-4 w-4 flex-shrink-0 text-[#707070]" />
           <span className="min-w-[150px] truncate">
@@ -102,7 +103,11 @@ const ProgramDropdown = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="m-1">
           {allProgramsData?.map((program: ProgramType) => (
-            <Link key={program.id} href={`/dashboard/programs/${program.id}`}>
+            <Link
+              key={program.id}
+              href={`/dashboard/programs/${program.id}`}
+              prefetch={true}
+            >
               <DropdownMenuItem className="justify-between w-full h-7 cursor-pointer hover:bg-gray-100">
                 {program?.program_name ?? <Skeleton className="w-full h-5" />}
                 {(program.id === programID ||
@@ -113,13 +118,13 @@ const ProgramDropdown = ({
             </Link>
           ))}
           <DropdownMenuSeparator />
-          <Link href={PATHS.PROGRAMS}>
+          <Link href={PATHS.PROGRAMS} prefetch={true}>
             <DropdownMenuItem className="justify-between w-full h-7 cursor-pointer hover:bg-gray-100">
               All Programs
             </DropdownMenuItem>
           </Link>
           <DropdownMenuSeparator />
-          <Link href={PATHS.NEW_PROGRAM}>
+          <Link href={PATHS.NEW_PROGRAM} prefetch={true}>
             <DropdownMenuItem>
               <Plus />
               New program
@@ -147,6 +152,7 @@ const ProjectDropdown = ({
       <Link
         href={pathname}
         className="text-black whitespace-nowrap flex items-center gap-2 h-full"
+        prefetch={true}
       >
         <Box className="h-4 w-4 flex-shrink-0 text-[#707070]" />
         <span className="min-w-[150px] truncate inline-block">
@@ -168,6 +174,7 @@ const ProjectDropdown = ({
             href={`${
               role == "admin" ? PATHS.PROJECTS : PATHS.FIELD_TECHNICIAN
             }/${project.id}`}
+            prefetch={true}
           >
             <DropdownMenuItem className="justify-between w-full h-7 cursor-pointer hover:bg-gray-100">
               {project?.project_name ?? <Skeleton className="w-full h-5" />}
@@ -182,6 +189,7 @@ const ProjectDropdown = ({
               ? `/dashboard/programs/${projects[0].program_id}`
               : PATHS.FIELD_TECHNICIAN
           }
+          prefetch={true}
         >
           <DropdownMenuItem className="justify-between w-full h-7 cursor-pointer hover:bg-gray-100">
             All Projects
@@ -190,7 +198,10 @@ const ProjectDropdown = ({
         {role === "admin" && (
           <>
             <Separator />
-            <Link href={`/dashboard/new/${projects?.[0]?.program_id}`}>
+            <Link
+              href={`/dashboard/new/${projects?.[0]?.program_id}`}
+              prefetch={true}
+            >
               <DropdownMenuItem>
                 <Plus />
                 New Project
