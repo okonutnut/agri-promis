@@ -108,16 +108,20 @@ export async function SelectAdminDashboardItemsAction() {
     .from("projects")
     .select("*", { count: "exact", head: true });
 
-  const today = new Date().toISOString().split("T")[0];
-  const todayStart = `${today}T00:00:00`;
+  const nowIso = new Date().toISOString(); // e.g. "2025-09-18T14:30:00.000Z"
 
-  const { data: futureOrders } = await supabase
+  const { data: futureOrders, error } = await supabase
     .from("travel_order")
     .select(
       "*, user:user_profile!travel_order_user_id_fkey (fullname), projects (project_name)"
     )
-    .or(`departure_date.gte.${todayStart},return_date.gte.${todayStart}`)
+    .lte("departure_date", nowIso)
+    .gte("return_date", nowIso)
     .limit(10);
+
+  if (error) {
+    throw error;
+  }
 
   const { data: activityLogs } = await supabase
     .from("activity_logs")
