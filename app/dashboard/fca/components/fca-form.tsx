@@ -19,7 +19,11 @@ import { useState } from "react";
 
 const formSchema = z.object({
   id: z.string().optional(),
-  description: z.string().min(1, "Name is required"),
+  description: z.string().min(1, "FCA Name is required"),
+  president_name: z.string().min(1, "President Name is required"),
+  contact_number: z
+    .string()
+    .regex(/^(\+63|0)\d{10}$/, "Contact Number must be a valid PH number"),
   member_count: z.coerce.number().min(1, "Member count is required"),
   active_status: z.coerce.number().min(0, "Role is required"),
 });
@@ -41,6 +45,8 @@ export function FCAForm({ isAddMode, data }: FCAFormProps) {
       id: data?.id || "",
       description: data?.description || "",
       member_count: data?.member_count || 0,
+      president_name: data?.president_name || "",
+      contact_number: data?.contact_number || "N/A",
       active_status: data?.active_status || 0,
     },
   });
@@ -99,6 +105,19 @@ export function FCAForm({ isAddMode, data }: FCAFormProps) {
         <FormInput
           label="Farmer's Cooperative Association Name"
           name="description"
+          form={form}
+          noPlaceholder
+        />
+        <FormInput
+          label="President Name"
+          name="president_name"
+          form={form}
+          noPlaceholder
+        />
+        <FormInput
+          label="Contact Number"
+          name="contact_number"
+          type="number"
           form={form}
           noPlaceholder
         />

@@ -25,6 +25,8 @@ export type FCAType = {
   id?: string;
   code?: string;
   description?: string;
+  president_name?: string;
+  contact_number?: string;
   member_count?: number;
   active_status?: number;
   created_at?: string;
