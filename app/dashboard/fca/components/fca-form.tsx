@@ -108,7 +108,7 @@ export function FCAForm({ isAddMode, data }: FCAFormProps) {
           form={form}
           noPlaceholder
         />
-        <FormInput
+        {/* <FormInput
           label="President Name"
           name="president_name"
           form={form}
@@ -120,7 +120,7 @@ export function FCAForm({ isAddMode, data }: FCAFormProps) {
           type="number"
           form={form}
           noPlaceholder
-        />
+        /> */}
         <FormInput
           label="Total Member Count"
           name="member_count"
