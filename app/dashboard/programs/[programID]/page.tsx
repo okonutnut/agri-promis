@@ -17,17 +17,12 @@ import {
 import cornGrowthStages from "@/data/growth-stages.json";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllProjectsByProgramIDAction } from "@/app/actions/ProjectAction";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import MunicipalitySelector from "./components/municipality-dropdown";
 
 const Badge = dynamic(
   () => import("@/components/ui/badge").then((mod) => mod.Badge),
-  { ssr: false }
-);
-const Button = dynamic(
-  () => import("@/components/ui/button").then((mod) => mod.Button),
-  { ssr: false }
-);
-const Input = dynamic(
-  () => import("@/components/ui/input").then((mod) => mod.Input),
   { ssr: false }
 );
 const CardLink = dynamic(() => import("@/components/custom/link/card-link"), {
@@ -38,6 +33,8 @@ export default function ProgramDashboardPage() {
   const { programID } = useParams();
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [filter, setFilter] = useState("");
+  console.log("Selected Municipality:", filter);
   const [projectStatus, setProjectStatus] = useState<number>(1);
 
   const { data, isLoading, error } = useRealtimeQuery({
@@ -56,8 +53,14 @@ export default function ProgramDashboardPage() {
             ?.toLowerCase()
             .includes(searchQuery.toLowerCase())
         )
+        .filter(
+          (project: ProjectType) =>
+            filter
+              ? project.location?.toLowerCase().includes(filter.toLowerCase())
+              : true // If filter is empty ("All"), include all
+        )
         .filter((project: ProjectType) => project.status === projectStatus),
-    [data, searchQuery, projectStatus]
+    [data, searchQuery, filter, projectStatus]
   );
 
   return (
@@ -66,7 +69,7 @@ export default function ProgramDashboardPage() {
       error={error}
       navItems={getProgramNavItems(programID as string)}
     >
-      <div className="flex items-start gap-2 mb-4">
+      <div className="flex flex-wrap items-start gap-2 mb-4">
         <Link href={`/dashboard/new/${programID}`}>
           <Button>New project</Button>
         </Link>
@@ -79,6 +82,7 @@ export default function ProgramDashboardPage() {
           />
           <Search className="absolute left-2 top-1/2 w-4 h-4 transform -translate-y-1/2 text-gray-500" />
         </div>
+        <MunicipalitySelector onChange={setFilter} />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline">

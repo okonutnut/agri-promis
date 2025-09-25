@@ -35,6 +35,7 @@ const formSchema = z.object({
     .number()
     .min(1, "Progress indicator is required"),
   fca_ids: z.array(z.string()).optional(),
+  total_alloted_area: z.coerce.number().optional(),
   status: z
     .number()
     .refine(
@@ -59,13 +60,13 @@ export default function EditProjectNameForm({
       project_name: project.project_name || "",
       progress_indicator: project.progress_indicator || 1,
       fca_ids: project.fca_ids || [],
+      total_alloted_area: project.total_alloted_area || 0,
       status: project.status || 0,
     },
   });
 
   const { mutate, isPending } = useEditProjectHook();
   const handleSubmit = (data: FormSchemaType) => mutate(data);
-
   const { openModal, closeModal } = useModal();
 
   return (
@@ -87,6 +88,12 @@ export default function EditProjectNameForm({
           onChange={(value) => form.setValue("fca_ids", value)}
           defaultValue={project.fca_ids || []}
           readOnly={!isAdmin}
+        />
+        <FormInput
+          label="Total Allotment Area (in hectares)"
+          name="total_alloted_area"
+          form={form}
+          readonly={!isAdmin}
         />
         <div className="w-full flex justify-between items-center">
           <Label>Set Active</Label>

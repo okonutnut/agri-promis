@@ -4,7 +4,6 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { ProjectType, FCAType } from "../../components/types";
-import { redirect, RedirectType } from "next/navigation";
 
 // PROJECT ACTIONS
 export async function InsertProjectAction(values: ProjectType) {
@@ -37,7 +36,7 @@ export async function InsertProjectAction(values: ProjectType) {
     `Project ${values.project_name as string} has been created.`
   );
 
-  redirect(`/dashboard/projects/${data.id}`, RedirectType.replace);
+  return data;
 }
 
 export async function SelectAllProjectsByProgramIDAction(programID: string) {
@@ -154,6 +153,7 @@ export async function EditProjectAction(data: ProjectType) {
       progress_indicator: data.progress_indicator,
       status: data.status,
       fca_ids: data.fca_ids,
+      total_alloted_area: data.total_alloted_area,
     })
     .eq("id", data.id);
 
@@ -167,7 +167,7 @@ export async function EditProjectAction(data: ProjectType) {
     `Project ${currentProject.project_name} updated successfully.`
   );
 
-  redirect(`/dashboard/projects/${data.id}`, RedirectType.replace);
+  return;
 }
 
 export async function DeleteProjectAction(projectID: string) {
@@ -184,7 +184,6 @@ export async function DeleteProjectAction(projectID: string) {
     throw projectError;
   }
 
-  const program_id = projectData?.program_id;
   const projectName = projectData?.project_name;
 
   // Delete the project
@@ -203,5 +202,5 @@ export async function DeleteProjectAction(projectID: string) {
     `Project ${projectName} has been deleted.`
   );
 
-  redirect(`/dashboard/programs/${program_id}`, RedirectType.replace);
+  return;
 }

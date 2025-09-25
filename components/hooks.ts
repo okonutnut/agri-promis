@@ -68,7 +68,6 @@ import {
   TravelOrderType,
   UserProfileType,
 } from "./types";
-import { useRouter } from "next/navigation";
 
 // PROGRAM HOOKS
 export function useSelectProgramByIDHook(programId: string) {
@@ -104,11 +103,12 @@ export function useInsertProgramHook() {
 
   return useMutation({
     mutationFn: async (data: ProgramType) => await InsertProgramAction(data),
-    onSuccess: () => {
+    onSuccess: (data) => {
       qc.invalidateQueries({
         queryKey: ["allProgramsByAgriculturist"],
       });
       toast("Program created successfully!");
+      window.location.href = `/dashboard/programs/${data?.id}`;
     },
     onError: () => {
       toast.error("Something went wrong. Please try again.");
@@ -142,6 +142,7 @@ export function useDeleteProgramHook(programId: string) {
         queryKey: ["allProgramsByAgriculturist"],
       });
       toast("Program deleted successfully!");
+      window.location.href = `/dashboard/programs`;
     },
     onError: () => {
       toast.error("Something went wrong. Please try again.");
@@ -213,11 +214,12 @@ export function useInsertProjectHook() {
 
   return useMutation({
     mutationFn: async (data: ProjectType) => await InsertProjectAction(data),
-    onSuccess: () => {
+    onSuccess: (data) => {
       qc.invalidateQueries({
         queryKey: ["allProjectsByProgramId"],
       });
       toast("Project created successfully!");
+      window.location.href = `/dashboard/projects/${data?.id}`;
     },
     onError: () => {
       toast.error("Something went wrong. Please try again.", {
@@ -244,6 +246,7 @@ export function useDeleteProjectHook(projectId: string, programId: string) {
     mutationFn: async () => await DeleteProjectAction(projectId),
     onSuccess: () => {
       toast.error("Project deleted successfully!");
+      window.location.href = `/dashboard/programs/${programId}`;
     },
     onError: () => {
       toast.error("Something went wrong. Please try again.");

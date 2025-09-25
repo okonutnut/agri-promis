@@ -33,7 +33,7 @@ export async function InsertProgramAction({
     `Program ${program_name as string} has been created.`
   );
 
-  redirect(`/dashboard/programs/${data.id}`, RedirectType.replace);
+  return data;
 }
 
 export async function EditProgramNameAction({
@@ -56,7 +56,7 @@ export async function EditProgramNameAction({
   }
 
   // Update the program name
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("programs")
     .update({ program_name })
     .eq("id", program_id)
@@ -73,7 +73,7 @@ export async function EditProgramNameAction({
     `Program ${currentProgram.program_name} name updated to ${program_name}.`
   );
 
-  redirect(`/dashboard/programs/${data.id}`, RedirectType.replace);
+  return;
 }
 
 export async function SelectProgramByIdAction(programId: string) {
@@ -164,7 +164,7 @@ export async function DeleteProgramAction(programID: string) {
     `Program ${programName} has been deleted.`
   );
 
-  redirect("/dashboard/programs", RedirectType.replace);
+  return;
 }
 
 export async function SelectAllProgramsAction() {
