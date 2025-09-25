@@ -34,28 +34,28 @@ function ProjectDashboardInfo(data: ProjectType) {
           Start Date:{" "}
           {data?.start_date
             ? format(new Date(data.start_date), "PP")
-            : "Not specified"}
+            : "NOT SPECIFIED"}
         </span>
         <span className="text-sm text-muted-foreground">
           Estimated End Date:{" "}
           {data?.end_date
             ? format(new Date(data.end_date), "PP")
-            : "Not specified"}
+            : "NOT SPECIFIED"}
         </span>
         <span className="text-sm text-muted-foreground">
-          Location: {data.location ?? "Not specified"}
+          Location: {data.location ?? "NOT SPECIFIED"}
         </span>
-        {data.fca && (
-          <>
-            <span className="text-sm text-muted-foreground">
-              FCA: {data.fca?.map((fca) => fca.description).join(", ")}
-            </span>
-            <span className="text-sm text-muted-foreground">
-              Total Alloted Land:&nbsp;
-              {data.total_alloted_area} hectares
-            </span>
-          </>
-        )}
+        <span className="text-sm text-muted-foreground">
+          FCA:{" "}
+          {data.fca?.map((fca) => fca.description).join(", ") ??
+            "NO FCA IDENTIFIED YET"}
+        </span>
+        <span className="text-sm text-muted-foreground">
+          Total Alloted Area:
+          {data.total_alloted_area
+            ? ` ${data.total_alloted_area} hectares`
+            : "NOT SPECIFIED"}
+        </span>
       </div>
       <Badge variant="outline" className={`h-7 px-4 text-xs gap-2`}>
         <div

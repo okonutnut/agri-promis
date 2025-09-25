@@ -10,6 +10,7 @@ const GoogleSignInButton = dynamic(() => import("./google-login"), {
 });
 
 export default function LoginCard() {
+  const app_ver = process.env.NEXT_PUBLIC_APP_VERSION as string;
   return (
     <section className="col-span-full md:col-span-1 h-screen flex items-center justify-center">
       <Card className="p-8 w-full gap-2 mx-4 border-none shadow-none">
@@ -44,7 +45,9 @@ export default function LoginCard() {
             <GoogleSignInButton />
           </Suspense>
         </CardContent>
-        <p className="text-center text-xs text-gray-500">version 0.1.0-dev</p>
+        <p className="text-center text-xs text-gray-500">
+          version {app_ver}-dev
+        </p>
       </Card>
     </section>
   );
