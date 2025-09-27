@@ -35,15 +35,18 @@ export const columns: ColumnDef<MonitoringReportType>[] = [
   {
     accessorKey: "remarkBy.fullname",
     header: "Reviewed By",
-    cell: ({ getValue }) => getValue() || "Not Reviewed",
+    cell: ({ getValue }) => String(getValue() || "Not Reviewed"),
   },
   {
     accessorKey: "reviewed_at",
-    header: "Date Reviewed",
-    cell: ({ getValue }) =>
-      getValue()
-        ? format(new Date(getValue() as string), "PPpp")
-        : "Not Reviewed",
+    header: () => <div className="text-end">Date Reviewed</div>,
+    cell: ({ getValue }) => (
+      <div className="text-end">
+        {getValue()
+          ? format(new Date(getValue() as string), "PPpp")
+          : "Not Reviewed"}
+      </div>
+    ),
   },
   {
     accessorKey: "created_at",

@@ -4,7 +4,6 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { ProgramType, UserProfileType } from "../../components/types";
-import { redirect, RedirectType } from "next/navigation";
 
 // PROGRAM ACTIONS
 export async function InsertProgramAction({

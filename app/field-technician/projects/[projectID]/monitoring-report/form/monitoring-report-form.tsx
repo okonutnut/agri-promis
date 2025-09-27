@@ -198,6 +198,7 @@ export default function UploadFieldReportForm({
         {values?.reviewed_by_id && (
           <PrintDownloadDropdown
             data={<MonitoringReportDocument data={values} />}
+            values={values}
           />
         )}
         {values?.key && <DeleteDraftButton draftKey={values.key} />}

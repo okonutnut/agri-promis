@@ -66,7 +66,7 @@ export default function AdminDashboardItems() {
       </section>
 
       {/* SCHEDULED MONITORING */}
-      <section className="mt-7 grid grid-cols-2 gap-4">
+      <section className="mt-7 grid grid-cols-5 gap-4">
         {isLoading ? (
           <SkeletonLoading className="col-span-full" />
         ) : (

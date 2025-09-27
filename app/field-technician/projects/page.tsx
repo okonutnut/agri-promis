@@ -61,9 +61,14 @@ export default function FieldTechnicianPage() {
                           {project.location}
                         </pre>
                         <small className="font-normal">
-                          {growthstages[project?.progress_indicator ?? 0]
-                            ?.label || "Unknown"}{" "}
-                          Stage
+                          {
+                            growthstages.find(
+                              (stage) =>
+                                stage.value ===
+                                project.progress_indicator?.toString()
+                            )?.label
+                          }
+                          &nbsp; Stage
                         </small>
                       </div>
                     </div>

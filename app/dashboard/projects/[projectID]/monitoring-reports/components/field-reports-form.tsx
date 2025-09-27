@@ -9,9 +9,13 @@ import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
 import { useInsertRemarksInMonitoringReportHook } from "@/components/hooks";
 import { Button } from "@/components/ui/button";
 import { Loader2, Send } from "lucide-react";
-import { useModal } from "@/components/custom/layout/custom-page-layout";
+import {
+  useModal,
+  useSheet,
+} from "@/components/custom/layout/custom-page-layout";
 import MonitoringReportDocument from "@/components/custom/pdf/monitoring-reports-document";
 import PrintDownloadDropdown from "@/components/custom/print/print-download-dropdown";
+import { useEffect } from "react";
 const ImageCarousel = dynamic(
   () => import("@/components/custom/images/image-carousel"),
   { ssr: false }
@@ -22,9 +26,16 @@ type FieldReportsFormProps = {
 };
 export function FieldReportsForm({ data }: FieldReportsFormProps) {
   const { openModal, closeModal } = useModal();
-  const { mutate, isPending } = useInsertRemarksInMonitoringReportHook(
-    data?.id as string
-  );
+  const { closeSheet } = useSheet();
+
+  const { mutate, isPending, isSuccess } =
+    useInsertRemarksInMonitoringReportHook(data?.id as string);
+
+  useEffect(() => {
+    if (isSuccess) {
+      closeSheet();
+    }
+  }, [isSuccess]);
   return (
     <>
       <section className="space-y-4 h-[calc(90vh)] overflow-y-auto overflow-x-hidden">
@@ -58,11 +69,8 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
           />
         </div>
       </section>
-      <CustomSheetFooter>
-        <PrintDownloadDropdown
-          data={<MonitoringReportDocument data={data} />}
-        />
-        {!data?.reviewed_by_id && (
+      <CustomSheetFooter isPending={isPending}>
+        {!data?.reviewed_by_id ? (
           <Button
             size={"sm"}
             disabled={isPending}
@@ -91,6 +99,11 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
               </>
             )}
           </Button>
+        ) : (
+          <PrintDownloadDropdown
+            data={<MonitoringReportDocument data={data} />}
+            values={data as MonitoringReportType}
+          />
         )}
       </CustomSheetFooter>
     </>

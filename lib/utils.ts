@@ -209,7 +209,7 @@ export const addOverlayToImage = (
         };
         logo.onerror = () => reject(new Error("Failed to load logo"));
         logo.src = "/da-logo.png"; // from public folder
-      } catch (error) {
+      } catch {
         resolve(file);
       }
     };
