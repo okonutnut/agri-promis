@@ -8,7 +8,9 @@ import { Input } from "@/components/ui/input";
 import CardLink from "@/components/custom/link/card-link";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllAssignedProjectsByFieldTechnicianIDAction } from "@/app/actions/AssignedProjectAction";
-import growthstages from "@/data/growth-stages.json";
+import growthStages from "@/data/growth-stages.json";
+import { CirclePercent } from "@/components/custom/charts/circle-percent";
+import { getPercentFromStages } from "@/lib/utils";
 
 export default function FieldTechnicianPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -60,16 +62,26 @@ export default function FieldTechnicianPage() {
                         <pre className="text-xs font-normal">
                           {project.location}
                         </pre>
-                        <small className="font-normal">
+                        <small className="font-semibold">
                           {
-                            growthstages.find(
+                            growthStages.find(
                               (stage) =>
                                 stage.value ===
-                                project.progress_indicator?.toString()
+                                project.progress_indicator!!.toString()
                             )?.label
                           }
                           &nbsp; Stage
                         </small>
+                        <div className="flex items-center justify-end">
+                          <span className="w-16 h-16">
+                            <CirclePercent
+                              percent={getPercentFromStages(
+                                growthStages,
+                                project.progress_indicator!!.toString()
+                              )}
+                            />
+                          </span>
+                        </div>
                       </div>
                     </div>
                     <span className="ml-2 transform transition-transform group-hover:translate-x-2">

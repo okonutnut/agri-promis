@@ -5,6 +5,8 @@ import {
 import { LocationData } from "@/components/interfaces";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import growthStages from "../data/growth-stages.json";
+import { Stage } from "@/components/types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -304,4 +306,24 @@ export async function getCurrentCoords(): Promise<{
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   });
+}
+
+export function getPercentFromStages(
+  stages: Stage[],
+  currentValue: string,
+  minPercent = 0,
+  maxPercent = 100
+): number {
+  const idx = stages.findIndex((s) => s.value === currentValue);
+  if (idx === -1) {
+    return 0;
+  }
+
+  const total = stages.length;
+  if (total === 1) {
+    return maxPercent;
+  }
+  return (maxPercent - minPercent) / (total - 1);
+  // console.log("Step Size:", step);
+  // return minPercent + idx * step;
 }

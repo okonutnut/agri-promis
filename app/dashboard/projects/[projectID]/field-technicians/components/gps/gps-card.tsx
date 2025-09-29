@@ -83,7 +83,7 @@ export default function FTGPSCard({ user_id }: FTGPSCardProps) {
           <Loader2 className="animate-spin text-primary" />
         ) : error ? (
           <p>Error loading GPS data</p>
-        ) : data?.latitude && data?.longitude ? (
+        ) : data?.latitude != 0 && data?.longitude != 0 ? (
           <MapComponent />
         ) : (
           <>

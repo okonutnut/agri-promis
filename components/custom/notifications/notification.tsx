@@ -13,7 +13,7 @@ export default function NotificationRequest() {
   const [isEnabled, setIsEnabled] = useState(false);
   const [notificationPermission, setNotificationPermission] = useState<
     "granted" | "denied" | "default"
-  >(typeof window !== "undefined" ? Notification.permission : "default");
+  >("default");
   const [isLoading, setIsLoading] = useState(false);
 
   const showNotificationRequest = async () => {
@@ -105,6 +105,7 @@ export default function NotificationRequest() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
+      setNotificationPermission(Notification.permission);
       const updatePermission = () =>
         setNotificationPermission(Notification.permission);
       document.addEventListener("visibilitychange", updatePermission);

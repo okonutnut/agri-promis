@@ -249,8 +249,13 @@ export default function CustomPageLayout({
           <div className="flex flex-1 overflow-hidden">
             {!noSidebar && <AppSidebar navItems={navItems || []} />}
             <div className="flex-1 w-full overflow-hidden">
-              <div className={cn("pl-4 pr-2 h-full flex flex-col", className)}>
-                <div className="flex-1 overflow-y-auto py-4">
+              <div
+                className={cn(
+                  "pl-4 pr-2 h-full flex flex-col overflow-y-scroll",
+                  className
+                )}
+              >
+                <div className="flex-1 py-4">
                   <div className="flex justify-between items-start mb-4">
                     <h1 className="text-2xl font-medium">{pageTitle}</h1>
                     {(!isLoading || error) && topRightComponent}

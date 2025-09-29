@@ -128,5 +128,10 @@ export function getUserProjectNavItems(id: string) {
       href: `/field-technician/projects/${id}/monitoring-report`,
       icon: Cctv,
     },
+    {
+      title: "Activity Logs",
+      href: `/field-technician/projects/${id}/activity-logs`,
+      icon: ChartLine,
+    },
   ];
 }

@@ -162,3 +162,8 @@ export type NotificationType = {
   is_read?: number;
   created_at?: string;
 };
+
+export type Stage = {
+  value: string;
+  label: string;
+};

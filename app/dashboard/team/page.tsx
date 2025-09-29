@@ -23,7 +23,7 @@ function TeamMembersContent({
 }: {
   values: UserProfileType[] | undefined;
 }) {
-  const { openSheet, closeSheet } = useSheet();
+  const { openSheet } = useSheet();
   const [programID, setProgramID] = useState<string>("");
 
   const handleRowSelect = (row: UserProfileType) => {

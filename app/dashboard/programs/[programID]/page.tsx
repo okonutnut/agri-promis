@@ -20,7 +20,14 @@ import { SelectAllProjectsByProgramIDAction } from "@/app/actions/ProjectAction"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import MunicipalitySelector from "./components/municipality-dropdown";
-
+import { getPercentFromStages } from "@/lib/utils";
+const CirclePercent = dynamic(
+  () =>
+    import("@/components/custom/charts/circle-percent").then(
+      (mod) => mod.CirclePercent
+    ),
+  { ssr: false }
+);
 const Badge = dynamic(
   () => import("@/components/ui/badge").then((mod) => mod.Badge),
   { ssr: false }
@@ -34,7 +41,6 @@ export default function ProgramDashboardPage() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("");
-  console.log("Selected Municipality:", filter);
   const [projectStatus, setProjectStatus] = useState<number>(1);
 
   const { data, isLoading, error } = useRealtimeQuery({
@@ -109,7 +115,7 @@ export default function ProgramDashboardPage() {
             <CardLink
               href={`/dashboard/projects/${project.id}`}
               key={project.id}
-              className="group min-h-36 min-w-sm flex flex-col items-start h-full p-5 space-y-2 gap-0"
+              className="group min-h-36 min-w-sm flex flex-col items-start h-full p-4 space-y-2 gap-0"
             >
               <span className="w-full flex justify-between items-center font-semibold">
                 {project.project_name}
@@ -118,23 +124,33 @@ export default function ProgramDashboardPage() {
                 </span>
               </span>
               <span className="font-mono text-xs">{project.location}</span>
-              <div className="flex items-center justify-between w-full mt-auto">
+
+              {/* FOOTER */}
+              <section className="flex items-center justify-between w-full mt-auto">
                 <Badge
                   variant={project.status == 1 ? "default" : "destructive"}
-                  className={`text-xs uppercase `}
+                  className="text-xs uppercase"
                 >
                   {project.status == 1 ? "active" : "inactive"}
                 </Badge>
-                <span className="font-medium text-xs">
-                  {
-                    cornGrowthStages.find(
-                      (stage) =>
-                        stage.value === project.progress_indicator?.toString()
-                    )?.label
-                  }
-                  &nbsp; Stage
-                </span>
-              </div>
+                <div className="flex items-center">
+                  <span className="font-medium text-xs">
+                    {
+                      cornGrowthStages.find(
+                        (stage) =>
+                          stage.value ===
+                          project.progress_indicator!!.toString()
+                      )?.label
+                    }
+                    &nbsp; Stage
+                  </span>
+                  <span className="w-14 h-14">
+                    <CirclePercent
+                      percent={getPercentFromStages(cornGrowthStages, "1")}
+                    />
+                  </span>
+                </div>
+              </section>
             </CardLink>
           ))}
         </div>
