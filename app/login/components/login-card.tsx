@@ -1,13 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import dynamic from "next/dynamic";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
-const GoogleSignInButton = dynamic(() => import("./google-login"), {
-  ssr: false,
-});
+import GoogleSignInButton from "./google-login";
 
 export default function LoginCard() {
   const app_ver = process.env.NEXT_PUBLIC_APP_VERSION as string;
