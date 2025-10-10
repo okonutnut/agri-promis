@@ -3,12 +3,12 @@
 import { Label } from "@/components/ui/label";
 import { Dot } from "lucide-react";
 
-type FormMultiInputProps = {
+type NonFormMultiInputProps = {
   label: string;
   values?: any | null;
 };
 
-export default function FormMultiInput({ values, label }: FormMultiInputProps) {
+export default function NonFormMultiInput({ values, label }: NonFormMultiInputProps) {
   return (
     <div className="space-y-2 relative">
       <Label>{label}</Label>

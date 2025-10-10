@@ -11,7 +11,7 @@ type FormInputType = {
   label: string;
   name: string;
   type?: string;
-  readonly?: boolean;
+  readOnly?: boolean;
   disabled?: boolean;
   form: UseFormReturn<any>;
   className?: string;
@@ -24,7 +24,7 @@ export default function FormInput({
   type,
   name,
   form,
-  readonly,
+  readOnly,
   disabled,
   className,
   copy = false,
@@ -49,7 +49,7 @@ export default function FormInput({
           readOnly={
             form.formState.isSubmitting ||
             form.formState.isValidating ||
-            readonly
+            readOnly
           }
           className={cn(copy ? "pr-10" : "")} // extra space for button
         />

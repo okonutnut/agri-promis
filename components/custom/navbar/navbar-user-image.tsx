@@ -14,7 +14,7 @@ import {
   useSelectCurrentUserSessionHook,
   useSelectUserProfileHook,
 } from "@/app/hooks/UserProfileHook";
-import { TabletSmartphone } from "lucide-react";
+import { TabletSmartphone, User2 } from "lucide-react";
 import Link from "next/link";
 
 export default function NavbarUserImage() {
@@ -42,6 +42,12 @@ export default function NavbarUserImage() {
           <span className="text-xs">{data?.position}</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <Link href={"/user-profile"}>
+          <DropdownMenuItem className="text-xs">
+            <User2 className="h-2 w-2" />
+            My Profile
+          </DropdownMenuItem>
+        </Link>
         <Link href={"/mobile-app"}>
           <DropdownMenuItem className="text-xs">
             <TabletSmartphone className="h-2 w-2" />

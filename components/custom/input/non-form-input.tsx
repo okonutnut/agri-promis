@@ -10,7 +10,7 @@ import { toast } from "sonner";
 type NonFormInputType = {
   label: string;
   defaultValue?: string;
-  readonly?: boolean;
+  readOnly?: boolean;
   disabled?: boolean;
   className?: string;
   copy?: boolean;
@@ -18,7 +18,7 @@ type NonFormInputType = {
 export default function NonFormInput({
   label,
   defaultValue,
-  readonly,
+  readOnly,
   disabled,
   className,
   copy = false,
@@ -50,7 +50,7 @@ export default function NonFormInput({
         placeholder={`Enter ${label.toLowerCase()}`}
         defaultValue={defaultValue}
         disabled={disabled}
-        readOnly={readonly}
+        readOnly={readOnly}
         autoFocus={false}
         tabIndex={-1}
       />

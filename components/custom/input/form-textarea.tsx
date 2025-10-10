@@ -8,7 +8,7 @@ import { UseFormReturn } from "react-hook-form";
 type FormTextareaType = {
   label: string;
   name: string;
-  readonly?: boolean;
+  readOnly?: boolean;
   form: UseFormReturn<any>;
   className?: string;
   optinal?: boolean;
@@ -19,7 +19,7 @@ export default function FormTextarea({
   label,
   name,
   form,
-  readonly,
+  readOnly,
   className,
   optinal,
   rows = 5,
@@ -37,7 +37,7 @@ export default function FormTextarea({
         tabIndex={-1}
         placeholder={noPlaceholder ? undefined : `Enter ${label.toLowerCase()}`}
         readOnly={
-          form.formState.isSubmitting || form.formState.isValidating || readonly
+          form.formState.isSubmitting || form.formState.isValidating || readOnly
         }
       />
       <p className="text-red-500 text-xs">

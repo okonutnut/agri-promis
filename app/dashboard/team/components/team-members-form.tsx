@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import FormInput from "@/components/custom/input/form-input";
 import FormSelect from "@/components/custom/select/form-select";
 import { Loader2, Send } from "lucide-react";
 import { useInsertMemberHook, useUpdateMemberHook } from "@/components/hooks";
@@ -19,6 +18,7 @@ import {
   useSheet,
 } from "@/components/custom/layout/custom-page-layout";
 import { sendNotification, sendNotificationToUser } from "@/lib/utils";
+import NonFormInput from "@/components/custom/input/non-form-input";
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -109,9 +109,9 @@ export function TeamMemberForm({ isAddMode, data }: TeamMemberFormProps) {
         id="team-member-form"
         onSubmit={form.handleSubmit(onSubmit)}
       >
-        <FormInput label="Fullname" name="fullname" form={form} />
-        <FormInput label="Email" name="email" form={form} type="email" />
-        <FormInput label="Position" name="position" form={form} />
+        <NonFormInput label="Fullname" defaultValue={data?.fullname} readOnly />
+        <NonFormInput label="Email" defaultValue={data?.email} readOnly />
+        <NonFormInput label="Position" defaultValue={data?.position} readOnly />
         <FormSelect
           options={roles.map((role) => ({
             value: role.value,

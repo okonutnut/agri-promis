@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 type NonFormTextareaType = {
   label: string;
-  readonly?: boolean;
+  readOnly?: boolean;
   className?: string;
   rows?: number;
   noPlaceholder?: boolean;
@@ -14,7 +14,7 @@ type NonFormTextareaType = {
 };
 export default function NonFormTextarea({
   label,
-  readonly,
+  readOnly,
   className,
   defaultValue,
   rows = 5,
@@ -28,7 +28,7 @@ export default function NonFormTextarea({
         rows={rows || 7}
         tabIndex={-1}
         placeholder={noPlaceholder ? undefined : `Enter ${label.toLowerCase()}`}
-        readOnly={readonly}
+        readOnly={readOnly}
       />
     </div>
   );

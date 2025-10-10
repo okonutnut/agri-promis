@@ -77,12 +77,12 @@ export default function EditProjectNameForm({
         onSubmit={form.handleSubmit(handleSubmit)}
       >
         <Label className="font-semibold w-full mb-4">General Settings</Label>
-        <FormInput label="Project ID" name="id" form={form} readonly copy />
+        <FormInput label="Project ID" name="id" form={form} readOnly copy />
         <FormInput
           label="Project name"
           name="project_name"
           form={form}
-          readonly={!isAdmin}
+          readOnly={!isAdmin}
         />
         <FCASelector
           onChange={(value) => form.setValue("fca_ids", value)}
@@ -93,7 +93,7 @@ export default function EditProjectNameForm({
           label="Total Allotment Area (in hectares)"
           name="total_alloted_area"
           form={form}
-          readonly={!isAdmin}
+          readOnly={!isAdmin}
         />
         <div className="w-full flex justify-between items-center">
           <Label>Set Active</Label>

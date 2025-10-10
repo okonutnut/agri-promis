@@ -46,6 +46,21 @@ export function getDashboardNavItems() {
   ];
 }
 
+export function getUserProfileNavItems() {
+  return [
+    {
+      title: "My Profile",
+      href: "/user-profile",
+      icon: UserPen,
+    },
+      {
+      title: "Back to Home",
+      href: "/",
+      icon: House,
+    },
+  ];
+}
+
 export function getProgramNavItems(id: string) {
   return [
     {

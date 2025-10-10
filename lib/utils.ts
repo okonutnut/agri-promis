@@ -5,7 +5,6 @@ import {
 import { LocationData } from "@/components/interfaces";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import growthStages from "../data/growth-stages.json";
 import { Stage } from "@/components/types";
 
 export function cn(...inputs: ClassValue[]) {
@@ -142,7 +141,7 @@ export const addOverlayToImage = (
           const maxChars = Math.floor(img.width / (fontSize * 0.55));
           const words = location.locationName.split(" ");
           let currentLine = "Location: ";
-          let locationLines: string[] = [];
+          const locationLines: string[] = [];
 
           words.forEach((word) => {
             const testLine = currentLine + word + " ";

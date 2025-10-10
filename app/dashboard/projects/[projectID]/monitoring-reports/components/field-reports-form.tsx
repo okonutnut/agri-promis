@@ -44,19 +44,19 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
           <NonFormInput
             label="Reporter Name"
             defaultValue={data?.reporter?.fullname}
-            readonly
+            readOnly
           />
           <NonFormInput
             label="Travel Order No"
             defaultValue={data?.travel_order?.travel_order_no}
-            readonly
+            readOnly
           />
-          <NonFormInput label="Purpose" defaultValue={data?.purpose} readonly />
+          <NonFormInput label="Purpose" defaultValue={data?.purpose} readOnly />
           <NonFormMultiInput label="Findings" values={data?.findings} />
           <NonFormTextarea
             label="Observation"
             defaultValue={data?.observation ?? "N/A"}
-            readonly
+            readOnly
           />
           <NonFormMultiInput
             label="Issues / Concern"
@@ -65,7 +65,7 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
           <NonFormTextarea
             label="Remarks"
             defaultValue={data?.remarks}
-            readonly
+            readOnly
           />
         </div>
       </section>

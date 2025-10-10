@@ -53,7 +53,7 @@ export const columns: ColumnDef<UserProfileType>[] = [
   },
   {
     accessorKey: "created_at",
-    header: () => <div className="text-end">Date Created</div>,
+    header: () => <div className="text-end">Date Modified</div>,
     cell: ({ getValue }) => (
       <div className="text-end">
         {format(new Date(new Date(getValue() as string)), "PPp")}

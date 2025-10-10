@@ -141,7 +141,7 @@ export default function IssueTravelOrderForm({
           label="Travel Order No."
           name="travel_order_no"
           form={form}
-          readonly={!isAddMode}
+          readOnly={!isAddMode}
         />
         {isAddMode ? (
           <UserComboBox form={form} />
@@ -149,42 +149,42 @@ export default function IssueTravelOrderForm({
           <NonFormInput
             label="Issued To"
             defaultValue={values?.user?.fullname}
-            readonly={!isAddMode}
+            readOnly={!isAddMode}
           />
         )}
         <FormInput
           label="Office"
           name="office"
           form={form}
-          readonly={!isAddMode}
+          readOnly={!isAddMode}
         />
         <FormInput
           label="Fund"
           name="fund"
           type="number"
           form={form}
-          readonly={!isAddMode}
+          readOnly={!isAddMode}
         />
         <FormInput
           label="Estimated Cost"
           name="estimated_cost"
           type="number"
           form={form}
-          readonly={!isAddMode}
+          readOnly={!isAddMode}
         />
         <FormInput
           label="Date of Departure"
           type="datetime-local"
           name="departure_date"
           form={form}
-          readonly={!isAddMode}
+          readOnly={!isAddMode}
         />
         <FormInput
           label="Date of Return"
           type="datetime-local"
           name="return_date"
           form={form}
-          readonly={!isAddMode}
+          readOnly={!isAddMode}
         />
         {isAddMode ? (
           <FormSelect
@@ -197,7 +197,7 @@ export default function IssueTravelOrderForm({
           <NonFormInput
             label="Mode of Transportation"
             defaultValue={values?.mode_of_transport?.toUpperCase()}
-            readonly
+            readOnly
           />
         )}
         <ItineraryOfTravel

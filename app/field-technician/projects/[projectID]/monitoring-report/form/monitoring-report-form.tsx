@@ -16,7 +16,6 @@ import { Loader2, Send } from "lucide-react";
 import FormInput from "@/components/custom/input/form-input";
 import FormTextarea from "@/components/custom/input/form-textarea";
 import FormMultiInput from "@/components/custom/input/form-multi-input";
-import NonFormTextarea from "@/components/custom/input/non-form-textarea";
 import NonFormInput from "@/components/custom/input/non-form-input";
 import {
   useModal,
@@ -157,14 +156,14 @@ export default function UploadFieldReportForm({
             <NonFormInput
               label="Travel Order No"
               defaultValue={values?.travel_order?.travel_order_no}
-              readonly
+              readOnly
             />
           )}
           <FormInput
             label="Purpose"
             name="purpose"
             form={form}
-            readonly={!isAddMode}
+            readOnly={!isAddMode}
           />
           <FormMultiInput
             label="Findings"
@@ -177,7 +176,7 @@ export default function UploadFieldReportForm({
             label="Observation"
             name="observation"
             form={form}
-            readonly={!isAddMode}
+            readOnly={!isAddMode}
           />
           <FormMultiInput
             label="Issues & Concern"
@@ -190,7 +189,7 @@ export default function UploadFieldReportForm({
             label="Remarks"
             name="remarks"
             form={form}
-            readonly={!isAddMode}
+            readOnly={!isAddMode}
           />
         </form>
       </div>

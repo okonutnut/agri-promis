@@ -229,7 +229,7 @@ export default function CustomPageLayout({
       }
       signOutInactiveUser();
     }
-  }, [data]);
+  }, [data, supabase.auth]);
 
   // -------------------- Render --------------------
   return (

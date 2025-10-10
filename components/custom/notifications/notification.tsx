@@ -82,7 +82,7 @@ export default function NotificationRequest() {
     setIsLoading(true);
     try {
       const applicationServerKey = urlBase64ToUint8Array(
-        process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!
+        process.env.NEXT_PUBLIC_VAPID_KEY!
       );
       const options = { applicationServerKey, userVisibleOnly: true };
       const subscription = await newRegistration.pushManager.subscribe(options);
@@ -121,14 +121,14 @@ export default function NotificationRequest() {
           onClick={() => {
             if (!isLoading) removeNotification();
           }}
-          className={isLoading ? "opacity-50 pointer-events-none" : ""}
+          className={isLoading ? "opacity-50 pointer-events-none" : "h-5 w-5"}
         />
       ) : (
         <BellOff
           onClick={() => {
             if (!isLoading) showNotificationRequest();
           }}
-          className={isLoading ? "opacity-50 pointer-events-none" : ""}
+          className={isLoading ? "opacity-50 pointer-events-none" : "h-5 w-5"}
         />
       )}
     </div>
