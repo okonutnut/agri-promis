@@ -82,6 +82,7 @@ export default function TeamMemberPage() {
   return (
     <CustomPageLayout
       pageTitle="Team Members"
+      pageDescription="View and manage all registered team members."
       isLoading={isLoading}
       error={error}
       navItems={getDashboardNavItems()}

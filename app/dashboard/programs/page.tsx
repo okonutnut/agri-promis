@@ -28,6 +28,7 @@ export default function ProgramsPage() {
   return (
     <CustomPageLayout
       pageTitle="Programs"
+      pageDescription="Browse and manage all available programs."
       isLoading={isLoading}
       error={error}
       navItems={getDashboardNavItems()}

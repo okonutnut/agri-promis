@@ -21,6 +21,7 @@ import {
 import cornGrowthStages from "@/data/growth-stages.json";
 import FormInput from "@/components/custom/input/form-input";
 import { useModal } from "@/components/custom/layout/custom-page-layout";
+import FormTextarea from "@/components/custom/input/form-textarea";
 const FCASelector = dynamic(
   () => import("@/components/custom/dropdown/fca-selector"),
   {
@@ -31,6 +32,7 @@ const FCASelector = dynamic(
 const formSchema = z.object({
   id: z.string().min(1, "Project ID is required"),
   project_name: z.string().min(1, "Project name is required"),
+  description: z.string().min(1, "Project description is required"),
   progress_indicator: z.coerce
     .number()
     .min(1, "Progress indicator is required"),
@@ -58,6 +60,7 @@ export default function EditProjectNameForm({
     defaultValues: {
       id: project.id as string,
       project_name: project.project_name || "",
+      description: project.description || "",
       progress_indicator: project.progress_indicator || 1,
       fca_ids: project.fca_ids || [],
       total_alloted_area: project.total_alloted_area || 0,
@@ -82,6 +85,12 @@ export default function EditProjectNameForm({
           label="Project name"
           name="project_name"
           form={form}
+          readOnly={!isAdmin}
+        />
+        <FormTextarea
+          form={form}
+          name="description"
+          label="Project Description"
           readOnly={!isAdmin}
         />
         <FCASelector

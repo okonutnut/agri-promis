@@ -19,6 +19,7 @@ export default function ActivityLogsPage() {
   return (
     <CustomPageLayout
       pageTitle="Activity Logs"
+      pageDescription="View and manage activity logs for the project."
       isLoading={isLoading}
       error={error}
       navItems={getProjectNavItems(projectID as string)}

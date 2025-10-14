@@ -37,6 +37,7 @@ export default function ProgramSettingsPage() {
   return (
     <CustomPageLayout
       pageTitle="Project Settings"
+      pageDescription="Manage project details and settings."
       isLoading={isLoading}
       error={error}
       navItems={getProjectNavItems(projectID as string)}

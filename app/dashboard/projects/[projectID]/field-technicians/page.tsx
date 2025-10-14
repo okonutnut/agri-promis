@@ -72,6 +72,7 @@ export default function FieldTechnicianPage() {
   return (
     <CustomPageLayout
       pageTitle="Assigned Field Technicians"
+      pageDescription="View and manage assigned field technicians for the project."
       isLoading={isLoading}
       error={error}
       navItems={getProjectNavItems(projectID as string)}

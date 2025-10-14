@@ -134,6 +134,7 @@ export async function SelectProjectDetailsByProjectIDAction(projectID: string) {
 
 export async function EditProjectAction(data: ProjectType) {
   const supabase = await createClient(cookies());
+
   // Get the current project details for logging
   const { data: currentProject, error: currentError } = await supabase
     .from("projects")
@@ -150,6 +151,7 @@ export async function EditProjectAction(data: ProjectType) {
     .from("projects")
     .update({
       project_name: data.project_name,
+      description: data.description,
       progress_indicator: data.progress_indicator,
       status: data.status,
       fca_ids: data.fca_ids,
@@ -164,7 +166,7 @@ export async function EditProjectAction(data: ProjectType) {
   // Log the activity
   await InsertActivityLogAction(
     "Updated Project",
-    `Project ${currentProject.project_name} updated successfully.`
+    `Project ${currentProject.project_name} details has been updated successfully.`
   );
 
   return;

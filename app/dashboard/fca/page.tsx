@@ -26,7 +26,7 @@ function FCAContent({ values }: { values: FCAType[] | undefined }) {
             content: <FCAForm isAddMode={false} key={row.id} data={row} />,
           },
           {
-            title: "Projects",
+            title: "Assigned Projects",
             content: <FCAPanel fcaID={row.id as string} />,
           },
         ]}
@@ -63,6 +63,7 @@ export default function FCAPage() {
   return (
     <CustomPageLayout
       pageTitle="Farmers' Cooperatives and Associations"
+      pageDescription="View and manage all associated FCAs."
       isLoading={isLoading}
       error={error}
       navItems={getDashboardNavItems()}

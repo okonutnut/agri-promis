@@ -17,6 +17,7 @@ export default function ActivityLogsPage() {
   return (
     <CustomPageLayout
       pageTitle="Activity Logs"
+      pageDescription="View all activity logs within the system."
       isLoading={isLoading}
       error={error}
       navItems={getDashboardNavItems()}

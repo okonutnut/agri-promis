@@ -103,6 +103,7 @@ type CustomPageLayoutProps = {
   children?: React.ReactNode;
   className?: string;
   pageTitle?: string;
+  pageDescription?: string;
   isLoading?: boolean;
   error?: Error | null;
   noSidebar?: boolean;
@@ -116,6 +117,7 @@ export default function CustomPageLayout({
   children,
   className,
   pageTitle,
+  pageDescription,
   isLoading,
   error,
   noSidebar,
@@ -257,7 +259,16 @@ export default function CustomPageLayout({
               >
                 <div className="flex-1 py-4">
                   <div className="flex justify-between items-start mb-4">
-                    <h1 className="text-2xl font-medium">{pageTitle}</h1>
+                    <div className="flex flex-col space-y-2">
+                      {pageTitle && (
+                        <h1 className="text-2xl font-medium">{pageTitle}</h1>
+                      )}
+                      {pageDescription && (
+                        <p className="text-md text-muted-foreground">
+                          {pageDescription}
+                        </p>
+                      )}
+                    </div>
                     {(!isLoading || error) && topRightComponent}
                   </div>
                   {isLoading || error ? (

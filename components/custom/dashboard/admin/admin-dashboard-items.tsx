@@ -1,18 +1,10 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import SkeletonLoading from "../../layout/skeleton-loading";
 import { BookOpen, FolderKanban, Users } from "lucide-react";
 import { useUniversalRealtime } from "@/hooks/use-universal-realtime";
 import { SelectAdminDashboardItemsAction } from "@/app/actions/DashboardAction";
 import ProjectQuickAccessCard from "./project-quick-access-card";
-// const ChartBarInteractive = dynamic(
-//   () =>
-//     import("../../charts/bar-chart-interactive").then(
-//       (mod) => mod.ChartBarInteractive
-//     ),
-//   { ssr: false }
-// );
 const RecentActivities = dynamic(() => import("./recent-activities-admin"), {
   ssr: false,
 });
@@ -66,30 +58,13 @@ export default function AdminDashboardItems() {
       </section>
 
       {/* SCHEDULED MONITORING */}
-      <section className="mt-7 grid grid-cols-5 gap-4">
-        {isLoading ? (
-          <SkeletonLoading className="col-span-full" />
-        ) : (
-          <>
-            <ProjectQuickAccessCard />
-            <ScheduledMonitoringTable data={data?.futureTravelOrders ?? []} />
-          </>
-        )}
+      <section className="mt-4 grid grid-cols-1 md:grid-cols-5 space-y-4 space-x-4">
+        <ProjectQuickAccessCard />
+        <ScheduledMonitoringTable data={data?.futureTravelOrders ?? []} />
       </section>
-
-      {/* BAR CHART */}
-      {/* <section className="mt-7">
-        {isLoading ? <SkeletonLoading /> : <ChartBarInteractive />}
-      </section> */}
 
       {/* RECENT ACTIVITIES */}
-      <section className="mt-7">
-        {isLoading ? (
-          <SkeletonLoading />
-        ) : (
-          <RecentActivities data={data?.recentActivityLogs ?? []} />
-        )}
-      </section>
+      <RecentActivities data={data?.recentActivityLogs ?? []} />
     </>
   );
 }
