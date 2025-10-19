@@ -11,6 +11,7 @@ import { CardFooter } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { sendNotification } from "@/lib/utils";
+import { Spinner } from "@/components/ui/spinner";
 
 const formSchema = z.object({
   program_name: z
@@ -65,7 +66,7 @@ export default function CreateProgramForm() {
           variant={isPending ? "ghost" : "default"}
           disabled={isPending}
         >
-          {isPending ? <Loader2 className="animate-spin" /> : "Create Program"}
+          {isPending ? <Spinner /> : "Create Program"}
         </Button>
         <Button
           variant={"outline"}

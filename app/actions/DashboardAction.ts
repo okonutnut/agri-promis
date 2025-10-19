@@ -167,3 +167,52 @@ export async function SelectTravelOrdersByDateAction() {
 
   return futureOrders;
 }
+
+export async function SelectTotalProjectsPerProgramAction() {
+  const supabase = await createClient(cookies());
+
+  const { data, error } = await supabase
+  .from("programs")
+  .select(`
+    id,
+    program_name,
+    projects:projects(count)
+  `);
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function SelectUserCountPerTypeAction() {
+  const supabase = await createClient(cookies());
+
+  // Fetch all users and group them by `role`
+  const { data, error } = await supabase
+    .from("user_profile")
+    .select("role");
+
+  if (error) {
+    console.error("Error fetching user count per type:", error);
+    return [];
+  }
+
+  // Guard for nullable data (Supabase returns `data` as type T[] | null)
+  const rows = data ?? [];
+
+  // Group and count users per role with explicit typing
+  const roleCounts = rows.reduce<Record<string, number>>((acc, user: any) => {
+    const role = String(user?.role ?? "Unknown");
+    acc[role] = (acc[role] ?? 0) + 1;
+    return acc;
+  }, {});
+
+  // Convert to chart-friendly array with explicit types
+  const formattedData: { role: string; count: number }[] = Object.entries(roleCounts).map(
+    ([role, count]) => ({ role, count })
+  );
+
+  return formattedData;
+}

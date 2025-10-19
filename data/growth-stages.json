@@ -1,8 +1,9 @@
 [
-  { "value": "1", "label": "Newly Planted" },
-  { "value": "2", "label": "Seedling" },
-  { "value": "3", "label": "Repetitive" },
-  { "value": "4", "label": "Reproductive" },
-  { "value": "5", "label": "Maturity" },
-  { "value": "6", "label": "Harvested" }
+  { "value": "1", "label": "New Project" },
+  { "value": "2", "label": "Newly Planted" },
+  { "value": "3", "label": "Seedling" },
+  { "value": "4", "label": "Repetitive" },
+  { "value": "5", "label": "Reproductive" },
+  { "value": "6", "label": "Maturity" },
+  { "value": "7", "label": "Harvested" }
 ]

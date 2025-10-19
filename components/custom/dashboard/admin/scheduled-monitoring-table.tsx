@@ -1,5 +1,6 @@
 "use client";
 
+import { Card } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -25,12 +26,12 @@ export default function ScheduledMonitoringTable({
   data,
 }: ScheduledMonitoringTableProps) {
   return (
-    <section className="col-span-3">
+    <section className="w-full md:w-3/4 h-[200px]">
       <span className="text-lg font-semibold">
         Scheduled Monitoring ({new Date().toLocaleDateString()})
       </span>
-      <div className="flex justify-center items-center border shadow-xs rounded-md">
-        <Table className="border-r">
+      <Card className="p-1 shadow-xs rounded-md h-full">
+        <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="font-medium">#</TableHead>
@@ -64,7 +65,7 @@ export default function ScheduledMonitoringTable({
             )}
           </TableBody>
         </Table>
-      </div>
+      </Card>
     </section>
   );
 }

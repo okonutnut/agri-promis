@@ -13,6 +13,7 @@ import { Loader2 } from "lucide-react";
 import FormTextarea from "../input/form-textarea";
 import { useState } from "react";
 import { sendNotification } from "@/lib/utils";
+import { Spinner } from "@/components/ui/spinner";
 const LocationSelector = dynamic(
   () => import("@/components/custom/dropdown/location-selector"),
   {
@@ -147,7 +148,7 @@ export default function CreateProjectForm() {
           variant={isPending ? "ghost" : "default"}
           disabled={isPending || disabled}
         >
-          {isPending ? <Loader2 className="animate-spin" /> : "Create Project"}
+          {isPending ? <Spinner /> : "Create Project"}
         </Button>
         <Button
           variant={"outline"}

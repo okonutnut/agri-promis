@@ -5,9 +5,8 @@ import { BookOpen, FolderKanban, Users } from "lucide-react";
 import { useUniversalRealtime } from "@/hooks/use-universal-realtime";
 import { SelectAdminDashboardItemsAction } from "@/app/actions/DashboardAction";
 import ProjectQuickAccessCard from "./project-quick-access-card";
-const RecentActivities = dynamic(() => import("./recent-activities-admin"), {
-  ssr: false,
-});
+import TotalProjectsPerProgram from "../../charts/total-project-per-program";
+import TotalUsersPerType from "../../charts/user-type-count";
 const SummaryCard = dynamic(() => import("../../card/summary-cards"), {
   ssr: false,
 });
@@ -15,6 +14,9 @@ const ScheduledMonitoringTable = dynamic(
   () => import("./scheduled-monitoring-table"),
   { ssr: false }
 );
+const RecentActivities = dynamic(() => import("./recent-activities-admin"), {
+  ssr: false,
+});
 
 export default function AdminDashboardItems() {
   const { data, isLoading } = useUniversalRealtime({
@@ -29,7 +31,8 @@ export default function AdminDashboardItems() {
     ],
   });
   return (
-    <>
+    <section className="flex flex-col flex-1 gap-5">
+      {/* SUMMARY CARDS */}
       <section className="flex flex-wrap md:flex-nowrap justify-between gap-5">
         <SummaryCard
           isLoading={isLoading}
@@ -58,13 +61,19 @@ export default function AdminDashboardItems() {
       </section>
 
       {/* SCHEDULED MONITORING */}
-      <section className="mt-4 grid grid-cols-1 md:grid-cols-5 space-y-4 space-x-4">
-        <ProjectQuickAccessCard />
+      <section className="flex flex-wrap md:flex-nowrap justify-between gap-5 space-y-5 md:space-y-0">
         <ScheduledMonitoringTable data={data?.futureTravelOrders ?? []} />
+        <ProjectQuickAccessCard />
+      </section>
+
+      {/* CHARTS */}
+      <section className="flex flex-wrap md:flex-nowrap justify-between gap-5 mt-5 space-y-5 md:space-y-0">
+        <TotalUsersPerType />
+        <TotalProjectsPerProgram />
       </section>
 
       {/* RECENT ACTIVITIES */}
       <RecentActivities data={data?.recentActivityLogs ?? []} />
-    </>
+    </section>
   );
 }

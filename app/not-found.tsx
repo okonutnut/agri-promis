@@ -1,17 +1,56 @@
 "use client";
 
+import { SearchIcon } from "lucide-react";
+
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { Kbd } from "@/components/ui/kbd";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
+import Link from "next/link";
 
 export default function NotFoundPage() {
-  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState("");
   return (
-    <div className="flex flex-col items-center justify-center h-screen w-screen space-y-4 text-center">
-      <h1 className="text-4xl font-bold">404 - Page Not Found</h1>
-      <p className="mt-4">The page you are looking for does not exist.</p>
-      <Button variant={"outline"} onClick={() => router.back()}>
-        Go Back
-      </Button>
-    </div>
+    <Empty>
+      <EmptyHeader>
+        <EmptyTitle className="text-2xl">404 - Not Found</EmptyTitle>
+        <EmptyDescription>
+          The page you&apos;re looking for doesn&apos;t exist. Try searching for
+          what you need below.
+        </EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent>
+        <form action="" className="sm:w-3/4">
+          <InputGroup className="w-full">
+            <InputGroupInput
+              placeholder="Try searching for pages..."
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <InputGroupAddon>
+              <SearchIcon />
+            </InputGroupAddon>
+            <InputGroupAddon align="inline-end">
+              <Kbd>/</Kbd>
+            </InputGroupAddon>
+          </InputGroup>
+        </form>
+        <Link href={`/${searchTerm}`}>
+          <Button variant="outline" size="sm">
+            Goto
+          </Button>
+        </Link>
+      </EmptyContent>
+    </Empty>
   );
 }
