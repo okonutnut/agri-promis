@@ -1,6 +1,5 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import { getProjectNavItems } from "@/components/sidebar/navitems";
 import { Badge } from "@/components/ui/badge";
@@ -13,12 +12,8 @@ import { useUniversalRealtime } from "@/hooks/use-universal-realtime";
 import { SelectProgramAndProjectDetailsByProjectIDAction } from "@/app/actions/ProjectAction";
 import { useEffect } from "react";
 import { addProjectToQuickAccess } from "@/utils/helpers/quickAccessHooks";
-const ProjectDashboardItems = dynamic(
-  () => import("@/components/custom/dashboard/admin/dashboard-summary-items"),
-  {
-    ssr: false,
-  }
-);
+import MonitoringReportsChart from "@/components/custom/charts/monitoring-reports-chart";
+import ProjectDashboardItems from "@/components/custom/dashboard/admin/dashboard-summary-items";
 
 function ProjectDashboardInfo(data: ProjectType) {
   return (
@@ -93,8 +88,11 @@ export default function ProjectDashboard() {
         <section className="space-y-4">
           <ProjectDashboardInfo {...data} />
           <Separator />
-          <ProjectDashboardItems projectID={projectID as string} />
-          <ProjectActivityLogTable project_id={projectID as string} />
+          <section className="p-4 space-y-4">
+            <ProjectDashboardItems project_id={projectID as string} />
+            <MonitoringReportsChart project_id={projectID as string} />
+            <ProjectActivityLogTable project_id={projectID as string} />
+          </section>
         </section>
       )}
     </CustomPageLayout>

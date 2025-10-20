@@ -317,12 +317,13 @@ export function getPercentFromStages(
   if (idx === -1) {
     return 0;
   }
-
   const total = stages.length;
-  if (total === 1) {
-    return maxPercent;
-  }
-  return (maxPercent - minPercent) / (total - 1);
-  // console.log("Step Size:", step);
-  // return minPercent + idx * step;
+
+  // If only one stage, return maxPercent.
+  if (total === 1) return maxPercent;
+
+  // First stage -> minPercent (usually 0%). Last stage -> maxPercent.
+  // Intermediate stages are evenly spaced between min and max.
+  const step = (maxPercent - minPercent) / (total - 1);
+  return Math.round(minPercent + idx * step);
 }

@@ -216,3 +216,48 @@ export async function SelectUserCountPerTypeAction() {
 
   return formattedData;
 }
+
+export async function SelectMonitoringReportsCountByDate(project_id: string) {
+  const supabase = await createClient(cookies());
+
+  // Get project start and end dates
+  const { data: project, error: projectError } = await supabase
+    .from("projects")
+    .select("start_date, end_date")
+    .eq("id", project_id)
+    .single();
+
+  if (projectError) throw projectError;
+  if (!project) return [];
+
+  const { start_date, end_date } = project;
+
+  // Get monitoring reports within project range
+  const { data: reports, error: reportsError } = await supabase
+    .from("monitoring")
+    .select("id, created_at")
+    .eq("project_id", project_id)
+    .gte("created_at", start_date)
+    .lte("created_at", end_date);
+
+  if (reportsError) throw reportsError;
+
+  // Generate date range
+  const start = new Date(start_date);
+  const end = new Date(end_date);
+  const dateArray = [];
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    dateArray.push(new Date(d));
+  }
+
+  // Count per day
+  const counts = dateArray.map((date) => {
+    const dateString = date.toISOString().split("T")[0];
+    const count = reports.filter(
+      (r) => r.created_at.split("T")[0] === dateString
+    ).length;
+    return { date: dateString, reports: count };
+  });
+
+  return counts;
+}

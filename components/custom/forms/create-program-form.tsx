@@ -8,7 +8,6 @@ import { useInsertProgramHook } from "../../hooks";
 import FormInput from "../input/form-input";
 import FormTextarea from "../input/form-textarea";
 import { CardFooter } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { sendNotification } from "@/lib/utils";
 import { Spinner } from "@/components/ui/spinner";

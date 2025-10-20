@@ -10,6 +10,7 @@ import { useParams } from "next/navigation";
 import { ProjectType } from "@/components/types";
 import { SelectProgramAndProjectDetailsByProjectIDAction } from "@/app/actions/ProjectAction";
 import { useUniversalRealtime } from "@/hooks/use-universal-realtime";
+import MonitoringReportsChart from "@/components/custom/charts/monitoring-reports-chart";
 const ProjectActivityLogTable = dynamic(
   () => import("@/components/custom/dashboard/project-activity-log-table"),
   {
@@ -91,8 +92,11 @@ export default function ProjectDashboard() {
         <section className="space-y-4">
           <ProjectDashboardInfo {...data} />
           <Separator />
-          <ProjectDashboardItems projectID={projectID as string} />
-          <ProjectActivityLogTable project_id={projectID as string} />
+          <section className="p-4 space-y-4">
+            <ProjectDashboardItems project_id={projectID as string} />
+            <MonitoringReportsChart project_id={projectID as string} />
+            <ProjectActivityLogTable project_id={projectID as string} />
+          </section>
         </section>
       )}
     </CustomPageLayout>

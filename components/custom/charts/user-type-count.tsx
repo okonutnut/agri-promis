@@ -8,33 +8,12 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
-import { createClient } from "@/utils/supabase/client";
 import { SelectUserCountPerTypeAction } from "@/app/actions/DashboardAction";
 
 const chartConfig = {
   "1": { label: "System Admin", color: "oklch(0.8348 0.1302 160.9080)" },
   "2": { label: "Field Operator", color: "oklch(0.6231 0.1880 259.8145)" },
 };
-
-type UserTypeData = {
-  role: string | number;
-  count: number;
-};
-
-async function fetchUserCounts(): Promise<UserTypeData[]> {
-  const supabase = createClient();
-  const { data, error } = await supabase.from("user_profile").select("role");
-  if (error) return [];
-  const roleCounts = (data ?? []).reduce<Record<string, number>>(
-    (acc, user: any) => {
-      const role = user.role ?? "Unknown";
-      acc[role] = (acc[role] ?? 0) + 1;
-      return acc;
-    },
-    {}
-  );
-  return Object.entries(roleCounts).map(([role, count]) => ({ role, count }));
-}
 
 export default function TotalUsersPerType() {
   const { data } = useRealtimeQuery({

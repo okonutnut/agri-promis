@@ -9,7 +9,6 @@ import FormInput from "../input/form-input";
 import { useInsertProjectHook } from "@/components/hooks";
 import { useParams, useRouter } from "next/navigation";
 import { CardFooter } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
 import FormTextarea from "../input/form-textarea";
 import { useState } from "react";
 import { sendNotification } from "@/lib/utils";

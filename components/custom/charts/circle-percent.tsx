@@ -10,10 +10,19 @@ import {
 
 type CirclePercentProps = {
   percent: number;
+  // zero-based index of the stage; when 0 (first stage) percent should be shown as 0%
+  stageIndex?: number;
 };
 
-export function CirclePercent({ percent }: CirclePercentProps) {
-  const validPercent = Math.max(0, Math.min(percent, 100));
+export function CirclePercent({ percent, stageIndex }: CirclePercentProps) {
+  // If stageIndex is provided and is the first stage (0), force 0%
+  // Keep behavior backward-compatible by not requiring stageIndex.
+  const effectivePercent = stageIndex === 0 ? 0 : percent;
+  const validPercent =
+    typeof effectivePercent === "number"
+      ? Math.max(0, Math.min(effectivePercent, 100))
+      : 0;
+
   const endAngle = (validPercent / 100) * 360;
 
   const chartData = [

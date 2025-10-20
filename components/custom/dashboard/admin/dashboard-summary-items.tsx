@@ -12,17 +12,17 @@ const SummaryCard = dynamic(() => import("../../card/summary-cards"), {
 });
 
 type ProjectDashboardItemsProps = {
-  projectID: string;
+  project_id: string;
 };
 export default function ProjectDashboardItems({
-  projectID,
+  project_id,
 }: ProjectDashboardItemsProps) {
   const { data, isLoading, error } = useSelectDashboardItemsHook(
-    projectID as string
+    project_id as string
   );
 
   return (
-    <section className="flex flex-wrap md:flex-nowrap justify-between gap-5 p-4">
+    <section className="flex flex-wrap md:flex-nowrap justify-between gap-5">
       <SummaryCard
         title="Progress"
         description="Current Project Stage"

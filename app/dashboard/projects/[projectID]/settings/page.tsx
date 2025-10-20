@@ -1,7 +1,6 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import { useParams } from "next/navigation";
 import { getProjectNavItems } from "@/components/sidebar/navitems";
@@ -10,15 +9,8 @@ import { useMemo } from "react";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectProjectDetailsByProjectIDAction } from "@/app/actions/ProjectAction";
 import { useSupabaseSession } from "@/hooks/use-session";
-const DeleteProjectCard = dynamic(
-  () => import("./components/delete-project-card"),
-  {
-    ssr: false,
-  }
-);
-const EditProjectForm = dynamic(() => import("./form/edit-project-form"), {
-  ssr: false,
-});
+import DeleteProjectCard from "./components/delete-project-card";
+import EditProjectForm from "./form/edit-project-form";
 
 export default function ProgramSettingsPage() {
   const { projectID } = useParams();
@@ -43,12 +35,10 @@ export default function ProgramSettingsPage() {
       navItems={getProjectNavItems(projectID as string)}
     >
       <Card className="shadow-xs mb-4">
-        <CardContent className="flex flex-wrap justify-between items-start p-0">
-          <EditProjectForm
-            project={data as ProjectType & { programs: ProgramType }}
-            isAdmin={isAdmin}
-          />
-        </CardContent>
+        <EditProjectForm
+          project={data as ProjectType & { programs: ProgramType }}
+          isAdmin={isAdmin}
+        />
       </Card>
       {isAdmin && (
         <DeleteProjectCard

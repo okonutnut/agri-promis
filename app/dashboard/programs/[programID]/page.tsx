@@ -1,6 +1,5 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
 import { ProjectType } from "@/components/types";
 import { Check, ChevronRight, Funnel, Search } from "lucide-react";
@@ -21,20 +20,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import MunicipalitySelector from "./components/municipality-dropdown";
 import { getPercentFromStages } from "@/lib/utils";
-const CirclePercent = dynamic(
-  () =>
-    import("@/components/custom/charts/circle-percent").then(
-      (mod) => mod.CirclePercent
-    ),
-  { ssr: false }
-);
-const Badge = dynamic(
-  () => import("@/components/ui/badge").then((mod) => mod.Badge),
-  { ssr: false }
-);
-const CardLink = dynamic(() => import("@/components/custom/link/card-link"), {
-  ssr: false,
-});
+import { CirclePercent } from "@/components/custom/charts/circle-percent";
+import { Badge } from "@/components/ui/badge";
+import CardLink from "@/components/custom/link/card-link";
 
 export default function ProgramDashboardPage() {
   const { programID } = useParams();
@@ -129,7 +117,7 @@ export default function ProgramDashboardPage() {
               <section className="flex items-center justify-between w-full mt-auto">
                 <Badge
                   variant={project.status == 1 ? "default" : "destructive"}
-                  className="text-xs uppercase"
+                  className="text-xs uppercase rounded-md"
                 >
                   {project.status == 1 ? "active" : "inactive"}
                 </Badge>
@@ -142,7 +130,7 @@ export default function ProgramDashboardPage() {
                           project.progress_indicator!!.toString()
                       )?.label
                     }
-                    &nbsp; Stage
+                    &nbsp; {project.progress_indicator == 1 ? "" : "Stages"}
                   </span>
                   <span className="w-14 h-14">
                     <CirclePercent

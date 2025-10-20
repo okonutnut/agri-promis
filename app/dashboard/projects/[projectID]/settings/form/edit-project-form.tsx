@@ -1,6 +1,5 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,12 +21,7 @@ import cornGrowthStages from "@/data/growth-stages.json";
 import FormInput from "@/components/custom/input/form-input";
 import { useModal } from "@/components/custom/layout/custom-page-layout";
 import FormTextarea from "@/components/custom/input/form-textarea";
-const FCASelector = dynamic(
-  () => import("@/components/custom/dropdown/fca-selector"),
-  {
-    ssr: false,
-  }
-);
+import FCASelector from "@/components/custom/dropdown/fca-selector";
 
 const formSchema = z.object({
   id: z.string().min(1, "Project ID is required"),
@@ -137,7 +131,7 @@ export default function EditProjectNameForm({
         </div>
       </form>
       {isAdmin && (
-        <CardFooter className="w-full justify-end p-0 border-t mt-4 px-4">
+        <CardFooter className="w-full justify-end border-t mt-4 p-2">
           <Button
             onClick={() =>
               openModal(
