@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { TravelOrderType } from "../../components/types";
+import { sendNotificationToUser } from "./NotificationAction";
 
 // TRAVEL ORDER ACTIONS
 export async function InsertTravelOrderAction(data: TravelOrderType) {
@@ -62,6 +63,12 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
   await InsertActivityLogAction(
     "Created a Travel Order",
     `Travel order for ${userProfile.fullname} has been created.`
+  );
+
+  // Send Notification
+  await sendNotificationToUser(
+    `Your travel order has been created successfully.`,
+    user!.id
   );
 
   return;

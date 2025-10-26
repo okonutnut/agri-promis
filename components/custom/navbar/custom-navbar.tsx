@@ -315,7 +315,7 @@ export default function CustomNavbar({
           </div>
         </div>
 
-        <span className="hidden md:flex items-center gap-6">
+        <span className="hidden md:flex items-center gap-3">
           <NotificationRequest />
           <NavbarUserImage />
         </span>

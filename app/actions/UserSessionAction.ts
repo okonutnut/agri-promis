@@ -1,8 +1,8 @@
 "use server";
-import { getCurrentCoords } from "@/lib/utils";
+
 import { decodeSupabaseJWT } from "@/utils/helpers/decodeSupabaseJwt";
 import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 
 // USER SESSION ACTIONS
 export async function SelectUserCurrentLocationAction(user_id: string) {
@@ -23,32 +23,31 @@ export async function SelectUserCurrentLocationAction(user_id: string) {
   return data;
 }
 
-export async function UpdateUserCurrentLocationAction() {
+export async function UpdateUserCurrentLocationAction(lat: string, lng: string) {
   const supabase = await createClient(cookies());
   const { data: user } = await supabase.auth.getUser();
-  if (!user?.user?.id) {
-    return;
-  }
+  if (!user?.user?.id) return;
 
-  const locationCoords = await getCurrentCoords();
-  const response = await fetch("https://api.ipify.org?format=json");
-  const ipAddress = await response.json();
+  // ✅ Get the user's IP address
+  const hdrs = await headers();
+  const ip =
+    hdrs.get("x-forwarded-for")?.split(",")[0] ||
+    hdrs.get("x-real-ip") ||
+    "Unknown";
 
   const { error } = await supabase.from("user_session").upsert(
     {
-      user_id: user?.user?.id,
-      longitude: locationCoords?.longitude || 0,
-      ip_address: ipAddress.ip,
-      latitude: locationCoords?.latitude || 0,
+      user_id: user.user.id,
+      ip_address: ip === "::1" ? "172.0.0.1" : ip,
+      longitude: lng || "0",
+      latitude: lat || "0",
       modified_at: new Date(),
     },
-    {
-      onConflict: "user_id",
-    }
+    { onConflict: "user_id" }
   );
 
   if (error) {
-    await UpdateUserCurrentLocationAction();
+    console.error("Error updating location:", error);
   }
 
   return;

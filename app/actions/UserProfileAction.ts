@@ -34,25 +34,16 @@ export async function SelectUserProfileByIDAction(userID: string) {
 
 export async function SelectUserProfileAction() {
   const supabase = await createClient(cookies());
-  const { data: userData, error: userError } = await supabase.auth.getUser();
 
-  if (userError || !userData?.user) {
-    throw userError;
-  }
-
-  const { data: user, error } = await supabase
+  const { data, error } = await supabase
     .from("user_profile")
     .select("*")
-    .eq("id", userData.user?.id)
+    .eq("id", (await supabase.auth.getUser()).data.user?.id)
     .single();
 
   if (error) {
     throw error;
   }
 
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  return user as UserProfileType;
+  return data as UserProfileType;
 }

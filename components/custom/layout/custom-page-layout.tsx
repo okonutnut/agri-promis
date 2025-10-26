@@ -12,6 +12,7 @@ import {
   useEffect,
   ReactNode,
   useCallback,
+  use,
 } from "react";
 import SkeletonLoading from "./skeleton-loading";
 import CustomNavbar from "../navbar/custom-navbar";
@@ -34,6 +35,7 @@ import { X } from "lucide-react";
 import { useSelectUserProfileHook } from "@/app/hooks/UserProfileHook";
 import { UpdateUserCurrentLocationAction } from "@/app/actions/UserSessionAction";
 import { createClient } from "@/utils/supabase/client";
+import GetCurrentLocation from "@/utils/helpers/getCurrentLocation";
 
 // -------------------- Context Types --------------------
 interface SheetContextType {
@@ -125,13 +127,18 @@ export default function CustomPageLayout({
   topRightComponent,
   role,
 }: CustomPageLayoutProps) {
-  // Ping server every 10 minutes
+  const { location } = GetCurrentLocation();
   useEffect(() => {
-    const interval = setInterval(async () => {
-      await UpdateUserCurrentLocationAction();
-    }, 600000);
-    return () => clearInterval(interval);
-  }, []);
+    async function updateLocation() {
+      if (location) {
+        await UpdateUserCurrentLocationAction(
+          location.lat.toString(),
+          location.lng.toString()
+        );
+      }
+    }
+    updateLocation();
+  }, [location]);
 
   // -------------------- Sheet State --------------------
   const [sheetState, setSheetState] = useState({
@@ -253,7 +260,7 @@ export default function CustomPageLayout({
             <div className="flex-1 w-full overflow-hidden">
               <div
                 className={cn(
-                  "pl-4 pr-2 h-full flex flex-col overflow-y-scroll",
+                  "pl-4 pr-2 h-full flex flex-col overflow-y-auto",
                   className
                 )}
               >

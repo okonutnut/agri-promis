@@ -9,10 +9,7 @@ import { Loader2, Send } from "lucide-react";
 import { useEditFCAHook, useInsertFCAHook } from "@/app/hooks/FCAHook";
 import { FCAType } from "@/components/types";
 import { Label } from "@/components/ui/label";
-import {
-  useModal,
-  useSheet,
-} from "@/components/custom/layout/custom-page-layout";
+import { useSheet } from "@/components/custom/layout/custom-page-layout";
 import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
 import FCAActiveStatusButton from "./active-status-button";
 import { useState } from "react";
@@ -20,11 +17,7 @@ import { useState } from "react";
 const formSchema = z.object({
   id: z.string().optional(),
   description: z.string().min(1, "FCA Name is required"),
-  president_name: z.string().min(1, "President Name is required"),
-  contact_number: z
-    .string()
-    .regex(/^(\+63|0)\d{10}$/, "Contact Number must be a valid PH number"),
-  member_count: z.coerce.number().min(1, "Member count is required"),
+  member_count: z.coerce.number().optional(),
   active_status: z.coerce.number().min(0, "Role is required"),
 });
 
@@ -36,7 +29,6 @@ type FCAFormProps = {
 };
 export function FCAForm({ isAddMode, data }: FCAFormProps) {
   const [pageState, setPageState] = useState<"idle" | "loading">("idle");
-  const { openModal, closeModal } = useModal();
   const { closeSheet } = useSheet();
 
   const form = useForm<FormType>({
@@ -45,8 +37,6 @@ export function FCAForm({ isAddMode, data }: FCAFormProps) {
       id: data?.id || "",
       description: data?.description || "",
       member_count: data?.member_count || 0,
-      president_name: data?.president_name || "",
-      contact_number: data?.contact_number || "N/A",
       active_status: data?.active_status || 0,
     },
   });
@@ -77,23 +67,6 @@ export function FCAForm({ isAddMode, data }: FCAFormProps) {
     }
   };
 
-  const handleOpenModal = () => {
-    openModal(
-      "Attention!!!",
-      "Are you sure you want to submit this form?",
-      <Button
-        className="w-full"
-        onClick={() => {
-          setPageState("loading");
-          form.handleSubmit(onSubmit)();
-          closeModal();
-        }}
-      >
-        Confirm
-      </Button>
-    );
-  };
-
   return (
     <>
       <Label className="px-3 my-2 text-xl">FCA Information</Label>
@@ -107,26 +80,15 @@ export function FCAForm({ isAddMode, data }: FCAFormProps) {
           name="description"
           form={form}
           noPlaceholder
+          readOnly={isPending}
         />
-        {/* <FormInput
-          label="President Name"
-          name="president_name"
-          form={form}
-          noPlaceholder
-        />
-        <FormInput
-          label="Contact Number"
-          name="contact_number"
-          type="number"
-          form={form}
-          noPlaceholder
-        /> */}
         <FormInput
           label="Total Member Count"
           name="member_count"
           type="number"
           form={form}
           noPlaceholder
+          readOnly={isPending}
         />
       </form>
       <CustomSheetFooter isPending={isPending || pageState === "loading"}>
@@ -141,7 +103,7 @@ export function FCAForm({ isAddMode, data }: FCAFormProps) {
         <Button
           variant={isPending ? "ghost" : "default"}
           size="sm"
-          onClick={handleOpenModal}
+          onClick={() => form.handleSubmit(onSubmit)()}
           disabled={isPending || pageState === "loading"}
         >
           {isPending ? (

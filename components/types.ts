@@ -156,10 +156,7 @@ export type NavigationItemType = {
 export type NotificationType = {
   id?: string;
   user_id?: string;
-  title?: string;
-  message?: string;
-  public?: number;
-  is_read?: number;
+  subscription?: string;
   created_at?: string;
 };
 

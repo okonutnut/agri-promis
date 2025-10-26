@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { AssignedProjectsType, ProjectType } from "../../components/types";
+import { sendNotificationToUser } from "./NotificationAction";
 
 // ASSIGNED PROJECTS ACTIONS
 export async function InsertFieldTechniciansToProjectAction(
@@ -57,6 +58,12 @@ export async function InsertFieldTechniciansToProjectAction(
         `Field technician ${userProfile?.fullname} was added to project ${projectData.project_name}.`,
         project_id
       );
+
+      // Send Notification
+      await sendNotificationToUser(
+        `You have been assigned to the project: ${projectData.project_name}.`,
+        technician_id
+      );
     }
   }
 
@@ -97,6 +104,12 @@ export async function DeleteFieldTechnicianFromProjectAction(
     "Removed a Field Technician from Project",
     `Field technician ${existingUserData.fullname} was removed from project ${projectData.project_name}.`,
     project_id
+  );
+
+  // Send Notification
+  await sendNotificationToUser(
+    `You have been removed from the project: ${projectData.project_name}.`,
+    user_id
   );
 
   return;

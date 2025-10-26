@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { ProjectType, FCAType } from "../../components/types";
+import { sendNotificationToAll } from "./NotificationAction";
 
 // PROJECT ACTIONS
 export async function InsertProjectAction(values: ProjectType) {
@@ -35,6 +36,9 @@ export async function InsertProjectAction(values: ProjectType) {
     "Created a Project",
     `Project ${values.project_name as string} has been created.`
   );
+
+  // Send Notification
+  await sendNotificationToAll(`New project created: ${values.project_name}.`);
 
   return data;
 }
@@ -169,6 +173,11 @@ export async function EditProjectAction(data: ProjectType) {
     `Project ${currentProject.project_name} details has been updated successfully.`
   );
 
+  // Send Notification
+  await sendNotificationToAll(
+    `Project ${currentProject.project_name} details has been updated successfully.`
+  );
+
   return;
 }
 
@@ -203,6 +212,9 @@ export async function DeleteProjectAction(projectID: string) {
     "Deleted a Project",
     `Project ${projectName} has been deleted.`
   );
+
+  // Send Notification
+  await sendNotificationToAll(`Project deleted: ${projectName}.`);
 
   return;
 }

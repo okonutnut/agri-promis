@@ -3,6 +3,7 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { FCAType } from "../../components/types";
 import { InsertActivityLogAction } from "./ActivityLogAction";
+import { sendNotificationToAll } from "./NotificationAction";
 
 // FCA ACTIONS
 export async function InsertFCAAction(data: FCAType) {
@@ -19,6 +20,9 @@ export async function InsertFCAAction(data: FCAType) {
     "Inserted new FCA record",
     `Inserted FCA: ${data.description}`
   );
+
+  // Send Notification
+  await sendNotificationToAll(`New FCA added: ${data.description as string}`);
 
   return;
 }
@@ -65,6 +69,9 @@ export async function EditFCAAction(data: FCAType) {
     `Updated FCA: ${data.description}`
   );
 
+  // Send Notification
+  await sendNotificationToAll(`Updated FCA: ${data.description as string}`);
+
   return;
 }
 
@@ -84,6 +91,13 @@ export async function EditFCAActiveStatusAction(fcaID: string, status: number) {
   // Log activity
   await InsertActivityLogAction(
     "Updated FCA record",
+    `Update ${data.description}'s active status to ${
+      status == 0 ? "Inactive" : "Active"
+    }`
+  );
+
+  // Send Notification
+  await sendNotificationToAll(
     `Update ${data.description}'s active status to ${
       status == 0 ? "Inactive" : "Active"
     }`

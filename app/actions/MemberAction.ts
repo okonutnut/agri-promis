@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { UserProfileType } from "../../components/types";
+import { sendNotificationToAll, sendNotificationToUser } from "./NotificationAction";
 
 // MEMBERS ACTIONS
 
@@ -42,6 +43,9 @@ export async function InsertMemberAction(data: UserProfileType) {
     "Added a Member",
     `New member added: ${data.fullname}.`
   );
+
+  // Send Notification
+  await sendNotificationToAll(`New member added: ${data.fullname}.`);
 
   return;
 }
@@ -86,6 +90,12 @@ export async function UpdateMemberAction(
     `Member ${data.fullname?.toString()} updated.`
   );
 
+  // Send Notification
+  await sendNotificationToUser(
+    `Your member profile has been updated.`,
+    userId
+  );
+
   return;
 }
 
@@ -126,6 +136,14 @@ export async function UpdateActiveStatusMemberAction(
     `Member ${data.fullname?.toString()} status updated to ${
       status === 0 ? "Inactive" : "Active"
     }.`
+  );
+
+  // Send NOtification
+  await sendNotificationToUser(
+    `Your member profile status has been updated to ${
+      status === 0 ? "Inactive" : "Active"
+    }.`,
+    userId
   );
 
   return;

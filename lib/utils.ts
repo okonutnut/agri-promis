@@ -281,32 +281,6 @@ export async function getLongtitudeLatitudeFromGPS(): Promise<LocationData> {
   });
 }
 
-export async function getCurrentCoords(): Promise<{
-  latitude: number;
-  longitude: number;
-} | null> {
-  if (!("geolocation" in navigator)) {
-    console.error("Geolocation is not supported by this browser.");
-    return null;
-  }
-
-  return new Promise((resolve, reject) => {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        resolve({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        });
-      },
-      (error) => {
-        console.error("Error getting location:", error);
-        reject(null);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
-  });
-}
-
 export function getPercentFromStages(
   stages: Stage[],
   currentValue: string,

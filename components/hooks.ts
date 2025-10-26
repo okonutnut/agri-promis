@@ -482,25 +482,6 @@ export function useSelectAssignedProjectsByFieldTechnicianHook() {
 }
 
 // LOCATION HOOKS
-export function useUpdateUserCurrentLocationHook() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async () => await UpdateUserCurrentLocationAction(),
-    onSuccess: () => {
-      qc.invalidateQueries({
-        queryKey: ["userLocation"],
-      });
-      setInterval(() => {
-        UpdateUserCurrentLocationAction();
-      }, 10 * 60 * 1000);
-    },
-    onError: () => {
-      UpdateUserCurrentLocationAction();
-      toast.error("Something went wrong. Please try again.");
-    },
-  });
-}
-
 export function useSelectUserLocationHook(user_id: string) {
   return useQuery({
     queryKey: ["userLocation"],

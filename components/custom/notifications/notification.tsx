@@ -1,135 +1,125 @@
 "use client";
 
-import {
-  DeleteSubscrptionEndpoint,
-  InsertSubscribeEndPoint,
-} from "@/app/actions/SubscriptionAction";
+import { SelectCurrentUserSubscription } from "@/app/actions/NotificationAction";
+import { DeleteSubscrptionEndpoint } from "@/app/actions/SubscriptionAction";
+import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { urlBase64ToUint8Array } from "@/lib/utils";
+import { createClient } from "@/utils/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 import { BellOff, BellRing } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function NotificationRequest() {
-  const [isEnabled, setIsEnabled] = useState(false);
+  const qc = useQueryClient();
+  const { data: subscription, isFetching } = useRealtimeQuery({
+    queryKey: ["notification"],
+    queryFn: SelectCurrentUserSubscription,
+    table: "push_subscriptions",
+  });
+
   const [notificationPermission, setNotificationPermission] = useState<
     "granted" | "denied" | "default"
   >("default");
-  const [isLoading, setIsLoading] = useState(false);
 
-  const showNotificationRequest = async () => {
-    if (!("Notification" in window)) {
-      toast.error("This browser does not support notifications.");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const permission = await Notification.requestPermission();
-      if (permission === "granted") {
-        await subscribeUser();
-      } else if (permission === "denied") {
-        toast.error("You have denied notification permissions.");
-      }
-    } catch {
-      toast.error("Error requesting notification permission.");
-    } finally {
-      setIsLoading(false);
+  const showNotification = () => {
+    if ("Notification" in window) {
+      Notification.requestPermission().then((permission) => {
+        setNotificationPermission(permission);
+        if (permission === "granted") {
+          subscribeUser();
+        } else {
+          toast.info("please go to setting and enable notification.");
+        }
+      });
+    } else {
+      toast.info("This browser does not support notifications.");
     }
   };
 
   const removeNotification = async () => {
-    setIsLoading(true);
     try {
       setNotificationPermission("denied");
       const isSuccess = await DeleteSubscrptionEndpoint();
       if (isSuccess) {
-        setIsEnabled(false);
         toast("You have successfully unsubscribed from notifications.");
       } else {
         toast.error("Cannot unsubscribe from notifications.");
       }
-    } catch {
+    } catch (ex) {
+      console.error("Error unsubscribing from notifications:", ex);
       toast.error("Error unsubscribing from notifications.");
     } finally {
-      setIsLoading(false);
     }
   };
 
   async function subscribeUser() {
     if ("serviceWorker" in navigator) {
       try {
+        // Check if service worker is already registered
         const registration = await navigator.serviceWorker.getRegistration();
-        if (!registration) {
-          toast.error(
-            "No service worker registered. Notifications cannot be enabled."
+        if (registration) {
+          generateSubscribeEndPoint(registration);
+        } else {
+          // Register the service worker
+          const newRegistration = await navigator.serviceWorker.register(
+            "/sw.js"
           );
-          return;
+          // Subscribe to push notifications
+          generateSubscribeEndPoint(newRegistration);
         }
-        await generateSubscribeEndPoint(registration);
-      } catch {
-        await navigator.serviceWorker.register("/sw.js", {
-          scope: "/",
-          updateViaCache: "none",
-        });
-        toast.error("Unable to subscribe to notifications.");
+      } catch (error) {
+        toast.error(
+          "Error during service worker registration or subscription:"
+        );
       }
+    } else {
+      toast.error("Service workers are not supported in this browser");
     }
   }
 
-  async function generateSubscribeEndPoint(
+  const generateSubscribeEndPoint = async (
     newRegistration: ServiceWorkerRegistration
-  ) {
-    setIsLoading(true);
-    try {
-      const applicationServerKey = urlBase64ToUint8Array(
-        process.env.NEXT_PUBLIC_VAPID_KEY!
-      );
-      const options = { applicationServerKey, userVisibleOnly: true };
-      const subscription = await newRegistration.pushManager.subscribe(options);
-      const isInserted = await InsertSubscribeEndPoint(
-        JSON.stringify(subscription)
-      );
+  ) => {
+    const applicationServerKey = urlBase64ToUint8Array(
+      process.env.NEXT_PUBLIC_VAPID_KEY!
+    );
+    const options = {
+      applicationServerKey,
+      userVisibleOnly: true, // This ensures the delivery of notifications that are visible to the user, eliminating silent notifications. (Mandatory in Chrome, and optional in Firefox)
+    };
+    const subscription = await newRegistration.pushManager.subscribe(options);
 
-      if (isInserted) {
-        setIsEnabled(true);
-        toast.success("You have successfully subscribed to notifications.");
-      } else {
-        toast.error("Cannot subscribe to notifications.");
-      }
-    } catch {
-      toast.error("Error subscribing to notifications.");
-    } finally {
-      setIsLoading(false);
+    const supabase = createClient();
+
+    const { error } = await supabase.from("push_subscriptions").insert({
+      user_id: (await supabase.auth.getUser()).data.user?.id,
+      subscription: JSON.stringify(subscription),
+    });
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      qc.invalidateQueries({
+        queryKey: ["notification"],
+      });
     }
-  }
+  };
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      setNotificationPermission(Notification.permission);
-      const updatePermission = () =>
-        setNotificationPermission(Notification.permission);
-      document.addEventListener("visibilitychange", updatePermission);
-      return () =>
-        document.removeEventListener("visibilitychange", updatePermission);
-    }
+    setNotificationPermission(Notification.permission);
   }, []);
 
+  if (isFetching) {
+    return null;
+  }
+
   return (
-    <div className="hover:scale-110 cursor-pointer transition-all">
-      {notificationPermission === "granted" || isEnabled ? (
-        <BellRing
-          onClick={() => {
-            if (!isLoading) removeNotification();
-          }}
-          className={isLoading ? "opacity-50 pointer-events-none" : "h-5 w-5"}
-        />
+    <div className=" hover:scale-110 cursor-pointer transition-all rounded-full p-2">
+      {notificationPermission === "granted" && subscription != null ? (
+        <BellRing onClick={removeNotification} />
       ) : (
-        <BellOff
-          onClick={() => {
-            if (!isLoading) showNotificationRequest();
-          }}
-          className={isLoading ? "opacity-50 pointer-events-none" : "h-5 w-5"}
-        />
+        <BellOff onClick={showNotification} />
       )}
     </div>
   );
