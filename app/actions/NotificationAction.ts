@@ -26,7 +26,8 @@ export const sendNotificationToUser = async (message: string, user_id: string) =
     .single();
 
   if (error) {
-    return JSON.stringify({ error: error.message });
+    console.error(error);
+    return;
   } else if (data) {
     try {
       await webpush.sendNotification(
@@ -38,8 +39,9 @@ export const sendNotificationToUser = async (message: string, user_id: string) =
         })
       );
       return "{}";
-    } catch {
-      return JSON.stringify({ error: "failed to send notification" });
+    } catch (error) {
+      console.error(error);
+      return;
     }
   }
   return "{}";
@@ -63,9 +65,10 @@ export const sendNotificationToAll = async (message: string) => {
   const { data, error } = await supabase.from("push_subscriptions").select("*");
 
   if (error) {
-    return JSON.stringify({ error: error.message });
+    console.error(error);
+    return;
   } else if (data && data.length > 0) {
-    const results = await Promise.all(
+     await Promise.all(
       data.map(async (subscription) => {
         try {
           await webpush.sendNotification(
@@ -76,15 +79,17 @@ export const sendNotificationToAll = async (message: string) => {
               body: message,
             })
           );
-          return { user_id: subscription.user_id, status: "success" };
-        } catch {
-          return { user_id: subscription.user_id, status: "failed" };
+          return;
+        } catch (error) {
+          console.error(error);
+          return;
         }
       })
     );
-    return JSON.stringify(results);
+    return;
   }
-  return JSON.stringify({ error: "No subscriptions found" });
+  console.error("No subscriptions found");
+  return;
 };
 
 export async function SelectCurrentUserSubscription() {
