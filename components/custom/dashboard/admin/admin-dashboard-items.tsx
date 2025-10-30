@@ -1,22 +1,14 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { BookOpen, FolderKanban, Users } from "lucide-react";
 import { useUniversalRealtime } from "@/hooks/use-universal-realtime";
 import { SelectAdminDashboardItemsAction } from "@/app/actions/DashboardAction";
 import ProjectQuickAccessCard from "./project-quick-access-card";
 import TotalProjectsPerProgram from "../../charts/total-project-per-program";
 import TotalUsersPerType from "../../charts/user-type-count";
-const SummaryCard = dynamic(() => import("../../card/summary-cards"), {
-  ssr: false,
-});
-const ScheduledMonitoringTable = dynamic(
-  () => import("./scheduled-monitoring-table"),
-  { ssr: false }
-);
-const RecentActivities = dynamic(() => import("./recent-activities-admin"), {
-  ssr: false,
-});
+import SummaryCard from "../../card/summary-cards";
+import ScheduledMonitoringTable from "./scheduled-monitoring-table";
+import RecentActivities from "./recent-activities-admin";
 
 export default function AdminDashboardItems() {
   const { data, isLoading } = useUniversalRealtime({
@@ -30,10 +22,10 @@ export default function AdminDashboardItems() {
       "activity_logs",
     ],
   });
+
   return (
-    <section className="flex flex-col flex-1 gap-5">
-      {/* SUMMARY CARDS */}
-      <section className="flex flex-wrap md:flex-nowrap justify-between gap-5">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+      <div className="col-start-1 row-start-1 md:col-start-1 md:row-start-1 md:col-span-1 md:row-span-1 h-[250px]">
         <SummaryCard
           isLoading={isLoading}
           title="Program"
@@ -42,6 +34,9 @@ export default function AdminDashboardItems() {
         >
           <strong className="text-4xl">{data?.totalPrograms ?? 0}</strong>
         </SummaryCard>
+      </div>
+
+      <div className="col-start-1 row-start-2 md:col-start-2 md:row-start-1 md:col-span-1 md:row-span-1 h-[250px]">
         <SummaryCard
           isLoading={isLoading}
           title="Projects"
@@ -50,6 +45,9 @@ export default function AdminDashboardItems() {
         >
           <strong className="text-4xl">{data?.totalProjects ?? 0}</strong>
         </SummaryCard>
+      </div>
+
+      <div className="col-start-1 row-start-3 md:col-start-3 md:row-start-1 md:col-span-1 md:row-span-1 h-[250px]">
         <SummaryCard
           isLoading={isLoading}
           title="Team"
@@ -58,22 +56,37 @@ export default function AdminDashboardItems() {
         >
           <strong className="text-4xl">{data?.totalUsers ?? 0}</strong>
         </SummaryCard>
-      </section>
+      </div>
 
-      {/* SCHEDULED MONITORING */}
-      <section className="flex flex-wrap md:flex-nowrap justify-between gap-5 space-y-5 md:space-y-0">
-        <ScheduledMonitoringTable data={data?.futureTravelOrders ?? []} />
-        <ProjectQuickAccessCard />
-      </section>
+      <div className="col-start-1 row-start-4 md:col-start-1 md:row-start-2 md:col-span-2 md:row-span-1 h-[250px]">
+        <div className="col-span-1 row-span-1 flex items-center justify-center">
+          <ScheduledMonitoringTable data={data?.futureTravelOrders ?? []} />
+        </div>
+      </div>
 
-      {/* CHARTS */}
-      <section className="flex flex-wrap md:flex-nowrap justify-between gap-5 mt-5 space-y-5 md:space-y-0">
-        <TotalUsersPerType />
-        <TotalProjectsPerProgram />
-      </section>
+      <div className="col-start-1 row-start-5 md:col-start-3 md:row-start-2 md:col-span-1 md:row-span-1 h-[250px]">
+        <div className="col-span-1 row-span-1 flex items-center justify-center">
+          <ProjectQuickAccessCard />
+        </div>
+      </div>
 
-      {/* RECENT ACTIVITIES */}
-      <RecentActivities data={data?.recentActivityLogs ?? []} />
-    </section>
+      <div className="col-start-1 row-start-6 md:col-start-1 md:row-start-3 md:col-span-1 md:row-span-1">
+        <div className="col-span-1 row-span-1 flex items-center justify-center">
+          <TotalUsersPerType />
+        </div>
+      </div>
+
+      <div className="col-start-1 row-start-7 md:col-start-2 md:row-start-3 md:col-span-2 md:row-span-1">
+        <div className="col-span-1 row-span-1 flex items-center justify-center">
+          <TotalProjectsPerProgram />
+        </div>
+      </div>
+
+      <div className="col-start-1 row-start-8 md:col-start-1 md:row-start-4 md:col-span-3 md:row-span-1">
+        <div className="col-span-1 row-span-1 flex items-center justify-center">
+          <RecentActivities data={data?.recentActivityLogs ?? []} />
+        </div>
+      </div>
+    </div>
   );
 }

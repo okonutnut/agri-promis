@@ -109,7 +109,7 @@ export default function ProjectsByProgramPage() {
         </div>
       </div>
       {filteredProjects && filteredProjects?.length > 0 ? (
-        <div className="flex flex-wrap justify-start items-center gap-2">
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {filteredProjects.map((project: ProjectType) => (
             <CardLink
               href={`/dashboard/projects/${project.id}`}

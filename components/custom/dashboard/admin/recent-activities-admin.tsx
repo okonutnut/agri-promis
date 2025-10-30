@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -22,9 +23,9 @@ type RecentActivitiesProps = {
 };
 export default function RecentActivities({ data }: RecentActivitiesProps) {
   return (
-    <div className="mt-4">
+    <div className="w-full h-full">
       <span className="text-lg font-semibold">Activity Logs</span>
-      <div className="border shadow-xs rounded-md">
+      <Card className="p-1">
         <div className="flex justify-end">
           {data && data.length > 0 && (
             <Link href="/dashboard/activity-logs">
@@ -65,7 +66,7 @@ export default function RecentActivities({ data }: RecentActivitiesProps) {
             )}
           </TableBody>
         </Table>
-      </div>
+      </Card>
     </div>
   );
 }

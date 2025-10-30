@@ -35,55 +35,51 @@ export default function ProgramsPage() {
       error={error}
       navItems={getDashboardNavItems()}
     >
-      {data && (
-        <>
-          <div className="flex flex-wrap items-start gap-4 mb-4">
-            <Link href="/dashboard/new/">
-              <Button className="w-full">New Program</Button>
-            </Link>
-            <SearchInput
-              setSearchTerm={setSearchQuery}
-              className="w-full max-w-md"
-            />
-          </div>
+      <div className="flex flex-wrap items-start gap-4 mb-4">
+        <Link href="/dashboard/new/">
+          <Button className="w-full">New Program</Button>
+        </Link>
+        <SearchInput
+          setSearchTerm={setSearchQuery}
+          className="w-full max-w-md"
+        />
+      </div>
 
-          {filteredPrograms && filteredPrograms?.length > 0 ? (
-            <div className="flex flex-wrap justify-start items-center gap-2">
-              {filteredPrograms.map((program) => (
-                <CardLink
-                  href={`/dashboard/programs/${program.id}`}
-                  key={program.id}
-                  className="group min-w-sm flex flex-col items-start h-full p-4 space-y-2 gap-0"
-                >
-                  <div className="w-full flex justify-between items-start">
-                    <div className="flex items-start gap-4">
-                      <span className="border border-primary rounded-full p-2">
-                        <Boxes className="h-5 w-5 text-primary" />
-                      </span>
-                      <div className="flex flex-col">
-                        <span className="font-semibold">
-                          {program.program_name}
-                        </span>
-                        <small className="mb-2">
-                          Created on:&nbsp;
-                          {format(new Date(program.created_at!), "PPp")}
-                        </small>
-                        <Badge className="font-normal rounded-md">
-                          {program.project_count[0].count ?? 0} project/s
-                        </Badge>
-                      </div>
-                    </div>
-                    <span className="ml-2 transform transition-transform group-hover:translate-x-2">
-                      <ChevronRight className="h-4 w-4" />
+      {filteredPrograms && filteredPrograms?.length > 0 ? (
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {filteredPrograms.map((program) => (
+            <CardLink
+              href={`/dashboard/programs/${program.id}`}
+              key={program.id}
+              className="flex flex-col items-start h-[120px] p-4 space-y-2 gap-0"
+            >
+              <div className="w-full flex justify-between items-start">
+                <div className="flex items-start gap-4">
+                  <span className="border border-primary rounded-full p-2">
+                    <Boxes className="h-5 w-5 text-primary" />
+                  </span>
+                  <div className="flex flex-col">
+                    <span className="font-semibold">
+                      {program.program_name}
                     </span>
+                    <small className="mb-2">
+                      Created on:&nbsp;
+                      {format(new Date(program.created_at!), "PPp")}
+                    </small>
+                    <Badge className="font-normal rounded-md">
+                      {program.project_count[0].count ?? 0} project/s
+                    </Badge>
                   </div>
-                </CardLink>
-              ))}
-            </div>
-          ) : (
-            <span className="italic">No programs found</span>
-          )}
-        </>
+                </div>
+                <span className="ml-2 transform transition-transform group-hover:translate-x-2">
+                  <ChevronRight className="h-4 w-4" />
+                </span>
+              </div>
+            </CardLink>
+          ))}
+        </div>
+      ) : (
+        <span className="italic">No programs found</span>
       )}
     </CustomPageLayout>
   );

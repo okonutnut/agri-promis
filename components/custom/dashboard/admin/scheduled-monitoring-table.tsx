@@ -26,11 +26,11 @@ export default function ScheduledMonitoringTable({
   data,
 }: ScheduledMonitoringTableProps) {
   return (
-    <section className="w-full md:w-3/4 h-[200px]">
+    <div className="w-full h-full">
       <span className="text-lg font-semibold">
         Scheduled Monitoring ({new Date().toLocaleDateString()})
       </span>
-      <Card className="p-1 shadow-xs rounded-md h-full">
+      <Card className="shadow-xs rounded-md p-1">
         <Table>
           <TableHeader>
             <TableRow>
@@ -66,6 +66,6 @@ export default function ScheduledMonitoringTable({
           </TableBody>
         </Table>
       </Card>
-    </section>
+    </div>
   );
 }

@@ -23,9 +23,9 @@ export default function ProjectQuickAccessCard() {
   });
 
   return (
-    <section className="h-[200px]">
+    <section className="h-full w-full">
       <span className="text-lg font-semibold">Quick Access</span>
-      <Card className="p-1 rounded-md shadow-xs h-full">
+      <Card className="p-1 rounded-md shadow-xs">
         <Table>
           <TableHeader>
             <TableRow>

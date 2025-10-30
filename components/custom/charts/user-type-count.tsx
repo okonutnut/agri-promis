@@ -43,13 +43,13 @@ export default function TotalUsersPerType() {
     }) ?? [];
 
   return (
-    <div className="col-span-2 h-[300px]">
+    <div className="w-full h-full">
       <span className="text-lg font-semibold">Total Users by System Role</span>
-      <Card className="flex flex-col p-2 h-full rounded-md">
+      <Card className="flex flex-col p-2 rounded-md">
         <CardContent className="flex-1 p-0 flex items-center justify-center">
           <ChartContainer
             config={chartConfig}
-            className="[&_.recharts-text]:fill-background w-full h-full"
+            className="[&_.recharts-text]:fill-background"
           >
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>

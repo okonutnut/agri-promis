@@ -25,7 +25,7 @@ export default function SummaryCard({
   isLoading,
 }: SummaryCardsProps) {
   return (
-    <Card className="p-4 w-full relative rounded-md shadow-xs  flex flex-col h-[200px]">
+    <Card className="p-4 h-full w-full relative rounded-md shadow-xs flex flex-col">
       {isLoading ? (
         <SkeletonLoading />
       ) : (
