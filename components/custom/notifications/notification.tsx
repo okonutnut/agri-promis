@@ -68,7 +68,7 @@ export default function NotificationRequest() {
           // Subscribe to push notifications
           generateSubscribeEndPoint(newRegistration);
         }
-      } catch (error) {
+      } catch {
         toast.error(
           "Error during service worker registration or subscription:"
         );

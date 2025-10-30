@@ -8,7 +8,7 @@ type SkeletonLoadingProps = {
 };
 export default function SkeletonLoading({ className }: SkeletonLoadingProps) {
   return (
-    <span className={`flex flex-col space-y-3 m-2 ${cn(className)}`}>
+    <span className={`flex flex-col space-y-3 ${cn(className)}`}>
       <Skeleton className="h-6 w-full" />
       <Skeleton className="h-6 w-3/4" />
       <Skeleton className="h-6 w-1/2" />

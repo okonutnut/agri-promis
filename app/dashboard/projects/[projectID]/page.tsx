@@ -23,6 +23,12 @@ function ProjectDashboardInfo(data: ProjectType) {
         <br />
         <pre className="text-xs italic">{data?.description}</pre>
         <span className="text-sm text-muted-foreground mt-4">
+          Date Created:&nbsp;
+          {data?.created_at
+            ? format(new Date(data.created_at), "PPp")
+            : "NOT SPECIFIED"}
+        </span>
+        <span className="text-sm text-muted-foreground">
           Start Date:&nbsp;
           {data?.start_date
             ? format(new Date(data.start_date), "PP")

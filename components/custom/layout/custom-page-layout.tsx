@@ -12,7 +12,6 @@ import {
   useEffect,
   ReactNode,
   useCallback,
-  use,
 } from "react";
 import SkeletonLoading from "./skeleton-loading";
 import CustomNavbar from "../navbar/custom-navbar";
@@ -260,7 +259,7 @@ export default function CustomPageLayout({
             <div className="flex-1 w-full overflow-hidden">
               <div
                 className={cn(
-                  "pl-4 pr-2 h-full flex flex-col overflow-y-auto",
+                  "px-2 h-full flex flex-col overflow-y-auto",
                   className
                 )}
               >
@@ -268,7 +267,7 @@ export default function CustomPageLayout({
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex flex-col space-y-2">
                       {pageTitle && (
-                        <h1 className="text-2xl font-medium">{pageTitle}</h1>
+                        <h1 className="text-2xl font-black">{pageTitle}</h1>
                       )}
                       {pageDescription && (
                         <p className="text-md text-muted-foreground">

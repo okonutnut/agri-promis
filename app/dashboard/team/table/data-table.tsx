@@ -18,10 +18,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { FilterByProgram } from "../components/filter-by-program";
+import SearchInput from "@/components/custom/input/search-input";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -56,16 +56,14 @@ export function DataTable<TData, TValue>({
     <div className="space-y-4">
       {/* Global Search Bar and Add Button */}
       <div className="flex items-start justify-between gap-2 flex-col md:flex-row">
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          <Input
-            placeholder="Search..."
-            value={table.getState().globalFilter ?? ""}
-            onChange={(event) => table.setGlobalFilter(event.target.value)}
-            className="max-w-sm"
+        <div className="flex items-center gap-2">
+          <SearchInput
+            setSearchTerm={table.setGlobalFilter}
+            className="w-full max-w-md"
           />
           <FilterByProgram programID={programID} />
         </div>
-        <Button onClick={onAdd} size={"sm"} className="w-full md:w-auto">
+        <Button onClick={onAdd} size={"sm"}>
           Invite member
         </Button>
       </div>

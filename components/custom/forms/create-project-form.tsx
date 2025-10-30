@@ -1,6 +1,5 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import z from "zod";
@@ -13,15 +12,8 @@ import FormTextarea from "../input/form-textarea";
 import { useState } from "react";
 import { sendNotification } from "@/lib/utils";
 import { Spinner } from "@/components/ui/spinner";
-const LocationSelector = dynamic(
-  () => import("@/components/custom/dropdown/location-selector"),
-  {
-    ssr: false,
-  }
-);
-const FCASelector = dynamic(() => import("../dropdown/fca-selector"), {
-  ssr: false,
-});
+import LocationSelector from "@/components/custom/dropdown/location-selector";
+import FCASelector from "../dropdown/fca-selector";
 
 const formSchema = z.object({
   project_name: z
@@ -103,7 +95,7 @@ export default function CreateProjectForm() {
   return (
     <>
       <form
-        className="space-y-4 p-4"
+        className="space-y-4 p-2"
         id="create-project-form"
         onSubmit={form.handleSubmit(handleSubmit)}
       >
@@ -140,7 +132,7 @@ export default function CreateProjectForm() {
           form={form}
         />
       </form>
-      <CardFooter className="flex-col gap-2 border-t px-4">
+      <CardFooter className="flex-col gap-2 border-t p-2">
         <Button
           form="create-project-form"
           className="w-full"

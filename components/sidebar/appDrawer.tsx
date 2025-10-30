@@ -28,7 +28,7 @@ export default function AppDrawer({ trigger, sidebarOptions }: AppDrawerProps) {
             prefetch={true}
           >
             {pathname === item.href && (
-              <span className="bg-primary w-0.5 h-full absolute left-0"></span>
+              <span className="bg-primary w-1 h-full absolute left-0"></span>
             )}
             <Button
               variant={"ghost"}

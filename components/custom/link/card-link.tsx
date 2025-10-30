@@ -14,7 +14,7 @@ export default function CardLink({ href, children, className }: CardLinkProps) {
     <Link href={href}>
       <Card
         className={cn(
-          `shadow-none transition-transform duration-200 hover:shadow-xs hover:bg-white/50 p-0 rounded-md`,
+          `shadow-xs transition-transform duration-200 hover:shadow-xs hover:bg-white/50 p-0 rounded-md`,
           className
         )}
       >

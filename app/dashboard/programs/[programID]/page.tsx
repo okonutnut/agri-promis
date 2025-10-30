@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { ProjectType } from "@/components/types";
-import { Check, ChevronRight, Funnel, Search } from "lucide-react";
+import { Box, Check, ChevronRight, Funnel } from "lucide-react";
 import { useParams } from "next/navigation";
 import { getProgramNavItems } from "@/components/sidebar/navitems";
 import Link from "next/link";
@@ -17,19 +17,22 @@ import cornGrowthStages from "@/data/growth-stages.json";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllProjectsByProgramIDAction } from "@/app/actions/ProjectAction";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import MunicipalitySelector from "./components/municipality-dropdown";
+import MunicipalitySelector from "../../../../components/custom/dropdown/municipality-dropdown";
+import YearsDropdown from "@/components/custom/dropdown/years-dropdown";
 import { getPercentFromStages } from "@/lib/utils";
 import { CirclePercent } from "@/components/custom/charts/circle-percent";
 import { Badge } from "@/components/ui/badge";
 import CardLink from "@/components/custom/link/card-link";
+import SearchInput from "@/components/custom/input/search-input";
+import { format } from "date-fns";
 
-export default function ProgramDashboardPage() {
+export default function ProjectsByProgramPage() {
   const { programID } = useParams();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("");
   const [projectStatus, setProjectStatus] = useState<number>(1);
+  const [yearFilter, setYearFilter] = useState("");
 
   const { data, isLoading, error } = useRealtimeQuery({
     queryKey: ["allProjectsByProgramId", programID as string],
@@ -53,12 +56,20 @@ export default function ProgramDashboardPage() {
               ? project.location?.toLowerCase().includes(filter.toLowerCase())
               : true // If filter is empty ("All"), include all
         )
+        .filter((project: ProjectType) =>
+          yearFilter
+            ? new Date(project.start_date!).getFullYear().toString() ===
+              yearFilter
+            : true
+        )
         .filter((project: ProjectType) => project.status === projectStatus),
-    [data, searchQuery, filter, projectStatus]
+    [data, searchQuery, filter, yearFilter, projectStatus]
   );
 
   return (
     <CustomPageLayout
+      pageTitle="Projects List"
+      pageDescription="List of projects under the program."
       isLoading={isLoading}
       error={error}
       navItems={getProgramNavItems(programID as string)}
@@ -67,35 +78,35 @@ export default function ProgramDashboardPage() {
         <Link href={`/dashboard/new/${programID}`}>
           <Button>New project</Button>
         </Link>
-        <div className="relative w-full max-w-sm">
-          <Input
-            placeholder="Search..."
-            className="pl-8"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+        <div className="w-full md:max-w-md flex flex-nowrap gap-3">
+          <SearchInput
+            placeholder="Search projects..."
+            setSearchTerm={setSearchQuery}
           />
-          <Search className="absolute left-2 top-1/2 w-4 h-4 transform -translate-y-1/2 text-gray-500" />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="shadow-xs">
+                <Funnel />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="mx-1">
+              <DropdownMenuItem onClick={() => setProjectStatus(1)}>
+                {projectStatus === 1 && <Check />}
+                <span className={`w-2 h-2 bg-primary rounded-full`} />
+                Active
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setProjectStatus(0)}>
+                {projectStatus === 0 && <Check />}
+                <span className={`w-2 h-2 bg-red-500 rounded-full`} />
+                Inactive
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-        <MunicipalitySelector onChange={setFilter} />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline">
-              <Funnel />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="mx-1">
-            <DropdownMenuItem onClick={() => setProjectStatus(1)}>
-              {projectStatus === 1 && <Check />}
-              <span className={`w-2 h-2 bg-primary rounded-full`} />
-              Active
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setProjectStatus(0)}>
-              {projectStatus === 0 && <Check />}
-              <span className={`w-2 h-2 bg-red-500 rounded-full`} />
-              Inactive
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="w-full md:max-w-md flex flex-wrap gap-2">
+          <MunicipalitySelector onChange={setFilter} />
+          <YearsDropdown onChange={setYearFilter} />
+        </div>
       </div>
       {filteredProjects && filteredProjects?.length > 0 ? (
         <div className="flex flex-wrap justify-start items-center gap-2">
@@ -103,42 +114,48 @@ export default function ProgramDashboardPage() {
             <CardLink
               href={`/dashboard/projects/${project.id}`}
               key={project.id}
-              className="group min-h-36 min-w-sm flex flex-col items-start h-full p-4 space-y-2 gap-0"
+              className="group min-w-sm flex flex-col items-start h-full p-4 space-y-2 gap-0"
             >
-              <span className="w-full flex justify-between items-center font-semibold">
-                {project.project_name}
+              <div className="w-full flex justify-between items-start">
+                <div className="flex items-start gap-4">
+                  <span className="border rounded-full p-2 border-primary">
+                    <Box className="h-5 w-5 text-primary" />
+                  </span>
+                  <div className="font-semibold flex flex-col gap-2">
+                    {project.project_name}
+                    <pre className="text-xs font-normal">
+                      {project.location}
+                    </pre>
+                    <small>
+                      Date Created:&nbsp;
+                      {format(new Date(project.created_at!), "PPp")}
+                    </small>
+                    <Badge className="font-semibold rounded-md">
+                      {
+                        cornGrowthStages.find(
+                          (stage) =>
+                            stage.value ===
+                            project.progress_indicator!.toString()
+                        )?.label
+                      }
+                      &nbsp; {project.progress_indicator == 1 ? "" : "Stages"}
+                    </Badge>
+                    <div className="flex items-center justify-end">
+                      <span className="w-16 h-16">
+                        <CirclePercent
+                          percent={getPercentFromStages(
+                            cornGrowthStages,
+                            project.progress_indicator!.toString()
+                          )}
+                        />
+                      </span>
+                    </div>
+                  </div>
+                </div>
                 <span className="ml-2 transform transition-transform group-hover:translate-x-2">
                   <ChevronRight className="h-4 w-4" />
                 </span>
-              </span>
-              <span className="font-mono text-xs">{project.location}</span>
-
-              {/* FOOTER */}
-              <section className="flex items-center justify-between w-full mt-auto">
-                <Badge
-                  variant={project.status == 1 ? "default" : "destructive"}
-                  className="text-xs uppercase rounded-md"
-                >
-                  {project.status == 1 ? "active" : "inactive"}
-                </Badge>
-                <div className="flex items-center">
-                  <span className="font-medium text-xs">
-                    {
-                      cornGrowthStages.find(
-                        (stage) =>
-                          stage.value ===
-                          project.progress_indicator!!.toString()
-                      )?.label
-                    }
-                    &nbsp; {project.progress_indicator == 1 ? "" : "Stages"}
-                  </span>
-                  <span className="w-14 h-14">
-                    <CirclePercent
-                      percent={getPercentFromStages(cornGrowthStages, "1")}
-                    />
-                  </span>
-                </div>
-              </section>
+              </div>
             </CardLink>
           ))}
         </div>

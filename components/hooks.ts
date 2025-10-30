@@ -13,7 +13,6 @@ import {
 } from "@/app/actions/ActivityLogAction";
 import {
   SelectUserCurrentLocationAction,
-  UpdateUserCurrentLocationAction,
 } from "@/app/actions/UserSessionAction";
 import {
   SelectAllFieldTechniciansByProjectIDAction,

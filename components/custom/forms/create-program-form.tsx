@@ -46,7 +46,7 @@ export default function CreateProgramForm() {
   return (
     <>
       <form
-        className="space-y-4 p-4"
+        className="space-y-4 p-2"
         id="create-program-form"
         onSubmit={form.handleSubmit(handleSubmit)}
       >
@@ -58,8 +58,9 @@ export default function CreateProgramForm() {
           optinal
         />
       </form>
-      <CardFooter className="flex-col gap-2 border-t px-4">
+      <CardFooter className="flex-col gap-2 border-t p-2">
         <Button
+          size="sm"
           form="create-program-form"
           className="w-full px-4 py-2"
           variant={isPending ? "ghost" : "default"}
@@ -68,6 +69,7 @@ export default function CreateProgramForm() {
           {isPending ? <Spinner /> : "Create Program"}
         </Button>
         <Button
+          size="sm"
           variant={"outline"}
           className="w-full"
           disabled={isPending}

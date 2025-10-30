@@ -4,12 +4,14 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
-import { Boxes, ChevronRight, Search } from "lucide-react";
+import { Boxes, ChevronRight } from "lucide-react";
 import { getDashboardNavItems } from "@/components/sidebar/navitems";
-import { Input } from "@/components/ui/input";
 import CardLink from "@/components/custom/link/card-link";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllProgramsAction } from "@/app/actions/ProgramAction";
+import SearchInput from "@/components/custom/input/search-input";
+import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
 
 export default function ProgramsPage() {
   const { data, isLoading, error } = useRealtimeQuery({
@@ -39,15 +41,10 @@ export default function ProgramsPage() {
             <Link href="/dashboard/new/">
               <Button className="w-full">New Program</Button>
             </Link>
-            <div className="relative w-full max-w-sm">
-              <Input
-                placeholder="Search..."
-                className="pl-8"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <Search className="absolute left-2 top-1/2 w-4 h-4 transform -translate-y-1/2 text-gray-500" />
-            </div>
+            <SearchInput
+              setSearchTerm={setSearchQuery}
+              className="w-full max-w-md"
+            />
           </div>
 
           {filteredPrograms && filteredPrograms?.length > 0 ? (
@@ -59,15 +56,21 @@ export default function ProgramsPage() {
                   className="group min-w-sm flex flex-col items-start h-full p-4 space-y-2 gap-0"
                 >
                   <div className="w-full flex justify-between items-start">
-                    <div className="flex items-center gap-4">
-                      <span className="border rounded-full p-2">
-                        <Boxes className="h-5 w-5 text-gray-500" />
+                    <div className="flex items-start gap-4">
+                      <span className="border border-primary rounded-full p-2">
+                        <Boxes className="h-5 w-5 text-primary" />
                       </span>
-                      <div className="font-semibold">
-                        {program.program_name} <br />
-                        <small className="font-normal">
-                          {program.project_count[0].count ?? 0} projects
+                      <div className="flex flex-col">
+                        <span className="font-semibold">
+                          {program.program_name}
+                        </span>
+                        <small className="mb-2">
+                          Created on:&nbsp;
+                          {format(new Date(program.created_at!), "PPp")}
                         </small>
+                        <Badge className="font-normal rounded-md">
+                          {program.project_count[0].count ?? 0} project/s
+                        </Badge>
                       </div>
                     </div>
                     <span className="ml-2 transform transition-transform group-hover:translate-x-2">
