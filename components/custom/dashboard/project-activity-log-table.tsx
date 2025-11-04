@@ -9,22 +9,27 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import SkeletonLoading from "../layout/skeleton-loading";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectActivityLogsByProjectIDAction } from "@/app/actions/ActivityLogAction";
+import { useParams } from "next/navigation";
 
-export default function ProjectActivityLogTable(value: { project_id: string }) {
+export default function ProjectActivityLogTable() {
+  const { projectID } = useParams();
+
   const { data, isLoading, error } = useRealtimeQuery({
-    queryKey: ["project-activity-logs", value.project_id],
-    queryFn: () => SelectActivityLogsByProjectIDAction(value.project_id),
+    queryKey: ["project-activity-logs", projectID as string],
+    queryFn: () => SelectActivityLogsByProjectIDAction(projectID as string),
     table: "activity_logs",
   });
 
   return (
-    <div>
-      <span className="text-lg font-semibold mb-2">Activity Logs</span>
-      <Card className="p-0 rounded-md shadow-xs max-h-[300px] overflow-y-auto">
+    <Card className="p-2 rounded-md shadow-xs overflow-y-auto">
+      <CardHeader className="p-0 justify-between">
+        <CardTitle className="text-lg">Activity Logs</CardTitle>
+      </CardHeader>
+      <CardContent className="flex-1 p-0">
         {isLoading ? (
           <SkeletonLoading />
         ) : error ? (
@@ -48,7 +53,9 @@ export default function ProjectActivityLogTable(value: { project_id: string }) {
               {data &&
                 data.slice(0, 10).map((activity) => (
                   <TableRow key={activity.id}>
-                    <TableCell>{activity.user.fullname}</TableCell>
+                    <TableCell>
+                      {activity.user?.fullname ?? "Unknown User"}
+                    </TableCell>
                     <TableCell>{activity.description}</TableCell>
                     <TableCell className="text-right">
                       {format(new Date(activity.created_at), "PPpp")}
@@ -58,7 +65,7 @@ export default function ProjectActivityLogTable(value: { project_id: string }) {
             </TableBody>
           </Table>
         )}
-      </Card>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

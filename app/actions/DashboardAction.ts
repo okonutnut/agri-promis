@@ -4,36 +4,33 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 
 // DASHBOARD ACTIONS
-export async function SelectDashboardItemsAction(projectID: string) {
+export async function SelectDashboardItemsAction(projectLocationID: string) {
   const supabase = await createClient(cookies());
+
   // 1. total assigned ft
   const { data: APData, error: APError } = await supabase
     .from("assigned_projects")
     .select("*")
-    .eq("project_id", projectID);
+    .eq("project_location_id", projectLocationID);
 
-  if (APError) {
-    throw APError;
-  }
+  if (APError) throw APError;
 
   // 2. total monitoring reports
   const { data: MData, error: MError } = await supabase
     .from("monitoring")
     .select("*")
-    .eq("project_id", projectID);
-  if (MError) {
-    throw MError;
-  }
+    .eq("project_location_id", projectLocationID);
+
+  if (MError) throw MError;
 
   // 3. project progress indicator
   const { data: PData, error: projectError } = await supabase
-    .from("projects")
+    .from("project_location")
     .select("progress_indicator")
-    .eq("id", projectID)
+    .eq("id", projectLocationID)
     .single();
-  if (projectError) {
-    throw projectError;
-  }
+
+  if (projectError) throw projectError;
 
   return {
     ap: APData,
@@ -111,7 +108,7 @@ export async function SelectAdminDashboardItemsAction() {
   const nowDate = new Date().toISOString().split("T")[0]; // e.g. "2025-09-18"
 
   const { data: futureOrders } = await supabase
-    .from("travel_order_projects")
+    .from("travel_order_itinerary_items")
     .select(
       `
     *,
@@ -220,9 +217,8 @@ export async function SelectUserCountPerTypeAction() {
 export async function SelectMonitoringReportsCountByDate(project_id: string) {
   const supabase = await createClient(cookies());
 
-  // Get project start and end dates
   const { data: project, error: projectError } = await supabase
-    .from("projects")
+    .from("project_location")
     .select("start_date, end_date")
     .eq("id", project_id)
     .single();
@@ -230,19 +226,29 @@ export async function SelectMonitoringReportsCountByDate(project_id: string) {
   if (projectError) throw projectError;
   if (!project) return [];
 
-  const { start_date, end_date } = project;
+  const start_date = project.start_date;
 
-  // Get monitoring reports within project range
+  let end_date: string;
+  if (project.end_date) {
+    end_date = project.end_date;
+  } else {
+    const today = new Date();
+    const dayOfWeek = today.getDay();            // Sunday = 0, Monday = 1 … Saturday = 6 :contentReference[oaicite:0]{index=0}
+    const daysUntilSunday = (7 - dayOfWeek) % 7; // if today is Sunday, this gives 0
+    const sunday = new Date(today);
+    sunday.setDate(today.getDate() + daysUntilSunday);
+    end_date = sunday.toISOString().split("T")[0];
+  }
+
   const { data: reports, error: reportsError } = await supabase
     .from("monitoring")
     .select("id, created_at")
-    .eq("project_id", project_id)
+    .eq("project_location_id", project_id)
     .gte("created_at", start_date)
     .lte("created_at", end_date);
 
   if (reportsError) throw reportsError;
 
-  // Generate date range
   const start = new Date(start_date);
   const end = new Date(end_date);
   const dateArray = [];
@@ -250,7 +256,6 @@ export async function SelectMonitoringReportsCountByDate(project_id: string) {
     dateArray.push(new Date(d));
   }
 
-  // Count per day
   const counts = dateArray.map((date) => {
     const dateString = date.toISOString().split("T")[0];
     const count = reports.filter(

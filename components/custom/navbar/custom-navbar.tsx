@@ -25,40 +25,20 @@ import { Skeleton } from "@/components/ui/skeleton";
 import MobileNavbar from "./mobile-nav";
 import AppDrawer from "@/components/sidebar/appDrawer";
 import { Separator } from "@/components/ui/separator";
-import { useMemo } from "react";
-import {
-  useSelectAssignedProjectsByFieldTechnicianHook,
-  useSelectAllProgramsByAgriculturistHook,
-  useSelectAllProjectsByProgramIDHook,
-  useSelectProgramAndProjectDetailsByProgjectIDHook,
-} from "@/components/hooks";
-import {
-  NavigationItemType,
-  ProgramType,
-  ProjectType,
-} from "@/components/types";
 import NotificationRequest from "../notifications/notification";
+import { ProgramType } from "@/components/types";
+import { useMemo } from "react";
+import { useRealtimeQuery } from "@/hooks/use-realtime";
+import { SelectAllProgramsWithProjectsAction } from "@/app/actions/ProgramAction";
 
-// Constants
 const PATHS = {
   FIELD_TECHNICIAN: "/field-technician/projects",
   NEW_PROGRAM: "/dashboard/new",
   NEW_PROJECT: "/dashboard/new/[programUID]",
   PROGRAMS: "/dashboard/programs",
   PROJECTS: "/dashboard/projects/",
-  TEAM: "/dashboard/team",
-  ACTIVITY_LOGS: "/dashboard/activity-logs",
 } as const;
 
-// Types
-type NavbarProps = {
-  role: "admin" | "user";
-  noSidebar?: boolean;
-  navItems?: NavigationItemType[];
-  pageTitle?: string;
-};
-
-// Shared Components
 const BreadcrumbSeparator = () => (
   <span className="text-gray-400">
     <Slash className="h-3 w-3 mx-1" />
@@ -67,67 +47,58 @@ const BreadcrumbSeparator = () => (
 
 const ProgramDropdown = ({
   programID,
-  programData,
-  allProgramsData,
-  programProjectsData,
+  allPrograms,
 }: {
-  programID: string | undefined;
-  programData: ProgramType | undefined;
-  allProgramsData: ProgramType[] | undefined;
-  programProjectsData: any;
+  programID?: string;
+  allPrograms: ProgramType[];
 }) => {
-  const currentProgramID = programID ?? programProjectsData?.program_id;
+  const currentProgram = allPrograms.find((p) => p.id === programID);
+
   return (
     <div className="flex items-center gap-2 min-w-max">
       <DropdownMenu>
         <Link
-          href={`/dashboard/programs/${currentProgramID}`}
-          className="text-black flex items-center gap-2 cursor-pointer whitespace-nowrap"
+          href={`/dashboard/programs/${currentProgram?.id}`}
+          className="text-black flex items-center gap-2 cursor-pointer"
           prefetch={true}
         >
-          <Boxes className="h-4 w-4 flex-shrink-0 text-[#707070]" />
+          <Boxes className="h-4 w-4 text-[#707070]" />
           <span className="min-w-[150px] truncate">
-            {programData?.program_name ??
-              programProjectsData?.programs.program_name ?? (
-                <Skeleton className="w-full h-5" />
-              )}
+            {currentProgram?.program_name ?? (
+              <Skeleton className="w-full h-5" />
+            )}
           </span>
         </Link>
+
         <DropdownMenuTrigger asChild>
-          <Button
-            className="ml-2 h-7 w-4 flex-shrink-0 text-[#707070]"
-            variant="ghost"
-          >
+          <Button className="ml-2 h-7 w-4 text-[#707070]" variant="ghost">
             <ChevronsUpDown />
           </Button>
         </DropdownMenuTrigger>
+
         <DropdownMenuContent align="start" className="m-1">
-          {allProgramsData?.map((program: ProgramType) => (
+          {allPrograms.map((program) => (
             <Link
               key={program.id}
               href={`/dashboard/programs/${program.id}`}
               prefetch={true}
             >
               <DropdownMenuItem className="justify-between w-full h-7 cursor-pointer hover:bg-gray-100">
-                {program?.program_name ?? <Skeleton className="w-full h-5" />}
-                {(program.id === programID ||
-                  program.id === currentProgramID) && (
-                  <Check className="ml-2 h-4 w-4" />
-                )}
+                {program.program_name}
+                {program.id === programID && <Check className="ml-2 h-4 w-4" />}
               </DropdownMenuItem>
             </Link>
           ))}
+
           <DropdownMenuSeparator />
           <Link href={PATHS.PROGRAMS} prefetch={true}>
-            <DropdownMenuItem className="justify-between w-full h-7 cursor-pointer hover:bg-gray-100">
-              All Programs
-            </DropdownMenuItem>
+            <DropdownMenuItem>All Programs</DropdownMenuItem>
           </Link>
+
           <DropdownMenuSeparator />
           <Link href={PATHS.NEW_PROGRAM} prefetch={true}>
             <DropdownMenuItem>
-              <Plus />
-              New program
+              <Plus className="h-4 w-4 mr-1" /> New Program
             </DropdownMenuItem>
           </Link>
         </DropdownMenuContent>
@@ -137,38 +108,38 @@ const ProgramDropdown = ({
 };
 
 const ProjectDropdown = ({
+  program,
   projectID,
-  projects,
   role,
 }: {
-  projectID: string;
-  projects: ProjectType[] | undefined;
+  program: ProgramType;
+  projectID?: string;
   role: "admin" | "user";
 }) => {
-  const currentProject = projects?.find((project) => project.id === projectID);
   const pathname = usePathname();
+  const projects = program.projects ?? [];
+  const currentProject = projects.find((p: any) => p.id === projectID);
+
   return (
     <DropdownMenu>
       <Link
         href={pathname}
-        className="text-black whitespace-nowrap flex items-center gap-2 h-full"
-        prefetch={true}
+        className="text-black flex items-center gap-2 whitespace-nowrap"
       >
-        <Box className="h-4 w-4 flex-shrink-0 text-[#707070]" />
-        <span className="min-w-[150px] truncate inline-block">
+        <Box className="h-4 w-4 text-[#707070]" />
+        <span className="min-w-[150px] truncate">
           {currentProject?.project_name ?? <Skeleton className="w-full h-5" />}
         </span>
       </Link>
+
       <DropdownMenuTrigger asChild>
-        <Button
-          className="ml-2 h-7 w-4 flex-shrink-0 text-[#707070]"
-          variant="ghost"
-        >
+        <Button className="ml-2 h-7 w-4 text-[#707070]" variant="ghost">
           <ChevronsUpDown />
         </Button>
       </DropdownMenuTrigger>
+
       <DropdownMenuContent align="start" className="m-1">
-        {projects?.map((project: ProjectType) => (
+        {projects.map((project: any) => (
           <Link
             key={project.id}
             href={`${
@@ -176,35 +147,25 @@ const ProjectDropdown = ({
             }/${project.id}`}
             prefetch={true}
           >
-            <DropdownMenuItem className="justify-between w-full h-7 cursor-pointer hover:bg-gray-100">
-              {project?.project_name ?? <Skeleton className="w-full h-5" />}
+            <DropdownMenuItem className="justify-between w-full h-7 hover:bg-gray-100">
+              {project.project_name}
               {project.id === projectID && <Check className="ml-2 h-4 w-4" />}
             </DropdownMenuItem>
           </Link>
         ))}
+
         <Separator />
-        <Link
-          href={
-            role === "admin" && projects?.length
-              ? `/dashboard/programs/${projects[0].program_id}`
-              : PATHS.FIELD_TECHNICIAN
-          }
-          prefetch={true}
-        >
-          <DropdownMenuItem className="justify-between w-full h-7 cursor-pointer hover:bg-gray-100">
-            All Projects
-          </DropdownMenuItem>
+
+        <Link href={`/dashboard/programs/${program.id}`} prefetch={true}>
+          <DropdownMenuItem>All Projects</DropdownMenuItem>
         </Link>
+
         {role === "admin" && (
           <>
             <Separator />
-            <Link
-              href={`/dashboard/new/${projects?.[0]?.program_id}`}
-              prefetch={true}
-            >
+            <Link href={`/dashboard/new/${program.id}`} prefetch={true}>
               <DropdownMenuItem>
-                <Plus />
-                New Project
+                <Plus className="h-4 w-4 mr-1" /> New Project
               </DropdownMenuItem>
             </Link>
           </>
@@ -214,48 +175,39 @@ const ProjectDropdown = ({
   );
 };
 
-// Main Navbar Component
+interface CustomNavbarProps {
+  role: "admin" | "user";
+  noSidebar?: boolean;
+  navItems?: any[];
+  pageTitle?: string;
+}
+
 export default function CustomNavbar({
   role,
   noSidebar,
   navItems,
   pageTitle,
-}: NavbarProps) {
+}: CustomNavbarProps) {
   const { programID, projectID } = useParams();
-  const hasProgramOrProject = Boolean(programID || projectID);
+  const { data: programs } = useRealtimeQuery({
+    table: "programs",
+    queryKey: ["allProgramsByUserIDForNavbar"],
+    queryFn: SelectAllProgramsWithProjectsAction,
+  });
 
-  // Admin Data
-  const { data: allProgramsData } = useSelectAllProgramsByAgriculturistHook();
-  const programData = useMemo(() => {
-    return allProgramsData?.find(
-      (program: ProgramType) => program.id === programID
-    );
-  }, [programID, allProgramsData]);
-
-  const { data: programProjectsData } =
-    useSelectProgramAndProjectDetailsByProgjectIDHook(projectID as string);
-  const { data: allProjectsByProgramIDData } =
-    useSelectAllProjectsByProgramIDHook(
-      programProjectsData?.program_id as string
-    );
-
-  // User Data
-  const { data: projects } = useSelectAssignedProjectsByFieldTechnicianHook();
+  const program = useMemo(
+    () => programs?.find((p) => p.id === programID),
+    [programID, programs]
+  );
 
   return (
     <>
       <MobileNavbar />
-      <nav className="bg-primary text-black w-screen flex items-center justify-between h-12 px-2 z-50 border-b border-gray-200">
-        <div className="flex items-center gap-4 overflow-x-auto overflow-y-hidden">
+      <nav className="bg-primary text-black w-screen flex items-center justify-between h-12 px-2 border-b z-50">
+        <div className="flex items-center gap-4 overflow-x-auto">
           <div className="flex items-center gap-2 min-w-max">
-            <Link href="/" className="hidden sm:inline">
-              <Image
-                src="/logo.png"
-                alt="app-logo"
-                width={32}
-                height={32}
-                className="h-8 w-8 flex-shrink-0 text-[#707070]"
-              />
+            <Link href="/" className="hidden sm:inline cursor-pointer">
+              <Image src="/logo.png" alt="app-logo" width={32} height={32} />
             </Link>
 
             {!noSidebar && (
@@ -271,47 +223,26 @@ export default function CustomNavbar({
 
             <BreadcrumbSeparator />
 
-            {(() => {
-              if (!hasProgramOrProject) {
-                return (
-                  <span className="text-black whitespace-nowrap">
-                    {pageTitle}
-                  </span>
-                );
-              }
+            {!programID && !projectID ? (
+              <span className="text-black whitespace-nowrap">{pageTitle}</span>
+            ) : (
+              <>
+                {program && (
+                  <ProgramDropdown
+                    programID={programID as string}
+                    allPrograms={programs ?? []}
+                  />
+                )}
 
-              if (role === "admin") {
-                return (
-                  <>
-                    <ProgramDropdown
-                      programID={programID as string}
-                      programData={programData}
-                      allProgramsData={allProgramsData}
-                      programProjectsData={programProjectsData}
-                    />
-                    {projectID && (
-                      <ProjectDropdown
-                        projectID={projectID as string}
-                        projects={allProjectsByProgramIDData}
-                        role={role}
-                      />
-                    )}
-                  </>
-                );
-              }
-
-              if (role === "user") {
-                return (
+                {program && projectID && (
                   <ProjectDropdown
+                    program={program}
                     projectID={projectID as string}
-                    projects={projects}
                     role={role}
                   />
-                );
-              }
-
-              return null;
-            })()}
+                )}
+              </>
+            )}
           </div>
         </div>
 

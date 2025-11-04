@@ -34,7 +34,7 @@ const createDraftData = (
   }));
 
   return {
-    project_id: projectID,
+    project_location_id: projectID,
     images: processedImages,
     purpose: formData.purpose || "",
     findings: formData.findings || [],
@@ -70,8 +70,6 @@ export default function SaveDraftButton({
 
       const formData = form.getValues();
       const draftData = createDraftData(projectID as string, formData, images);
-
-      console.log("Saving draft data:", draftData); // <-- Add this line
 
       const key =
         draftKey || `draft_${data?.user.id}_${new Date().toISOString()}`;

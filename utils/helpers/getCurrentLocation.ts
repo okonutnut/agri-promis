@@ -1,6 +1,5 @@
 "use client";
 
-import { UpdateUserCurrentLocationAction } from "@/app/actions/UserSessionAction";
 import { useCallback, useEffect, useState } from "react";
 
 type LatLng = { lat: number; lng: number } | null;

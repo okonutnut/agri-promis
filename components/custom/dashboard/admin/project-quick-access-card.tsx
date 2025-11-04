@@ -1,7 +1,7 @@
 "use client";
 
 import { SelectProjectByIDsAction } from "@/app/actions/QuickAccessAction";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { getQuickAccessProjects } from "@/utils/helpers/quickAccessHooks";
 import {
@@ -24,41 +24,45 @@ export default function ProjectQuickAccessCard() {
 
   return (
     <section className="h-full w-full">
-      <span className="text-lg font-semibold">Quick Access</span>
-      <Card className="p-1 rounded-md shadow-xs">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px]">Project Name</TableHead>
-              <TableHead className="text-right"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data && data.length > 0 ? (
-              data.map((project) => (
-                <TableRow key={project.id} className="h-7 border-b">
-                  <TableCell className="text-xs">
-                    <strong>{project.project_name}</strong>
-                    <pre>{project.location}</pre>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Link href={`/dashboard/projects/${project.id}`}>
-                      <Button variant={"link"} size={"sm"}>
-                        Open
-                      </Button>
-                    </Link>
+      <Card className="p-2 rounded-md shadow-xs">
+        <CardHeader className="items-center p-0">
+          <CardTitle className="text-lg">Quick Access</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[100px]">Project Name</TableHead>
+                <TableHead className="text-right"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data && data.length > 0 ? (
+                data.map((project) => (
+                  <TableRow key={project.id} className="h-7 border-b">
+                    <TableCell className="text-xs">
+                      <strong>{project.project_name}</strong>
+                      <pre>{project.location ?? ""}</pre>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Link href={`/dashboard/projects/${project.id}`}>
+                        <Button variant={"link"} size={"sm"}>
+                          Open
+                        </Button>
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow className="h-7">
+                  <TableCell className="text-xs text-center" colSpan={2}>
+                    No Quick Access Projects
                   </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow className="h-7">
-                <TableCell className="text-xs text-center" colSpan={2}>
-                  No Quick Access Projects
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
       </Card>
     </section>
   );

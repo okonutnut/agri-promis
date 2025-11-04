@@ -157,41 +157,36 @@ export async function SelectAllMembersAction() {
     .select(
       `
       *,
+      admin_programs:programs!programs_admin_id_fkey (*, projects(count)),
       assigned_projects (
-        project_id,
-        projects (
-          id,
-          program_id
+        *,
+        project_location (
+          *,
+          projects (*)
         )
-      ),
-      programs:programs!programs_admin_id_fkey (
-        id
       )
     `
     )
     .order("created_at", { ascending: false });
 
-  if (error) {
-    throw error;
-  }
+  if (error) throw error;
 
-  return data.map((user) => {
-    // programs from assigned projects
-    const programFromAssigned =
-      user.assigned_projects
-        ?.map((ap: any) => ap.projects?.program_id)
-        .filter(Boolean) ?? [];
+  return data.map((user) => ({
+    ...user,
+    program_ids: [
+      ...new Set([
+        // programs where user is admin
+        ...(user.admin_programs?.map((p: any) => p.id) ?? []),
 
-    // programs where user is admin
-    const programFromAdmin =
-      user.programs?.map((p: { id: string }) => p.id).filter(Boolean) ?? [];
-
-    return {
-      ...user,
-      program_ids: [...new Set([...programFromAssigned, ...programFromAdmin])],
-    };
-  }) as (UserProfileType & { program_ids: string[] })[];
+        // programs from assigned projects
+        ...(user.assigned_projects
+          ?.map((ap: any) => ap.project_location?.projects?.program_id)
+          .filter(Boolean) ?? []),
+      ]),
+    ],
+  })) as (UserProfileType & { program_ids: string[] })[];
 }
+
 
 export async function SelectAllMembersByRoleAction(role: number) {
   const supabase = await createClient(cookies());

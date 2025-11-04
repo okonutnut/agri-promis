@@ -6,7 +6,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import FormSelect from "@/components/custom/select/form-select";
 import { Loader2, Send } from "lucide-react";
-import { useInsertMemberHook, useUpdateMemberHook } from "@/components/hooks";
+import { useUpdateMemberHook } from "@/components/hooks";
 import { UserProfileType } from "@/components/types";
 import { Label } from "@/components/ui/label";
 import ChangeStatusButton from "./change-status-button";
@@ -17,8 +17,9 @@ import {
   useModal,
   useSheet,
 } from "@/components/custom/layout/custom-page-layout";
-import { sendNotification, sendNotificationToUser } from "@/lib/utils";
-import NonFormInput from "@/components/custom/input/non-form-input";
+import { useUniversalMutation } from "@/hooks/use-universal-mutation";
+import { InsertMemberAction } from "@/app/actions/MemberAction";
+import FormInput from "@/components/custom/input/form-input";
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -32,8 +33,7 @@ const formSchema = z.object({
   position: z.string().min(1, "Position is required"),
   role: z.coerce.number().min(1, "Role is required"),
 });
-
-type MemberType = z.infer<typeof formSchema>;
+type TeamMemberType = z.infer<typeof formSchema>;
 
 type TeamMemberFormProps = {
   isAddMode: boolean;
@@ -49,7 +49,7 @@ export function TeamMemberForm({ isAddMode, data }: TeamMemberFormProps) {
     { value: 2, label: "System User" },
   ];
 
-  const form = useForm<MemberType>({
+  const form = useForm<TeamMemberType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       id: data?.id || "",
@@ -61,8 +61,15 @@ export function TeamMemberForm({ isAddMode, data }: TeamMemberFormProps) {
   });
 
   // INSERT MEMBER HOOK
+  // const { mutate: insertMutate, isPending: isInsertPending } =
+  //   useInsertMemberHook();
   const { mutate: insertMutate, isPending: isInsertPending } =
-    useInsertMemberHook();
+    useUniversalMutation({
+      mutationFn: async (data: TeamMemberType) =>
+        await InsertMemberAction(data),
+      invalidateKeys: ["team-members"],
+    });
+
   // UPDATE MEMBER HOOK
   const { mutate: updateMutate, isPending: isUpdatePending } =
     useUpdateMemberHook();
@@ -75,12 +82,11 @@ export function TeamMemberForm({ isAddMode, data }: TeamMemberFormProps) {
 
   const isPending = isInsertPending || isUpdatePending;
 
-  const onSubmit = (data: MemberType) => {
+  const onSubmit = (data: TeamMemberType) => {
     setPageState("loading");
     if (isAddMode) {
       insertMutate(data, {
         onSuccess: () => {
-          sendNotification("A new team member has been added.");
           form.reset();
           setPageState("idle");
           closeSheet();
@@ -89,10 +95,6 @@ export function TeamMemberForm({ isAddMode, data }: TeamMemberFormProps) {
     } else {
       updateMutate(data, {
         onSuccess: () => {
-          sendNotificationToUser(
-            data.id!,
-            "Your account information has been updated."
-          );
           form.reset();
           setPageState("idle");
           closeSheet();
@@ -109,9 +111,24 @@ export function TeamMemberForm({ isAddMode, data }: TeamMemberFormProps) {
         id="team-member-form"
         onSubmit={form.handleSubmit(onSubmit)}
       >
-        <NonFormInput label="Fullname" defaultValue={data?.fullname} readOnly />
-        <NonFormInput label="Email" defaultValue={data?.email} readOnly />
-        <NonFormInput label="Position" defaultValue={data?.position} readOnly />
+        <FormInput
+          form={form}
+          name="fullname"
+          label="Fullname"
+          readOnly={!isAddMode}
+        />
+        <FormInput
+          form={form}
+          name="email"
+          label="Email"
+          readOnly={!isAddMode}
+        />
+        <FormInput
+          form={form}
+          name="position"
+          label="Position"
+          readOnly={!isAddMode}
+        />
         <FormSelect
           options={roles.map((role) => ({
             value: role.value,

@@ -22,6 +22,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "worker/**/*.ts", "app/field-technician/dashboard/layout.tsx", "app/field-technician/projects/[projectID]/monitoring-report/loading.tsx.bak", "app/dashboard/projects/[projectID]/monitoring-reports/loading.tsx.back", "app/dashboard/projects/[projectID]/field-technicians/loading.tsx.back", "app/field-technician/travel-order/components/travel-order-form.tsx.bak"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "worker/**/*.ts", "app/field-technician/dashboard/layout.tsx", "app/field-technician/projects/[projectID]/monitoring-report/loading.tsx.bak", "app/dashboard/projects/[projectID]/monitoring-reports/loading.tsx.back", "app/dashboard/projects/[projectID]/field-technicians/loading.tsx.back", "app/field-technician/travel-order/components/travel-order-form.tsx.bak", "components/custom/navbar/custom-navbar copy.tsx.bak"],
   "exclude": ["node_modules"]
 }

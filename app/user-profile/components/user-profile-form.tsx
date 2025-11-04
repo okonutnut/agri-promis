@@ -9,7 +9,6 @@ import FormSelect from "@/components/custom/select/form-select";
 import { Loader2, Send } from "lucide-react";
 import { useUpdateMemberHook } from "@/components/hooks";
 import { useState } from "react";
-import { sendNotification, sendNotificationToUser } from "@/lib/utils";
 import { useSelectUserProfileHook } from "@/app/hooks/UserProfileHook";
 import NonFormInput from "@/components/custom/input/non-form-input";
 
@@ -57,16 +56,6 @@ export default function UserProfileForm() {
     // Insert logic removed: always call update mutate
     updateMutate(data, {
       onSuccess: () => {
-        // notify the affected user that their account was updated
-        if (data.id) {
-          sendNotificationToUser(
-            data.id,
-            "Your account information has been updated."
-          );
-        } else {
-          // fallback notification for non-user updates
-          sendNotification("Account information has been updated.");
-        }
         form.reset();
         setPageState("idle");
       },
@@ -88,15 +77,15 @@ export default function UserProfileForm() {
         />
         <FormInput label="Position" name="position" form={form} />
         {userProfile?.role === 0 && (
-        <FormSelect
-          options={roles.map((role) => ({
-            value: role.value,
-            label: role.label,
-          }))}
-          label="System Role"
-          name="role"
-          form={form}
-        />
+          <FormSelect
+            options={roles.map((role) => ({
+              value: role.value,
+              label: role.label,
+            }))}
+            label="System Role"
+            name="role"
+            form={form}
+          />
         )}
         <Button
           size={"sm"}

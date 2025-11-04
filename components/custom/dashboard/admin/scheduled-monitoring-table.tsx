@@ -1,6 +1,6 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -27,44 +27,50 @@ export default function ScheduledMonitoringTable({
 }: ScheduledMonitoringTableProps) {
   return (
     <div className="w-full h-full">
-      <span className="text-lg font-semibold">
-        Scheduled Monitoring ({new Date().toLocaleDateString()})
-      </span>
-      <Card className="shadow-xs rounded-md p-1">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="font-medium">#</TableHead>
-              <TableHead>Travel Order No</TableHead>
-              <TableHead>Purpose</TableHead>
-              <TableHead className="text-end">Field Operator</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data && data.length > 0 ? (
-              data.map((item, index) => (
-                <TableRow key={item.id}>
-                  <TableCell className="font-medium">{index + 1}</TableCell>
-                  <TableCell>
-                    {item.travel_order?.travel_order_no ||
-                      "Unknown Travel Order No"}
-                  </TableCell>
-                  <TableCell>{item.purpose ?? "No Purpose Provided"}</TableCell>
-                  <TableCell className="text-end">
-                    {item.travel_order?.user_profile?.fullname ||
-                      "Unknown Operator"}
+      <Card className="shadow-xs rounded-md p-2">
+        <CardHeader className="items-center p-0">
+          <CardTitle className="text-lg">
+            Scheduled Monitoring ({new Date().toLocaleDateString()})
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="font-medium">#</TableHead>
+                <TableHead>Travel Order No</TableHead>
+                <TableHead>Purpose</TableHead>
+                <TableHead className="text-end">Field Operator</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data && data.length > 0 ? (
+                data.map((item, index) => (
+                  <TableRow key={item.id}>
+                    <TableCell className="font-medium">{index + 1}</TableCell>
+                    <TableCell>
+                      {item.travel_order?.travel_order_no ||
+                        "Unknown Travel Order No"}
+                    </TableCell>
+                    <TableCell>
+                      {item.purpose ?? "No Purpose Provided"}
+                    </TableCell>
+                    <TableCell className="text-end">
+                      {item.travel_order?.user_profile?.fullname ||
+                        "Unknown Operator"}
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center">
+                    No activities scheduled for today.
                   </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center">
-                  No activities scheduled for today.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
       </Card>
     </div>
   );

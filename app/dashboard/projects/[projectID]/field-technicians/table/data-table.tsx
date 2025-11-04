@@ -9,7 +9,6 @@ import {
   getFilteredRowModel,
   ColumnFiltersState,
 } from "@tanstack/react-table";
-
 import {
   Table,
   TableBody,
@@ -22,6 +21,9 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import SearchInput from "@/components/custom/input/search-input";
+import SelectProjectLocationDetailsByIDAction from "@/app/actions/ProjectLocationAction";
+import { useParams } from "next/navigation";
+import { useRealtimeQuery } from "@/hooks/use-realtime";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -50,6 +52,13 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  const { projectID } = useParams();
+  const { data: projectStatus } = useRealtimeQuery({
+    queryKey: ["project-status-check"],
+    queryFn: () => SelectProjectLocationDetailsByIDAction(projectID as string),
+    table: "project_location",
+  });
+
   return (
     <div className="space-y-4">
       {/* Global Search Bar and Add Button */}
@@ -58,7 +67,9 @@ export function DataTable<TData, TValue>({
           setSearchTerm={table.setGlobalFilter}
           className="w-full max-w-md"
         />
-        <Button onClick={onAdd}>Assign New</Button>
+        {projectStatus?.status != 0 && (
+          <Button onClick={onAdd}>Assign New</Button>
+        )}
       </div>
 
       {/* Table */}

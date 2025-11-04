@@ -4,9 +4,9 @@ import { BookOpen, FolderKanban, Users } from "lucide-react";
 import { useUniversalRealtime } from "@/hooks/use-universal-realtime";
 import { SelectAdminDashboardItemsAction } from "@/app/actions/DashboardAction";
 import ProjectQuickAccessCard from "./project-quick-access-card";
-import TotalProjectsPerProgram from "../../charts/total-project-per-program";
-import TotalUsersPerType from "../../charts/user-type-count";
-import SummaryCard from "../../card/summary-cards";
+import TotalProjectsPerProgram from "@/components/custom/charts/total-project-per-program";
+import TotalUsersPerType from "@/components/custom/charts/user-type-count";
+import SummaryCard from "@/components/custom/card/summary-cards";
 import ScheduledMonitoringTable from "./scheduled-monitoring-table";
 import RecentActivities from "./recent-activities-admin";
 

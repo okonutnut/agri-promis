@@ -33,7 +33,7 @@ function DraftsContent({ handleModify }: ViewDraftsSheetProps) {
         const res = await loadDrafts(data?.user?.id as string);
         setDrafts(
           res.filter(
-            (d) => d.project_id === projectID
+            (d) => d.project_location_id === projectID
           ) as MonitoringReportType[]
         );
       }

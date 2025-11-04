@@ -27,7 +27,7 @@ export const sendNotificationToUser = async (message: string, user_id: string) =
 
   if (error) {
     console.error(error);
-    return;
+    return "{}";
   } else if (data) {
     try {
       await webpush.sendNotification(
@@ -41,7 +41,7 @@ export const sendNotificationToUser = async (message: string, user_id: string) =
       return "{}";
     } catch (error) {
       console.error(error);
-      return;
+      return "{}";
     }
   }
   return "{}";
@@ -79,17 +79,17 @@ export const sendNotificationToAll = async (message: string) => {
               body: message,
             })
           );
-          return;
+          return "{}";
         } catch (error) {
           console.error(error);
-          return;
+          return "{}";
         }
       })
     );
-    return;
+    return "{}";
   }
   console.error("No subscriptions found");
-  return;
+  return "{}";
 };
 
 export async function SelectCurrentUserSubscription() {

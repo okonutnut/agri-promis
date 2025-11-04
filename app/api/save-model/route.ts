@@ -38,12 +38,6 @@ export async function POST(req: Request) {
       });
     if (metaError) throw metaError;
 
-    console.log("Model files saved successfully.", {
-      modelJson,
-      weights,
-      metadata,
-    });
-
     return NextResponse.json({ ok: true });
   } catch (err: any) {
     console.error("Save model error:", err.message);

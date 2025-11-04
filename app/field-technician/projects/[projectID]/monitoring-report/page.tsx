@@ -9,10 +9,10 @@ import CustomPageLayout, {
   useSheet,
 } from "@/components/custom/layout/custom-page-layout";
 import { useMemo } from "react";
-import SkeletonLoading from "@/components/custom/layout/skeleton-loading";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllMonitoringReportsByProjectIDAndUserAction } from "@/app/actions/MonitoringAction";
-import { SelectProjectDetailsByProjectIDAction } from "@/app/actions/ProjectAction";
+import { SelectProjectDetailsByProjectLocationIDAction } from "@/app/actions/ProjectAction";
+import SkeletonLoading from "@/components/custom/layout/skeleton-loading";
 import UploadFieldReportForm from "./form/monitoring-report-form";
 import ViewDraftsSheet from "./components/view-drafts-sheet";
 
@@ -51,8 +51,9 @@ function MonitoringReportContent({
   if (!data) return <SkeletonLoading />;
 
   const { data: projectData } = useRealtimeQuery({
-    queryKey: ["project-details"],
-    queryFn: () => SelectProjectDetailsByProjectIDAction(projectID as string),
+    queryKey: ["project-details", projectID as string],
+    queryFn: () =>
+      SelectProjectDetailsByProjectLocationIDAction(projectID as string),
     table: "projects",
   });
 
@@ -94,7 +95,7 @@ export default function MonitoringReportPage() {
   const { projectID } = useParams();
 
   const { data, isLoading, error } = useRealtimeQuery({
-    queryKey: ["monitoring-report"],
+    queryKey: ["monitoring-report", projectID as string],
     queryFn: () =>
       SelectAllMonitoringReportsByProjectIDAndUserAction(projectID as string),
     table: "monitoring",
@@ -103,6 +104,7 @@ export default function MonitoringReportPage() {
   return (
     <CustomPageLayout
       pageTitle="Monitoring Reports"
+      pageDescription="View all monitoring reports for this project."
       isLoading={isLoading}
       error={error}
       navItems={getUserProjectNavItems(projectID as string)}

@@ -1,13 +1,13 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Icon } from "leaflet";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import "leaflet/dist/leaflet.css";
 import { Loader2 } from "lucide-react";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectUserCurrentLocationAction } from "@/app/actions/UserSessionAction";
+import { Icon } from "leaflet";
 
 // Dynamically import the map components with SSR disabled
 const MapContainer = dynamic(

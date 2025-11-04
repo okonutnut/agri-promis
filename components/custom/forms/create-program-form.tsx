@@ -9,7 +9,6 @@ import FormInput from "../input/form-input";
 import FormTextarea from "../input/form-textarea";
 import { CardFooter } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
-import { sendNotification } from "@/lib/utils";
 import { Spinner } from "@/components/ui/spinner";
 
 const formSchema = z.object({
@@ -36,12 +35,7 @@ export default function CreateProgramForm() {
 
   const { mutate, isPending } = useInsertProgramHook();
   const handleSubmit = (data: FormData) =>
-    mutate(
-      { ...data, project_count: [] },
-      {
-        onSuccess: () => sendNotification("A new program has been created."),
-      }
-    );
+    mutate({ ...data, project_count: [] });
 
   return (
     <>
@@ -55,7 +49,7 @@ export default function CreateProgramForm() {
           label="Description"
           name="description"
           form={form}
-          optinal
+          optional
         />
       </form>
       <CardFooter className="flex-col gap-2 border-t p-2">

@@ -53,7 +53,7 @@ export function getUserProfileNavItems() {
       href: "/user-profile",
       icon: UserPen,
     },
-      {
+    {
       title: "Back to Home",
       href: "/",
       icon: House,

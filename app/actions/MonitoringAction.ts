@@ -7,32 +7,35 @@ import { MonitoringReportType } from "../../components/types";
 
 // MONITORING REPORT ACTIONS
 export async function SelectAllMonitoringReportsByProjectIDAction(
-  projectID: string
+  projectLocationID: string
 ) {
   const supabase = await createClient(cookies());
 
   // Step 1: Fetch monitoring reports with joins
   const { data, error } = await supabase
     .from("monitoring")
-    .select(
-      `*, 
-      project:projects(project_name, location, fca_ids),
+    .select(`
+      *,
+      project_location:project_location(id, project_id, location, fca_ids),
+      project:project_location!monitoring_project_location_id_fkey(
+        projects(project_name)
+      ),
       travel_order:travel_order(travel_order_no),
       reporter:user_profile!monitoring_reporter_id_fkey(fullname),
-      remarkBy:user_profile!monitoring_reviewed_by_id_fkey(fullname)`
-    )
-    .eq("project_id", projectID)
+      remarkBy:user_profile!monitoring_reviewed_by_id_fkey(fullname)
+    `)
+    .eq("project_location_id", projectLocationID)
     .order("created_at", { ascending: false });
 
   if (error) {
-    throw new Error();
+    throw new Error(error.message);
   }
 
-  // Step 2: Collect all FCA IDs from projects
-  const projectFCAIds = Array.from(
+  // Step 2: Gather FCA IDs
+  const fcaIds = Array.from(
     new Set(
       data
-        .map((report) => report.project?.fca_ids || [])
+        .map((r) => r.project_location?.fca_ids || [])
         .flat()
         .filter((id): id is string => !!id)
     )
@@ -41,77 +44,74 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
   const { data: fcaData, error: fcaError } = await supabase
     .from("farmers")
     .select("id, description")
-    .in("id", projectFCAIds);
+    .in("id", fcaIds);
 
-  if (fcaError) {
-    throw new Error();
-  }
+  if (fcaError) throw new Error(fcaError.message);
 
-  // Step 3: Map FCA + convert photo paths -> signed URLs
-  const reportsWithFCA = await Promise.all(
+  // Step 3: Attach FCA + sign URLs
+  const reports = await Promise.all(
     data.map(async (report) => {
-      // Convert photo paths to signed URLs
-      const signedPhotoUrls = report.photo_url
+      const signedPhotos = report.photo_url
         ? await Promise.all(
             report.photo_url.map(async (path: string) => {
               const { data: signed } = await supabase.storage
                 .from("monitoring-reports")
-                .createSignedUrl(path, 60 * 60); // 1h expiry
+                .createSignedUrl(path, 3600);
               return signed?.signedUrl ?? null;
             })
           )
         : [];
 
-      // Attach FCA details
-      const fcaDetails = report.project?.fca_ids
-        ? fcaData.filter((fca) => report.project?.fca_ids.includes(fca.id))
+      const fcaDetails = report.project_location?.fca_ids
+        ? fcaData.filter((fca) =>
+            report.project_location?.fca_ids.includes(fca.id)
+          )
         : [];
 
       return {
         ...report,
-        photo_url: signedPhotoUrls.filter((url) => url !== null), // only valid URLs
-        project: { ...report.project, fcaDetails },
+        photo_url: signedPhotos.filter(Boolean),
+        project_location: {
+          ...report.project_location,
+          fcaDetails,
+        },
       };
     })
   );
 
-  return reportsWithFCA as MonitoringReportType[];
+  return reports;
 }
 
 export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
-  projectID: string
+  projectLocationID: string
 ) {
   const supabase = await createClient(cookies());
 
   // Get logged-in user
   const { data: userData, error: userError } = await supabase.auth.getUser();
-  if (userError || !userData?.user) {
-    throw userError;
-  }
+  if (userError || !userData?.user) throw userError;
 
-  // Fetch reports by this user for the project
+  // Fetch reports from this user for the project location
   const { data, error } = await supabase
     .from("monitoring")
-    .select(
-      `*, 
-      project:projects(project_name, fca_ids),
+    .select(`
+      *,
+      project_location:project_location(*, projects(*)),
       travel_order:travel_order(travel_order_no),
       reporter:user_profile!monitoring_reporter_id_fkey(fullname),
-      reviewedBy:user_profile!monitoring_reviewed_by_id_fkey(fullname)`
-    )
+      reviewedBy:user_profile!monitoring_reviewed_by_id_fkey(fullname)
+    `)
     .eq("reporter_id", userData.user.id)
-    .eq("project_id", projectID)
+    .eq("project_location_id", projectLocationID)
     .order("created_at", { ascending: false });
 
-  if (error) {
-    throw error;
-  }
+  if (error) throw error;
 
   // Collect unique FCA IDs from all reports
   const projectFCAIds = Array.from(
     new Set(
       data
-        .map((report) => report.project?.fca_ids || [])
+        .map((report) => report.project_location?.fca_ids || [])
         .flat()
         .filter((id): id is string => !!id)
     )
@@ -122,34 +122,35 @@ export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
     .select("id, description")
     .in("id", projectFCAIds);
 
-  if (fcaError) {
-    throw fcaError;
-  }
+  if (fcaError) throw fcaError;
 
-  // Map FCA details + signed URLs
+  // Map FCA + signed URLs
   const reportsWithExtras = await Promise.all(
     data.map(async (report) => {
-      // Resolve signed image URLs
       const signedPhotoUrls = report.photo_url
         ? await Promise.all(
             report.photo_url.map(async (path: string) => {
               const { data: signed } = await supabase.storage
                 .from("monitoring-reports")
-                .createSignedUrl(path, 60 * 60); // valid 1 hour
+                .createSignedUrl(path, 60 * 60);
               return signed?.signedUrl ?? null;
             })
           )
         : [];
 
-      // Attach FCA details
-      const fcaDetails = report.project?.fca_ids
-        ? fcaData.filter((fca) => report.project?.fca_ids.includes(fca.id))
+      const fcaDetails = report.project_location?.fca_ids
+        ? fcaData.filter((fca) =>
+            report.project_location?.fca_ids.includes(fca.id)
+          )
         : [];
 
       return {
         ...report,
-        photo_url: signedPhotoUrls.filter((url) => url !== null),
-        project: { ...report.project, fcaDetails },
+        photo_url: signedPhotoUrls.filter(Boolean),
+        project_location: {
+          ...report.project_location,
+          fcaDetails,
+        },
       };
     })
   );
@@ -238,7 +239,7 @@ export async function SelectAllMonitoringReportsByCurrentUserAction() {
 }
 
 export async function InsertMonitoringReportAction({
-  project_id,
+  project_location_id,
   purpose,
   findings,
   observation,
@@ -284,7 +285,7 @@ export async function InsertMonitoringReportAction({
   // Upload Monitoring Report to Supabase Database
   const { error } = await supabase.from("monitoring").insert({
     travel_order_no,
-    project_id,
+    project_location_id,
     purpose,
     findings: findings?.filter((f) => f !== "") || [],
     issues_concern: issues_concern?.filter((i) => i !== "") || [],
@@ -299,8 +300,8 @@ export async function InsertMonitoringReportAction({
   // Get project name for logging
   const { data: projectData, error: projectError } = await supabase
     .from("projects")
-    .select()
-    .eq("id", project_id)
+    .select("*, project_location!inner (*)")
+    .eq("project_location.id", project_location_id)
     .single();
 
   if (projectError) {
@@ -310,8 +311,8 @@ export async function InsertMonitoringReportAction({
   // Log the activity
   await InsertActivityLogAction(
     "Submitted a Monitoring Report",
-    `Monitoring report submitted for project ${projectData.project_name}.`,
-    project_id
+    `Monitoring report submitted for project ${projectData.project_name}, ${projectData.project_location?.location}.`,
+    project_location_id
   );
 
   // Send Notification to admin
@@ -338,7 +339,7 @@ export async function InsertRemarksInMonitoringReportAction(reportId: string) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) throw new Error();
+  if (!user) throw new Error("User not authenticated");
 
   const { data, error } = await supabase
     .from("monitoring")
@@ -347,7 +348,7 @@ export async function InsertRemarksInMonitoringReportAction(reportId: string) {
       reviewed_at: new Date(),
     })
     .eq("id", reportId)
-    .select("project_id, travel_order_no")
+    .select("project_location_id, travel_order_no")
     .single();
 
   if (error) {
@@ -368,7 +369,7 @@ export async function InsertRemarksInMonitoringReportAction(reportId: string) {
   await InsertActivityLogAction(
     "Reviewed a Monitoring Report",
     `Monitoring report with T.O no ${toData.travel_order_no} has been reviewed.`,
-    data?.project_id
+    data?.project_location_id
   );
 
   return;

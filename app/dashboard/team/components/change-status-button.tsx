@@ -7,7 +7,6 @@ import {
 import { useUpdateActiveStatusMemberHook } from "@/components/hooks";
 import { UserProfileType } from "@/components/types";
 import { Button } from "@/components/ui/button";
-import { sendNotificationToUser } from "@/lib/utils";
 import { Loader2, TriangleAlert } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 
@@ -38,10 +37,6 @@ export default function ChangeStatusButton({
       },
       {
         onSuccess: () => {
-          sendNotificationToUser(
-            userID,
-            "Your account status has been changed."
-          );
           setPageState("idle");
           form.reset();
           closeSheet();

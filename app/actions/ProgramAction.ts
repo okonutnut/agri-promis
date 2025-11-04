@@ -103,21 +103,21 @@ export async function SelectAllProgramsByAgriculturistAction() {
   const supabase = await createClient(cookies());
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
-  if (userError || !userData?.user?.id) {
-    throw userError;
-  }
+  if (userError || !userData?.user?.id) throw userError;
 
   const { data, error } = await supabase
     .from("programs")
-    .select("*, project_count:projects(count)")
+    .select(`
+      *,
+      project_count:projects(count)
+    `)
     .order("created_at", { ascending: true });
 
-  if (error) {
-    throw error;
-  }
+  if (error) throw error;
 
   return data as ProgramType[];
 }
+
 
 export async function SelectAllProgramsByUserIDAction(userID: string) {
   const supabase = await createClient(cookies());
@@ -229,4 +229,23 @@ export async function SelectUserByProgramAssignedAction(programId?: string) {
     (item) => item.user
   ) as unknown as UserProfileType[];
   return users;
+}
+
+
+export async function SelectAllProgramsWithProjectsAction() {
+  const supabase = await createClient(cookies());
+  const { data, error } = await supabase
+    .from("programs")
+    .select(`
+      *,
+      projects (
+        *,
+        project_location (*)
+      )
+    `)
+    .order("created_at", { ascending: true });
+
+  if (error) throw error;
+
+  return data;
 }

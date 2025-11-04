@@ -1,34 +1,22 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { Card, CardContent } from "@/components/ui/card";
 import { useParams } from "next/navigation";
-import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import { getProgramNavItems } from "@/components/sidebar/navitems";
 import { ProgramType } from "@/components/types";
 import { useMemo } from "react";
 import { useSupabaseSession } from "@/hooks/use-session";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectProgramByIdAction } from "@/app/actions/ProgramAction";
-const EditProgramNameForm = dynamic(
-  () => import("./form/edit-program-name-form"),
-  {
-    ssr: false,
-  }
-);
-const DeleteProgramCard = dynamic(
-  () => import("./components/delete-program-card"),
-  {
-    ssr: false,
-  }
-);
+import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
+import EditProgramNameForm from "./form/edit-program-name-form";
+import DeleteProgramCard from "./components/delete-program-card";
 
 export default function ProgramSettingsPage() {
   const { programID } = useParams();
 
   const { data: userData } = useSupabaseSession();
   const { data, isLoading, error } = useRealtimeQuery({
-    queryKey: ["programDetails"],
+    queryKey: ["programDetails", programID as string],
     queryFn: () => SelectProgramByIdAction(programID as string),
     table: "programs",
   });
@@ -40,21 +28,15 @@ export default function ProgramSettingsPage() {
   return (
     <CustomPageLayout
       pageTitle="Program Settings"
+      pageDescription="Manage program details and settings."
       isLoading={isLoading}
       error={error}
       navItems={getProgramNavItems(programID as string)}
     >
-      <Card className="shadow-xs mb-4">
-        <CardContent className="flex flex-wrap justify-between items-start">
-          <span className="text-xl font-semibold w-full mb-4">
-            General Settings
-          </span>
-          <EditProgramNameForm
-            programData={data as ProgramType}
-            isAdmin={isAdmin}
-          />
-        </CardContent>
-      </Card>
+      <EditProgramNameForm
+        programData={data as ProgramType}
+        isAdmin={isAdmin}
+      />
       {isAdmin && <DeleteProgramCard data={data as ProgramType} />}
     </CustomPageLayout>
   );

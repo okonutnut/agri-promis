@@ -67,6 +67,25 @@ interface ModalContextType {
 const SheetContext = createContext<SheetContextType | undefined>(undefined);
 const ModalContext = createContext<ModalContextType | undefined>(undefined);
 
+// -------------------- Loading Context --------------------
+interface LoadingContextType {
+  isLoading: boolean;
+  setLoading: (state: boolean) => void;
+}
+
+const LoadingContext = createContext<LoadingContextType | undefined>(undefined);
+
+// -------------------- Disabled Context --------------------
+interface DisabledContextType {
+  isDisabled: boolean;
+  setDisabled: (state: boolean) => void;
+}
+
+const DisabledContext = createContext<DisabledContextType | undefined>(
+  undefined
+);
+
+// -------------------- Custom Hooks --------------------
 export const useSheet = () => {
   const context = useContext(SheetContext);
   if (!context) {
@@ -79,6 +98,22 @@ export const useModal = () => {
   const context = useContext(ModalContext);
   if (!context) {
     throw new Error("useModal must be used within a CustomPageLayout");
+  }
+  return context;
+};
+
+export const useLoading = () => {
+  const context = useContext(LoadingContext);
+  if (!context) {
+    throw new Error("useLoading must be used within a CustomPageLayout");
+  }
+  return context;
+};
+
+export const useDisabled = () => {
+  const context = useContext(DisabledContext);
+  if (!context) {
+    throw new Error("useDisabled must be used within a CustomPageLayout");
   }
   return context;
 };
@@ -119,7 +154,7 @@ export default function CustomPageLayout({
   className,
   pageTitle,
   pageDescription,
-  isLoading,
+  isLoading: pageLoading,
   error,
   noSidebar,
   navItems,
@@ -224,6 +259,22 @@ export default function CustomPageLayout({
     closeModal,
   };
 
+  // -------------------- Loading State --------------------
+  const [loadingState, setLoadingState] = useState(false);
+
+  const loadingContextValue: LoadingContextType = {
+    isLoading: loadingState,
+    setLoading: setLoadingState,
+  };
+
+  // -------------------- Disabled State --------------------
+  const [disabledState, setDisabledState] = useState(false);
+
+  const disabledContextValue: DisabledContextType = {
+    isDisabled: disabledState,
+    setDisabled: setDisabledState,
+  };
+
   // -------------------- Session Management --------------------
   const supabase = createClient();
   const { data } = useSelectUserProfileHook();
@@ -231,7 +282,6 @@ export default function CustomPageLayout({
     if (data?.active_status === 0) {
       toast.error("Your account is inactive. Please contact support.");
       async function signOutInactiveUser() {
-        console.log("Signing out inactive user...");
         await supabase.auth.signOut();
         window.location.href = "/login";
       }
@@ -241,93 +291,99 @@ export default function CustomPageLayout({
 
   // -------------------- Render --------------------
   return (
-    <SheetContext.Provider value={sheetContextValue}>
-      <ModalContext.Provider value={modalContextValue}>
-        <section className="w-full h-screen flex flex-col relative text-sm overflow-hidden">
-          {error &&
-            toast.error(
-              `Error: ${error.message || "An unexpected error occurred"}`
-            )}
-          <CustomNavbar
-            navItems={navItems || []}
-            noSidebar={noSidebar}
-            pageTitle={pageTitle}
-            role={role || "admin"}
-          />
-          <div className="flex flex-1 overflow-hidden">
-            {!noSidebar && <AppSidebar navItems={navItems || []} />}
-            <div className="flex-1 w-full overflow-hidden">
-              <div
-                className={cn(
-                  "px-2 h-full flex flex-col overflow-y-auto",
-                  className
+    <LoadingContext.Provider value={loadingContextValue}>
+      <SheetContext.Provider value={sheetContextValue}>
+        <ModalContext.Provider value={modalContextValue}>
+          <DisabledContext.Provider value={disabledContextValue}>
+            <section className="w-full h-screen flex flex-col relative text-sm overflow-hidden">
+              {error &&
+                toast.error(
+                  `Error: ${error.message || "An unexpected error occurred"}`
                 )}
-              >
-                <div className="flex-1 py-4">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex flex-col space-y-2">
-                      {pageTitle && (
-                        <h1 className="text-2xl font-black">{pageTitle}</h1>
-                      )}
-                      {pageDescription && (
-                        <p className="text-md text-muted-foreground">
-                          {pageDescription}
-                        </p>
+              <CustomNavbar
+                navItems={navItems || []}
+                noSidebar={noSidebar}
+                pageTitle={pageTitle}
+                role={role || "admin"}
+              />
+              <div className="flex flex-1 overflow-hidden">
+                {!noSidebar && <AppSidebar navItems={navItems || []} />}
+                <div className="flex-1 w-full overflow-hidden">
+                  <div
+                    className={cn(
+                      "px-2 h-full flex flex-col overflow-y-auto",
+                      className
+                    )}
+                  >
+                    <div className="flex-1 py-4">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex flex-col space-y-2">
+                          {pageTitle && (
+                            <h1 className="text-2xl font-black">{pageTitle}</h1>
+                          )}
+                          {pageDescription && (
+                            <p className="text-md text-muted-foreground">
+                              {pageDescription}
+                            </p>
+                          )}
+                        </div>
+                        {(!loadingState || error) && topRightComponent}
+                      </div>
+                      {loadingState || pageLoading || error ? (
+                        <SkeletonLoading className="m-2" />
+                      ) : (
+                        <Suspense fallback={<SkeletonLoading />}>
+                          {children}
+                        </Suspense>
                       )}
                     </div>
-                    {(!isLoading || error) && topRightComponent}
                   </div>
-                  {isLoading || error ? (
-                    <SkeletonLoading />
-                  ) : (
-                    <Suspense fallback={<SkeletonLoading />}>
-                      {children}
-                    </Suspense>
-                  )}
                 </div>
               </div>
-            </div>
-          </div>
 
-          {/* Global Sheet */}
-          <Sheet open={sheetState.isOpen} onOpenChange={closeSheet}>
-            <SheetContent className="md:min-w-[600px] w-screen flex flex-col gap-0 h-full">
-              <SheetHeader className="border-b p-2">
-                <SheetTitle className="uppercase text-primary">
-                  {sheetState.title}
-                </SheetTitle>
-              </SheetHeader>
-              {sheetState.content}
-            </SheetContent>
-          </Sheet>
+              {/* Global Sheet */}
+              <Sheet open={sheetState.isOpen} onOpenChange={closeSheet}>
+                <SheetContent className="md:min-w-[600px] w-screen flex flex-col gap-0 h-full">
+                  <SheetHeader className="border-b p-2">
+                    <SheetTitle className="uppercase text-primary">
+                      {sheetState.title}
+                    </SheetTitle>
+                  </SheetHeader>
+                  {sheetState.content}
+                </SheetContent>
+              </Sheet>
 
-          {/* Modal */}
-          <AlertDialog
-            open={modalState.isOpen}
-            onOpenChange={(open) => !open && closeModal()}
-          >
-            <AlertDialogContent className="p-0 gap-1">
-              <AlertDialogHeader className="border-b p-2 flex flex-row justify-between items-start">
-                <div>
-                  <AlertDialogTitle>{modalState.title}</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    {modalState.description}
-                  </AlertDialogDescription>
-                </div>
-                <AlertDialogCancel asChild>
-                  <Button
-                    variant="ghost"
-                    className="h-7 w-7 border-0 shadow-none"
-                  >
-                    <X />
-                  </Button>
-                </AlertDialogCancel>
-              </AlertDialogHeader>
-              <div className="p-1">{modalState.content}</div>
-            </AlertDialogContent>
-          </AlertDialog>
-        </section>
-      </ModalContext.Provider>
-    </SheetContext.Provider>
+              {/* Modal */}
+              <AlertDialog
+                open={modalState.isOpen}
+                onOpenChange={(open) => !open && closeModal()}
+              >
+                <AlertDialogContent className="p-0 gap-1 w-[calc(100%-1rem)] max-w-lg md:w-sm">
+                  <AlertDialogHeader className="border-b p-2 flex flex-row justify-between items-start">
+                    <div>
+                      <AlertDialogTitle className="text-primary font-bold text-start uppercase">
+                        {modalState.title}
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {modalState.description}
+                      </AlertDialogDescription>
+                    </div>
+                    <AlertDialogCancel asChild>
+                      <Button
+                        variant="ghost"
+                        className="h-7 w-7 border-0 shadow-none"
+                      >
+                        <X />
+                      </Button>
+                    </AlertDialogCancel>
+                  </AlertDialogHeader>
+                  <div className="p-2">{modalState.content}</div>
+                </AlertDialogContent>
+              </AlertDialog>
+            </section>
+          </DisabledContext.Provider>
+        </ModalContext.Provider>
+      </SheetContext.Provider>
+    </LoadingContext.Provider>
   );
 }

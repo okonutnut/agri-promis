@@ -36,11 +36,15 @@ export default function AssignedProjectsPage() {
     table: "assigned_projects",
   });
 
+  console.log("Assigned Projects Data:", data);
+
   const filteredData = useMemo(
     () =>
       data
         ?.filter((project) =>
-          project.project_name?.toLowerCase().includes(searchTerm.toLowerCase())
+          project.projects.project_name
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase())
         )
         .filter((project) =>
           filter
@@ -113,7 +117,7 @@ export default function AssignedProjectsPage() {
                         <Box className="h-5 w-5 text-primary" />
                       </span>
                       <div className="font-semibold flex flex-col gap-2">
-                        {project.project_name}
+                        {project.projects.project_name}
                         <pre className="text-xs font-normal">
                           {project.location}
                         </pre>

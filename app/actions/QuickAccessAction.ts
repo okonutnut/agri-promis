@@ -13,5 +13,5 @@ export async function SelectProjectByIDsAction(projectIDs: string[]) {
 
   if (error) error;
 
-  return data as ProjectType[];
+  return data;
 }

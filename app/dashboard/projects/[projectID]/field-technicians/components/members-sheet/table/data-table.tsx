@@ -85,7 +85,7 @@ export function DataTable<TData, TValue>({
         <Button
           onClick={() =>
             openModal(
-              "Add the user",
+              "Attention!!!",
               "Are you sure you want to add this user?",
               <Button
                 className="w-full"

@@ -6,7 +6,6 @@ import { cookies, headers } from "next/headers";
 
 // USER SESSION ACTIONS
 export async function SelectUserCurrentLocationAction(user_id: string) {
-  console.log("Fetching user location for user_id:", user_id);
   const supabase = await createClient(cookies());
   const { data, error } = await supabase
     .from("user_session")

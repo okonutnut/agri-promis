@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Agri-ProMIS - Create Program",
+  title: "Agri-ProMIS | Create Program",
   description: "Dashboard page for Agri-ProMIS",
 };
 

@@ -3,7 +3,7 @@
 import { useDeleteProgramHook } from "@/components/hooks";
 import { ProgramType } from "@/components/types";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { AlertCircle, Loader2 } from "lucide-react";
@@ -65,29 +65,28 @@ export default function DeleteProgramCard({ data }: DeleteProgramCardProps) {
   };
 
   return (
-    <Card className="shadow-xs bg-red-50 border-red-200">
-      <CardContent className="flex flex-col flex-wrap justify-between items-start space-y-4">
-        <div className="flex gap-2 items-center font-semibold w-full mb-4 text-red-600">
-          <AlertCircle />
-          Danger Zone
-        </div>
-        <span>
-          To remove this program, please delete all the associated projects and
-          data. This action cannot be undone.
-        </span>
-        <Button
-          variant={isPending ? "ghost" : "destructive"}
-          size="sm"
-          disabled={isPending}
-          onClick={handleOpenModal}
-        >
-          {isPending ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            "Delete Program"
-          )}
-        </Button>
-      </CardContent>
+    <Card className="rounded-md shadow-xs bg-red-50 border-red-200 p-2">
+      <div className="flex gap-2 items-center font-semibold w-full mb-4 text-red-600">
+        <AlertCircle />
+        Danger Zone
+      </div>
+      <span>
+        To remove this program, please delete all the associated projects and
+        data. This action cannot be undone.
+      </span>
+      <Button
+        variant={isPending ? "ghost" : "destructive"}
+        size="sm"
+        disabled={isPending}
+        className="w-[150px]"
+        onClick={handleOpenModal}
+      >
+        {isPending ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          "Delete Program"
+        )}
+      </Button>
     </Card>
   );
 }

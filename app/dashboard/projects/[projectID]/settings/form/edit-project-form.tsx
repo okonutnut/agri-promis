@@ -1,15 +1,14 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEditProjectHook } from "@/components/hooks";
-import { CardFooter } from "@/components/ui/card";
+import { Card, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { ProjectType } from "@/components/types";
+import { ProjectLocationType } from "@/components/types";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { useModal } from "@/components/custom/layout/custom-page-layout";
 import {
   Select,
   SelectContent,
@@ -17,15 +16,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import z from "zod";
 import cornGrowthStages from "@/data/growth-stages.json";
 import FormInput from "@/components/custom/input/form-input";
-import { useModal } from "@/components/custom/layout/custom-page-layout";
 import FormTextarea from "@/components/custom/input/form-textarea";
 import FCASelector from "@/components/custom/dropdown/fca-selector";
+import { useParams } from "next/navigation";
+import { useUniversalMutation } from "@/hooks/use-universal-mutation";
+import { EditProjectAction } from "@/app/actions/ProjectAction";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   id: z.string().min(1, "Project ID is required"),
-  project_name: z.string().min(1, "Project name is required"),
   description: z.string().min(1, "Project description is required"),
   progress_indicator: z.coerce
     .number()
@@ -42,18 +44,20 @@ const formSchema = z.object({
 type FormSchemaType = z.infer<typeof formSchema>;
 
 type EditProjectNameFormProps = {
-  project: ProjectType;
+  project: ProjectLocationType;
   isAdmin: boolean;
 };
 export default function EditProjectNameForm({
   project,
   isAdmin,
 }: EditProjectNameFormProps) {
+  const { projectID } = useParams();
+  const { openModal, closeModal } = useModal();
+
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      id: project.id as string,
-      project_name: project.project_name || "",
+      id: projectID as string,
       description: project.description || "",
       progress_indicator: project.progress_indicator || 1,
       fca_ids: project.fca_ids || [],
@@ -62,12 +66,30 @@ export default function EditProjectNameForm({
     },
   });
 
-  const { mutate, isPending } = useEditProjectHook();
-  const handleSubmit = (data: FormSchemaType) => mutate(data);
-  const { openModal, closeModal } = useModal();
+  // const { mutate, isPending } = useEditProjectHook();
+  const { mutate, isPending } = useUniversalMutation({
+    mutationFn: async (data: FormSchemaType) =>
+      await EditProjectAction({
+        id: data.id,
+        description: data.description,
+        progress_indicator: data.progress_indicator,
+        fca_ids: data.fca_ids,
+        total_alloted_area: data.total_alloted_area,
+        status: data.status,
+      }),
+  });
+  const handleSubmit = (data: FormSchemaType) =>
+    mutate(data, {
+      onSuccess: () => {
+        toast.success("Project updated successfully");
+      },
+      onError: () => {
+        toast.error("Error updating project");
+      },
+    });
 
   return (
-    <>
+    <Card className="rounded-md shadow-xs mb-4">
       <form
         className="w-full flex flex-col items-start space-y-6 px-4"
         id="edit-project-form"
@@ -75,28 +97,22 @@ export default function EditProjectNameForm({
       >
         <Label className="font-semibold w-full mb-4">General Settings</Label>
         <FormInput label="Project ID" name="id" form={form} readOnly copy />
-        <FormInput
-          label="Project name"
-          name="project_name"
-          form={form}
-          readOnly={!isAdmin}
-        />
         <FormTextarea
           form={form}
           name="description"
           label="Project Description"
-          readOnly={!isAdmin}
+          readOnly={!isAdmin || isPending}
         />
         <FCASelector
           onChange={(value) => form.setValue("fca_ids", value)}
           defaultValue={project.fca_ids || []}
-          readOnly={!isAdmin}
+          readOnly={!isAdmin || isPending}
         />
         <FormInput
           label="Total Allotment Area (in hectares)"
           name="total_alloted_area"
           form={form}
-          readOnly={!isAdmin}
+          readOnly={!isAdmin || isPending}
         />
         <div className="w-full flex justify-between items-center">
           <Label>Set Active</Label>
@@ -105,7 +121,7 @@ export default function EditProjectNameForm({
             onCheckedChange={(checked) =>
               form.setValue("status", checked ? 1 : 0)
             }
-            disabled={!isAdmin}
+            disabled={!isAdmin || isPending}
           />
         </div>
         <div className="w-full flex justify-between items-center">
@@ -115,7 +131,7 @@ export default function EditProjectNameForm({
             onValueChange={(value) =>
               form.setValue("progress_indicator", parseInt(value))
             }
-            disabled={!isAdmin}
+            disabled={!isAdmin || isPending}
           >
             <SelectTrigger className="w-[230px]">
               <SelectValue placeholder="Progress" />
@@ -135,7 +151,7 @@ export default function EditProjectNameForm({
           <Button
             onClick={() =>
               openModal(
-                "Are you sure?",
+                "Attention!!!",
                 "This action cannot be undone. Do you want to proceed?",
                 <Button
                   onClick={() => {
@@ -156,6 +172,6 @@ export default function EditProjectNameForm({
           </Button>
         </CardFooter>
       )}
-    </>
+    </Card>
   );
 }

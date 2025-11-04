@@ -1,6 +1,5 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { DataTable } from "./table/data-table";
 import { columns } from "./table/columns";
 import { TeamMemberForm } from "./components/team-members-form";
@@ -13,16 +12,12 @@ import { useMemo, useState } from "react";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllMembersAction } from "@/app/actions/MemberAction";
 import { CustomTabList } from "@/components/custom/layout/custom-tab-list";
-const TeamMemberPanel = dynamic(
-  () => import("./components/team-member-panel"),
-  { ssr: false }
-);
+import TeamMemberPanel from "./components/team-member-panel";
 
-function TeamMembersContent({
-  values,
-}: {
+type TeamMembersContentProps = {
   values: UserProfileType[] | undefined;
-}) {
+};
+function TeamMembersContent({ values }: TeamMembersContentProps) {
   const { openSheet } = useSheet();
   const [programID, setProgramID] = useState<string>("");
 
@@ -37,7 +32,7 @@ function TeamMembersContent({
           },
           {
             title: "Assigned Program/Projects",
-            content: <TeamMemberPanel userId={row.id as string} />,
+            content: <TeamMemberPanel userId={row.id as string} data={row} />,
           },
         ]}
       />
@@ -74,9 +69,9 @@ function TeamMembersContent({
 
 export default function TeamMemberPage() {
   const { data, isLoading, error } = useRealtimeQuery({
-    queryKey: ["members"],
-    table: "user_profile",
     queryFn: SelectAllMembersAction,
+    queryKey: ["team-members"],
+    table: "user_profile",
   });
 
   return (

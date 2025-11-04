@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEditProgramNameHook } from "@/components/hooks";
-import { CardFooter } from "@/components/ui/card";
+import { Card, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { ProgramType } from "@/components/types";
@@ -45,7 +45,10 @@ export default function EditProgramNameForm({
   const { openModal, closeModal } = useModal();
 
   return (
-    <>
+    <Card className="rounded-md shadow-xs p-2 mb-4">
+      <div className="flex gap-2 items-center font-semibold w-full mb-4 ">
+        General Settings
+      </div>
       <form
         className="w-full flex flex-col items-start space-y-4"
         onSubmit={form.handleSubmit(handleSubmit)}
@@ -94,6 +97,6 @@ export default function EditProgramNameForm({
           </CardFooter>
         )}
       </form>
-    </>
+    </Card>
   );
 }

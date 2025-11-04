@@ -40,26 +40,42 @@ export type ProgramType = {
   user_profile?: UserProfileType;
   project_count: { count: number }[];
   created_at?: string;
+
+  // relations
+  projects?: ProjectType[];
 };
 
 export type ProjectType = {
   id?: string;
   project_name?: string;
   description?: string;
+  created_by?: string;
+  program_id?: string;
+  created_at?: string;
+  // realtions
+  programs?: ProgramType;
+  fca?: FCAType[];
+  project_location: ProjectLocationType[];
+};
+
+export type ProjectLocationType = {
+  id?: string;
+  project_id?: string;
+  description?: string;
+  location?: string;
   start_date?: string;
   end_date?: string;
-  status?: number;
   total_alloted_area?: number;
   progress_indicator?: number;
-  location_id?: string;
-  location?: string;
-  fca?: FCAType[];
   fca_ids?: string[];
+  status?: number;
   programs?: ProgramType;
   locationData?: LocationType;
-  program_id?: string;
   created_by?: string;
   created_at?: string;
+
+  // relation
+  projects?: ProjectType;
 };
 
 export type LocationType = {
@@ -73,7 +89,7 @@ export type LocationType = {
 export type MonitoringReportType = {
   id?: string;
   key?: string;
-  project_id?: string;
+  project_location_id?: string;
   travel_order_no?: string;
   reporter_id?: string;
   reviewed_by_id?: string;

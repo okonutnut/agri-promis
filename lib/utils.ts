@@ -1,7 +1,4 @@
-import {
-  SendPushNotificationToAllAction,
-  SendPushNotificationToUserAction,
-} from "@/app/actions/SubscriptionAction";
+
 import { LocationData } from "@/components/interfaces";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -10,17 +7,6 @@ import { Stage } from "@/components/types";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
-
-export const sendNotification = async (message: string) => {
-  await SendPushNotificationToAllAction(message);
-};
-
-export const sendNotificationToUser = async (
-  userId: string,
-  message: string
-) => {
-  await SendPushNotificationToUserAction(userId, message);
-};
 
 export const compressImage = (
   file: File,

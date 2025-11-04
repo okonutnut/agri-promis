@@ -1,6 +1,5 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { DataTable } from "./table/data-table";
 import { columns } from "./table/columns";
 import CustomPageLayout, {
@@ -11,18 +10,12 @@ import { TravelOrderType } from "@/components/types";
 import { getProgramNavItems } from "@/components/sidebar/navitems";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllTravelOrdersByProgramIDAction } from "@/app/actions/TravelOrderAction";
-const IssueTravelOrderForm = dynamic(
-  () => import("./components/travel-order-form"),
-  {
-    ssr: false,
-  }
-);
+import IssueTravelOrderForm from "./components/travel-order-form";
 
-function TravelOrderContent({
-  values,
-}: {
+type TravelOrderContentProps = {
   values: TravelOrderType[] | undefined;
-}) {
+};
+function TravelOrderContent({ values }: TravelOrderContentProps) {
   const { openSheet } = useSheet();
 
   const handleRowSelect = (row: TravelOrderType) => {
@@ -57,16 +50,17 @@ function TravelOrderContent({
 
 export default function TravelOrderPage() {
   const { programID } = useParams();
+
   const { data, isLoading, error } = useRealtimeQuery({
-    queryKey: ["travel_order"],
+    queryKey: ["travel_order", programID as string],
     queryFn: () => SelectAllTravelOrdersByProgramIDAction(programID as string),
     table: "travel_order",
   });
-  console.log({ data });
 
   return (
     <CustomPageLayout
       pageTitle="Travel Orders"
+      pageDescription="View & Manage Travel Orders for Field Operators."
       isLoading={isLoading}
       error={error}
       navItems={getProgramNavItems(programID as string)}

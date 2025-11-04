@@ -1,6 +1,5 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { DataTable } from "./table/data-table";
 import { columns } from "./table/columns";
 import CustomPageLayout, {
@@ -11,24 +10,13 @@ import { AssignedProjectsType } from "@/components/types";
 import { getProjectNavItems } from "@/components/sidebar/navitems";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllFieldTechniciansByProjectIDAction } from "@/app/actions/AssignedProjectAction";
-const SelectMembersTable = dynamic(
-  () => import("./components/members-sheet/select-members-table"),
-  {
-    ssr: false,
-  }
-);
-const ViewFieldTechnicianPanel = dynamic(
-  () => import("./components/view-field-technician-panel"),
-  {
-    ssr: false,
-  }
-);
+import SelectMembersTable from "./components/members-sheet/select-members-table";
+import ViewFieldTechnicianPanel from "./components/view-field-technician-panel";
 
-function FieldTechnicianContent({
-  data,
-}: {
+type FieldTechnicianPageProps = {
   data: AssignedProjectsType[] | undefined;
-}) {
+};
+function FieldTechnicianContent({ data }: FieldTechnicianPageProps) {
   const { openSheet, closeSheet } = useSheet();
 
   const handleRowSelect = (row: AssignedProjectsType) => {
@@ -62,8 +50,9 @@ function FieldTechnicianContent({
 
 export default function FieldTechnicianPage() {
   const { projectID } = useParams();
+
   const { data, isLoading, error } = useRealtimeQuery({
-    queryKey: ["project-field-technicians"],
+    queryKey: ["project-field-technicians", projectID as string],
     queryFn: () =>
       SelectAllFieldTechniciansByProjectIDAction(projectID as string),
     table: "assigned_projects",

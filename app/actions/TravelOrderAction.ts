@@ -11,12 +11,7 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
   const supabase = await createClient(cookies());
   const {
     data: { user },
-    error: userError,
   } = await supabase.auth.getUser();
-
-  if (userError) {
-    throw userError;
-  }
 
   // Insert travel order
   const { travel_itinerary, ...rest } = data;
@@ -36,7 +31,7 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
 
   // Insert Travel Itinerary
   const { error: itineraryError } = await supabase
-    .from("travel_order_projects")
+    .from("travel_order_itinerary_items")
     .insert(
       travel_itinerary.map((item) => ({
         ...item,
@@ -76,48 +71,49 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
 
 export async function SelectAllTravelOrdersByUserIDAction(user_id?: string) {
   const supabase = await createClient(cookies());
+
   if (!user_id) {
     const { data: userData, error: userError } = await supabase.auth.getUser();
-
     if (userError) throw userError;
-
     user_id = userData.user.id;
   }
 
   const { data, error } = await supabase
     .from("travel_order")
-    .select(
-      `*, project:projects(id, project_name), user:user_profile!travel_order_user_id_fkey(fullname),
-      travel_itinerary:travel_order_projects(*),
-      created_by:user_profile!travel_order_created_by_fkey(fullname)`
-    )
+    .select(`
+      *,
+      user:user_profile!travel_order_user_id_fkey(fullname),
+      created_by:user_profile!travel_order_created_by_fkey(fullname),
+      travel_itinerary:travel_order_itinerary_items(*)
+    `)
     .eq("user_id", user_id)
+    .eq("is_active", 1)
     .order("created_at", { ascending: false });
 
-  if (error) {
-    throw error;
-  }
+  if (error) throw error;
 
-  return data as TravelOrderType[];
+  return data;
 }
 
-export async function SelectAllTravelOrdersByProgramIDAction(
-  programID: string
-) {
+
+
+export async function SelectAllTravelOrdersByProgramIDAction(programID: string) {
   const supabase = await createClient(cookies());
+
   const { data, error } = await supabase
     .from("travel_order")
-    .select(
-      `*, project:projects(id, project_name), user:user_profile!travel_order_user_id_fkey(fullname),
-      travel_itinerary:travel_order_projects(*),
-      created_by:user_profile!travel_order_created_by_fkey(fullname)`
-    )
+    .select(`
+      *,
+      user:user_profile!travel_order_user_id_fkey(fullname),
+      created_by:user_profile!travel_order_created_by_fkey(fullname),
+      travel_itinerary:travel_order_itinerary_items(*)
+    `)
     .eq("program_id", programID)
     .order("created_at", { ascending: false });
 
-  if (error) {
-    throw error;
-  }
+  if (error) throw error;
 
-  return data as TravelOrderType[];
+  return data;
 }
+
+

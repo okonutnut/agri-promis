@@ -9,66 +9,67 @@ import { sendNotificationToUser } from "./NotificationAction";
 
 // ASSIGNED PROJECTS ACTIONS
 export async function InsertFieldTechniciansToProjectAction(
-  data: string[],
-  project_id: string
+  technicianIDs: string[],
+  projectLocationID: string
 ) {
   const supabase = await createClient(cookies());
 
-  for (const technician_id of data) {
-    // Check if the technician is already assigned to the project
-    const { data: existingAssignment, error: selectError } = await supabase
-      .from("assigned_projects")
-      .select("*")
-      .eq("user_id", technician_id)
-      .eq("project_id", project_id)
-      .maybeSingle();
+  // Get project & project name
+  const { data: projectLoc, error: locError } = await supabase
+    .from("project_location")
+    .select("project_id, projects(project_name)")
+    .eq("id", projectLocationID)
+    .single();
 
-    if (selectError) {
-      throw selectError;
-    }
+  if (locError) throw locError;
 
-    if (!existingAssignment) {
-      // Insert new assignment if it doesn't exist
-      const { error: insertError } = await supabase
-        .from("assigned_projects")
-        .insert({
-          user_id: technician_id,
-          project_id: project_id,
-        });
+  const projectName = projectLoc?.projects?.[0]?.project_name ?? "Project";
 
-      if (insertError) {
-        throw insertError;
-      }
+  // Fetch existing assignments to avoid duplicates
+  const { data: existing, error: existError } = await supabase
+    .from("assigned_projects")
+    .select("user_id")
+    .eq("project_location_id", projectLocationID);
 
-      // Get project details for logging
-      const { data: projectData, error: projectError } = await supabase
-        .from("projects")
-        .select("project_name")
-        .eq("id", project_id)
-        .single();
-      if (projectError) {
-        throw projectError;
-      }
+  if (existError) throw existError;
 
-      const userProfile = await SelectUserProfileByIDAction(technician_id);
+  const existingIDs = new Set(existing?.map((row) => row.user_id));
 
-      // Log the activity
-      await InsertActivityLogAction(
-        "Added a Field Technician to Project",
-        `Field technician ${userProfile?.fullname} was added to project ${projectData.project_name}.`,
-        project_id
-      );
+  const newAssignees = technicianIDs.filter((id) => !existingIDs.has(id));
 
-      // Send Notification
-      await sendNotificationToUser(
-        `You have been assigned to the project: ${projectData.project_name}.`,
-        technician_id
-      );
-    }
+  if (newAssignees.length === 0) return;
+
+  // Insert all new assignees
+  const insertPayload = newAssignees.map((id) => ({
+    user_id: id,
+    project_location_id: projectLocationID,
+  }));
+
+  const { error: insertError } = await supabase
+    .from("assigned_projects")
+    .insert(insertPayload);
+
+  if (insertError) throw insertError;
+
+  // Log and notify each new technician
+  for (const technicianID of newAssignees) {
+    const userProfile = await SelectUserProfileByIDAction(technicianID);
+
+    await InsertActivityLogAction(
+      "Assigned Field Technician",
+      `Field technician ${userProfile?.fullname} assigned to ${projectName}.`,
+      projectLocationID
+    );
+
+    await sendNotificationToUser(
+      `You have been assigned to the project: ${projectName}.`,
+      technicianID
+    );
   }
 
-  return;
+  return { success: true, assigned: newAssignees.length };
 }
+
 
 export async function DeleteFieldTechnicianFromProjectAction(
   user_id: string,
@@ -81,7 +82,7 @@ export async function DeleteFieldTechnicianFromProjectAction(
     .from("assigned_projects")
     .delete()
     .eq("user_id", user_id)
-    .eq("project_id", project_id);
+    .eq("project_location_id", project_id);
 
   if (deleteError) {
     throw deleteError;
@@ -90,9 +91,10 @@ export async function DeleteFieldTechnicianFromProjectAction(
   // Get project details for logging
   const { data: projectData, error: projectError } = await supabase
     .from("projects")
-    .select("project_name")
-    .eq("id", project_id)
+    .select("project_name, project_location!inner(*)")
+    .eq("project_location.id", project_id)
     .single();
+    
   if (projectError) {
     throw projectError;
   }
@@ -121,8 +123,8 @@ export async function SelectAllFieldTechniciansByProjectIDAction(
   const supabase = await createClient(cookies());
   const { data, error } = await supabase
     .from("assigned_projects")
-    .select("*, user_profile (fullname, position)")
-    .eq("project_id", projectID)
+    .select("*, project_location (*), user_profile (fullname, position)")
+    .eq("project_location.id", projectID)
     .order("created_at", { ascending: true });
 
   if (error) {
@@ -135,19 +137,25 @@ export async function SelectAllFieldTechniciansByProjectIDAction(
 export async function SelectAllAssignedProjectsByFieldTechnicianIDAction() {
   const supabase = await createClient(cookies());
   const { data: userData, error: userError } = await supabase.auth.getUser();
-
-  if (userError) {
-    throw userError;
-  }
+  if (userError) throw userError;
 
   const { data, error } = await supabase
     .from("assigned_projects")
-    .select("project:projects!project_id(*)")
+    .select(`
+      id,
+      user_id,
+      project_location (
+        *,
+        projects (*)
+      )
+    `)
     .eq("user_id", userData.user.id);
 
-  if (error) {
-    throw error;
-  }
+  if (error) throw error;
 
-  return data.map((item) => item.project) as ProjectType[];
+  return data.map((row: any) => ({
+    ...row.project_location,
+    project: row.project_location?.projects ?? null,
+  }));
 }
+

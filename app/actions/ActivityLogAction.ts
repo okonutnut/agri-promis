@@ -21,9 +21,9 @@ export async function InsertActivityLogAction(
   const { error } = await supabase.from("activity_logs").insert({
     code,
     description,
-    project_id: project_id || null,
-    user_id: userData.user.id,
+    project_location_id: project_id || null,
     ip_address: data.ip,
+    user_id: userData.user.id,
   });
 
   if (error) {
@@ -55,7 +55,7 @@ export async function SelectActivityLogsByProjectIDAction(project_id: string) {
   const { data, error } = await supabase
     .from("activity_logs")
     .select("*, user:user_profile (fullname)")
-    .eq("project_id", project_id)
+    .eq("project_location_id", project_id)
     .order("created_at", { ascending: false });
 
   if (error) {

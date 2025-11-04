@@ -1,6 +1,5 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,7 +8,6 @@ import { toast } from "sonner";
 import { useParams } from "next/navigation";
 import { ImageData } from "@/components/interfaces";
 import { MonitoringReportType } from "@/components/types";
-import { useInsertMonitoringReportHook } from "@/components/hooks";
 import { deleteDraft } from "@/hooks/use-draft";
 import { Button } from "@/components/ui/button";
 import { Loader2, Send } from "lucide-react";
@@ -21,24 +19,18 @@ import {
   useModal,
   useSheet,
 } from "@/components/custom/layout/custom-page-layout";
+import { useUniversalMutation } from "@/hooks/use-universal-mutation";
+import { InsertMonitoringReportAction } from "@/app/actions/MonitoringAction";
 import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
 import ImageCaptureForm from "./image-report-form";
-const SaveDraftButton = dynamic(
-  () => import("../components/save-draft-button"),
-  { ssr: false }
-);
-const DeleteDraftButton = dynamic(
-  () => import("../components/delete-draft-button"),
-  { ssr: false }
-);
 import PrintDownloadDropdown from "@/components/custom/print/print-download-dropdown";
 import MonitoringReportDocument from "@/components/custom/pdf/monitoring-reports-document";
-const TravelOrderDropdown = dynamic(
-  () => import("../components/travel-order-combobox"),
-  { ssr: false }
-);
+import SaveDraftButton from "../components/save-draft-button";
+import DeleteDraftButton from "../components/delete-draft-button";
+import TravelOrderDropdown from "../components/travel-order-combobox";
 
 const fieldReportSchema = z.object({
+  project_location_id: z.string().optional(),
   travel_order_no: z.string().min(1, "Travel order number is required"),
   purpose: z.string().min(1, "Purpose is required"),
   findings: z.array(z.string()),
@@ -104,6 +96,7 @@ export default function UploadFieldReportForm({
   const form = useForm<FieldReportFormData>({
     resolver: zodResolver(fieldReportSchema),
     defaultValues: {
+      project_location_id: projectID as string,
       purpose: values?.purpose || "",
       findings: values?.findings ? [...values.findings] : [],
       issues_concern: values?.issues_concern ? [...values.issues_concern] : [],
@@ -112,7 +105,12 @@ export default function UploadFieldReportForm({
     },
   });
 
-  const { mutate, isPending } = useInsertMonitoringReportHook();
+  // const { mutate, isPending } = useInsertMonitoringReportHook();
+  const { mutate, isPending } = useUniversalMutation({
+    mutationFn: async (data: any) => await InsertMonitoringReportAction(data),
+    invalidateKeys: ["monitoring-report", projectID as string],
+  });
+
   const onSubmit = async (data: FieldReportFormData) => {
     if (!validateImages(images)) return;
 
@@ -122,12 +120,11 @@ export default function UploadFieldReportForm({
       issues_concern: (data.issues_concern || []).filter((item) => item !== ""),
     };
 
-    await deleteDraft(values?.key as string);
-
     mutate(
-      { ...cleanedData, project_id: projectID as string, images },
+      { ...cleanedData, project_location_id: projectID as string, images },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
+          await deleteDraft(values?.key as string);
           form.reset();
           setImages([]);
           closeSheet();

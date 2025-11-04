@@ -1,8 +1,0 @@
-{
-  "crons": [
-    {
-      "path": "/api/deactivate-travel-orders",
-      "schedule": "0 */12 * * *"
-    }
-  ]
-}

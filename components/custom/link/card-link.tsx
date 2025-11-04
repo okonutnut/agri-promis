@@ -11,7 +11,7 @@ type CardLinkProps = {
 };
 export default function CardLink({ href, children, className }: CardLinkProps) {
   return (
-    <Link href={href}>
+    <Link href={href} prefetch={true}>
       <Card
         className={cn(
           `w-full shadow-xs transition-transform duration-200 hover:shadow-xs hover:bg-white/50 p-0 rounded-md`,

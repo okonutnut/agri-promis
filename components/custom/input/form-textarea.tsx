@@ -11,7 +11,7 @@ type FormTextareaType = {
   readOnly?: boolean;
   form: UseFormReturn<any>;
   className?: string;
-  optinal?: boolean;
+  optional?: boolean;
   rows?: number;
   noPlaceholder?: boolean;
 };
@@ -21,14 +21,14 @@ export default function FormTextarea({
   form,
   readOnly,
   className,
-  optinal,
+  optional,
   rows = 5,
   noPlaceholder = false,
 }: FormTextareaType) {
   return (
     <div className={cn(`w-full mt-2 mb-4`, className)}>
       <Label htmlFor={name} className="font-medium mb-1">
-        {label} {optinal && <span className="text-gray-500">(optional)</span>}
+        {label} {optional && <span className="text-gray-500">(optional)</span>}
       </Label>
       <Textarea
         {...form.register(name)}

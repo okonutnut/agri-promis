@@ -12,11 +12,10 @@ import { MonitoringReportType } from "@/components/types";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllMonitoringReportsByProjectIDAction } from "@/app/actions/MonitoringAction";
 
-function MonitoringReportContent({
-  data,
-}: {
+type MonitoringReportContentProps = {
   data: MonitoringReportType[] | undefined;
-}) {
+};
+function MonitoringReportContent({ data }: MonitoringReportContentProps) {
   const { openSheet } = useSheet();
 
   const handleRowSelect = (row: MonitoringReportType) => {
@@ -39,6 +38,7 @@ function MonitoringReportContent({
 
 export default function MonitoringReportPage() {
   const { projectID } = useParams();
+
   const { data, isLoading, error } = useRealtimeQuery({
     queryKey: ["monitoring-reports"],
     queryFn: () =>

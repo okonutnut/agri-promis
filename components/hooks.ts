@@ -44,7 +44,7 @@ import {
   SelectAllProjectsByProgramIDAction,
   SelectProgramAndProjectDetailsByProjectIDAction,
   EditProjectAction,
-  SelectProjectDetailsByProjectIDAction,
+  SelectProjectDetailsByProjectLocationIDAction,
   DeleteProjectAction,
   SelectAllProjectsByUserIDAction,
 } from "@/app/actions/ProjectAction";
@@ -63,10 +63,12 @@ import { toast } from "sonner";
 import {
   MonitoringReportType,
   ProgramType,
+  ProjectLocationType,
   ProjectType,
   TravelOrderType,
   UserProfileType,
 } from "./types";
+import { InsertProjectLocationAction } from "@/app/actions/ProjectLocationAction";
 
 // PROGRAM HOOKS
 export function useSelectProgramByIDHook(programId: string) {
@@ -201,7 +203,7 @@ export function useSelectProgramAndProjectDetailsByProgjectIDHook(
 export function useSelectProjectDetailsHook(projectId: string) {
   return useQuery({
     queryKey: ["projectDetails", projectId],
-    queryFn: async () => await SelectProjectDetailsByProjectIDAction(projectId),
+    queryFn: async () => await SelectProjectDetailsByProjectLocationIDAction(projectId),
     enabled: !!projectId,
     refetchInterval: 3000,
     networkMode: "online",
@@ -218,7 +220,26 @@ export function useInsertProjectHook() {
         queryKey: ["allProjectsByProgramId"],
       });
       toast("Project created successfully!");
-      window.location.href = `/dashboard/projects/${data?.id}`;
+      window.location.href = `/dashboard/programs/${data?.program_id}`;
+    },
+    onError: () => {
+      toast.error("Something went wrong. Please try again.", {
+        duration: 2000,
+      });
+    },
+  });
+}
+
+export function useInsertProjectLocationHook() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: ProjectLocationType) => await InsertProjectLocationAction(data),
+    onSuccess: (data) => {
+      qc.invalidateQueries({
+        queryKey: ["allProjectsByProgramId"],
+      });
+      toast("Project location added successfully!");
     },
     onError: () => {
       toast.error("Something went wrong. Please try again.", {

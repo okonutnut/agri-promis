@@ -3,7 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
-import { ProjectType, FCAType } from "../../components/types";
+import { ProjectType, FCAType, ProjectLocationType } from "../../components/types";
 import { sendNotificationToAll } from "./NotificationAction";
 
 // PROJECT ACTIONS
@@ -11,18 +11,11 @@ export async function InsertProjectAction(values: ProjectType) {
   const supabase = await createClient(cookies());
   const userId = (await supabase.auth.getUser()).data.user?.id;
 
-  // Auth check
-  if (!userId) {
-    throw new Error("User not authenticated");
-  }
-
   const { data, error } = await supabase
     .from("projects")
     .insert({
-      created_by: userId,
-      progress_indicator: 1,
-      status: 1,
       ...values,
+      created_by: userId,
     })
     .select()
     .single();
@@ -45,15 +38,17 @@ export async function InsertProjectAction(values: ProjectType) {
 
 export async function SelectAllProjectsByProgramIDAction(programID: string) {
   const supabase = await createClient(cookies());
+
   const { data, error } = await supabase
     .from("projects")
-    .select("*")
+    .select(`
+      *,
+      project_location (*)
+    `)
     .eq("program_id", programID)
     .order("created_at", { ascending: true });
 
-  if (error) {
-    throw error;
-  }
+  if (error) throw error;
 
   return data as ProjectType[];
 }
@@ -89,72 +84,82 @@ export async function SelectAllProjectsByUserIDAction(userID: string) {
 }
 
 export async function SelectProgramAndProjectDetailsByProjectIDAction(
-  projectID: string
+  projectLocationID: string
 ) {
   const supabase = await createClient(cookies());
 
   const { data, error } = await supabase
     .from("projects")
-    .select(`*,programs ("*")`)
-    .eq("id", projectID)
+    .select(`
+      *,
+      project_location!inner (*)
+    `)
+    .eq("project_location.id", projectLocationID)
     .single();
 
-  if (error) {
-    throw error;
-  }
+  if (error) throw error;
 
-  // GET FCA Info
+  // Get FCA info
   const { data: fcaData, error: fcaError } = await supabase
     .from("farmers")
     .select("id, description")
-    .in("id", data.fca_ids);
+    .in("id", data.project_location[0]?.fca_ids ?? []);
 
-  if (fcaError) {
-    throw fcaError;
-  }
+  if (fcaError) throw fcaError;
 
-  const res = {
+  return {
     ...data,
     fca: fcaData.length > 0 ? fcaData : null,
   };
-
-  return res as ProjectType & { fca: FCAType[] | null };
 }
 
-export async function SelectProjectDetailsByProjectIDAction(projectID: string) {
+export async function SelectProjectDetailsByProjectLocationIDAction(projectLocationID: string) {
   const supabase = await createClient(cookies());
+
   const { data, error } = await supabase
-    .from("projects")
-    .select("*, programs (*)")
-    .eq("id", projectID)
+    .from("project_location")
+    .select(`
+      *,
+      projects (
+        *,
+        programs (*)
+      ),
+      user_profile:created_by (fullname)
+    `)
+    .eq("id", projectLocationID)
     .single();
 
-  if (error) {
-    throw error;
-  }
+  if (error) throw error;
 
-  return data as ProjectType;
+  return data;
 }
 
-export async function EditProjectAction(data: ProjectType) {
+
+export async function EditProjectAction(data: ProjectLocationType) {
   const supabase = await createClient(cookies());
 
-  // Get the current project details for logging
-  const { data: currentProject, error: currentError } = await supabase
-    .from("projects")
-    .select("project_name")
+  // Step 1: Get project_location details first
+  const { data: projectLocation, error: plError } = await supabase
+    .from("project_location")
+    .select("project_id")
     .eq("id", data.id)
     .single();
 
-  if (currentError) {
-    throw currentError;
-  }
+  if (plError) throw plError;
 
-  // Update the project name and status
-  const { error } = await supabase
+  // Step 2: Get parent project info
+  const { data: project, error: projectError } = await supabase
     .from("projects")
+    .select("project_name")
+    .eq("id", projectLocation.project_id)
+    .single();
+
+  if (projectError) throw projectError;
+
+  // Step 3: Update project_location
+  const { error } = await supabase
+    .from("project_location")
     .update({
-      project_name: data.project_name,
       description: data.description,
       progress_indicator: data.progress_indicator,
       status: data.status,
@@ -163,58 +168,55 @@ export async function EditProjectAction(data: ProjectType) {
     })
     .eq("id", data.id);
 
-  if (error) {
-    throw error;
-  }
+  if (error) throw error;
 
-  // Log the activity
+  // Step 4: Log activity
   await InsertActivityLogAction(
     "Updated Project",
-    `Project ${currentProject.project_name} details has been updated successfully.`
+    `Project ${project.project_name} details have been updated successfully.`,
+    data.id
   );
 
-  // Send Notification
+  // Step 5: Notify all
   await sendNotificationToAll(
-    `Project ${currentProject.project_name} details has been updated successfully.`
+    `Project ${project.project_name} details have been updated successfully.`
   );
 
   return;
 }
 
-export async function DeleteProjectAction(projectID: string) {
+export async function DeleteProjectAction(projectLocationID: string) {
   const supabase = await createClient(cookies());
 
-  // Get project details for logging
+  // get project name for logs
   const { data: projectData, error: projectError } = await supabase
-    .from("projects")
-    .select("project_name, program_id")
-    .eq("id", projectID)
+    .from("project_location")
+    .select("id, description, fca_ids")
+    .eq("id", projectLocationID)
     .single();
 
-  if (projectError) {
-    throw projectError;
-  }
+  if (projectError) throw projectError;
+  const projectName = projectData?.description;
 
-  const projectName = projectData?.project_name;
-
-  // Delete the project
-  const { error } = await supabase
-    .from("projects")
+  // delete assigned projects first
+  const { error: assignedErr } = await supabase
+    .from("assigned_projects")
     .delete()
-    .eq("id", projectID);
+    .eq("project_location_id", projectLocationID);
 
-  if (error) {
-    throw error;
-  }
+  if (assignedErr) throw assignedErr;
 
-  // Log the activity
-  await InsertActivityLogAction(
-    "Deleted a Project",
-    `Project ${projectName} has been deleted.`
-  );
+  // now delete project
+  const { error } = await supabase
+    .from("project_location")
+    .delete()
+    .eq("id", projectLocationID);
 
-  // Send Notification
+  if (error) throw error;
+
+  await InsertActivityLogAction("Deleted a Project", `Project ${projectName} has been deleted.`);
   await sendNotificationToAll(`Project deleted: ${projectName}.`);
 
   return;
 }
+

@@ -1,28 +1,27 @@
 "use client";
 
-import { useDeleteProjectHook } from "@/components/hooks";
-import { ProjectType } from "@/components/types";
+import { ProjectLocationType } from "@/components/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useModal } from "@/components/custom/layout/custom-page-layout";
+import { useUniversalMutation } from "@/hooks/use-universal-mutation";
+import { DeleteProjectAction } from "@/app/actions/ProjectAction";
+import { toast } from "sonner";
 
 type DeleteProjectCardProps = {
-  data: ProjectType;
-  programID: string;
+  data: ProjectLocationType;
 };
 
-export default function DeleteProjectCard({
-  data,
-  programID,
-}: DeleteProjectCardProps) {
+export default function DeleteProjectCard({ data }: DeleteProjectCardProps) {
   const { openModal, closeModal } = useModal();
-  const { mutate, isPending } = useDeleteProjectHook(
-    data.id as string,
-    programID
-  );
+
+  const { mutate, isPending } = useUniversalMutation({
+    mutationFn: async () => await DeleteProjectAction(data.id as string),
+    invalidateKeys: [],
+  });
 
   const DeleteModalContent = ({
     projectName,
@@ -66,9 +65,17 @@ export default function DeleteProjectCard({
       "Delete Project",
       "Are you sure you want to delete this project? This action cannot be undone.",
       <DeleteModalContent
-        projectName={data.project_name as string}
+        projectName={`${data.projects?.project_name}`}
         onConfirm={() => {
-          mutate();
+          mutate(data.id, {
+            onSuccess: () => {
+              toast.success("Project deleted successfully.");
+              window.location.href = `/dashboard/programs/${data.projects?.program_id}`;
+            },
+            onError: () => {
+              toast.error(`Error deleting project. Please try again.`);
+            },
+          });
           closeModal();
         }}
       />
@@ -76,7 +83,7 @@ export default function DeleteProjectCard({
   };
 
   return (
-    <Card className="shadow-xs bg-red-50 border-red-200">
+    <Card className="rounded-md shadow-xs bg-red-50 border-red-200">
       <CardContent className="flex flex-col flex-wrap justify-between items-start space-y-4">
         <div className="flex gap-2 items-center font-semibold w-full mb-4 text-red-600">
           <AlertCircle />

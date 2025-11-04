@@ -1,25 +1,22 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { useSelectDashboardItemsHook } from "@/components/hooks";
 import { ChartLine, Contact, FileStack } from "lucide-react";
 import cornGrowthStages from "@/data/growth-stages.json";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import SummaryCard from "@/components/custom/card/summary-cards";
+import { useParams } from "next/navigation";
+import { SelectDashboardItemsAction } from "@/app/actions/DashboardAction";
+import { useUniversalRealtime } from "@/hooks/use-universal-realtime";
 
-const SummaryCard = dynamic(() => import("../../card/summary-cards"), {
-  ssr: false,
-});
+export default function ProjectDashboardItems() {
+  const { projectID } = useParams();
 
-type ProjectDashboardItemsProps = {
-  project_id: string;
-};
-export default function ProjectDashboardItems({
-  project_id,
-}: ProjectDashboardItemsProps) {
-  const { data, isLoading, error } = useSelectDashboardItemsHook(
-    project_id as string
-  );
+  const { data, isLoading, error } = useUniversalRealtime({
+    queryKey: ["dashboard_items", projectID as string],
+    queryFn: () => SelectDashboardItemsAction(projectID as string),
+    tables: ["projects", "farmers", "project_location"],
+  });
 
   return (
     <section className="flex flex-wrap md:flex-nowrap justify-between gap-5">

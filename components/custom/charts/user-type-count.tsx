@@ -1,93 +1,109 @@
 "use client";
 
-import { Pie, PieChart, ResponsiveContainer, LabelList } from "recharts";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Pie, PieChart } from "recharts";
 import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
-import { SelectUserCountPerTypeAction } from "@/app/actions/DashboardAction";
+import { SelectAllMembersAction } from "@/app/actions/MemberAction";
 
-const chartConfig = {
-  "1": { label: "System Admin", color: "oklch(0.8348 0.1302 160.9080)" },
-  "2": { label: "Field Operator", color: "oklch(0.6231 0.1880 259.8145)" },
-};
+export const description = "A pie chart with no separator";
 
 export default function TotalUsersPerType() {
   const { data } = useRealtimeQuery({
-    table: "user_profile",
     queryKey: ["total-users-per-type"],
-    queryFn: SelectUserCountPerTypeAction,
+    queryFn: SelectAllMembersAction,
+    table: "user_profile",
   });
 
-  const total =
-    data?.reduce((sum, item) => sum + (item.count as number), 0) || 0;
+  type UserProfile = {
+    role?: string | number;
+  };
 
-  const chartData =
-    data?.map((item) => {
-      const percentage = total
-        ? (((item.count as number) / total) * 100).toFixed(0)
-        : "0";
-      return {
-        role:
-          chartConfig[item.role as keyof typeof chartConfig]?.label ||
-          `Role ${item.role}`,
-        count: item.count,
-        percentage: `${percentage}%`,
-        fill:
-          chartConfig[item.role as keyof typeof chartConfig]?.color ||
-          "oklch(0.6959 0.1491 162.4796)",
-      };
-    }) ?? [];
+  type RoleCounts = {
+    [key: string]: number;
+  };
+
+  const roleCounts: RoleCounts =
+    data?.reduce((acc: RoleCounts, user: UserProfile) => {
+      const roleKey = String(user.role ?? "unknown");
+      acc[roleKey] = (acc[roleKey] || 0) + 1;
+      return acc;
+    }, {} as RoleCounts) || {};
+
+  const chartData = [
+    {
+      browser: "System Admin ",
+      visitors: roleCounts["1"] || 0,
+      fill: "var(--color-chrome)",
+    },
+    {
+      browser: "Field Operator ",
+      visitors: roleCounts["2"] || 0,
+      fill: "var(--color-safari)",
+    },
+  ];
+
+  const chartConfig = {
+    visitors: {
+      label: "Visitors",
+    },
+    chrome: {
+      label: "System Admin",
+      color: "var(--chart-1)",
+    },
+    safari: {
+      label: "Field Operator",
+      color: "var(--chart-2)",
+    },
+  } satisfies ChartConfig;
 
   return (
-    <div className="w-full h-full">
-      <span className="text-lg font-semibold">Total Users by System Role</span>
-      <Card className="flex flex-col p-2 rounded-md">
-        <CardContent className="flex-1 p-0 flex items-center justify-center">
+    <>
+      <Card className="flex flex-col h-full w-full p-3 rounded-md shadow-xs">
+        <CardHeader className="items-center p-0">
+          <CardTitle className="text-lg">System User Types</CardTitle>
+        </CardHeader>
+        <CardContent className="flex-1 p-0">
           <ChartContainer
             config={chartConfig}
-            className="[&_.recharts-text]:fill-background"
+            className="mx-auto aspect-square max-h-[250px]"
           >
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <ChartTooltip
-                  content={<ChartTooltipContent nameKey="count" hideLabel />}
-                />
-                <Pie
-                  data={chartData}
-                  dataKey="count"
-                  nameKey="role"
-                  stroke="none"
-                  outerRadius="80%"
-                >
-                  <LabelList
-                    dataKey="percentage"
-                    position="inside"
-                    className="fill-background"
-                    fontSize={12}
-                    stroke="none"
-                  />
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
+            <PieChart>
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent hideLabel />}
+              />
+              <Pie
+                data={chartData}
+                dataKey="visitors"
+                nameKey="browser"
+                stroke="0"
+              />
+            </PieChart>
           </ChartContainer>
         </CardContent>
-
-        <CardFooter className="flex flex-wrap justify-center gap-4 text-sm mt-2">
-          {chartData.map((item, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <div
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: item.fill }}
-              ></div>
-              <span className="text-muted-foreground">{item.role}</span>
-            </div>
-          ))}
+        <CardFooter className="gap-2 text-sm p-0">
+          <div className="w-1/2 flex items-center">
+            <span className="inline-block h-3 w-3 bg-(--chart-1) rounded-full mr-2"></span>
+            <span>System Admin</span>
+          </div>
+          <div className="w-1/2 items-center">
+            <span className="inline-block h-3 w-3 bg-(--chart-2) rounded-full mr-2"></span>
+            <span>Field Operator</span>
+          </div>
         </CardFooter>
       </Card>
-    </div>
+    </>
   );
 }

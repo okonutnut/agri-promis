@@ -1,42 +1,42 @@
 "use client";
 
-import FormInput from "@/components/custom/input/form-input";
-import FormSelect from "@/components/custom/select/form-select";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { UserComboBox } from "./user-combobox";
-import NonFormInput from "@/components/custom/input/non-form-input";
 import { TravelOrderProjectsType, TravelOrderType } from "@/components/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useInsertTravelOrderHook } from "@/components/hooks";
 import { Loader2, Send } from "lucide-react";
 import { useParams } from "next/navigation";
 import {
   useModal,
   useSheet,
 } from "@/components/custom/layout/custom-page-layout";
+import FormInput from "@/components/custom/input/form-input";
+import FormSelect from "@/components/custom/select/form-select";
+import NonFormInput from "@/components/custom/input/non-form-input";
+import * as z from "zod";
 import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
-import { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
-const ItineraryOfTravel = dynamic(() => import("./itinerary-of-travel"), {
-  ssr: false,
-});
-//
+import ItineraryOfTravel from "./itinerary-of-travel";
+import { Label } from "@/components/ui/label";
+import { useUniversalMutation } from "@/hooks/use-universal-mutation";
+import { InsertTravelOrderAction } from "@/app/actions/TravelOrderAction";
+import { toast } from "sonner";
 
 const formSchema = z
   .object({
     travel_order_no: z
       .string()
       .min(1, { message: "Travel order number is required" }),
+    program_id: z.string().min(1, { message: "Program ID is required" }),
     user_id: z.string().min(1, { message: "User is required" }),
-    office: z.string().min(1, { message: "Office is required" }),
+    /* office: z.string().min(1, { message: "Office is required" }),
     fund: z.coerce
       .number()
       .min(0, { message: "Fund must be a positive number" }),
     estimated_cost: z.coerce
       .number()
-      .min(0, { message: "Cost must be a positive number" }),
+      .min(0, { message: "Cost must be a positive number" }), */
     departure_date: z
       .string()
       .min(1, { message: "Departure date is required" }),
@@ -85,10 +85,11 @@ export default function IssueTravelOrderForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       travel_order_no: values?.travel_order_no || "",
+      program_id: programID as string,
       user_id: values?.user_id || "",
-      office: values?.office || "DA NVES",
-      fund: values?.fund || 0,
-      estimated_cost: values?.estimated_cost || 0,
+      // office: values?.office || "DA NVES",
+      // fund: values?.fund || 0,
+      // estimated_cost: values?.estimated_cost || 0,
       departure_date: values?.departure_date || "",
       return_date: values?.return_date || "",
       mode_of_transport:
@@ -108,17 +109,22 @@ export default function IssueTravelOrderForm({
     { value: "plane", label: "Plane" },
   ];
 
-  const { mutate, isPending } = useInsertTravelOrderHook();
+  const { mutate, isPending } = useUniversalMutation({
+    mutationFn: async (data: TravelOrderSchema) =>
+      await InsertTravelOrderAction(data),
+    invalidateKeys: ["travel-orders", programID as string],
+  });
+
   const onSubmit = (data: TravelOrderSchema) => {
-    console.log({ data });
-    mutate(
-      { ...data, program_id: programID as string },
-      {
-        onSuccess: () => {
-          closeSheet();
-        },
-      }
-    );
+    mutate(data, {
+      onSuccess: () => {
+        toast.success("Travel order inserted successfully.");
+        closeSheet();
+      },
+      onError: () => {
+        toast.error("Failed to insert travel order. Please try again.");
+      },
+    });
   };
 
   const [itinerary, setItinerary] = useState<TravelOrderProjectsType[]>(
@@ -137,6 +143,7 @@ export default function IssueTravelOrderForm({
         id="travel-order-form"
         onSubmit={form.handleSubmit(onSubmit)}
       >
+        <Label className="mb-4 text-md uppercase">Travel Order Info</Label>
         <FormInput
           label="Travel Order No."
           name="travel_order_no"
@@ -152,7 +159,7 @@ export default function IssueTravelOrderForm({
             readOnly={!isAddMode}
           />
         )}
-        <FormInput
+        {/* <FormInput
           label="Office"
           name="office"
           form={form}
@@ -171,7 +178,7 @@ export default function IssueTravelOrderForm({
           type="number"
           form={form}
           readOnly={!isAddMode}
-        />
+        /> */}
         <FormInput
           label="Date of Departure"
           type="datetime-local"
@@ -204,6 +211,7 @@ export default function IssueTravelOrderForm({
           isAddMode={isAddMode}
           itinerary={itinerary}
           setItinerary={setItinerary}
+          isPending={isPending}
         />
       </form>
       <CustomSheetFooter isPending={isPending}>
