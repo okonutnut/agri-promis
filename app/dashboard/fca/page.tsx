@@ -8,12 +8,15 @@ import CustomPageLayout, {
   useSheet,
 } from "@/components/custom/layout/custom-page-layout";
 import { getDashboardNavItems } from "@/components/sidebar/navitems";
-import FCAPanel from "./components/fca-projects";
+import FCAProjects from "./components/fca-projects";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllFCAAction } from "@/app/actions/FCAAction";
 import { CustomTabList } from "@/components/custom/layout/custom-tab-list";
 
-function FCAContent({ values }: { values: FCAType[] | undefined }) {
+type FCAContentProps = {
+  values: FCAType[] | undefined;
+};
+function FCAContent({ values }: FCAContentProps) {
   const { openSheet } = useSheet();
 
   const handleRowSelect = (row: FCAType) => {
@@ -27,7 +30,7 @@ function FCAContent({ values }: { values: FCAType[] | undefined }) {
           },
           {
             title: "Assigned Projects",
-            content: <FCAPanel fcaID={row.id as string} />,
+            content: <FCAProjects assignedProjects={row.assignedProjects} />,
           },
         ]}
       />
@@ -59,6 +62,8 @@ export default function FCAPage() {
     table: "farmers",
     queryFn: SelectAllFCAAction,
   });
+
+  console.log("FCA Data:", data);
 
   return (
     <CustomPageLayout

@@ -6,6 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
+import { Button } from "@/components/ui/button";
+import SearchInput from "@/components/custom/input/search-input";
+import Link from "next/link";
 
 type TeamMemberPanelProps = {
   data: any;
@@ -16,22 +19,36 @@ export default function TeamMemberPanel({
   data,
 }: TeamMemberPanelProps) {
   if (!userId) return null;
+
   const [search, setSearch] = useState("");
 
-  const total =
-    data.assigned_projects?.length + data.admin_programs?.length || 0;
+  // Filter admin_programs by program_name
+  const filteredPrograms =
+    data.admin_programs?.filter((program: any) =>
+      program.program_name?.toLowerCase().includes(search.toLowerCase())
+    ) || [];
+
+  // Filter assigned_projects by project_name or location
+  const filteredProjects =
+    data.assigned_projects?.filter((project: any) => {
+      const name = project.project_location?.projects.project_name || "";
+      const location = project.project_location?.location || "";
+      return (
+        name.toLowerCase().includes(search.toLowerCase()) ||
+        location.toLowerCase().includes(search.toLowerCase())
+      );
+    }) || [];
+
+  const total = filteredPrograms.length + filteredProjects.length;
 
   return (
     <>
       <div className="space-y-2 h-full overflow-y-auto px-3">
         <Label className="mt-2 text-xl">Assigned Programs/Projects</Label>
-        <Input
-          placeholder="Search..."
-          className="w-full"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        {data.admin_programs?.map((program: any) => (
+        <SearchInput setSearchTerm={setSearch} />
+
+        {/* Program Cards */}
+        {filteredPrograms.map((program: any) => (
           <Card
             className="shadow-xs rounded-md p-2 flex flex-row justify-between items-start"
             key={program.id}
@@ -42,10 +59,19 @@ export default function TeamMemberPanel({
                 {program?.projects[0]?.count || 0} Projects
               </small>
             </div>
-            <Badge className="text-xs">PROGRAM</Badge>
+            <div className="flex flex-col gap-2">
+              <Badge className="w-full rounded-md">PROGRAM</Badge>
+              <Link href={`/dashboard/programs/${program.id}`} prefetch={true}>
+                <Button size={"sm"} variant={"outline"}>
+                  View Program
+                </Button>
+              </Link>
+            </div>
           </Card>
         ))}
-        {data.assigned_projects?.map((project: any) => (
+
+        {/* Project Cards */}
+        {filteredProjects.map((project: any) => (
           <Card
             className="shadow-xs rounded-md p-2 flex flex-row justify-between items-start"
             key={project.id}
@@ -58,9 +84,20 @@ export default function TeamMemberPanel({
                 {project.project_location?.location || "N/A"}
               </small>
             </div>
-            <Badge className="text-xs">PROJECT</Badge>
+            <div className="flex flex-col gap-2">
+              <Badge className="w-full rounded-md">PROJECT</Badge>
+              <Link
+                href={`/dashboard/projects/${project.project_location?.id}`}
+                prefetch={true}
+              >
+                <Button size={"sm"} variant={"outline"}>
+                  View Project
+                </Button>
+              </Link>
+            </div>
           </Card>
         ))}
+
         {total === 0 && (
           <span className="italic ms-3 text-xs">No results found.</span>
         )}

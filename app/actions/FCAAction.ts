@@ -1,4 +1,5 @@
 "use server";
+
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { FCAType } from "../../components/types";
@@ -29,13 +30,31 @@ export async function InsertFCAAction(data: FCAType) {
 
 export async function SelectAllFCAAction() {
   const supabase = await createClient(cookies());
-  const { data, error } = await supabase.from("farmers").select("*");
 
-  if (error) {
-    throw error;
-  }
+  const { data: fcaData, error: fcaError } = await supabase
+    .from("farmers")
+    .select("*");
 
-  return data as FCAType[];
+  if (fcaError) throw fcaError;
+
+  // Fetch ALL projects (do not filter here)
+  const { data: projectData, error: projectError } = await supabase
+    .from("project_location")
+    .select("*, projects (project_name)");
+
+  if (projectError) throw projectError;
+
+  // Map projects to each FCA
+  const result = fcaData.map((fca) => {
+    const assignedProjects = projectData.filter((project) => {
+      const ids = Array.isArray(project.fca_ids) ? project.fca_ids : [];
+      return ids.includes(fca.id);
+    });
+
+    return { ...fca, assignedProjects };
+  });
+
+  return result;
 }
 
 export async function SelectAllFCAByStatusAction(status: number) {
@@ -109,8 +128,8 @@ export async function EditFCAActiveStatusAction(fcaID: string, status: number) {
 export async function SelectAllAssignedProjectsByFCAIDAction(fcaID: string) {
   const supabase = await createClient(cookies());
   const { data, error } = await supabase
-    .from("projects")
-    .select("project_name, created_at")
+    .from("project_location")
+    .select("projects (project_name), created_at")
     .contains("fca_ids", [fcaID]);
 
   if (error) {

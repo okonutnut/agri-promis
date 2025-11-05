@@ -30,6 +30,9 @@ export type FCAType = {
   member_count?: number;
   active_status?: number;
   created_at?: string;
+
+  // relations
+  assignedProjects?: ProjectLocationType[];
 };
 
 export type ProgramType = {
@@ -52,10 +55,11 @@ export type ProjectType = {
   created_by?: string;
   program_id?: string;
   created_at?: string;
+
   // realtions
   programs?: ProgramType;
   fca?: FCAType[];
-  project_location: ProjectLocationType[];
+  project_location?: ProjectLocationType[];
 };
 
 export type ProjectLocationType = {

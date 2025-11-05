@@ -26,7 +26,7 @@ import MobileNavbar from "./mobile-nav";
 import AppDrawer from "@/components/sidebar/appDrawer";
 import { Separator } from "@/components/ui/separator";
 import NotificationRequest from "../notifications/notification";
-import { ProgramType } from "@/components/types";
+import { ProgramType, ProjectType } from "@/components/types";
 import { useMemo } from "react";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllProgramsWithProjectsAction } from "@/app/actions/ProgramAction";
@@ -63,11 +63,11 @@ const ProgramDropdown = ({
           prefetch={true}
         >
           <Boxes className="h-4 w-4 text-[#707070]" />
-          <span className="min-w-[150px] truncate">
+          <Button className="min-w-[150px] truncate" variant="ghost">
             {currentProgram?.program_name ?? (
               <Skeleton className="w-full h-5" />
             )}
-          </span>
+          </Button>
         </Link>
 
         <DropdownMenuTrigger asChild>
@@ -92,12 +92,14 @@ const ProgramDropdown = ({
 
           <DropdownMenuSeparator />
           <Link href={PATHS.PROGRAMS} prefetch={true}>
-            <DropdownMenuItem>All Programs</DropdownMenuItem>
+            <DropdownMenuItem className="h-[28px]">
+              All Programs
+            </DropdownMenuItem>
           </Link>
 
           <DropdownMenuSeparator />
           <Link href={PATHS.NEW_PROGRAM} prefetch={true}>
-            <DropdownMenuItem>
+            <DropdownMenuItem className="h-[28px]">
               <Plus className="h-4 w-4 mr-1" /> New Program
             </DropdownMenuItem>
           </Link>
@@ -118,60 +120,69 @@ const ProjectDropdown = ({
 }) => {
   const pathname = usePathname();
   const projects = program.projects ?? [];
-  const currentProject = projects.find((p: any) => p.id === projectID);
+  const currentProject = projects.find((p: ProjectType) =>
+    p.project_location?.some((location) => location.id === projectID)
+  );
+  const currentProjectLocation = currentProject?.project_location?.find(
+    (location) => location.id === projectID
+  );
 
   return (
-    <DropdownMenu>
-      <Link
-        href={pathname}
-        className="text-black flex items-center gap-2 whitespace-nowrap"
-      >
-        <Box className="h-4 w-4 text-[#707070]" />
-        <span className="min-w-[150px] truncate">
-          {currentProject?.project_name ?? <Skeleton className="w-full h-5" />}
-        </span>
-      </Link>
-
-      <DropdownMenuTrigger asChild>
-        <Button className="ml-2 h-7 w-4 text-[#707070]" variant="ghost">
-          <ChevronsUpDown />
-        </Button>
-      </DropdownMenuTrigger>
-
-      <DropdownMenuContent align="start" className="m-1">
-        {projects.map((project: any) => (
-          <Link
-            key={project.id}
-            href={`${
-              role == "admin" ? PATHS.PROJECTS : PATHS.FIELD_TECHNICIAN
-            }/${project.id}`}
-            prefetch={true}
-          >
-            <DropdownMenuItem className="justify-between w-full h-7 hover:bg-gray-100">
-              {project.project_name}
-              {project.id === projectID && <Check className="ml-2 h-4 w-4" />}
-            </DropdownMenuItem>
-          </Link>
-        ))}
-
-        <Separator />
-
-        <Link href={`/dashboard/programs/${program.id}`} prefetch={true}>
-          <DropdownMenuItem>All Projects</DropdownMenuItem>
+    <>
+      <DropdownMenu>
+        <Link
+          href={pathname}
+          className="text-black flex items-center gap-2 whitespace-nowrap"
+        >
+          <Box className="h-4 w-4 text-[#707070]" />
+          <Button className="min-w-[150px] truncate" variant="ghost">
+            {currentProject?.project_name ?? (
+              <Skeleton className="w-full h-5" />
+            )}
+          </Button>
         </Link>
 
-        {role === "admin" && (
-          <>
-            <Separator />
-            <Link href={`/dashboard/new/${program.id}`} prefetch={true}>
-              <DropdownMenuItem>
-                <Plus className="h-4 w-4 mr-1" /> New Project
+        <DropdownMenuTrigger asChild>
+          <Button className="ml-2 h-7 w-4 text-[#707070]" variant="ghost">
+            <ChevronsUpDown />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="m-1">
+          {projects.map((project: any) => (
+            <Link
+              key={project.id}
+              href={`${
+                role == "admin" ? PATHS.PROJECTS : PATHS.FIELD_TECHNICIAN
+              }/${project.id}`}
+              prefetch={true}
+            >
+              <DropdownMenuItem className="justify-between w-full h-7 hover:bg-gray-100">
+                {project.project_name}
+                {project.id === projectID && <Check className="ml-2 h-4 w-4" />}
               </DropdownMenuItem>
             </Link>
-          </>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+          ))}
+
+          <Separator />
+
+          <Link href={`/dashboard/programs/${program.id}`} prefetch={true}>
+            <DropdownMenuItem>All Projects</DropdownMenuItem>
+          </Link>
+
+          {role === "admin" && (
+            <>
+              <Separator />
+              <Link href={`/dashboard/new/${program.id}`} prefetch={true}>
+                <DropdownMenuItem>
+                  <Plus className="h-4 w-4 mr-1" /> New Project
+                </DropdownMenuItem>
+              </Link>
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <span>{currentProjectLocation?.location}</span>
+    </>
   );
 };
 
@@ -182,6 +193,18 @@ interface CustomNavbarProps {
   pageTitle?: string;
 }
 
+function getProgramIDProjectLocationID(
+  projectID: string,
+  programs?: ProgramType[]
+): ProgramType | undefined {
+  if (!projectID || !programs) return undefined;
+  return programs.find((program: ProgramType) =>
+    program.projects?.some((project: ProjectType) =>
+      project.project_location?.filter((location) => location.id === projectID)
+    )
+  );
+}
+
 export default function CustomNavbar({
   role,
   noSidebar,
@@ -189,16 +212,22 @@ export default function CustomNavbar({
   pageTitle,
 }: CustomNavbarProps) {
   const { programID, projectID } = useParams();
+
   const { data: programs } = useRealtimeQuery({
     table: "programs",
     queryKey: ["allProgramsByUserIDForNavbar"],
     queryFn: SelectAllProgramsWithProjectsAction,
   });
 
-  const program = useMemo(
-    () => programs?.find((p) => p.id === programID),
-    [programID, programs]
-  );
+  const currentProgram = useMemo(() => {
+    if (programID && programs) {
+      return programs.find((p) => p.id === programID);
+    }
+    if (projectID && programs) {
+      return getProgramIDProjectLocationID(projectID as string, programs);
+    }
+    return undefined;
+  }, [programID, projectID, programs]);
 
   return (
     <>
@@ -227,16 +256,14 @@ export default function CustomNavbar({
               <span className="text-black whitespace-nowrap">{pageTitle}</span>
             ) : (
               <>
-                {program && (
-                  <ProgramDropdown
-                    programID={programID as string}
-                    allPrograms={programs ?? []}
-                  />
-                )}
+                <ProgramDropdown
+                  programID={(programID as string) ?? currentProgram.id}
+                  allPrograms={programs ?? []}
+                />
 
-                {program && projectID && (
+                {currentProgram && projectID && (
                   <ProjectDropdown
-                    program={program}
+                    program={currentProgram}
                     projectID={projectID as string}
                     role={role}
                   />

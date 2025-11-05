@@ -2,7 +2,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Agri-ProMIS - Project Settings",
+  title: "Agri-ProMIS | Project Settings",
   description: "Dashboard page for Agri-ProMIS",
 };
 

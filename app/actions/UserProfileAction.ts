@@ -34,11 +34,12 @@ export async function SelectUserProfileByIDAction(userID: string) {
 
 export async function SelectUserProfileAction() {
   const supabase = await createClient(cookies());
+  const user = (await supabase.auth.getUser()).data.user?.id;
 
   const { data, error } = await supabase
     .from("user_profile")
     .select("*")
-    .eq("id", (await supabase.auth.getUser()).data.user?.id)
+    .eq("id", user)
     .single();
 
   if (error) {

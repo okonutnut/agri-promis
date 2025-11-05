@@ -103,7 +103,7 @@ export async function SelectCurrentUserSubscription() {
 
   if (error) {
     return null;
-  } else {
-    return data;
   }
+  
+  return data;
 }

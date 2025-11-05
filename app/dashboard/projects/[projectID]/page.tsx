@@ -24,12 +24,12 @@ import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 
 function ProjectDashboardInfo(data: ProjectType) {
-  const locationDetails = data?.project_location[0];
+  const locationDetails = data?.project_location?.[0];
 
   const { mutate, isPending } = useUniversalMutation({
     mutationFn: async () =>
-      await EndProjectLocationAction(locationDetails.id as string),
-    invalidateKeys: ["project-activity-logs", locationDetails.id as string],
+      await EndProjectLocationAction(locationDetails?.id as string),
+    invalidateKeys: ["project-activity-logs", locationDetails?.id as string],
   });
 
   const { openModal, closeModal } = useModal();
@@ -42,7 +42,7 @@ function ProjectDashboardInfo(data: ProjectType) {
         variant={"destructive"}
         className="w-full"
         onClick={() => {
-          mutate(locationDetails.id as string, {
+          mutate(locationDetails?.id as string, {
             onSuccess: () => {
               toast.success("Project ended successfully.");
               window.location.href = `/dashboard/programs`;
@@ -60,65 +60,67 @@ function ProjectDashboardInfo(data: ProjectType) {
   };
 
   return (
-    <div className="py-5 px-4 flex justify-between items-start cursor-default">
-      <div className="flex flex-col gap-1 text-2xl font-medium ">
-        {data?.project_name ?? "..."}
-        <br />
-        <pre className="text-xs italic">{data?.description}</pre>
-        <span className="text-sm text-muted-foreground mt-4">
-          Location: {locationDetails?.location ?? "NOT SPECIFIED"}
-        </span>
-        <span className="text-sm text-muted-foreground">
-          Date Created:&nbsp;
-          {locationDetails?.created_at
-            ? format(new Date(locationDetails?.created_at), "PPp")
-            : "NOT SPECIFIED"}
-        </span>
-        <span className="text-sm text-muted-foreground">
-          Start Date:&nbsp;
-          {locationDetails?.start_date
-            ? format(new Date(locationDetails?.start_date), "PP")
-            : "NOT SPECIFIED"}
-        </span>
-        {locationDetails?.end_date && (
-          <span className="text-sm text-muted-foreground">
-            End Date:&nbsp;
-            {format(new Date(locationDetails?.end_date), "PP")}
+    <>
+      <div className="py-5 px-4 flex justify-between items-start cursor-default">
+        <div className="flex flex-col gap-1 text-2xl font-medium ">
+          {data?.project_name ?? "..."}
+          <br />
+          <pre className="text-xs italic">{data?.description}</pre>
+          <span className="text-sm text-muted-foreground mt-4">
+            Location: {locationDetails?.location ?? "NOT SPECIFIED"}
           </span>
-        )}
-        <span className="text-sm text-muted-foreground">
-          FCA:&nbsp;
-          {data.fca?.map((fca) => fca.description).join(", ") ??
-            "NO FCA IDENTIFIED YET"}
-        </span>
-        <span className="text-sm text-muted-foreground">
-          Total Alloted Area:
-          {locationDetails?.total_alloted_area
-            ? ` ${locationDetails?.total_alloted_area} hectares`
-            : "NOT SPECIFIED"}
-        </span>
+          <span className="text-sm text-muted-foreground">
+            Date Created:&nbsp;
+            {locationDetails?.created_at
+              ? format(new Date(locationDetails?.created_at), "PPp")
+              : "NOT SPECIFIED"}
+          </span>
+          <span className="text-sm text-muted-foreground">
+            Start Date:&nbsp;
+            {locationDetails?.start_date
+              ? format(new Date(locationDetails?.start_date), "PP")
+              : "NOT SPECIFIED"}
+          </span>
+          {locationDetails?.end_date && (
+            <span className="text-sm text-muted-foreground">
+              End Date:&nbsp;
+              {format(new Date(locationDetails?.end_date), "PP")}
+            </span>
+          )}
+          <span className="text-sm text-muted-foreground">
+            FCA:&nbsp;
+            {data.fca?.map((fca) => fca.description).join(", ") ??
+              "NO FCA IDENTIFIED YET"}
+          </span>
+          <span className="text-sm text-muted-foreground">
+            Total Alloted Area:
+            {locationDetails?.total_alloted_area
+              ? ` ${locationDetails?.total_alloted_area} hectares`
+              : "NOT SPECIFIED"}
+          </span>
+        </div>
+        <div className="flex flex-col gap-2">
+          <Badge variant="outline" className={`h-7 px-4 text-xs gap-2`}>
+            <span
+              className={`w-2 h-2 bg-${
+                locationDetails?.status == 1 ? "primary" : "red-500"
+              } rounded-full`}
+            ></span>
+            Project Status
+          </Badge>
+          {locationDetails?.status == 1 && (
+            <Button
+              variant={"destructive"}
+              disabled={isPending}
+              className="h-7 text-xs rounded-md"
+              onClick={handleEndProject}
+            >
+              {isPending ? <Spinner /> : "End Project"}
+            </Button>
+          )}
+        </div>
       </div>
-      <div className="flex flex-col gap-2">
-        <Badge variant="outline" className={`h-7 px-4 text-xs gap-2`}>
-          <span
-            className={`w-2 h-2 bg-${
-              locationDetails?.status == 1 ? "primary" : "red-500"
-            } rounded-full`}
-          ></span>
-          Project Status
-        </Badge>
-        {locationDetails?.status == 1 && (
-          <Button
-            variant={"destructive"}
-            disabled={isPending}
-            className="h-7 text-xs rounded-md"
-            onClick={handleEndProject}
-          >
-            {isPending ? <Spinner /> : "End Project"}
-          </Button>
-        )}
-      </div>
-    </div>
+    </>
   );
 }
 
