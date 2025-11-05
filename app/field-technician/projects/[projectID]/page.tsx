@@ -28,18 +28,18 @@ function ProjectDashboardInfo(data: ProjectType) {
         </span>
         <span className="text-sm text-muted-foreground">
           Start Date:{" "}
-          {data?.project_location[0]?.start_date
+          {data?.project_location?.[0]?.start_date
             ? format(new Date(data.project_location[0].start_date), "PP")
             : "NOT SPECIFIED"}
         </span>
         <span className="text-sm text-muted-foreground">
           Estimated End Date:{" "}
-          {data?.project_location[0]?.end_date
+          {data?.project_location?.[0]?.end_date
             ? format(new Date(data.project_location[0].end_date), "PP")
             : "NOT SPECIFIED"}
         </span>
         <span className="text-sm text-muted-foreground">
-          Location: {data?.project_location[0]?.location ?? "NOT SPECIFIED"}
+          Location: {data?.project_location?.[0]?.location ?? "NOT SPECIFIED"}
         </span>
         <span className="text-sm text-muted-foreground">
           FCA:&nbsp;
@@ -48,7 +48,7 @@ function ProjectDashboardInfo(data: ProjectType) {
         </span>
         <span className="text-sm text-muted-foreground">
           Total Alloted Area:
-          {data?.project_location[0]?.total_alloted_area
+          {data?.project_location?.[0]?.total_alloted_area
             ? ` ${data.project_location[0].total_alloted_area} hectares`
             : "NOT SPECIFIED"}
         </span>
@@ -56,7 +56,7 @@ function ProjectDashboardInfo(data: ProjectType) {
       <Badge variant="outline" className={`h-7 px-4 text-xs gap-2`}>
         <div
           className={`w-2 h-2 bg-${
-            data.project_location[0].status == 1 ? "primary" : "red-500"
+            data.project_location?.[0]?.status == 1 ? "primary" : "red-500"
           } rounded-full`}
         ></div>
         Project Status

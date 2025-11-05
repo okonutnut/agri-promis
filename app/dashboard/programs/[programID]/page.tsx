@@ -45,7 +45,7 @@ function ProjectListTab({ project }: ProjectListTabProps) {
   const [statusFilter, setStatusFilter] = useState<number | null>(null);
 
   const filteredLocations = useSearchFilter(
-    project.project_location,
+    project.project_location ?? [],
     searchQuery,
     (location, query) =>
       location.location!.toLowerCase().includes(query.toLowerCase())
