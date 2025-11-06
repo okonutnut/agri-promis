@@ -78,72 +78,64 @@ const ProgramDropdown = memo(
     }, [programID]);
 
     return (
-      <div className="flex items-center gap-2 min-w-max">
-        <Popover open={open} onOpenChange={setOpen}>
-          <Boxes className="h-4 w-4 text-[#707070]" />
-          <span className="min-w-[150px] truncate">
-            {currentProgram?.program_name ?? (
-              <Skeleton className="w-full h-5" />
-            )}
-          </span>
-          <PopoverTrigger asChild>
-            <Button className="ml-2 h-7 w-4 text-[#707070]" variant="ghost">
-              <ChevronsUpDown />
+      <Popover open={open} onOpenChange={setOpen}>
+        <Boxes className="h-4 w-4 text-[#707070]" />
+        <span className="min-w-[150px] truncate">
+          {currentProgram?.program_name ?? <Skeleton className="w-full h-5" />}
+        </span>
+        <PopoverTrigger asChild>
+          <Button className="ml-2 h-7 w-4 text-[#707070]" variant="ghost">
+            <ChevronsUpDown />
+          </Button>
+        </PopoverTrigger>
+
+        <PopoverContent align="start" className="m-1 p-0 w-[300px]">
+          <Command>
+            <CommandInput placeholder="Search programs..." />
+            <CommandList>
+              <CommandEmpty>No program found.</CommandEmpty>
+              <CommandGroup>
+                {allPrograms.map((program) => (
+                  <CommandItem
+                    key={program.id}
+                    value={program.id}
+                    onSelect={() => {
+                      setValue(program.id);
+                      setOpen(false);
+                      router.push(`/dashboard/programs/${program.id}`);
+                    }}
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <span>{program.program_name}</span>
+                      {program.id === value && (
+                        <Check className="ml-2 h-4 w-4" />
+                      )}
+                    </div>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+          <Separator />
+
+          <Link href={PATHS.PROGRAMS} prefetch={true}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start font-medium"
+            >
+              All Programs
             </Button>
-          </PopoverTrigger>
+          </Link>
 
-          <PopoverContent align="start" className="m-1 p-0 w-[300px]">
-            <Command>
-              <CommandInput placeholder="Search programs..." />
-              <CommandList>
-                <CommandEmpty>No program found.</CommandEmpty>
-                <CommandGroup>
-                  {allPrograms.map((program) => (
-                    <CommandItem
-                      key={program.id}
-                      value={program.id}
-                      onSelect={() => {
-                        setValue(program.id);
-                        setOpen(false);
-                        router.push(`/dashboard/programs/${program.id}`);
-                      }}
-                    >
-                      <div className="flex items-center justify-between w-full">
-                        <span>{program.program_name}</span>
-                        {program.id === value && (
-                          <Check className="ml-2 h-4 w-4" />
-                        )}
-                      </div>
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-            <Separator />
-
-            <Link href={PATHS.PROGRAMS} prefetch={true}>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start font-medium"
-              >
-                All Programs
-              </Button>
-            </Link>
-
-            <Separator />
-            <Link href={PATHS.NEW_PROGRAM} prefetch={true}>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start"
-              >
-                <Plus className="h-4 w-4 mr-1" /> New Program
-              </Button>
-            </Link>
-          </PopoverContent>
-        </Popover>
-      </div>
+          <Separator />
+          <Link href={PATHS.NEW_PROGRAM} prefetch={true}>
+            <Button variant="ghost" size="sm" className="w-full justify-start">
+              <Plus className="h-4 w-4 mr-1" /> New Program
+            </Button>
+          </Link>
+        </PopoverContent>
+      </Popover>
     );
   }
 );
@@ -175,94 +167,92 @@ const ProjectDropdown = memo(
     }, [projectID]);
 
     return (
-      <>
-        <Popover open={open} onOpenChange={setOpen}>
-          <Link
-            href={pathname}
-            className="text-black flex items-center gap-2 whitespace-nowrap"
-          >
-            <Box className="h-4 w-4 text-[#707070]" />
-            <span className="min-w-[150px] truncate">
-              {currentProject ? (
-                <span className="flex items-center gap-2">
-                  {currentProject?.project_name}
-                  <ChevronRight className="mx-1 h-3 w-3 text-gray-400" />
-                  <MapPin className="h-4 w-4 text-[#707070] mr-1" />
-                  <small>{currentProjectLocation?.location}</small>
-                </span>
-              ) : (
-                <Skeleton className="w-full h-5" />
-              )}
-            </span>
+      <Popover open={open} onOpenChange={setOpen}>
+        <Link
+          href={pathname}
+          className="text-black flex items-center gap-2 whitespace-nowrap"
+        >
+          <Box className="h-4 w-4 text-[#707070]" />
+          <span className="min-w-[150px] truncate">
+            {currentProject ? (
+              <span className="flex items-center gap-2">
+                {currentProject?.project_name}
+                <ChevronRight className="mx-1 h-3 w-3 text-gray-400" />
+                <MapPin className="h-4 w-4 text-[#707070] mr-1" />
+                <small>{currentProjectLocation?.location}</small>
+              </span>
+            ) : (
+              <Skeleton className="w-full h-5" />
+            )}
+          </span>
+        </Link>
+
+        <PopoverTrigger asChild>
+          <Button className="ml-2 h-7 w-4 text-[#707070]" variant="ghost">
+            <ChevronsUpDown />
+          </Button>
+        </PopoverTrigger>
+
+        <PopoverContent align="start" className="m-1 p-0 w-[300px]">
+          <Command>
+            <CommandInput placeholder="Search projects..." />
+            <CommandList>
+              <CommandEmpty>No project found.</CommandEmpty>
+              <CommandGroup>
+                {projects.map((project: ProjectType, index: number) => {
+                  const href = `${
+                    role == "admin" ? PATHS.PROGRAMS : PATHS.FIELD_TECHNICIAN
+                  }/${project.program_id}?i=${index}`;
+                  return (
+                    <CommandItem
+                      key={project.id}
+                      value={project.id}
+                      onSelect={() => {
+                        setValue(project.id);
+                        setOpen(false);
+                        router.push(href);
+                      }}
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span>{project.project_name}</span>
+                        {project.id === value && (
+                          <Check className="ml-2 h-4 w-4" />
+                        )}
+                      </div>
+                    </CommandItem>
+                  );
+                })}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+          <Separator />
+
+          <Link href={`/dashboard/programs/${program.id}`} prefetch={true}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start font-medium"
+            >
+              All Projects
+            </Button>
           </Link>
 
-          <PopoverTrigger asChild>
-            <Button className="ml-2 h-7 w-4 text-[#707070]" variant="ghost">
-              <ChevronsUpDown />
-            </Button>
-          </PopoverTrigger>
-
-          <PopoverContent align="start" className="m-1 p-0 w-[300px]">
-            <Command>
-              <CommandInput placeholder="Search projects..." />
-              <CommandList>
-                <CommandEmpty>No project found.</CommandEmpty>
-                <CommandGroup>
-                  {projects.map((project: ProjectType, index: number) => {
-                    const href = `${
-                      role == "admin" ? PATHS.PROGRAMS : PATHS.FIELD_TECHNICIAN
-                    }/${project.program_id}?i=${index}`;
-                    return (
-                      <CommandItem
-                        key={project.id}
-                        value={project.id}
-                        onSelect={() => {
-                          setValue(project.id);
-                          setOpen(false);
-                          router.push(href);
-                        }}
-                      >
-                        <div className="flex items-center justify-between w-full">
-                          <span>{project.project_name}</span>
-                          {project.id === value && (
-                            <Check className="ml-2 h-4 w-4" />
-                          )}
-                        </div>
-                      </CommandItem>
-                    );
-                  })}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-            <Separator />
-
-            <Link href={`/dashboard/programs/${program.id}`} prefetch={true}>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start font-medium"
-              >
-                All Projects
-              </Button>
-            </Link>
-
-            {role === "admin" && (
-              <>
-                <Separator />
-                <Link href={`/dashboard/new/${program.id}`} prefetch={true}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full justify-start"
-                  >
-                    <Plus className="h-4 w-4 mr-1" /> New Project
-                  </Button>
-                </Link>
-              </>
-            )}
-          </PopoverContent>
-        </Popover>
-      </>
+          {role === "admin" && (
+            <>
+              <Separator />
+              <Link href={`/dashboard/new/${program.id}`} prefetch={true}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start"
+                >
+                  <Plus className="h-4 w-4 mr-1" /> New Project
+                </Button>
+              </Link>
+            </>
+          )}
+        </PopoverContent>
+      </Popover>
     );
   }
 );
@@ -288,73 +278,71 @@ const UserProjectsDropdown = memo(function UserProjectsDropdown() {
   }, [projectID]);
 
   return (
-    <>
-      <Popover open={open} onOpenChange={setOpen}>
-        <div className="flex items-center gap-2 min-w-max">
-          <Box className="h-4 w-4 text-[#707070]" />
-          <div className="min-w-[150px] truncate">
-            {currentProject ? (
-              <span className="flex items-center gap-2">
-                {currentProject?.projects.project_name}
-                <ChevronRight className="mx-1 h-3 w-3 text-gray-400" />
-                <MapPin className="h-4 w-4 text-[#707070] mr-1" />
-                <small>{currentProject?.location}</small>
-              </span>
-            ) : (
-              <Skeleton className="w-full h-5" />
-            )}
-          </div>
+    <Popover open={open} onOpenChange={setOpen}>
+      <div className="flex items-center gap-2 min-w-max">
+        <Box className="h-4 w-4 text-[#707070]" />
+        <div className="min-w-[150px] truncate">
+          {currentProject ? (
+            <span className="flex items-center gap-2">
+              {currentProject?.projects.project_name}
+              <ChevronRight className="mx-1 h-3 w-3 text-gray-400" />
+              <MapPin className="h-4 w-4 text-[#707070] mr-1" />
+              <small>{currentProject?.location}</small>
+            </span>
+          ) : (
+            <Skeleton className="w-full h-5" />
+          )}
         </div>
-        <PopoverTrigger asChild>
-          <Button className="ml-2 h-7 w-4 text-[#707070]" variant="ghost">
-            <ChevronsUpDown />
-          </Button>
-        </PopoverTrigger>
+      </div>
+      <PopoverTrigger asChild>
+        <Button className="ml-2 h-7 w-4 text-[#707070]" variant="ghost">
+          <ChevronsUpDown />
+        </Button>
+      </PopoverTrigger>
 
-        <PopoverContent align="start" className="m-1 p-0 w-[300px]">
-          <Command>
-            <CommandInput placeholder="Search projects..." />
-            <CommandList>
-              <CommandEmpty>No project found.</CommandEmpty>
-              <CommandGroup>
-                {(data ?? []).map((project: ProjectLocationType) => (
-                  <CommandItem
-                    key={project.id}
-                    value={project.id}
-                    onSelect={(currentValue: string) => {
-                      setValue(currentValue);
-                      setOpen(false);
-                      router.push(`/field-technician/projects/${currentValue}`);
-                    }}
-                  >
-                    <div className="flex flex-col gap-1">
-                      <span className="font-medium">
-                        {project.projects?.project_name}
-                      </span>
-                      <small className="flex items-center">
-                        <MapPin className="h-4 w-4 text-[#707070] mr-1" />{" "}
-                        {project.location}
-                      </small>
-                    </div>
-                    {project.id === value && <Check className="ml-2 h-4 w-4" />}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-          <Separator />
-          <Link href="/field-technician/projects" prefetch={true}>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start font-medium"
-            >
-              All Projects
-            </Button>
-          </Link>
-        </PopoverContent>
-      </Popover>
-    </>
+      <PopoverContent align="start" className="m-1 p-0 w-[300px]">
+        <Command>
+          <CommandInput placeholder="Search projects..." />
+          <CommandList>
+            <CommandEmpty>No project found.</CommandEmpty>
+            <CommandGroup>
+              {(data ?? []).map((project: ProjectLocationType) => (
+                <CommandItem
+                  key={project.id}
+                  value={project.id}
+                  onSelect={(currentValue: string) => {
+                    setValue(currentValue);
+                    setOpen(false);
+                    router.push(`/field-technician/projects/${currentValue}`);
+                  }}
+                >
+                  <div className="flex flex-col gap-1">
+                    <span className="font-medium">
+                      {project.projects?.project_name}
+                    </span>
+                    <small className="flex items-center">
+                      <MapPin className="h-4 w-4 text-[#707070] mr-1" />{" "}
+                      {project.location}
+                    </small>
+                  </div>
+                  {project.id === value && <Check className="ml-2 h-4 w-4" />}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+        <Separator />
+        <Link href="/field-technician/projects" prefetch={true}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start font-medium"
+          >
+            All Projects
+          </Button>
+        </Link>
+      </PopoverContent>
+    </Popover>
   );
 });
 
@@ -440,6 +428,8 @@ export default function CustomNavbar({
                       programID={(programID as string) ?? currentProgram?.id}
                       allPrograms={programs ?? []}
                     />
+
+                    <BreadcrumbSeparator />
 
                     {currentProgram && projectID && (
                       <ProjectDropdown
