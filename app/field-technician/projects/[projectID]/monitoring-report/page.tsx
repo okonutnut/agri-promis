@@ -65,18 +65,20 @@ function MonitoringReportContent({
     const endDate = projectData?.end_date
       ? new Date(projectData.end_date)
       : null;
+    // If startDate is not present or invalid, reports cannot be enabled.
+    if (!startDate || isNaN(startDate.getTime())) return false;
 
-    if (
-      startDate &&
-      endDate &&
-      !isNaN(startDate.getTime()) &&
-      !isNaN(endDate.getTime()) &&
-      currentDate >= startDate &&
-      currentDate <= endDate
-    ) {
-      return true;
+    // If start date is in the future, don't enable reports yet.
+    if (startDate > currentDate) return false;
+
+    // If endDate is null (nullable) or invalid, treat the project as open-ended
+    // and enable reports as long as currentDate >= startDate.
+    if (!endDate || isNaN(endDate.getTime())) {
+      return currentDate >= startDate;
     }
-    return false;
+
+    // Both dates valid: enable when current is between start and end.
+    return currentDate >= startDate && currentDate <= endDate;
   }, [projectData]);
 
   return (
