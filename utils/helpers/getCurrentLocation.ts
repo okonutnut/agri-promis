@@ -20,11 +20,11 @@ export default function useCurrentLocation() {
   const [loading, setLoading] = useState<boolean>(false);
 
   const getLocation = useCallback(() => {
-    // Helper: try an IP-based geolocation service as a fallback
+    // Helper: try an IP-based geolocation service as a fallback (proxied through our own API to avoid CORS)
     const fetchIpLocation = async (): Promise<LatLng> => {
       try {
-        // ipapi.co is a lightweight public service (rate-limited). It returns latitude/longitude fields.
-        const res = await fetch("https://ipapi.co/json/");
+        // Use our own Next.js API route as a proxy to avoid CORS issues
+        const res = await fetch("/api/get-current-location");
         if (!res.ok) throw new Error(`IP geolocation failed: ${res.status}`);
         const data = await res.json();
         const lat = parseFloat(data.latitude ?? data.lat ?? "");
@@ -48,7 +48,9 @@ export default function useCurrentLocation() {
           setErrorCode(null);
           setRawError(null);
         } else {
-          setError("Geolocation is not supported by this browser and IP-based lookup failed.");
+          setError(
+            "Geolocation is not supported by this browser and IP-based lookup failed."
+          );
           setLocation(null);
         }
         setLoading(false);
@@ -75,7 +77,8 @@ export default function useCurrentLocation() {
 
         // Standard PositionError codes: 1 = PERMISSION_DENIED, 2 = POSITION_UNAVAILABLE, 3 = TIMEOUT
         if (code === 1) {
-          friendly = "Location access was denied. Please allow location permissions in your browser settings.";
+          friendly =
+            "Location access was denied. Please allow location permissions in your browser settings.";
           // Do not fallback on explicit denial
           setError(friendly);
           setErrorCode(1);
@@ -84,9 +87,11 @@ export default function useCurrentLocation() {
           setLoading(false);
           return;
         } else if (code === 2) {
-          friendly = "Position unavailable. Attempting IP-based lookup as a fallback...";
+          friendly =
+            "Position unavailable. Attempting IP-based lookup as a fallback...";
         } else if (code === 3) {
-          friendly = "Location request timed out. Attempting IP-based lookup as a fallback...";
+          friendly =
+            "Location request timed out. Attempting IP-based lookup as a fallback...";
         }
 
         // Try IP-based fallback for transient/unavailable errors
@@ -122,5 +127,12 @@ export default function useCurrentLocation() {
     };
   }, [getLocation]);
 
-  return { location, loading, error, errorCode, rawError, refresh: getLocation };
+  return {
+    location,
+    loading,
+    error,
+    errorCode,
+    rawError,
+    refresh: getLocation,
+  };
 }
