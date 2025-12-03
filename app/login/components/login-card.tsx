@@ -41,7 +41,7 @@ export default function LoginCard() {
             <GoogleSignInButton />
           </Suspense>
         </CardContent>
-        <p className="text-center text-xs text-gray-500">version 1.6-dev</p>
+        <p className="text-center text-xs text-gray-500">version 0.1.5</p>
       </Card>
     </section>
   );
