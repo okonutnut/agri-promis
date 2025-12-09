@@ -63,8 +63,6 @@ export default function FCAPage() {
     queryFn: SelectAllFCAAction,
   });
 
-  console.log("FCA Data:", data);
-
   return (
     <CustomPageLayout
       pageTitle="Farmers' Cooperatives and Associations"

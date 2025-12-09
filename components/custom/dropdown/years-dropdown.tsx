@@ -47,7 +47,7 @@ export default function ProjectYearsDropdown({
           aria-expanded={openYear}
           className="w-[200px] justify-between shadow-xs font-normal"
         >
-          {year ? years.find((m) => m.value === year)?.label : "All"}
+          {year ? years.find((m) => m.value === year)?.label : "All Years"}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>

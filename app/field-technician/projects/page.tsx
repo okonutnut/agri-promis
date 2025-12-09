@@ -36,8 +36,6 @@ export default function AssignedProjectsPage() {
     table: "assigned_projects",
   });
 
-  console.log("Assigned Projects Data:", data);
-
   const filteredData = useMemo(
     () =>
       data

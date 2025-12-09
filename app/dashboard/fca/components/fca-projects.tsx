@@ -17,17 +17,26 @@ type FCAProjectsProps = {
 export default function FCAProjects({ assignedProjects }: FCAProjectsProps) {
   const [search, setSearch] = useState("");
 
+  // Filter projects based on search term
+  const filteredProjects =
+    assignedProjects?.filter((project) => {
+      const name = project.projects?.project_name?.toLowerCase() ?? "";
+      const location = project.location?.toLowerCase() ?? "";
+      const searchTerm = search.toLowerCase();
+      return name.includes(searchTerm) || location.includes(searchTerm);
+    }) ?? [];
+
   return (
     <>
       <div className="space-y-2 h-full overflow-y-auto px-3">
         <Label className="mt-2 text-xl">Assigned Projects</Label>
         <SearchInput setSearchTerm={setSearch} />
-        {assignedProjects?.length === 0 ? (
+        {filteredProjects.length === 0 ? (
           <center className="italic p-4 text-sm text-muted-foreground">
             No assigned programs or projects found.
           </center>
         ) : (
-          assignedProjects?.map((project, index) => (
+          filteredProjects.map((project, index) => (
             <Card
               className="shadow-xs rounded-md p-2 flex flex-row justify-between items-start"
               key={index}

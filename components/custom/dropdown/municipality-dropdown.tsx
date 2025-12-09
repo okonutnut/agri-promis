@@ -49,7 +49,7 @@ export default function MunicipalitySelector({
           {municipality
             ? muniData.find((m) => m.municipality === municipality)
                 ?.municipality
-            : "All"}
+            : "All Municipalities"}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
