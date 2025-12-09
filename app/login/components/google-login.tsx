@@ -41,7 +41,7 @@ export default function GoogleSignInButton() {
 
   return (
     <Button
-      className="flex items-center gap-2 cursor-pointer my-3 min-w-[250px] mx-auto"
+      className="flex items-center gap-2 cursor-pointer my-3 min-w-[250px] mx-auto shadow-none rounded-pill"
       type="submit"
       disabled={state !== "ready"}
       variant={state === "loading" ? "ghost" : "outline"}
