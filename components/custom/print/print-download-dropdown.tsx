@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { PDFDownloadLink, pdf } from "@react-pdf/renderer";
 import { ChevronDown, Download, FileText, Printer } from "lucide-react";
-import { generateReportDocx } from "@/components/custom/pdf/monitoring-reports-docx";
+// import { generateReportDocx } from "@/components/custom/pdf/monitoring-reports-docx";
 import { MonitoringReportType } from "@/components/types";
 
 type PrintDownloadDropdownProps = {
@@ -30,16 +30,16 @@ export default function PrintDownloadDropdown({
   };
 
   // WORD
-  const generateWordDocument = async () => {
-    const resp = await generateReportDocx(values);
-    const blob = await resp.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = docName + ".docx";
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  // const generateWordDocument = async () => {
+  //   const resp = await generateReportDocx(values);
+  //   const blob = await resp.blob();
+  //   const url = URL.createObjectURL(blob);
+  //   const a = document.createElement("a");
+  //   a.href = url;
+  //   a.download = docName + ".docx";
+  //   a.click();
+  //   URL.revokeObjectURL(url);
+  // };
 
   return (
     <DropdownMenu>
@@ -63,13 +63,13 @@ export default function PrintDownloadDropdown({
             Download
           </PDFDownloadLink>
         </DropdownMenuItem>
-        <DropdownMenuItem
+        {/* <DropdownMenuItem
           onClick={generateWordDocument}
           disabled={!values || true}
         >
           <FileText />
           Microsoft Word &#40;docx&#41;
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
         <DropdownMenuItem onClick={handleOpenInNewTab}>
           <Printer />
           Print
