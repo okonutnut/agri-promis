@@ -26,11 +26,21 @@ export default function FormMultiInput({
   return (
     <div className="relative space-y-2">
       {readOnly ? (
-        <Label>{label}</Label>
+        <Label
+          htmlFor={name}
+          className="capitalize mb-1 block text-sm font-semibold"
+        >
+          {label}
+        </Label>
       ) : (
         <div className="flex items-center gap-2 m-0">
           <div className="flex-1 space-y-2">
-            <Label htmlFor={`${name}-input`}>{label}</Label>
+            <Label
+              htmlFor={`${name}-input`}
+              className="capitalize mb-1 block text-sm font-semibold"
+            >
+              {label}
+            </Label>
             <Textarea
               id={`${name}-input`}
               placeholder={`Enter ${label.toLowerCase()}...`}

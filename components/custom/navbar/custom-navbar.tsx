@@ -13,7 +13,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useParams, usePathname } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import NavbarUserImage from "./navbar-user-image";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -44,7 +44,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { SelectAllAssignedProjectsByFieldTechnicianIDAction } from "@/app/actions/AssignedProjectAction";
-// removed unused Spinner import
 
 const PATHS = {
   FIELD_TECHNICIAN: "/field-technician/projects",
@@ -79,10 +78,18 @@ const ProgramDropdown = memo(
 
     return (
       <Popover open={open} onOpenChange={setOpen}>
-        <Boxes className="h-4 w-4 text-[#707070]" />
-        <span className="min-w-[150px] truncate">
-          {currentProgram?.program_name ?? <Skeleton className="w-full h-5" />}
-        </span>
+        <Link
+          href={PATHS.PROGRAMS}
+          prefetch={true}
+          className="flex flex-1 gap-2"
+        >
+          <Boxes className="h-4 w-4 text-[#707070]" />
+          <span className="min-w-[150px] truncate">
+            {currentProgram?.program_name ?? (
+              <Skeleton className="w-full h-5" />
+            )}
+          </span>
+        </Link>
         <PopoverTrigger asChild>
           <Button className="ml-2 h-7 w-4 text-[#707070]" variant="ghost">
             <ChevronsUpDown />
@@ -150,7 +157,7 @@ const ProjectDropdown = memo(
     projectID?: string;
     role: "admin" | "user";
   }) => {
-    const pathname = usePathname();
+    // const pathname = usePathname();
     const projects = program.projects ?? [];
     const currentProject = projects.find((p: ProjectType) =>
       p.project_location?.some((location) => location.id === projectID)
@@ -158,18 +165,23 @@ const ProjectDropdown = memo(
     const currentProjectLocation = currentProject?.project_location?.find(
       (location) => location.id === projectID
     );
-    const router = useRouter();
+    const currentProjectIndex = () => {
+      return projects.findIndex((p: ProjectType) =>
+        p.project_location?.some((location) => location.id === projectID)
+      );
+    };
     const [open, setOpen] = useState(false);
-    const [value, setValue] = useState<string | undefined>(projectID);
+    // const router = useRouter();
+    // const [value, setValue] = useState<string | undefined>(projectID);
 
-    useEffect(() => {
-      setValue(projectID);
-    }, [projectID]);
+    // useEffect(() => {
+    //   setValue(projectID);
+    // }, [projectID]);
 
     return (
       <Popover open={open} onOpenChange={setOpen}>
         <Link
-          href={pathname}
+          href={`/dashboard/programs/${program.id}?i=${currentProjectIndex()}`}
           className="text-black flex items-center gap-2 whitespace-nowrap"
         >
           <Box className="h-4 w-4 text-[#707070]" />
@@ -177,9 +189,9 @@ const ProjectDropdown = memo(
             {currentProject ? (
               <span className="flex items-center gap-2">
                 {currentProject?.project_name}
-                <ChevronRight className="mx-1 h-3 w-3 text-gray-400" />
+                <Slash className="mx-1 h-3 w-3 text-gray-400" />
                 <MapPin className="h-4 w-4 text-[#707070] mr-1" />
-                <small>{currentProjectLocation?.location}</small>
+                <span>{currentProjectLocation?.location}</span>
               </span>
             ) : (
               <Skeleton className="w-full h-5" />
@@ -187,13 +199,13 @@ const ProjectDropdown = memo(
           </span>
         </Link>
 
-        <PopoverTrigger asChild>
+        {/* <PopoverTrigger asChild>
           <Button className="ml-2 h-7 w-4 text-[#707070]" variant="ghost">
             <ChevronsUpDown />
           </Button>
-        </PopoverTrigger>
+        </PopoverTrigger> */}
 
-        <PopoverContent align="start" className="m-1 p-0 w-[300px]">
+        {/* <PopoverContent align="start" className="m-1 p-0 w-[300px]">
           <Command>
             <CommandInput placeholder="Search projects..." />
             <CommandList>
@@ -251,7 +263,7 @@ const ProjectDropdown = memo(
               </Link>
             </>
           )}
-        </PopoverContent>
+        </PopoverContent> */}
       </Popover>
     );
   }
@@ -287,7 +299,7 @@ const UserProjectsDropdown = memo(function UserProjectsDropdown() {
               {currentProject?.projects.project_name}
               <ChevronRight className="mx-1 h-3 w-3 text-gray-400" />
               <MapPin className="h-4 w-4 text-[#707070] mr-1" />
-              <small>{currentProject?.location}</small>
+              <span>{currentProject?.location}</span>
             </span>
           ) : (
             <Skeleton className="w-full h-5" />

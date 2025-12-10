@@ -93,10 +93,12 @@ export type LocationType = {
 export type MonitoringReportType = {
   id?: string;
   key?: string;
+  report_type_id?: string;
   project_location_id?: string;
   travel_order_no?: string;
   reporter_id?: string;
   reviewed_by_id?: string;
+  inclusive_date_of_travel?: string;
   purpose?: string;
   findings?: string[];
   observation?: string;
@@ -107,24 +109,29 @@ export type MonitoringReportType = {
   images?: ImageData[];
   reporter?: UserProfileType;
   travel_order?: TravelOrderType;
+  report_type?: ReportType;
   reviewedBy?: UserProfileType;
   created_at?: string;
 };
 
-export interface PostActivityReportType {
+export type PostTravelReportType = {
   id?: string;
-  project_id?: string;
-  submitted_by_id?: string;
+  project_location_id?: string;
+  travel_order_id?: string;
+  user_id?: string;
   reviewed_by_id?: string;
-  travel_order_no?: string;
-  inclusive_date_of_travel?: string;
-  issues_concern_accomplishment?: string;
-  activities_undertaken?: string;
-  status_notes?: string;
+  issues_concern?: string;
+  photo_url?: string;
   remarks?: string;
-  reviewedBy?: UserProfileType;
   created_at?: string;
-}
+};
+
+export type ReportType = {
+  id?: string;
+  code?: string;
+  description?: string;
+  created_at?: string;
+};
 
 export type AssignedProjectsType = {
   id?: string;

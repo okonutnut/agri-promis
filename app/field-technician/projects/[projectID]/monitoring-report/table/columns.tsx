@@ -1,6 +1,7 @@
 "use client";
 
 import { MonitoringReportType } from "@/components/types";
+import { Badge } from "@/components/ui/badge";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 
@@ -20,6 +21,27 @@ export const columns: ColumnDef<MonitoringReportType>[] = [
   {
     accessorKey: "purpose",
     header: "Purpose",
+    cell: ({ getValue }) => {
+      const value = (getValue() as string) || "N/A";
+      const maxLength = 40;
+      const isTruncated = value.length > maxLength;
+      const displayValue = isTruncated
+        ? value.slice(0, maxLength) + "..."
+        : value;
+      return (
+        <div
+          title={isTruncated ? value : undefined}
+          className="truncate max-w-full whitespace-nowrap"
+        >
+          {displayValue}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "report_type.description",
+    header: "Report Type",
+    cell: ({ getValue }) => <Badge>{(getValue() as string) || "N/A"}</Badge>,
   },
   {
     accessorKey: "reviewedBy.fullname",

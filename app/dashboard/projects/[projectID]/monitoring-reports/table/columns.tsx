@@ -25,7 +25,7 @@ export const columns: ColumnDef<MonitoringReportType>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="h-8 p-0 hover:bg-transparent"
         >
-          Reporter Name
+          Uploader
           <ArrowUpDown className="ml-1 h-3 w-3 text-muted-foreground" />
         </Button>
       );
@@ -33,20 +33,14 @@ export const columns: ColumnDef<MonitoringReportType>[] = [
     enableSorting: true,
   },
   {
-    accessorKey: "remarkBy.fullname",
-    header: "Reviewed By",
+    accessorKey: "remarkBy.report_type",
+    header: "Report Type",
     cell: ({ getValue }) => String(getValue() || "Not Reviewed"),
   },
   {
-    accessorKey: "reviewed_at",
-    header: () => <div className="text-end">Date Reviewed</div>,
-    cell: ({ getValue }) => (
-      <div className="text-end">
-        {getValue()
-          ? format(new Date(getValue() as string), "PPpp")
-          : "Not Reviewed"}
-      </div>
-    ),
+    accessorKey: "remarkBy.fullname",
+    header: "Reviewed By",
+    cell: ({ getValue }) => String(getValue() || "Not Reviewed"),
   },
   {
     accessorKey: "created_at",
@@ -58,7 +52,7 @@ export const columns: ColumnDef<MonitoringReportType>[] = [
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             className="h-8 p-0 hover:bg-transparent"
           >
-            <div>Date Submitted</div>
+            <div>Date Created</div>
             <ArrowUpDown className="ml-1 h-3 w-3 text-muted-foreground" />
           </Button>
         </div>

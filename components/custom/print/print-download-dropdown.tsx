@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { PDFDownloadLink, pdf } from "@react-pdf/renderer";
-import { ChevronDown, Download, FileText, Printer } from "lucide-react";
+import { ChevronDown, Download, Printer } from "lucide-react";
 // import { generateReportDocx } from "@/components/custom/pdf/monitoring-reports-docx";
 import { MonitoringReportType } from "@/components/types";
 

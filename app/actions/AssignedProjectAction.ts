@@ -4,7 +4,7 @@ import { SelectUserProfileByIDAction } from "@/app/actions/UserProfileAction";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
-import { AssignedProjectsType, ProjectType } from "../../components/types";
+import { AssignedProjectsType } from "../../components/types";
 import { sendNotificationToUser } from "./NotificationAction";
 
 // ASSIGNED PROJECTS ACTIONS
@@ -70,7 +70,6 @@ export async function InsertFieldTechniciansToProjectAction(
   return { success: true, assigned: newAssignees.length };
 }
 
-
 export async function DeleteFieldTechnicianFromProjectAction(
   user_id: string,
   project_id: string
@@ -94,7 +93,7 @@ export async function DeleteFieldTechnicianFromProjectAction(
     .select("project_name, project_location!inner(*)")
     .eq("project_location.id", project_id)
     .single();
-    
+
   if (projectError) {
     throw projectError;
   }
@@ -124,7 +123,7 @@ export async function SelectAllFieldTechniciansByProjectIDAction(
   const { data, error } = await supabase
     .from("assigned_projects")
     .select("*, project_location (*), user_profile (fullname, position)")
-    .eq("project_location.id", projectID)
+    .eq("project_location_id", projectID)
     .order("created_at", { ascending: true });
 
   if (error) {
@@ -141,14 +140,16 @@ export async function SelectAllAssignedProjectsByFieldTechnicianIDAction() {
 
   const { data, error } = await supabase
     .from("assigned_projects")
-    .select(`
+    .select(
+      `
       id,
       user_id,
       project_location (
         *,
         projects (*)
       )
-    `)
+    `
+    )
     .eq("user_id", userData.user.id);
 
   if (error) throw error;
@@ -158,4 +159,3 @@ export async function SelectAllAssignedProjectsByFieldTechnicianIDAction() {
     project: row.project_location?.projects ?? null,
   }));
 }
-

@@ -1,4 +1,4 @@
-export const runtime = 'nodejs';
+// export const runtime = 'nodejs';
 
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";

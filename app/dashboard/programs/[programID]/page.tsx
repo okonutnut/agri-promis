@@ -123,9 +123,9 @@ function ProjectListTab({ project }: ProjectListTabProps) {
                   </span>
                   <div className="flex flex-col gap-2">
                     <span className="font-semibold">{location.location}</span>
-                    {location.description && (
-                      <small className="italic">{location.description}</small>
-                    )}
+                    <small className="italic">
+                      {location.description || "No Description"}
+                    </small>
                     <small>
                       Date Created:&nbsp;
                       {format(new Date(location.created_at!), "PP")}
@@ -179,9 +179,9 @@ function FilteredProjects({ projects, searchQuery }: FilteredProjectsProps) {
                     <span className="font-semibold">
                       {project.project_name}
                     </span>
-                    {project.description && (
-                      <small>{project.description}</small>
-                    )}
+                    <small className="italic">
+                      {project.description || "No Description"}
+                    </small>
                   </div>
                 </div>
                 <span className="ml-2 transform transition-transform group-hover:translate-x-2">

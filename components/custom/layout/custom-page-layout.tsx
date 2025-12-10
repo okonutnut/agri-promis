@@ -343,7 +343,10 @@ export default function CustomPageLayout({
 
               {/* Global Sheet */}
               <Sheet open={sheetState.isOpen} onOpenChange={closeSheet}>
-                <SheetContent className="md:min-w-[600px] w-screen flex flex-col gap-0 h-full">
+                <SheetContent
+                  className="md:min-w-[700px] w-screen flex flex-col gap-0 h-full"
+                  onInteractOutside={(e) => e.preventDefault()}
+                >
                   <SheetHeader className="border-b p-2">
                     <SheetTitle className="uppercase text-primary">
                       {sheetState.title}

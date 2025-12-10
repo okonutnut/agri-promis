@@ -27,7 +27,7 @@ export default function FormSelect({
   return (
     <div>
       {label && (
-        <Label className="text-sm font-medium text flex justify-between items-center mb-1">
+        <Label className="capitalize mb-1 block text-sm font-semibold">
           {label}
         </Label>
       )}

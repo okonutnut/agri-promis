@@ -26,7 +26,9 @@ export default function NonFormInput({
   return (
     <div className={cn(`w-full`, className)}>
       <div className="text-sm font-medium flex justify-between items-center mb-1">
-        <Label className="capitalized">{label}</Label>
+        <Label className="capitalize mb-1 block text-sm font-semibold">
+          {label}
+        </Label>
         {copy && (
           <Button
             size={"sm"}

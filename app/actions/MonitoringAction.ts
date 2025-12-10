@@ -14,7 +14,8 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
   // Step 1: Fetch monitoring reports with joins
   const { data, error } = await supabase
     .from("monitoring")
-    .select(`
+    .select(
+      `
       *,
       project_location:project_location(id, project_id, location, fca_ids),
       project:project_location!monitoring_project_location_id_fkey(
@@ -23,7 +24,8 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
       travel_order:travel_order(travel_order_no),
       reporter:user_profile!monitoring_reporter_id_fkey(fullname),
       remarkBy:user_profile!monitoring_reviewed_by_id_fkey(fullname)
-    `)
+    `
+    )
     .eq("project_location_id", projectLocationID)
     .order("created_at", { ascending: false });
 
@@ -94,13 +96,16 @@ export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
   // Fetch reports from this user for the project location
   const { data, error } = await supabase
     .from("monitoring")
-    .select(`
+    .select(
+      `
       *,
       project_location:project_location(*, projects(*)),
       travel_order:travel_order(travel_order_no),
+      report_type:report_type(description),
       reporter:user_profile!monitoring_reporter_id_fkey(fullname),
       reviewedBy:user_profile!monitoring_reviewed_by_id_fkey(fullname)
-    `)
+    `
+    )
     .eq("reporter_id", userData.user.id)
     .eq("project_location_id", projectLocationID)
     .order("created_at", { ascending: false });

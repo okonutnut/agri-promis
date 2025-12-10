@@ -34,7 +34,7 @@ export default function FormInput({
     <div className={cn("w-full", className)}>
       <Label
         htmlFor={name}
-        className="capitalize mb-1 block text-sm font-medium"
+        className="capitalize mb-1 block text-sm font-semibold"
       >
         {label}
       </Label>
@@ -51,7 +51,7 @@ export default function FormInput({
             form.formState.isValidating ||
             readOnly
           }
-          className={cn(copy ? "pr-10" : "")} // extra space for button
+          className={cn(copy ? "pr-10" : "")}
         />
 
         {copy && (

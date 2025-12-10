@@ -4,10 +4,9 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { toast } from "sonner";
 import { useParams } from "next/navigation";
 import { ImageData } from "@/components/interfaces";
-import { MonitoringReportType } from "@/components/types";
+import { MonitoringReportType, ReportType } from "@/components/types";
 import { deleteDraft } from "@/hooks/use-draft";
 import { Button } from "@/components/ui/button";
 import { Loader2, Send } from "lucide-react";
@@ -28,20 +27,18 @@ import MonitoringReportDocument from "@/components/custom/pdf/monitoring-reports
 import SaveDraftButton from "../components/save-draft-button";
 import DeleteDraftButton from "../components/delete-draft-button";
 import TravelOrderDropdown from "../components/travel-order-combobox";
+import { validateImages } from "@/utils/helpers/validateImages";
 
 const fieldReportSchema = z.object({
+  report_type_id: z.string().optional(),
   project_location_id: z.string().optional(),
   travel_order_no: z.string().min(1, "Travel order number is required"),
-  purpose: z.string().min(1, "Purpose is required"),
-  findings: z.array(z.string()),
-  observation: z
-    .string()
-    .optional()
-    .refine((value) => !value || (value.length >= 5 && value.length <= 700), {
-      message: "Observation must be between 5 and 700 characters if provided",
-    }),
-  issues_concern: z.array(z.string()),
-  remarks: z.string().min(1, "Remarks is required"),
+  inclusive_date_of_travel: z.string().optional(),
+  purpose: z.string().optional(),
+  findings: z.array(z.string()).optional(),
+  observation: z.string().optional(),
+  issues_concern: z.array(z.string()).optional(),
+  remarks: z.string().optional(),
 });
 type FieldReportFormData = z.infer<typeof fieldReportSchema>;
 
@@ -49,43 +46,14 @@ type UploadFieldReportFormProps = {
   isAddMode?: boolean;
   isDraft?: boolean;
   values?: MonitoringReportType | null;
-};
-
-// Image validation
-const validateImages = (images: ImageData[]) => {
-  const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-  const maxSize = 3 * 1024 * 1024; // 3MB
-  const maxTotalSize = 20 * 1024 * 1024; // 20MB
-
-  if (!images || images.length === 0) {
-    toast.error("At least one image is required");
-    return false;
-  }
-
-  for (const img of images) {
-    if (!allowedTypes.includes(img.file.type)) {
-      toast.error("Please upload valid image files (JPEG, PNG, or WebP)");
-      return false;
-    }
-    if (img.file.size > maxSize) {
-      toast.error("Each image file must be less than 3MB");
-      return false;
-    }
-  }
-
-  const totalSize = images.reduce((sum, img) => sum + img.file.size, 0);
-  if (totalSize > maxTotalSize) {
-    toast.error("Total images size must be less than 20MB");
-    return false;
-  }
-
-  return true;
+  reportType?: ReportType;
 };
 
 export default function UploadFieldReportForm({
   isAddMode,
   isDraft,
   values,
+  reportType,
 }: UploadFieldReportFormProps) {
   const { projectID } = useParams();
   const { closeSheet } = useSheet();
@@ -96,8 +64,10 @@ export default function UploadFieldReportForm({
   const form = useForm<FieldReportFormData>({
     resolver: zodResolver(fieldReportSchema),
     defaultValues: {
+      report_type_id: reportType?.id || values?.report_type_id || "",
       project_location_id: projectID as string,
       purpose: values?.purpose || "",
+      inclusive_date_of_travel: values?.inclusive_date_of_travel || "",
       findings: values?.findings ? [...values.findings] : [],
       issues_concern: values?.issues_concern ? [...values.issues_concern] : [],
       observation: values?.observation || "",
@@ -118,10 +88,14 @@ export default function UploadFieldReportForm({
       ...data,
       findings: (data.findings || []).filter((item) => item !== ""),
       issues_concern: (data.issues_concern || []).filter((item) => item !== ""),
+      project_location_id: projectID as string,
+      images,
     };
 
+    console.log("Submitting Monitoring Report:", cleanedData);
+
     mutate(
-      { ...cleanedData, project_location_id: projectID as string, images },
+      { ...cleanedData },
       {
         onSuccess: async () => {
           await deleteDraft(values?.key as string);
@@ -151,42 +125,62 @@ export default function UploadFieldReportForm({
             <TravelOrderDropdown form={form} />
           ) : (
             <NonFormInput
-              label="Travel Order No"
+              label="Travel Order No:"
               defaultValue={values?.travel_order?.travel_order_no}
               readOnly
             />
           )}
+          {reportType?.code === "PTR" && (
+            <FormInput
+              label="Inclusive Date of Travel:"
+              name="inclusive_date_of_travel"
+              type="date"
+              form={form}
+              readOnly={!isAddMode}
+            />
+          )}
           <FormInput
-            label="Purpose"
+            label={
+              reportType?.code === "MR" ? "Purpose:" : "Activities Undertaken:"
+            }
             name="purpose"
             form={form}
             readOnly={!isAddMode}
           />
+          {reportType?.code === "MR" && (
+            <>
+              <FormMultiInput
+                label="Findings:"
+                name="findings"
+                form={form}
+                values={values?.findings || null}
+                readOnly={!isAddMode}
+              />
+              <FormTextarea
+                label="Observation:"
+                name="observation"
+                form={form}
+                readOnly={!isAddMode}
+              />
+            </>
+          )}
           <FormMultiInput
-            label="Findings"
-            name="findings"
-            form={form}
-            values={values?.findings || null}
-            readOnly={!isAddMode}
-          />
-          <FormTextarea
-            label="Observation"
-            name="observation"
-            form={form}
-            readOnly={!isAddMode}
-          />
-          <FormMultiInput
-            label="Issues & Concern"
+            label={
+              reportType?.code === "MR"
+                ? "Issues / Concerns:"
+                : "Issues / Concerns / Project % Accomplishment To Date:"
+            }
             name="issues_concern"
             form={form}
             values={values?.issues_concern || null}
             readOnly={!isAddMode}
           />
           <FormTextarea
-            label="Remarks"
+            label="Remarks:"
             name="remarks"
             form={form}
             readOnly={!isAddMode}
+            noPlaceholder={!isAddMode}
           />
         </form>
       </div>

@@ -32,7 +32,9 @@ export function UserComboBox({ form }: UserComboBoxProps) {
 
   return (
     <>
-      <Label className="mb-1">Issued To</Label>
+      <Label className="capitalize mb-1 block text-sm font-semibold">
+        Issued To:
+      </Label>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button

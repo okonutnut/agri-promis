@@ -8,14 +8,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useParams } from "next/navigation";
-import { useSelectProjectDetailsHook } from "@/components/hooks";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import CreateProjectLocationForm from "@/components/custom/forms/create-project-location";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useRealtimeQuery } from "@/hooks/use-realtime";
+import { SelectProjectDetailsByIDAction } from "@/app/actions/ProjectAction";
 
 export default function CreateProgramPage() {
   const { id: projectID } = useParams();
-  const { data } = useSelectProjectDetailsHook(projectID as string);
+  const { data } = useRealtimeQuery({
+    queryKey: ["project-details", projectID as string],
+    queryFn: () => SelectProjectDetailsByIDAction(projectID as string),
+    table: "projects",
+  });
 
   return (
     <CustomPageLayout noSidebar className="p-0">

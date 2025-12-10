@@ -15,8 +15,7 @@ import { Spinner } from "@/components/ui/spinner";
 const formSchema = z.object({
   project_name: z
     .string()
-    .min(1, "Project name is required")
-    .max(50, "Project name cannot exceed 20 characters")
+    .min(10, "Project name is required")
     .refine((val) => !/\d/.test(val), {
       message: "Project name cannot contain numbers",
     }),
@@ -45,7 +44,6 @@ export default function CreateProjectForm() {
         ...data,
         program_id: programUID as string,
         description: data.description || "",
-        project_location: [],
       },
       {
         onSuccess: () => {

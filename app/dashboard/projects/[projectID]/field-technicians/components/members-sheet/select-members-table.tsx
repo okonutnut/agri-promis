@@ -31,7 +31,7 @@ export default function SelectMemberTable({
 
   // GET
   const { data, isLoading, isError } = useRealtimeQuery({
-    queryKey: ["field-project-field-technicians"],
+    queryKey: ["field-technicians", projectID as string],
     queryFn: () => SelectAllMembersByRoleAction(2),
     table: "user_profile",
   });

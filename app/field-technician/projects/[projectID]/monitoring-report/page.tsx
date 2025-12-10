@@ -2,7 +2,7 @@
 
 import { DataTable } from "./table/data-table";
 import { columns } from "./table/columns";
-import { MonitoringReportType } from "@/components/types";
+import { MonitoringReportType, ReportType } from "@/components/types";
 import { useParams } from "next/navigation";
 import { getUserProjectNavItems } from "@/components/sidebar/navitems";
 import CustomPageLayout, {
@@ -15,6 +15,7 @@ import { SelectProjectDetailsByProjectLocationIDAction } from "@/app/actions/Pro
 import SkeletonLoading from "@/components/custom/layout/skeleton-loading";
 import UploadFieldReportForm from "./form/monitoring-report-form";
 import ViewDraftsSheet from "./components/view-drafts-sheet";
+import { report } from "process";
 
 type MonitoringReportContentType = {
   data: MonitoringReportType[] | undefined;
@@ -29,15 +30,25 @@ function MonitoringReportContent({
 
   const handleRowSelect = (row: MonitoringReportType) => {
     openSheet(
-      "View Monitoring Report",
+      "View Report",
       <UploadFieldReportForm isAddMode={false} isDraft={false} values={row} />
     );
   };
 
-  const handleAdd = () => {
+  const handleAdd = (reportType: ReportType) => {
+    const sheetTitle = () => {
+      return reportType.code === "MR"
+        ? "Upload Monitoring Report"
+        : "Upload Post Travel Report";
+    };
     openSheet(
-      "Upload Monitoring Report",
-      <UploadFieldReportForm isAddMode={true} isDraft={false} values={null} />
+      sheetTitle(),
+      <UploadFieldReportForm
+        isAddMode={true}
+        isDraft={false}
+        values={null}
+        reportType={reportType}
+      />
     );
   };
 
@@ -95,7 +106,6 @@ function MonitoringReportContent({
 
 export default function MonitoringReportPage() {
   const { projectID } = useParams();
-
   const { data, isLoading, error } = useRealtimeQuery({
     queryKey: ["monitoring-report", projectID as string],
     queryFn: () =>
@@ -105,8 +115,8 @@ export default function MonitoringReportPage() {
 
   return (
     <CustomPageLayout
-      pageTitle="Monitoring Reports"
-      pageDescription="View all monitoring reports for this project."
+      pageTitle="Monitoring Report"
+      pageDescription="View all submitted reports for this project."
       isLoading={isLoading}
       error={error}
       navItems={getUserProjectNavItems(projectID as string)}

@@ -42,7 +42,9 @@ export default function TravelOrderDropdown({
 
   return (
     <>
-      <Label className="mb-1">Travel Order No</Label>
+      <Label className="capitalize mb-1 block text-sm font-semibold">
+        Travel Order No
+      </Label>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button

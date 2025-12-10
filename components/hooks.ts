@@ -11,9 +11,7 @@ import {
   SelectActivityLogsByProjectIDAction,
   SelectAllActivityLogsByCurrentUserAction,
 } from "@/app/actions/ActivityLogAction";
-import {
-  SelectUserCurrentLocationAction,
-} from "@/app/actions/UserSessionAction";
+import { SelectUserCurrentLocationAction } from "@/app/actions/UserSessionAction";
 import {
   SelectAllFieldTechniciansByProjectIDAction,
   SelectAllAssignedProjectsByFieldTechnicianIDAction,
@@ -203,7 +201,8 @@ export function useSelectProgramAndProjectDetailsByProgjectIDHook(
 export function useSelectProjectDetailsHook(projectId: string) {
   return useQuery({
     queryKey: ["projectDetails", projectId],
-    queryFn: async () => await SelectProjectDetailsByProjectLocationIDAction(projectId),
+    queryFn: async () =>
+      await SelectProjectDetailsByProjectLocationIDAction(projectId),
     enabled: !!projectId,
     refetchInterval: 3000,
     networkMode: "online",
@@ -234,8 +233,9 @@ export function useInsertProjectLocationHook() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: ProjectLocationType) => await InsertProjectLocationAction(data),
-    onSuccess: (data) => {
+    mutationFn: async (data: ProjectLocationType) =>
+      await InsertProjectLocationAction(data),
+    onSuccess: () => {
       qc.invalidateQueries({
         queryKey: ["allProjectsByProgramId"],
       });

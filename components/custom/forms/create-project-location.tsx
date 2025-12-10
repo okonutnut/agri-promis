@@ -25,15 +25,16 @@ const formSchema = z.object({
   total_alloted_area: z.coerce
     .number()
     .min(1, "At least one hectare per person is required"),
-  start_date: z.coerce.string().refine(
-    (val) => {
-      const date = new Date(val);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      return !isNaN(date.getTime()) && date >= today;
-    },
-    { message: "Start date cannot be in the past" }
-  ),
+  start_date: z.coerce.string(),
+  // .refine(
+  //   (val) => {
+  //     const date = new Date(val);
+  //     const today = new Date();
+  //     today.setHours(0, 0, 0, 0);
+  //     return !isNaN(date.getTime()) && date >= today;
+  //   },
+  //   { message: "Start date cannot be in the past" }
+  // ),
 });
 type FormData = z.infer<typeof formSchema>;
 
@@ -71,7 +72,7 @@ export default function CreateProjectLocationForm() {
       {
         onSuccess: () => {
           toast.success("Project location created successfully");
-          window.location.href = `/dashboard/programs/${programUID}?project=${projectID}`;
+          window.location.href = `/dashboard/programs/${programUID}`;
         },
         onError: () => {
           toast.error("Failed to create project location. Please try again.");

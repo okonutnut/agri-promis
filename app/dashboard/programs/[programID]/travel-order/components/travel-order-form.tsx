@@ -112,7 +112,7 @@ export default function IssueTravelOrderForm({
   const { mutate, isPending } = useUniversalMutation({
     mutationFn: async (data: TravelOrderSchema) =>
       await InsertTravelOrderAction(data),
-    invalidateKeys: ["travel-orders", programID as string],
+    invalidateKeys: ["travel_order", programID as string],
   });
 
   const onSubmit = (data: TravelOrderSchema) => {
@@ -145,7 +145,7 @@ export default function IssueTravelOrderForm({
       >
         <Label className="mb-4 text-md uppercase">Travel Order Info</Label>
         <FormInput
-          label="Travel Order No."
+          label="Travel Order No:"
           name="travel_order_no"
           form={form}
           readOnly={!isAddMode}
@@ -154,7 +154,7 @@ export default function IssueTravelOrderForm({
           <UserComboBox form={form} />
         ) : (
           <NonFormInput
-            label="Issued To"
+            label="Issued To:"
             defaultValue={values?.user?.fullname}
             readOnly={!isAddMode}
           />
@@ -180,14 +180,14 @@ export default function IssueTravelOrderForm({
           readOnly={!isAddMode}
         /> */}
         <FormInput
-          label="Date of Departure"
+          label="Date of Departure:"
           type="datetime-local"
           name="departure_date"
           form={form}
           readOnly={!isAddMode}
         />
         <FormInput
-          label="Date of Return"
+          label="Date of Return:"
           type="datetime-local"
           name="return_date"
           form={form}
@@ -196,13 +196,13 @@ export default function IssueTravelOrderForm({
         {isAddMode ? (
           <FormSelect
             options={modeOfTransportOptions}
-            label="Mode of Transportation"
+            label="Mode of Transportation:"
             name="mode_of_transport"
             form={form}
           />
         ) : (
           <NonFormInput
-            label="Mode of Transportation"
+            label="Mode of Transportation:"
             defaultValue={values?.mode_of_transport?.toUpperCase()}
             readOnly
           />

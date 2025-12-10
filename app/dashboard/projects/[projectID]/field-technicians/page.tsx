@@ -50,7 +50,6 @@ function FieldTechnicianContent({ data }: FieldTechnicianPageProps) {
 
 export default function FieldTechnicianPage() {
   const { projectID } = useParams();
-
   const { data, isLoading, error } = useRealtimeQuery({
     queryKey: ["project-field-technicians", projectID as string],
     queryFn: () =>

@@ -14,8 +14,7 @@ import { Spinner } from "@/components/ui/spinner";
 const formSchema = z.object({
   program_name: z
     .string()
-    .min(1, "Program name is required")
-    .max(50, "Program name cannot exceed 20 characters")
+    .min(10, "Program name is required")
     .refine((val) => !/\d/.test(val), {
       message: "Program name cannot contain numbers",
     }),

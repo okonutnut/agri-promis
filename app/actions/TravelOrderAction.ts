@@ -47,7 +47,7 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
   const { data: userProfile, error: profileError } = await supabase
     .from("user_profile")
     .select("fullname")
-    .eq("id", user?.id)
+    .eq("id", data.user_id)
     .single();
 
   if (profileError) {
@@ -80,12 +80,14 @@ export async function SelectAllTravelOrdersByUserIDAction(user_id?: string) {
 
   const { data, error } = await supabase
     .from("travel_order")
-    .select(`
+    .select(
+      `
       *,
       user:user_profile!travel_order_user_id_fkey(fullname),
       created_by:user_profile!travel_order_created_by_fkey(fullname),
       travel_itinerary:travel_order_itinerary_items(*)
-    `)
+    `
+    )
     .eq("user_id", user_id)
     .eq("is_active", 1)
     .order("created_at", { ascending: false });
@@ -95,19 +97,21 @@ export async function SelectAllTravelOrdersByUserIDAction(user_id?: string) {
   return data;
 }
 
-
-
-export async function SelectAllTravelOrdersByProgramIDAction(programID: string) {
+export async function SelectAllTravelOrdersByProgramIDAction(
+  programID: string
+) {
   const supabase = await createClient(cookies());
 
   const { data, error } = await supabase
     .from("travel_order")
-    .select(`
+    .select(
+      `
       *,
       user:user_profile!travel_order_user_id_fkey(fullname),
       created_by:user_profile!travel_order_created_by_fkey(fullname),
       travel_itinerary:travel_order_itinerary_items(*)
-    `)
+    `
+    )
     .eq("program_id", programID)
     .order("created_at", { ascending: false });
 
@@ -115,5 +119,3 @@ export async function SelectAllTravelOrdersByProgramIDAction(programID: string) 
 
   return data;
 }
-
-

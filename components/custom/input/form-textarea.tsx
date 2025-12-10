@@ -27,7 +27,10 @@ export default function FormTextarea({
 }: FormTextareaType) {
   return (
     <div className={cn(`w-full mt-2 mb-4`, className)}>
-      <Label htmlFor={name} className="font-medium mb-1">
+      <Label
+        htmlFor={name}
+        className="capitalize mb-1 block text-sm font-semibold"
+      >
         {label} {optional && <span className="text-gray-500">(optional)</span>}
       </Label>
       <Textarea

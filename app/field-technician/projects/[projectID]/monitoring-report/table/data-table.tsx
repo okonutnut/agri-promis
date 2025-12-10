@@ -22,12 +22,14 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import SearchInput from "@/components/custom/input/search-input";
+import ReportTypeSelector from "@/components/custom/dropdown/report-type-selector";
+import { ReportType } from "@/components/types";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   onRowSelect?: (row: TData) => void;
-  onAdd?: () => void;
+  onAdd?: (reportType: ReportType) => void;
   enableUpload?: boolean;
   topLeftComponent?: React.ReactNode;
 }
@@ -65,7 +67,8 @@ export function DataTable<TData, TValue>({
 
         {enableUpload && (
           <div className={`flex items-center gap-2`}>
-            <Button onClick={onAdd}>New Report</Button>
+            {/* <Button onClick={onAdd}>New Report</Button> */}
+            <ReportTypeSelector onSelect={onAdd} />
             {topLeftComponent}
           </div>
         )}
