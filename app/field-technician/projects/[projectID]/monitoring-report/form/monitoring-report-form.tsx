@@ -89,10 +89,9 @@ export default function UploadFieldReportForm({
       findings: (data.findings || []).filter((item) => item !== ""),
       issues_concern: (data.issues_concern || []).filter((item) => item !== ""),
       project_location_id: projectID as string,
+      report_type_id: (reportType?.id || values?.report_type_id) as string,
       images,
     };
-
-    console.log("Submitting Monitoring Report:", cleanedData);
 
     mutate(
       { ...cleanedData },
