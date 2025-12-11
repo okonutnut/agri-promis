@@ -75,7 +75,6 @@ export default function UploadFieldReportForm({
     },
   });
 
-  // const { mutate, isPending } = useInsertMonitoringReportHook();
   const { mutate, isPending } = useUniversalMutation({
     mutationFn: async (data: any) => await InsertMonitoringReportAction(data),
     invalidateKeys: ["monitoring-report", projectID as string],
@@ -218,9 +217,7 @@ export default function UploadFieldReportForm({
                 );
               }}
               size="sm"
-              disabled={
-                isPending || !form.formState.isValid || images.length === 0
-              }
+              disabled={isPending}
             >
               {isPending ? (
                 <Loader2 className="animate-spin" />
