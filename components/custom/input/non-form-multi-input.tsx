@@ -8,10 +8,15 @@ type NonFormMultiInputProps = {
   values?: any | null;
 };
 
-export default function NonFormMultiInput({ values, label }: NonFormMultiInputProps) {
+export default function NonFormMultiInput({
+  values,
+  label,
+}: NonFormMultiInputProps) {
   return (
     <div className="space-y-2 relative">
-      <Label>{label}</Label>
+      <Label className="capitalize mb-1 block text-sm font-semibold">
+        {label}
+      </Label>
       <ul>
         {values && values.length > 0 ? (
           values.map((issue: string, index: number) => (

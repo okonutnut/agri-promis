@@ -22,7 +22,9 @@ export default function NonFormTextarea({
 }: NonFormTextareaType) {
   return (
     <div className={cn(`w-full mt-2 mb-4`, className)}>
-      <Label className="font-medium mb-1">{label}</Label>
+      <Label className="capitalize mb-1 block text-sm font-semibold">
+        {label}
+      </Label>
       <Textarea
         defaultValue={defaultValue}
         rows={rows || 7}

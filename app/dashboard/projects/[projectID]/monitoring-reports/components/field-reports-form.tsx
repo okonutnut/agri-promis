@@ -36,35 +36,58 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
       closeSheet();
     }
   }, [isSuccess]);
+
   return (
     <>
       <section className="space-y-4 h-[calc(90vh)] overflow-y-auto overflow-x-hidden">
         <ImageCarousel images={data?.photo_url || []} />
         <div className="p-2 space-y-4 border-t">
           <NonFormInput
-            label="Reporter Name"
+            label="Reporter Name:"
             defaultValue={data?.reporter?.fullname}
             readOnly
           />
           <NonFormInput
-            label="Travel Order No"
+            label="Travel Order No:"
             defaultValue={data?.travel_order?.travel_order_no}
             readOnly
           />
-          <NonFormInput label="Purpose" defaultValue={data?.purpose} readOnly />
-          <NonFormMultiInput label="Findings" values={data?.findings} />
-          <NonFormTextarea
-            label="Observation"
-            defaultValue={data?.observation ?? "N/A"}
+          <NonFormInput
+            label="Inclusive Date of Travel:"
+            defaultValue={data?.inclusive_date_of_travel}
             readOnly
           />
+          <NonFormInput
+            label={
+              data?.report_type?.code === "MR"
+                ? "Purpose:"
+                : "Activities Undertaken:"
+            }
+            defaultValue={data?.purpose}
+            readOnly
+          />
+          {data?.report_type?.code === "MR" && (
+            <>
+              <NonFormMultiInput label="Findings" values={data?.findings} />
+              <NonFormTextarea
+                label="Observation"
+                defaultValue={data?.observation ?? "N/A"}
+                readOnly
+              />
+            </>
+          )}
           <NonFormMultiInput
-            label="Issues / Concern"
+            label={
+              data?.report_type?.code === "MR"
+                ? "Issues / Concerns:"
+                : "Issues / Concerns / Project % Accomplishment To Date:"
+            }
             values={data?.issues_concern}
           />
           <NonFormTextarea
             label="Remarks"
             defaultValue={data?.remarks}
+            noPlaceholder={!!data}
             readOnly
           />
         </div>

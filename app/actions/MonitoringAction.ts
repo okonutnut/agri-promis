@@ -11,33 +11,29 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
 ) {
   const supabase = await createClient(cookies());
 
-  // Step 1: Fetch monitoring reports with joins
+  // Fetch all reports for the given project location
   const { data, error } = await supabase
     .from("monitoring")
     .select(
       `
       *,
-      project_location:project_location(id, project_id, location, fca_ids),
-      project:project_location!monitoring_project_location_id_fkey(
-        projects(project_name)
-      ),
-      travel_order:travel_order(travel_order_no),
+      project_location:project_location(*, projects(*)),
+      travel_order:travel_order(travel_order_no, travel_order_itinerary_items(*)),
+      report_type:report_type(description),
       reporter:user_profile!monitoring_reporter_id_fkey(fullname),
-      remarkBy:user_profile!monitoring_reviewed_by_id_fkey(fullname)
+      reviewedBy:user_profile!monitoring_reviewed_by_id_fkey(fullname)
     `
     )
     .eq("project_location_id", projectLocationID)
     .order("created_at", { ascending: false });
 
-  if (error) {
-    throw new Error(error.message);
-  }
+  if (error) throw error;
 
-  // Step 2: Gather FCA IDs
-  const fcaIds = Array.from(
+  // Collect unique FCA IDs from all reports
+  const projectFCAIds = Array.from(
     new Set(
       data
-        .map((r) => r.project_location?.fca_ids || [])
+        .map((report) => report.project_location?.fca_ids || [])
         .flat()
         .filter((id): id is string => !!id)
     )
@@ -46,19 +42,19 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
   const { data: fcaData, error: fcaError } = await supabase
     .from("farmers")
     .select("id, description")
-    .in("id", fcaIds);
+    .in("id", projectFCAIds);
 
-  if (fcaError) throw new Error(fcaError.message);
+  if (fcaError) throw fcaError;
 
-  // Step 3: Attach FCA + sign URLs
-  const reports = await Promise.all(
+  // Map FCA + signed URLs
+  const reportsWithExtras = await Promise.all(
     data.map(async (report) => {
-      const signedPhotos = report.photo_url
+      const signedPhotoUrls = report.photo_url
         ? await Promise.all(
             report.photo_url.map(async (path: string) => {
               const { data: signed } = await supabase.storage
                 .from("monitoring-reports")
-                .createSignedUrl(path, 3600);
+                .createSignedUrl(path, 60 * 60);
               return signed?.signedUrl ?? null;
             })
           )
@@ -72,7 +68,7 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
 
       return {
         ...report,
-        photo_url: signedPhotos.filter(Boolean),
+        photo_url: signedPhotoUrls.filter(Boolean),
         project_location: {
           ...report.project_location,
           fcaDetails,
@@ -81,7 +77,7 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
     })
   );
 
-  return reports;
+  return reportsWithExtras as MonitoringReportType[];
 }
 
 export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
@@ -100,7 +96,7 @@ export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
       `
       *,
       project_location:project_location(*, projects(*)),
-      travel_order:travel_order(travel_order_no),
+      travel_order:travel_order(travel_order_no, travel_order_itinerary_items(*)),
       report_type:report_type(description),
       reporter:user_profile!monitoring_reporter_id_fkey(fullname),
       reviewedBy:user_profile!monitoring_reviewed_by_id_fkey(fullname)
@@ -252,6 +248,9 @@ export async function InsertMonitoringReportAction({
   images,
   remarks,
   travel_order_no,
+  inclusive_date_of_travel,
+  report_type_id,
+  project_location,
 }: MonitoringReportType) {
   if (!images?.length) throw new Error("No images provided");
 
@@ -292,31 +291,22 @@ export async function InsertMonitoringReportAction({
     travel_order_no,
     project_location_id,
     purpose,
+    observation,
+    inclusive_date_of_travel,
+    report_type_id,
     findings: findings?.filter((f) => f !== "") || [],
     issues_concern: issues_concern?.filter((i) => i !== "") || [],
     reporter_id: user.id,
-    observation,
     photo_url: photo_paths,
     remarks: remarks,
   });
 
   if (error) throw error;
 
-  // Get project name for logging
-  const { data: projectData, error: projectError } = await supabase
-    .from("projects")
-    .select("*, project_location!inner (*)")
-    .eq("project_location.id", project_location_id)
-    .single();
-
-  if (projectError) {
-    throw projectError;
-  }
-
   // Log the activity
   await InsertActivityLogAction(
     "Submitted a Monitoring Report",
-    `Monitoring report submitted for project ${projectData.project_name}, ${projectData.project_location?.location}.`,
+    `Monitoring report submitted for project ${project_location?.projects?.project_name}, ${project_location?.location}.`,
     project_location_id
   );
 

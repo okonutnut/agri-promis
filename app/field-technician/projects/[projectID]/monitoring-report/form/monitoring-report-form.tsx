@@ -128,15 +128,13 @@ export default function UploadFieldReportForm({
               readOnly
             />
           )}
-          {reportType?.code === "PTR" && (
-            <FormInput
-              label="Inclusive Date of Travel:"
-              name="inclusive_date_of_travel"
-              type="date"
-              form={form}
-              readOnly={!isAddMode}
-            />
-          )}
+          <FormInput
+            label="Inclusive Date of Travel:"
+            name="inclusive_date_of_travel"
+            type="date"
+            form={form}
+            readOnly={!isAddMode}
+          />
           <FormInput
             label={
               reportType?.code === "MR" ? "Purpose:" : "Activities Undertaken:"

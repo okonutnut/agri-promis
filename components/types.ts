@@ -105,6 +105,8 @@ export type MonitoringReportType = {
   issues_concern?: string[];
   remarks?: string;
   photo_url?: string[];
+  // Objects
+  project_location?: ProjectLocationType;
   project?: ProjectType & { fcaDetails?: FCAType[] };
   images?: ImageData[];
   reporter?: UserProfileType;

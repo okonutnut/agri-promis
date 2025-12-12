@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { MonitoringReportType } from "@/components/types";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 export const columns: ColumnDef<MonitoringReportType>[] = [
   {
@@ -25,7 +26,7 @@ export const columns: ColumnDef<MonitoringReportType>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="h-8 p-0 hover:bg-transparent"
         >
-          Uploader
+          Uploader Name
           <ArrowUpDown className="ml-1 h-3 w-3 text-muted-foreground" />
         </Button>
       );
@@ -33,9 +34,21 @@ export const columns: ColumnDef<MonitoringReportType>[] = [
     enableSorting: true,
   },
   {
-    accessorKey: "remarkBy.report_type",
-    header: "Report Type",
-    cell: ({ getValue }) => String(getValue() || "Not Reviewed"),
+    accessorKey: "report_type.description",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="h-8 p-0 hover:bg-transparent"
+        >
+          Report Type
+          <ArrowUpDown className="ml-1 h-3 w-3 text-muted-foreground" />
+        </Button>
+      );
+    },
+    enableSorting: true,
+    cell: ({ getValue }) => <Badge>{String(getValue() || "Unknown")}</Badge>,
   },
   {
     accessorKey: "remarkBy.fullname",
@@ -44,21 +57,7 @@ export const columns: ColumnDef<MonitoringReportType>[] = [
   },
   {
     accessorKey: "created_at",
-    header: ({ column }) => {
-      return (
-        <div className="flex items-center justify-end">
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="h-8 p-0 hover:bg-transparent"
-          >
-            <div>Date Created</div>
-            <ArrowUpDown className="ml-1 h-3 w-3 text-muted-foreground" />
-          </Button>
-        </div>
-      );
-    },
-    enableSorting: true,
+    header: () => <div className="text-end">Date Created</div>,
     cell: ({ getValue }) => (
       <div className="text-end">
         {format(

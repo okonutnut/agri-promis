@@ -15,7 +15,6 @@ import { SelectProjectDetailsByProjectLocationIDAction } from "@/app/actions/Pro
 import SkeletonLoading from "@/components/custom/layout/skeleton-loading";
 import UploadFieldReportForm from "./form/monitoring-report-form";
 import ViewDraftsSheet from "./components/view-drafts-sheet";
-import { report } from "process";
 
 type MonitoringReportContentType = {
   data: MonitoringReportType[] | undefined;
