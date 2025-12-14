@@ -2,7 +2,7 @@
 
 import { DataTable } from "./table/data-table";
 import { columns } from "./table/columns";
-import { MonitoringReportType, ReportType } from "@/components/types";
+import { MonitoringReportType } from "@/components/types";
 import { useParams } from "next/navigation";
 import { getUserProjectNavItems } from "@/components/sidebar/navitems";
 import CustomPageLayout, {
@@ -34,19 +34,13 @@ function MonitoringReportContent({
     );
   };
 
-  const handleAdd = (reportType: ReportType) => {
-    const sheetTitle = () => {
-      return reportType.code === "MR"
-        ? "Upload Monitoring Report"
-        : "Upload Post Travel Report";
-    };
+  const handleAdd = () => {
     openSheet(
-      sheetTitle(),
+      "Upload Monitoring Report",
       <UploadFieldReportForm
         isAddMode={true}
         isDraft={false}
         values={null}
-        reportType={reportType}
       />
     );
   };

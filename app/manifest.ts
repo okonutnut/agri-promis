@@ -8,28 +8,34 @@ export default function manifest(): MetadataRoute.Manifest {
     description:
       "A Progressive Web App built for Agricultural Project Monitoring and Implementation",
     start_url: "/",
-    display: "minimal-ui",
+    scope: "/",
+    display: "standalone",
     background_color: "#ffffff",
     theme_color: "#ffffff",
+    orientation: "portrait",
     icons: [
       {
         src: "/icons/favicon-96x96.png",
         sizes: "96x96",
         type: "image/png",
+        purpose: "any",
       },
       {
         src: "/icons/web-app-manifest-192x192.png",
         sizes: "192x192",
         type: "image/png",
+        purpose: "any",
       },
       {
         src: "/icons/web-app-manifest-512x512.png",
         sizes: "512x512",
         type: "image/png",
+        purpose: "any",
       },
     ],
     lang: "en",
-    orientation: "portrait",
-    display_override: ["window-controls-overlay", "minimal-ui", "standalone"],
+    display_override: ["window-controls-overlay", "standalone", "minimal-ui"],
+    categories: ["productivity", "business"],
+    screenshots: [],
   };
 }

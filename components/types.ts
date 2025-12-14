@@ -93,39 +93,47 @@ export type LocationType = {
 export type MonitoringReportType = {
   id?: string;
   key?: string;
-  report_type_id?: string;
+  travel_order_id?: string;
+  travel_date_id?: string;
   project_location_id?: string;
   travel_order_no?: string;
   reporter_id?: string;
   reviewed_by_id?: string;
-  inclusive_date_of_travel?: string;
   purpose?: string;
   findings?: string[];
   observation?: string;
   issues_concern?: string[];
   remarks?: string;
   photo_url?: string[];
+  
   // Objects
   project_location?: ProjectLocationType;
   project?: ProjectType & { fcaDetails?: FCAType[] };
   images?: ImageData[];
   reporter?: UserProfileType;
   travel_order?: TravelOrderType;
-  report_type?: ReportType;
   reviewedBy?: UserProfileType;
   created_at?: string;
 };
 
 export type PostTravelReportType = {
   id?: string;
-  project_location_id?: string;
-  travel_order_id?: string;
   user_id?: string;
-  reviewed_by_id?: string;
+  reviewer_id?: string;
+  travel_order_id?: string;
+  travel_date_id?: string;
+  projects_places_visited?: string;
+  activities_undertaken?: string;
   issues_concern?: string;
-  photo_url?: string;
   remarks?: string;
+  photo_url?: string[];
   created_at?: string;
+
+  // relations
+  user?: UserProfileType;
+  reviewer?: UserProfileType;
+  travel_order?: TravelOrderType;
+  travel_date?: TravelOrderProjectsType;
 };
 
 export type ReportType = {

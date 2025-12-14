@@ -28,7 +28,7 @@ export async function InsertProjectLocationAction(values: ProjectLocationType) {
 
   // Log the activity
   await InsertActivityLogAction(
-    "Created a Project",
+    "Added a Project Location",
     `${values.location} has been added to project ${data.projects.project_name}.`,
     data.id
   );

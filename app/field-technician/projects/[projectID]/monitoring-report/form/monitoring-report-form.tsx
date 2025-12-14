@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useParams } from "next/navigation";
 import { ImageData } from "@/components/interfaces";
-import { MonitoringReportType, ReportType } from "@/components/types";
+import { MonitoringReportType, TravelOrderProjectsType } from "@/components/types";
 import { deleteDraft } from "@/hooks/use-draft";
 import { Button } from "@/components/ui/button";
 import { Loader2, Send } from "lucide-react";
@@ -21,19 +21,24 @@ import {
 import { useUniversalMutation } from "@/hooks/use-universal-mutation";
 import { InsertMonitoringReportAction } from "@/app/actions/MonitoringAction";
 import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
-import ImageCaptureForm from "./image-report-form";
+import ImageCaptureForm from "../../../../../../components/custom/forms/image-report-form";
 import PrintDownloadDropdown from "@/components/custom/print/print-download-dropdown";
 import MonitoringReportDocument from "@/components/custom/pdf/monitoring-reports-document";
 import SaveDraftButton from "../components/save-draft-button";
 import DeleteDraftButton from "../components/delete-draft-button";
-import TravelOrderDropdown from "../components/travel-order-combobox";
-import { validateImages } from "@/utils/helpers/validateImages";
+import { TravelOrderDropdown } from "@/components/custom/dropdown/travel-order-dropdown";
+import { TravelDateDropdown } from "@/components/custom/dropdown/travel-date-dropdown";
+import { useRealtimeQuery } from "@/hooks/use-realtime";
+import { SelectAllTravelOrdersByUserIDAction } from "@/app/actions/TravelOrderAction";
+import { useSupabaseSession } from "@/hooks/use-session";
+import { toast } from "sonner";
+import { format } from "date-fns";
 
 const fieldReportSchema = z.object({
-  report_type_id: z.string().optional(),
   project_location_id: z.string().optional(),
-  travel_order_no: z.string().min(1, "Travel order number is required"),
-  inclusive_date_of_travel: z.string().optional(),
+  travel_order_id: z.string().min(1, "Travel order is required"),
+  travel_date_id: z.string().min(1, "Travel date is required"),
+  travel_order_no: z.string().optional(), // For backward compatibility with action
   purpose: z.string().optional(),
   findings: z.array(z.string()).optional(),
   observation: z.string().optional(),
@@ -46,28 +51,38 @@ type UploadFieldReportFormProps = {
   isAddMode?: boolean;
   isDraft?: boolean;
   values?: MonitoringReportType | null;
-  reportType?: ReportType;
 };
 
 export default function UploadFieldReportForm({
   isAddMode,
   isDraft,
   values,
-  reportType,
 }: UploadFieldReportFormProps) {
   const { projectID } = useParams();
   const { closeSheet } = useSheet();
   const { openModal, closeModal } = useModal();
+  const { data: userData } = useSupabaseSession();
 
   const [images, setImages] = useState<ImageData[]>(values?.images || []);
+  const [selectedTravelOrderId, setSelectedTravelOrderId] = useState<
+    string | null
+  >(values?.travel_order?.id || values?.travel_order_id || null);
+
+  // Get travel orders to look up travel_order_no and date
+  const { data: travelOrders } = useRealtimeQuery({
+    queryKey: ["travel-orders"],
+    queryFn: () => SelectAllTravelOrdersByUserIDAction(userData?.user.id),
+    table: "travel_order",
+  });
 
   const form = useForm<FieldReportFormData>({
     resolver: zodResolver(fieldReportSchema),
     defaultValues: {
-      report_type_id: reportType?.id || values?.report_type_id || "",
       project_location_id: projectID as string,
+      travel_order_id: values?.travel_order?.id || values?.travel_order_id || "",
+      travel_date_id: values?.travel_order?.travel_itinerary?.[0]?.id || values?.travel_date_id || "",
+      travel_order_no: values?.travel_order_no || "",
       purpose: values?.purpose || "",
-      inclusive_date_of_travel: values?.inclusive_date_of_travel || "",
       findings: values?.findings ? [...values.findings] : [],
       issues_concern: values?.issues_concern ? [...values.issues_concern] : [],
       observation: values?.observation || "",
@@ -75,35 +90,69 @@ export default function UploadFieldReportForm({
     },
   });
 
+  // Watch travel_order_id and travel_date_id to disable submit button
+  const travelOrderId = form.watch("travel_order_id");
+  const travelDateId = form.watch("travel_date_id");
+
   const { mutate, isPending } = useUniversalMutation({
     mutationFn: async (data: any) => await InsertMonitoringReportAction(data),
     invalidateKeys: ["monitoring-report", projectID as string],
   });
 
   const onSubmit = async (data: FieldReportFormData) => {
-    if (!validateImages(images)) return;
+    try {
+      // Remove image validation - images are now optional
+      // if (!validateImages(images)) {
+      //   toast.error("Please add at least one image to submit the report.");
+      //   return;
+      // }
 
-    const cleanedData = {
-      ...data,
-      findings: (data.findings || []).filter((item) => item !== ""),
-      issues_concern: (data.issues_concern || []).filter((item) => item !== ""),
-      project_location_id: projectID as string,
-      report_type_id: (reportType?.id || values?.report_type_id) as string,
-      images,
-    };
+      // Get travel_order_no from selected ID
+      const selectedTravelOrder = travelOrders?.find(
+        (order) => order.id === data.travel_order_id
+      );
 
-    mutate(
-      { ...cleanedData },
-      {
-        onSuccess: async () => {
-          await deleteDraft(values?.key as string);
-          form.reset();
-          setImages([]);
-          closeSheet();
-        },
-      }
-    );
+      const cleanedData = {
+        ...data,
+        findings: (data.findings || []).filter((item) => item !== ""),
+        issues_concern: (data.issues_concern || []).filter((item) => item !== ""),
+        project_location_id: projectID as string,
+        travel_order_no: selectedTravelOrder?.travel_order_no || data.travel_order_no || "",
+        travel_date_id: data.travel_date_id,
+        images,
+      };
+
+      console.log(cleanedData);
+
+      mutate(
+        { ...cleanedData },
+        {
+          onSuccess: async () => {
+            toast.success("Monitoring report submitted successfully!");
+            await deleteDraft(values?.key as string);
+            form.reset();
+            setImages([]);
+            setSelectedTravelOrderId(null);
+            closeSheet();
+          },
+          onError: (error: any) => {
+            const errorMessage = error?.message || error?.toString() || "Failed to submit monitoring report. Please try again.";
+            toast.error(errorMessage);
+            console.error("Error submitting monitoring report:", error);
+          },
+        }
+      );
+    } catch (error: any) {
+      const errorMessage = error?.message || error?.toString() || "An unexpected error occurred. Please try again.";
+      toast.error(errorMessage);
+      console.error("Error in form submission:", error);
+    }
   };
+
+  // Check if submit should be disabled - properly handle empty strings, null, undefined
+  const hasTravelOrder = travelOrderId && travelOrderId.trim() !== "";
+  const hasTravelDate = travelDateId && travelDateId.trim() !== "";
+  const isSubmitDisabled = isPending || !hasTravelOrder || !hasTravelDate;
 
   return (
     <>
@@ -120,52 +169,51 @@ export default function UploadFieldReportForm({
           onSubmit={form.handleSubmit(onSubmit)}
         >
           {isAddMode || isDraft ? (
-            <TravelOrderDropdown form={form} />
+            <>
+              <TravelOrderDropdown
+                form={form as any}
+                onTravelOrderSelect={(id: string) => setSelectedTravelOrderId(id)}
+              />
+              <TravelDateDropdown
+                form={form as any}
+                travelOrderId={selectedTravelOrderId}
+              />
+            </>
           ) : (
-            <NonFormInput
-              label="Travel Order No:"
-              defaultValue={values?.travel_order?.travel_order_no}
-              readOnly
-            />
+            <>
+              <NonFormInput
+                label="Travel Order No:"
+                defaultValue={values?.travel_order?.travel_order_no}
+                readOnly
+              />
+              <NonFormInput
+                label="Inclusive Date of Travel:"
+                defaultValue={format(new Date(values?.travel_order?.travel_itinerary?.[0]?.date || ""), "MMM d, yyyy")}
+                readOnly
+              />
+            </>
           )}
           <FormInput
-            label="Inclusive Date of Travel:"
-            name="inclusive_date_of_travel"
-            type="date"
-            form={form}
-            readOnly={!isAddMode}
-          />
-          <FormInput
-            label={
-              reportType?.code === "MR" ? "Purpose:" : "Activities Undertaken:"
-            }
+            label="Purpose:"
             name="purpose"
             form={form}
             readOnly={!isAddMode}
           />
-          {reportType?.code === "MR" && (
-            <>
-              <FormMultiInput
-                label="Findings:"
-                name="findings"
-                form={form}
-                values={values?.findings || null}
-                readOnly={!isAddMode}
-              />
-              <FormTextarea
-                label="Observation:"
-                name="observation"
-                form={form}
-                readOnly={!isAddMode}
-              />
-            </>
-          )}
           <FormMultiInput
-            label={
-              reportType?.code === "MR"
-                ? "Issues / Concerns:"
-                : "Issues / Concerns / Project % Accomplishment To Date:"
-            }
+            label="Findings:"
+            name="findings"
+            form={form}
+            values={values?.findings || null}
+            readOnly={!isAddMode}
+          />
+          <FormTextarea
+            label="Observation:"
+            name="observation"
+            form={form}
+            readOnly={!isAddMode}
+          />
+          <FormMultiInput
+            label="Issues / Concerns:"
             name="issues_concern"
             form={form}
             values={values?.issues_concern || null}
@@ -188,7 +236,7 @@ export default function UploadFieldReportForm({
           />
         )}
         {values?.key && <DeleteDraftButton draftKey={values.key} />}
-        {isAddMode && (
+        {(isAddMode || isDraft) && (
           <>
             <SaveDraftButton
               draftKey={values?.key as string}
@@ -197,7 +245,7 @@ export default function UploadFieldReportForm({
               isPending={isPending}
             />
             <Button
-              variant={isPending ? "ghost" : "default"}
+              variant={isSubmitDisabled ? "ghost" : "default"}
               type="button"
               onClick={() => {
                 openModal(
@@ -215,7 +263,7 @@ export default function UploadFieldReportForm({
                 );
               }}
               size="sm"
-              disabled={isPending}
+              disabled={isSubmitDisabled}
             >
               {isPending ? (
                 <Loader2 className="animate-spin" />

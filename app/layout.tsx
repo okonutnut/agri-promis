@@ -6,11 +6,17 @@ import ReactQueryProvider from "@/components/reactQueryProvider";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
+import PWA from "@/components/pwa";
 
 export const metadata: Metadata = {
   title: "Agri-ProMIS",
   description: "Login page for Agri-ProMIS",
   manifest: "/manifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Agri-ProMIS",
+  },
   icons: {
     icon: "/favicon.ico",
     shortcut: "/icons/web-app-manifest-512x512.png",
@@ -20,6 +26,10 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: "#ffffff",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 const outfit = Outfit({
@@ -35,12 +45,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Agri-ProMIS" />
+      </head>
       <body className={`${outfit.variable} antialiased`}>
         <ReactQueryProvider>
           <Analytics />
           <SpeedInsights />
           <Toaster richColors position="top-center" />
           <SidebarProvider>{children}</SidebarProvider>
+          <PWA />
         </ReactQueryProvider>
       </body>
     </html>

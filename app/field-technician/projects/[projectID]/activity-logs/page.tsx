@@ -23,6 +23,7 @@ export default function ActivityLogsPage() {
       pageDescription="View all activity logs for this project."
       isLoading={isLoading}
       error={error}
+      role="user"
       navItems={getUserProjectNavItems(projectID as string)}
     >
       <DataTable columns={columns} data={data ?? []} />

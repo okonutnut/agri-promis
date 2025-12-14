@@ -22,6 +22,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Check } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import growthStages from "@/data/growth-stages.json";
 
 function useSearchFilter<T>(
   items: T[],
@@ -126,6 +128,17 @@ function ProjectListTab({ project }: ProjectListTabProps) {
                     <small className="italic">
                       {location.description || "No Description"}
                     </small>
+                    <Badge className="font-semibold rounded-md">
+                      {
+                        growthStages.find(
+                          (stage) =>
+                            stage.value ===
+                            location.progress_indicator!.toString()
+                        )?.label
+                      }
+                      &nbsp;
+                      {location.progress_indicator == 1 ? "" : "Stages"}
+                    </Badge>
                     <small>
                       Date Created:&nbsp;
                       {format(new Date(location.created_at!), "PP")}
@@ -168,15 +181,21 @@ function FilteredProjects({ projects, searchQuery }: FilteredProjectsProps) {
             <CardLink
               href={`?i=${index}`}
               key={index}
-              className="h-auto min-w-sm group flex flex-col items-start p-4 space-y-2 gap-0"
+              className="min-w-sm group flex flex-col items-start p-4 space-y-2 gap-0 h-44 md:h-44 max-h-44"
             >
-              <div className="w-full flex justify-between items-start">
-                <div className="flex items-start gap-4">
+              <div className="w-full flex justify-between items-start h-full">
+                <div className="flex items-start gap-4 w-full">
                   <span className="border rounded-full p-2 border-primary">
                     <Box className="h-5 w-5 text-primary" />
                   </span>
-                  <div className="flex flex-col gap-2">
-                    <span className="font-semibold">
+                  <div className="flex flex-col gap-2 w-full">
+                    <span
+                      className="font-semibold break-words line-clamp-3 w-full"
+                      style={{
+                        wordBreak: "break-word",
+                        overflowWrap: "break-word",
+                      }}
+                    >
                       {project.project_name}
                     </span>
                     <small className="italic">

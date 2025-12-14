@@ -26,16 +26,19 @@ interface LocationSelectorProps {
 export default function ProjectYearsDropdown({
   onChange,
 }: LocationSelectorProps) {
-  // Fetch years from projects created at
-  const [year, setYear] = useState<string>("");
+  // Set default to current year if available
+  const currentYear = new Date().getFullYear().toString();
+  const defaultYear = years.some((m) => m.value === currentYear)
+    ? currentYear
+    : years[0]?.value || "";
+  const [year, setYear] = useState<string>(defaultYear);
   const [openYear, setOpenYear] = useState(false);
 
   function handleYearChange(value: string) {
-    // "All" option clears selection
-    const newValue = value === "All" ? "" : year === value ? "" : value;
-    setYear(newValue);
+    // Always select a year, never empty
+    setYear(value);
     setOpenYear(false);
-    onChange?.(newValue);
+    onChange?.(value);
   }
 
   return (
@@ -47,7 +50,7 @@ export default function ProjectYearsDropdown({
           aria-expanded={openYear}
           className="w-[200px] justify-between shadow-xs font-normal"
         >
-          {year ? years.find((m) => m.value === year)?.label : "All Years"}
+          {"Year " + (years.find((m) => m.value === year)?.label || year)}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -57,15 +60,6 @@ export default function ProjectYearsDropdown({
           <CommandList>
             <CommandEmpty>No years found.</CommandEmpty>
             <CommandGroup>
-              <CommandItem value="All" onSelect={() => handleYearChange("All")}>
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    year === "" ? "opacity-100" : "opacity-0"
-                  )}
-                />
-                All
-              </CommandItem>
               {years.map((m) => (
                 <CommandItem
                   key={m.value}

@@ -62,7 +62,7 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
           {images.map((image, index) => (
             <CarouselItem key={index}>
               <div
-                className="cursor-pointer hover:opacity-80 transition-opacity h-[20vh]"
+                className="cursor-pointer hover:opacity-80 transition-opacity h-[20vh] flex items-center justify-center"
                 onClick={() => handleImageClick(image)}
               >
                 <Image
@@ -70,7 +70,7 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
                   alt={`Image ${index + 1}`}
                   width={100}
                   height={100}
-                  className="mx-auto h-[20vh]"
+                  className="h-[20vh] w-auto object-contain"
                 />
               </div>
             </CarouselItem>

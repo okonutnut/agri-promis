@@ -291,7 +291,11 @@ const UserProjectsDropdown = memo(function UserProjectsDropdown() {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <div className="flex items-center gap-2 min-w-max">
+      <Link
+        href="/field-technician/projects"
+        prefetch={true}
+        className="flex flex-1 gap-2"
+      >
         <Box className="h-4 w-4 text-[#707070]" />
         <div className="min-w-[150px] truncate">
           {currentProject ? (
@@ -305,7 +309,7 @@ const UserProjectsDropdown = memo(function UserProjectsDropdown() {
             <Skeleton className="w-full h-5" />
           )}
         </div>
-      </div>
+      </Link>
       <PopoverTrigger asChild>
         <Button className="ml-2 h-7 w-4 text-[#707070]" variant="ghost">
           <ChevronsUpDown />

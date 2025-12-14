@@ -18,7 +18,7 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
       `
       *,
       project_location:project_location(*, projects(*)),
-      travel_order:travel_order(travel_order_no, travel_order_itinerary_items(*)),
+      travel_order:travel_order(travel_order_no, travel_itinerary:travel_order_itinerary_items(*)),
       report_type:report_type(description),
       reporter:user_profile!monitoring_reporter_id_fkey(fullname),
       reviewedBy:user_profile!monitoring_reviewed_by_id_fkey(fullname)
@@ -96,8 +96,7 @@ export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
       `
       *,
       project_location:project_location(*, projects(*)),
-      travel_order:travel_order(travel_order_no, travel_order_itinerary_items(*)),
-      report_type:report_type(description),
+      travel_order:travel_order(travel_order_no, travel_itinerary:travel_order_itinerary_items(*)),
       reporter:user_profile!monitoring_reporter_id_fkey(fullname),
       reviewedBy:user_profile!monitoring_reviewed_by_id_fkey(fullname)
     `
@@ -247,12 +246,12 @@ export async function InsertMonitoringReportAction({
   issues_concern,
   images,
   remarks,
-  travel_order_no,
-  inclusive_date_of_travel,
-  report_type_id,
+  travel_order_id,
+  travel_date_id,
   project_location,
 }: MonitoringReportType) {
-  if (!images?.length) throw new Error("No images provided");
+  // Remove the image requirement check
+  // if (!images?.length) throw new Error("No images provided");
 
   const supabase = await createClient(cookies());
 
@@ -262,42 +261,45 @@ export async function InsertMonitoringReportAction({
   } = await supabase.auth.getUser();
   if (!user) throw new Error("User not authenticated");
 
-  // Upload images to Supabase Storage
-  const imageFile = images.map((img) => {
-    return img.file;
-  });
+  // Upload images to Supabase Storage only if images are provided
+  let photo_paths: string[] = [];
+  
+  if (images && images.length > 0) {
+    const imageFile = images.map((img) => {
+      return img.file;
+    });
 
-  const photo_paths = await Promise.all(
-    imageFile.map(async (file) => {
-      if (!(file instanceof File)) throw new Error("Invalid file");
+    photo_paths = await Promise.all(
+      imageFile.map(async (file) => {
+        if (!(file instanceof File)) throw new Error("Invalid file");
 
-      const filePath = `images/${Date.now()}-${file.name}`;
+        const filePath = `images/${Date.now()}-${file.name}`;
 
-      const { error } = await supabase.storage
-        .from("monitoring-reports")
-        .upload(filePath, file, {
-          cacheControl: "3600",
-          upsert: false,
-        });
+        const { error } = await supabase.storage
+          .from("monitoring-reports")
+          .upload(filePath, file, {
+            cacheControl: "3600",
+            upsert: false,
+          });
 
-      if (error) throw error;
+        if (error) throw error;
 
-      return filePath;
-    })
-  );
+        return filePath;
+      })
+    );
+  }
 
   // Upload Monitoring Report to Supabase Database
   const { error } = await supabase.from("monitoring").insert({
-    travel_order_no,
     project_location_id,
     purpose,
     observation,
-    inclusive_date_of_travel,
-    report_type_id,
+    travel_date_id,
+    travel_order_no: travel_order_id,
     findings: findings?.filter((f) => f !== "") || [],
     issues_concern: issues_concern?.filter((i) => i !== "") || [],
     reporter_id: user.id,
-    photo_url: photo_paths,
+    photo_url: photo_paths, // Will be empty array if no images
     remarks: remarks,
   });
 
@@ -309,20 +311,6 @@ export async function InsertMonitoringReportAction({
     `Monitoring report submitted for project ${project_location?.projects?.project_name}, ${project_location?.location}.`,
     project_location_id
   );
-
-  // Send Notification to admin
-  // const { data: programData, error: programError } = await supabase
-  //   .from("projects")
-  //   .select(
-  //     "program_id, project_name, programs!projects_program_id_fkey(admin_id)"
-  //   )
-  //   .eq("id", project_id)
-  //   .limit(1, { foreignTable: "programs" })
-  //   .single();
-
-  // if (programError) {
-  //   throw programError;
-  // }
 
   return;
 }

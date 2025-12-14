@@ -37,6 +37,11 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
     }
   }, [isSuccess]);
 
+  // Get the travel date from travel_date_id
+  const travelDate = data?.travel_order?.travel_itinerary?.find(
+    (item: any) => item.id === data?.travel_date_id
+  )?.date;
+
   return (
     <>
       <section className="space-y-4 h-[calc(90vh)] overflow-y-auto overflow-x-hidden">
@@ -54,7 +59,7 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
           />
           <NonFormInput
             label="Inclusive Date of Travel:"
-            defaultValue={data?.inclusive_date_of_travel}
+            defaultValue={travelDate || "N/A"}
             readOnly
           />
           <NonFormInput

@@ -14,14 +14,16 @@ import {
   compressImage,
   getLongtitudeLatitudeFromGPS,
 } from "@/lib/utils";
-import { MonitoringReportType } from "@/components/types";
 import { useParams } from "next/navigation";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectUserProfileAction } from "@/app/actions/UserProfileAction";
 import { SelectProjectDetailsByProjectLocationIDAction } from "@/app/actions/ProjectAction";
+import { LocationData } from "@/components/interfaces";
+
 const ImageModal = dynamic(() => import("@/components/ui/image-modal"), {
   ssr: false,
 });
+
 const ImageCarousel = dynamic(
   () => import("@/components/custom/images/image-carousel"),
   {
@@ -31,17 +33,23 @@ const ImageCarousel = dynamic(
 
 type ImageCaptureFormProps = {
   isAddMode?: boolean;
-  values?: MonitoringReportType | null;
+  values?: { photo_url?: string[] } | null;
   images: ImageData[];
   setImages: React.Dispatch<React.SetStateAction<ImageData[]>>;
+  enableOverlay?: boolean;
+  projectID?: string;
 };
+
 export default function ImageCaptureForm({
   isAddMode,
   values,
   images,
   setImages,
+  enableOverlay = true,
+  projectID: propProjectID,
 }: ImageCaptureFormProps) {
-  const { projectID } = useParams();
+  const params = useParams();
+  const projectID = propProjectID || (params?.projectID as string);
 
   const [isCompressing, setIsCompressing] = useState(false);
   const [fullScreenImage, setFullScreenImage] = useState<ImageData | null>(
@@ -54,12 +62,14 @@ export default function ImageCaptureForm({
     table: "user_profile",
   });
 
-  const { data: project, isLoading } = useRealtimeQuery({
-    queryKey: ["project_details", projectID as string],
+  const { data: project, isLoading: isProjectLoading } = useRealtimeQuery({
+    queryKey: ["project_details", projectID],
     queryFn: () =>
-      SelectProjectDetailsByProjectLocationIDAction(projectID as string),
+      SelectProjectDetailsByProjectLocationIDAction(projectID),
     table: "projects",
   });
+
+  const isLoading = enableOverlay && isProjectLoading;
 
   const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -69,6 +79,20 @@ export default function ImageCaptureForm({
     setIsCompressing(true);
 
     try {
+      // Get GPS location once before processing all images
+      let locationData: LocationData | null = null;
+      if (enableOverlay && projectID && userProfile && project) {
+        try {
+          locationData = await getLongtitudeLatitudeFromGPS();
+          if (locationData.error) {
+            toast.warning(`Location unavailable: ${locationData.error}. Images will be saved without location data.`);
+          }
+        } catch (error) {
+          console.error("Error getting GPS location:", error);
+          toast.warning("Failed to get location. Images will be saved without location data.");
+        }
+      }
+
       const processedImages: ImageData[] = [];
 
       for (const file of files) {
@@ -80,24 +104,28 @@ export default function ImageCaptureForm({
           minute: "2-digit",
         });
 
-        const overlayedFile = await addOverlayToImage(
-          file,
-          dateTimeCaptured,
-          await getLongtitudeLatitudeFromGPS(),
-          userProfile?.fullname as string,
-          project?.projects?.project_name as string
-        );
+        let processedFile = file;
 
-        const compressedFile =
-          overlayedFile.size > 800 * 1024
-            ? await compressImage(overlayedFile, 800)
-            : overlayedFile;
+        if (enableOverlay && projectID && userProfile && project && locationData) {
+          const overlayedFile = await addOverlayToImage(
+            file,
+            dateTimeCaptured,
+            locationData,
+            userProfile?.fullname as string,
+            project?.projects?.project_name as string
+          );
 
-        const fileURL = URL.createObjectURL(compressedFile);
+          processedFile =
+            overlayedFile.size > 800 * 1024
+              ? await compressImage(overlayedFile, 800)
+              : overlayedFile;
+        }
+
+        const fileURL = URL.createObjectURL(processedFile);
         const imageData: ImageData = {
           id: `${Date.now()}-${Math.random()}`,
           src: fileURL,
-          file: compressedFile,
+          file: processedFile,
           dateTimeCaptured: dateTimeCaptured,
         };
 
@@ -176,10 +204,8 @@ export default function ImageCaptureForm({
       <div className="space-y-4 m-2">
         {isAddMode ? (
           <>
-            {/* Image Gallery with Camera Trigger */}
             <div className="space-y-2">
               <div className="flex gap-4 justify-start overflow-x-auto pb-4">
-                {/* Camera Trigger Card */}
                 <div className="min-w-[128px] max-w-[200px] h-50">
                   <Card
                     className={`h-full w-full flex flex-col items-center justify-center border-2 border-dashed shadow-none transition-colors cursor-pointer relative overflow-hidden ${
@@ -204,7 +230,6 @@ export default function ImageCaptureForm({
                   </Card>
                 </div>
 
-                {/* File Upload Card */}
                 <div className="min-w-[128px] max-w-[200px] h-50">
                   <Card
                     className={`h-full w-full flex flex-col items-center justify-center border-2 border-dashed shadow-none transition-colors cursor-pointer relative overflow-hidden ${
@@ -228,7 +253,6 @@ export default function ImageCaptureForm({
                   </Card>
                 </div>
 
-                {/* Uploaded Images */}
                 {images.map((image) => (
                   <div
                     key={image.id}
@@ -269,7 +293,9 @@ export default function ImageCaptureForm({
 
               {isCompressing && (
                 <p className="text-blue-500 text-sm text-center">
-                  Processing images and adding overlay...
+                  {enableOverlay
+                    ? "Processing images and adding overlay..."
+                    : "Processing images..."}
                 </p>
               )}
             </div>

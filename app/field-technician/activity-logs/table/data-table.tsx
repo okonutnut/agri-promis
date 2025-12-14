@@ -27,18 +27,12 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   onRowSelect?: (row: TData) => void;
-  onAdd?: () => void;
-  enableUpload?: boolean;
-  topLeftComponent?: React.ReactNode;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   onRowSelect,
-  onAdd,
-  enableUpload,
-  topLeftComponent,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
@@ -57,21 +51,10 @@ export function DataTable<TData, TValue>({
   return (
     <div className="space-y-4">
       {/* Global Search Bar and Add Button */}
-      <div className="flex flex-wrap-reverse items-center justify-between gap-2">
-        <SearchInput
-          setSearchTerm={table.setGlobalFilter}
-          className="w-full max-w-md"
-        />
-
-        {enableUpload && (
-          <div className={`flex items-center gap-2`}>
-            <Button onClick={onAdd} size="sm">
-              New Report
-            </Button>
-            {topLeftComponent}
-          </div>
-        )}
-      </div>
+      <SearchInput
+        setSearchTerm={table.setGlobalFilter}
+        className="w-full max-w-md"
+      />
 
       {/* Table */}
       <div className="rounded-md border">

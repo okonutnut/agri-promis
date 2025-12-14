@@ -101,10 +101,25 @@ export const addOverlayToImage = (
 
         const minDimension = Math.min(img.width, img.height);
         const maxDimension = Math.max(img.width, img.height);
+        const aspectRatio = img.width / img.height;
 
-        // 🔹 Bigger font scaling (more readable)
-        const baseFontSize = Math.min(minDimension / 15, maxDimension / 35);
-        const fontSize = Math.max(28, Math.min(60, baseFontSize));
+        // Better font size calculation based on aspect ratio
+        // For portrait images, use height-based calculation
+        // For landscape images, use width-based calculation
+        let baseFontSize: number;
+        if (aspectRatio < 1) {
+          // Portrait: base on height
+          baseFontSize = minDimension / 20;
+        } else if (aspectRatio > 1.5) {
+          // Wide landscape: base on width
+          baseFontSize = img.width / 40;
+        } else {
+          // Square or moderate landscape: use minimum dimension
+          baseFontSize = minDimension / 18;
+        }
+
+        // Clamp font size to reasonable bounds
+        const fontSize = Math.max(16, Math.min(32, baseFontSize));
 
         ctx.font = `bold ${fontSize}px Arial, sans-serif`;
         ctx.textAlign = "left";
@@ -113,69 +128,163 @@ export const addOverlayToImage = (
         const date = new Date(timestamp);
         const formattedDate = date.toLocaleDateString();
         const formattedTime = date.toLocaleTimeString();
-        const overlayLines = [`${formattedDate} ${formattedTime}`];
+        const overlayLines: string[] = [`${formattedDate} ${formattedTime}`];
 
         if (location.latitude && location.longitude) {
           overlayLines.push(
-            `Lat: ${location.latitude.toFixed(
-              6
-            )}, Long: ${location.longitude.toFixed(6)}`
+            `Lat: ${location.latitude.toFixed(6)}, Long: ${location.longitude.toFixed(6)}`
           );
         }
 
+        // Better text wrapping using actual text measurement
         if (location.locationName) {
-          const maxChars = Math.floor(img.width / (fontSize * 0.55));
+          const maxTextWidth = img.width * 0.6; // Use 60% of image width for text area
           const words = location.locationName.split(" ");
           let currentLine = "Location: ";
           const locationLines: string[] = [];
 
           words.forEach((word) => {
             const testLine = currentLine + word + " ";
-            if (testLine.length > maxChars) {
+            const metrics = ctx.measureText(testLine);
+            
+            if (metrics.width > maxTextWidth && currentLine !== "Location: ") {
               locationLines.push(currentLine.trim());
               currentLine = word + " ";
             } else {
               currentLine = testLine;
             }
           });
-          if (currentLine) locationLines.push(currentLine.trim());
+          if (currentLine.trim() !== "Location:") {
+            locationLines.push(currentLine.trim());
+          }
           overlayLines.push(...locationLines);
         }
 
-        overlayLines.push(`Project: ${projectName}`);
-        overlayLines.push(`Captured by ${fullname}`);
+        // Wrap project name and fullname if needed
+        const projectText = `Project: ${projectName}`;
+        const projectMetrics = ctx.measureText(projectText);
+        const maxTextWidth = img.width * 0.6;
+        
+        if (projectMetrics.width > maxTextWidth) {
+          // Split project name if too long
+          const words = projectName.split(" ");
+          let currentLine = "Project: ";
+          const projectLines: string[] = [];
+          
+          words.forEach((word) => {
+            const testLine = currentLine + word + " ";
+            const metrics = ctx.measureText(testLine);
+            
+            if (metrics.width > maxTextWidth && currentLine !== "Project: ") {
+              projectLines.push(currentLine.trim());
+              currentLine = word + " ";
+            } else {
+              currentLine = testLine;
+            }
+          });
+          if (currentLine.trim() !== "Project:") {
+            projectLines.push(currentLine.trim());
+          }
+          overlayLines.push(...projectLines);
+        } else {
+          overlayLines.push(projectText);
+        }
 
-        const padding = fontSize * 1.0;
-        const lineHeight = fontSize * 1.5;
+        const capturedByText = `Captured by ${fullname}`;
+        const capturedByMetrics = ctx.measureText(capturedByText);
+        
+        if (capturedByMetrics.width > maxTextWidth) {
+          // Split if too long
+          const words = fullname.split(" ");
+          let currentLine = "Captured by ";
+          const nameLines: string[] = [];
+          
+          words.forEach((word) => {
+            const testLine = currentLine + word + " ";
+            const metrics = ctx.measureText(testLine);
+            
+            if (metrics.width > maxTextWidth && currentLine !== "Captured by ") {
+              nameLines.push(currentLine.trim());
+              currentLine = word + " ";
+            } else {
+              currentLine = testLine;
+            }
+          });
+          if (currentLine.trim() !== "Captured by") {
+            nameLines.push(currentLine.trim());
+          }
+          overlayLines.push(...nameLines);
+        } else {
+          overlayLines.push(capturedByText);
+        }
+
+        const padding = fontSize * 0.8;
+        const lineHeight = fontSize * 1.3;
         const overlayHeight = overlayLines.length * lineHeight + padding * 2;
 
-        const margin = Math.max(12, fontSize * 0.7);
-        const overlayY = img.height - overlayHeight - margin;
+        // Ensure overlay doesn't go outside image bounds
+        const margin = Math.max(10, fontSize * 0.5);
+        let overlayY = img.height - overlayHeight - margin;
+        
+        // If overlay would go outside bounds, adjust it
+        if (overlayY < margin) {
+          overlayY = margin;
+        }
 
         // Load and draw logo from public folder
         const logo = new window.Image();
         logo.onload = () => {
-          // 🔹 Bigger auto-scale logo (8–10% of image height)
-          const logoTargetHeight = Math.max(
-            img.height * 0.1, // 10% of image height
-            overlayHeight * 0.7
+          // Scale logo to fit within overlay area
+          const logoTargetHeight = Math.min(
+            overlayHeight * 0.6,
+            img.height * 0.08 // Max 8% of image height
           );
           const logoTargetWidth = (logo.width / logo.height) * logoTargetHeight;
 
           const logoX = margin;
           const logoY = overlayY + padding;
 
-          ctx.drawImage(logo, logoX, logoY, logoTargetWidth, logoTargetHeight);
+          // Ensure logo doesn't go outside bounds
+          if (logoX + logoTargetWidth > img.width - margin) {
+            // Scale down logo if needed
+            const maxLogoWidth = img.width - margin * 2;
+            const scale = maxLogoWidth / logoTargetWidth;
+            const adjustedLogoWidth = logoTargetWidth * scale;
+            const adjustedLogoHeight = logoTargetHeight * scale;
+            ctx.drawImage(logo, logoX, logoY, adjustedLogoWidth, adjustedLogoHeight);
+          } else {
+            ctx.drawImage(logo, logoX, logoY, logoTargetWidth, logoTargetHeight);
+          }
 
           ctx.fillStyle = "white";
           ctx.strokeStyle = "black";
-          ctx.lineWidth = Math.max(3, fontSize / 8); // thicker outline
+          ctx.lineWidth = Math.max(2, fontSize / 10);
+
+          // Calculate text area width (accounting for logo and padding)
+          const textAreaX = logoX + logoTargetWidth + padding;
+          const textAreaWidth = img.width - textAreaX - margin;
 
           overlayLines.forEach((line, index) => {
-            const textX = logoX + logoTargetWidth + padding;
             const textY = overlayY + padding + index * lineHeight;
-            ctx.strokeText(line, textX, textY);
-            ctx.fillText(line, textX, textY);
+            
+            // Measure text and truncate if it exceeds available width
+            let displayLine = line;
+            let textMetrics = ctx.measureText(displayLine);
+            
+            if (textMetrics.width > textAreaWidth) {
+              // Truncate text with ellipsis
+              while (textMetrics.width > textAreaWidth - ctx.measureText("...").width && displayLine.length > 0) {
+                displayLine = displayLine.slice(0, -1);
+                textMetrics = ctx.measureText(displayLine + "...");
+              }
+              displayLine = displayLine + "...";
+            }
+            
+            // Ensure text doesn't go outside image bounds
+            const finalTextX = Math.min(textAreaX, img.width - margin - textMetrics.width);
+            
+            ctx.strokeText(displayLine, finalTextX, textY);
+            ctx.fillText(displayLine, finalTextX, textY);
           });
 
           canvas.toBlob(
@@ -229,19 +338,35 @@ export async function getLongtitudeLatitudeFromGPS(): Promise<LocationData> {
   }
 
   return new Promise<LocationData>((resolve) => {
+    // Set a timeout to prevent hanging indefinitely
+    const timeoutId = setTimeout(() => {
+      resolve({
+        latitude: 0,
+        longitude: 0,
+        locationName: "",
+        error: "Geolocation request timed out. Please ensure location permissions are granted.",
+      });
+    }, 10000); // 10 second timeout
+
     navigator.geolocation.getCurrentPosition(
       async (position) => {
+        clearTimeout(timeoutId);
         const { latitude, longitude } = position.coords;
         let locationName = "";
 
         try {
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
+            {
+              headers: {
+                'User-Agent': 'AgriPromis/1.0'
+              }
+            }
           );
           const data = await response.json();
-          locationName = `${data.address.village || ""}, ${
-            data.address.city || ""
-          }, ${data.address.country || ""}`.replace(/^,\s|,\s$/g, "");
+          locationName = `${data.address?.village || ""}, ${
+            data.address?.city || ""
+          }, ${data.address?.country || ""}`.replace(/^,\s|,\s$/g, "");
         } catch (error) {
           console.error("Error fetching from OpenStreetMap:", error);
           locationName = "Location unavailable";
@@ -254,14 +379,46 @@ export async function getLongtitudeLatitudeFromGPS(): Promise<LocationData> {
           error: undefined,
         });
       },
-      (error) => {
-        console.error("Geolocation error:", error);
+      (error: GeolocationPositionError) => {
+        clearTimeout(timeoutId);
+        
+        // Handle different types of geolocation errors
+        let errorMessage = "Unable to get location";
+        
+        if (error) {
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage = "Location permission denied. Please enable location access in your browser settings.";
+              break;
+            case error.POSITION_UNAVAILABLE:
+              errorMessage = "Location information is unavailable. Please check your device's location services.";
+              break;
+            case error.TIMEOUT:
+              errorMessage = "Location request timed out. Please try again.";
+              break;
+            default:
+              errorMessage = error.message || "An unknown error occurred while getting location.";
+              break;
+          }
+        }
+        
+        console.error("Geolocation error:", {
+          code: error?.code,
+          message: error?.message,
+          error: error
+        });
+        
         resolve({
           latitude: 0,
           longitude: 0,
           locationName: "",
-          error: error.message,
+          error: errorMessage,
         });
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000, // Accept cached position up to 1 minute old
       }
     );
   });

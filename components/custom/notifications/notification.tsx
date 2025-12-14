@@ -29,7 +29,7 @@ export default function NotificationRequest() {
         if (permission === "granted") {
           subscribeUser();
         } else {
-          toast.info("please go to setting and enable notification.");
+          toast.info("Please go to settings and enable notification.");
         }
       });
     } else {
@@ -42,14 +42,16 @@ export default function NotificationRequest() {
       setNotificationPermission("denied");
       const isSuccess = await DeleteSubscrptionEndpoint();
       if (isSuccess) {
-        toast("You have successfully unsubscribed from notifications.");
+        toast.success("You have successfully unsubscribed from notifications.");
+        qc.invalidateQueries({
+          queryKey: ["notification"],
+        });
       } else {
         toast.error("Cannot unsubscribe from notifications.");
       }
     } catch (ex) {
       console.error("Error unsubscribing from notifications:", ex);
       toast.error("Error unsubscribing from notifications.");
-    } finally {
     }
   };
 
@@ -68,10 +70,9 @@ export default function NotificationRequest() {
           // Subscribe to push notifications
           generateSubscribeEndPoint(newRegistration);
         }
-      } catch {
-        toast.error(
-          "Error during service worker registration or subscription:"
-        );
+      } catch (error) {
+        console.error("Error during service worker registration:", error);
+        toast.error("Error during service worker registration or subscription.");
       }
     } else {
       toast.error("Service workers are not supported in this browser");
@@ -81,33 +82,74 @@ export default function NotificationRequest() {
   const generateSubscribeEndPoint = async (
     newRegistration: ServiceWorkerRegistration
   ) => {
-    const applicationServerKey = urlBase64ToUint8Array(
-      process.env.NEXT_PUBLIC_VAPID_KEY!
-    );
-    const options = {
-      applicationServerKey,
-      userVisibleOnly: true, // This ensures the delivery of notifications that are visible to the user, eliminating silent notifications. (Mandatory in Chrome, and optional in Firefox)
-    };
-    const subscription = await newRegistration.pushManager.subscribe(options);
+    try {
+      const applicationServerKey = urlBase64ToUint8Array(
+        process.env.NEXT_PUBLIC_VAPID_KEY!
+      );
+      const options = {
+        applicationServerKey,
+        userVisibleOnly: true,
+      };
+      const subscription = await newRegistration.pushManager.subscribe(options);
 
-    const supabase = createClient();
+      const supabase = createClient();
+      const { data: userData } = await supabase.auth.getUser();
+      
+      if (!userData?.user?.id) {
+        toast.error("User not authenticated.");
+        return;
+      }
 
-    const { error } = await supabase.from("push_subscriptions").insert({
-      user_id: (await supabase.auth.getUser()).data.user?.id,
-      subscription: JSON.stringify(subscription),
-    });
+      // Check if subscription already exists
+      const { data: existingSubscription } = await supabase
+        .from("push_subscriptions")
+        .select("id")
+        .eq("user_id", userData.user.id)
+        .maybeSingle();
 
-    if (error) {
-      toast.error(error.message);
-    } else {
-      qc.invalidateQueries({
-        queryKey: ["notification"],
-      });
+      if (existingSubscription) {
+        // Update existing subscription
+        const { error } = await supabase
+          .from("push_subscriptions")
+          .update({
+            subscription: JSON.stringify(subscription),
+          })
+          .eq("user_id", userData.user.id);
+
+        if (error) {
+          toast.error(error.message);
+        } else {
+          toast.success("Notification subscription updated successfully!");
+          qc.invalidateQueries({
+            queryKey: ["notification"],
+          });
+        }
+      } else {
+        // Insert new subscription
+        const { error } = await supabase.from("push_subscriptions").insert({
+          user_id: userData.user.id,
+          subscription: JSON.stringify(subscription),
+        });
+
+        if (error) {
+          toast.error(error.message);
+        } else {
+          toast.success("Notification subscription created successfully!");
+          qc.invalidateQueries({
+            queryKey: ["notification"],
+          });
+        }
+      }
+    } catch (error: any) {
+      console.error("Error generating subscription:", error);
+      toast.error("Failed to subscribe to notifications. Please try again.");
     }
   };
 
   useEffect(() => {
-    setNotificationPermission(Notification.permission);
+    if ("Notification" in window) {
+      setNotificationPermission(Notification.permission);
+    }
   }, []);
 
   if (isFetching) {
@@ -115,7 +157,7 @@ export default function NotificationRequest() {
   }
 
   return (
-    <div className=" hover:scale-110 cursor-pointer transition-all rounded-full p-2">
+    <div className="hover:scale-110 cursor-pointer transition-all rounded-full p-2">
       {notificationPermission === "granted" && subscription != null ? (
         <BellRing onClick={removeNotification} />
       ) : (

@@ -22,6 +22,8 @@ import { useUniversalMutation } from "@/hooks/use-universal-mutation";
 import { EndProjectLocationAction } from "@/app/actions/ProjectLocationAction";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 
 function ProjectDashboardInfo(data: ProjectType) {
   const locationDetails = data?.project_location?.[0];
@@ -99,6 +101,8 @@ function ProjectDashboardInfo(data: ProjectType) {
               : "NOT SPECIFIED"}
           </span>
         </div>
+
+        {/* Buttons */}
         <div className="flex flex-col gap-2">
           <Badge variant="outline" className={`h-7 px-4 text-xs gap-2`}>
             <span
@@ -118,6 +122,15 @@ function ProjectDashboardInfo(data: ProjectType) {
               {isPending ? <Spinner /> : "End Project"}
             </Button>
           )}
+          <Link
+            href={`/dashboard/programs/${data?.program_id}`}
+            prefetch={true}
+          >
+            <Button variant={"outline"} className="w-full" size="sm">
+              <ChevronLeft />
+              Back
+            </Button>
+          </Link>
         </div>
       </div>
     </>

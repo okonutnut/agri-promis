@@ -6,6 +6,7 @@ import {
   Contact,
   House,
   LayoutDashboard,
+  NotebookPen,
   Settings,
   UserPen,
   Users,
@@ -64,6 +65,11 @@ export function getProgramNavItems(id: string) {
       icon: House,
     },
     {
+      title: "Post-Travel Reports",
+      href: `/dashboard/programs/${id}/post-travel-reports`,
+      icon: NotebookPen,
+    },
+    {
       title: "Travel Order",
       href: `/dashboard/programs/${id}/travel-order`,
       icon: ClipboardPen,
@@ -114,6 +120,11 @@ export function getUserDashboardNavItems() {
       icon: House,
     },
     {
+      title: "Post-Travel Reports",
+      href: "/field-technician/post-travel-reports",
+      icon: NotebookPen,
+    },
+    {
       title: "Assigned Projects",
       href: "/field-technician/projects",
       icon: UserPen,
@@ -122,6 +133,11 @@ export function getUserDashboardNavItems() {
       title: "Travel Orders",
       href: "/field-technician/travel-order",
       icon: ClipboardPen,
+    },
+    {
+      title: "Activity Logs",
+      href: "/field-technician/activity-logs",
+      icon: ChartLine,
     },
   ];
 }

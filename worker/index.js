@@ -17,5 +17,6 @@ self.addEventListener('push', function (event) {
  
 self.addEventListener('notificationclick', function (event) {
   event.notification.close()
-  event.waitUntil(clients.openWindow('https://localhost:3000/'))
+  // Use the current origin instead of hardcoded localhost
+  event.waitUntil(clients.openWindow(self.location.origin))
 })

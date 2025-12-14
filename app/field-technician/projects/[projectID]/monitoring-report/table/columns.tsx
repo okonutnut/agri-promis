@@ -39,11 +39,6 @@ export const columns: ColumnDef<MonitoringReportType>[] = [
     },
   },
   {
-    accessorKey: "report_type.description",
-    header: "Report Type",
-    cell: ({ getValue }) => <Badge>{(getValue() as string) || "N/A"}</Badge>,
-  },
-  {
     accessorKey: "reviewedBy.fullname",
     header: "Reviewed By",
     cell: ({ getValue }) => <div>{(getValue() as string) || "N/A"}</div>,

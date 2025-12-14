@@ -52,22 +52,50 @@ export async function SendPushNotificationToAllAction(message: string) {
   const supabase = await createClient(cookies());
   const { data: subscriptions, error } = await supabase
     .from("push_subscriptions")
-    .select("subscription");
+    .select("id, subscription");
 
-  if (error) return;
+  if (error) {
+    console.error("Error fetching subscriptions:", error);
+    return;
+  }
 
-  await Promise.all(
-    subscriptions.map((subscription) =>
-      webpush.sendNotification(
-        JSON.parse(subscription.subscription),
-        JSON.stringify({
-          title: "New Notification",
-          body: message,
-          icon: "/icons/favicon-96x96.png",
-        })
-      )
-    )
+  if (!subscriptions || subscriptions.length === 0) {
+    console.log("No subscriptions found");
+    return;
+  }
+
+  // Send notifications and handle errors for each subscription
+  const results = await Promise.allSettled(
+    subscriptions.map(async (sub) => {
+      try {
+        await webpush.sendNotification(
+          JSON.parse(sub.subscription),
+          JSON.stringify({
+            title: "New Notification",
+            body: message,
+            icon: "/icons/favicon-96x96.png",
+          })
+        );
+      } catch (error: any) {
+        // If subscription is invalid (expired, revoked, etc.), delete it
+        if (error.statusCode === 410 || error.statusCode === 404) {
+          await supabase
+            .from("push_subscriptions")
+            .delete()
+            .eq("id", sub.id);
+          console.log(`Removed invalid subscription: ${sub.id}`);
+        } else {
+          console.error(`Error sending notification to subscription ${sub.id}:`, error);
+        }
+        throw error;
+      }
+    })
   );
+
+  const failed = results.filter((r) => r.status === "rejected").length;
+  if (failed > 0) {
+    console.log(`Failed to send ${failed} out of ${subscriptions.length} notifications`);
+  }
 
   return;
 }
@@ -76,33 +104,55 @@ export async function SendPushNotificationToUserAction(
   user_id: string,
   message: string
 ) {
+  if (!user_id) {
+    return;
+  }
+
   webpush.setVapidDetails(
     "mailto:" + process.env.VAPID_ADMIN_EMAIL,
     vapidKeys.publicKey,
     vapidKeys.privateKey
   );
 
-  if (!user_id) {
+  const supabase = await createClient(cookies());
+  const { data: subscription, error } = await supabase
+    .from("push_subscriptions")
+    .select("id, subscription")
+    .eq("user_id", user_id)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Error fetching subscription:", error);
     return;
   }
 
-  const supabase = await createClient(cookies());
-  const { data: subscriptions, error } = await supabase
-    .from("push_subscriptions")
-    .select("*")
-    .eq("user_id", user_id)
-    .single();
+  if (!subscription) {
+    console.log(`No subscription found for user: ${user_id}`);
+    return;
+  }
 
-  if (error) return;
-
-  webpush.sendNotification(
-    JSON.parse(subscriptions.subscription),
-    JSON.stringify({
-      title: "New Notification",
-      body: message,
-      icon: "/icons/favicon-96x96.png",
-    })
-  );
+  try {
+    await webpush.sendNotification(
+      JSON.parse(subscription.subscription),
+      JSON.stringify({
+        title: "New Notification",
+        body: message,
+        icon: "/icons/favicon-96x96.png",
+      })
+    );
+  } catch (error: any) {
+    // If subscription is invalid (expired, revoked, etc.), delete it
+    if (error.statusCode === 410 || error.statusCode === 404) {
+      await supabase
+        .from("push_subscriptions")
+        .delete()
+        .eq("id", subscription.id);
+      console.log(`Removed invalid subscription: ${subscription.id}`);
+    } else {
+      console.error("Error sending notification:", error);
+    }
+    throw error;
+  }
 
   return;
 }
