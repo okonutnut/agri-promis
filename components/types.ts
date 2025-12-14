@@ -105,7 +105,7 @@ export type MonitoringReportType = {
   issues_concern?: string[];
   remarks?: string;
   photo_url?: string[];
-  
+
   // Objects
   project_location?: ProjectLocationType;
   project?: ProjectType & { fcaDetails?: FCAType[] };
@@ -119,6 +119,7 @@ export type MonitoringReportType = {
 export type PostTravelReportType = {
   id?: string;
   user_id?: string;
+  program_id?: string;
   reviewer_id?: string;
   travel_order_id?: string;
   travel_date_id?: string;
@@ -128,6 +129,7 @@ export type PostTravelReportType = {
   remarks?: string;
   photo_url?: string[];
   created_at?: string;
+  reviewed_at?: string;
 
   // relations
   user?: UserProfileType;

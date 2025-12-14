@@ -22,10 +22,7 @@ function PostTravelContent({ values }: PostTravelContentProps) {
   const handleRowSelect = (row: PostTravelReportType) => {
     openSheet(
       "View Post-Travel Report Details",
-      <PostTravelForm
-        data={row}
-        key={`view-${row.id}`}
-      />
+      <PostTravelForm data={row} key={`view-${row.id}`} />
     );
   };
 
@@ -51,7 +48,8 @@ export default function PostTravelReportsPage() {
   const { programID } = useParams();
   const { data, isLoading, error } = useRealtimeQuery({
     queryKey: ["post_travel_reports", programID as string],
-    queryFn: () => SelectAllPostTravelReportsByProgramIDAction(programID as string),
+    queryFn: () =>
+      SelectAllPostTravelReportsByProgramIDAction(programID as string),
     table: "post_travel",
   });
 

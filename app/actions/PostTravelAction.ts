@@ -153,6 +153,7 @@ export async function SelectAllPostTravelReportsByCurrentUserAction() {
 }
 
 export async function InsertPostTravelReportAction({
+  program_id,
   travel_order_id,
   travel_date_id,
   projects_places_visited,
@@ -161,9 +162,6 @@ export async function InsertPostTravelReportAction({
   remarks,
   images,
 }: PostTravelReportType & { images?: { file: File }[] }) {
-  // Remove the image requirement check
-  // if (!images?.length) throw new Error("No images provided");
-
   const supabase = await createClient(cookies());
 
   // Auth check
@@ -174,7 +172,7 @@ export async function InsertPostTravelReportAction({
 
   // Upload images to Supabase Storage only if images are provided
   let photo_paths: string[] = [];
-  
+
   if (images && images.length > 0) {
     const imageFile = images.map((img) => {
       return img.file;
@@ -200,32 +198,67 @@ export async function InsertPostTravelReportAction({
     );
   }
 
-  // Fetch travel order details for activity log
-  const { data: travelOrderData, error: toError } = await supabase
-    .from("travel_order")
-    .select("travel_order_no, user_id, user:user_profile!travel_order_user_id_fkey(fullname)")
-    .eq("id", travel_order_id)
-    .single();
-
-  if (toError) throw toError;
-
   // Insert Post Travel Report to Supabase Database
-  const { error } = await supabase.from("post_travel").insert({
-    travel_order_id,
-    travel_date_id,
-    projects_places_visited,
-    activities_undertaken,
-    issues_concern,
-    remarks,
-    photo_url: photo_paths, // Will be empty array if no images
-  });
+  const { data, error } = await supabase
+    .from("post_travel")
+    .insert({
+      program_id,
+      travel_order_id,
+      travel_date_id,
+      projects_places_visited,
+      activities_undertaken,
+      issues_concern,
+      remarks,
+      photo_url: photo_paths, // Will be empty array if no images
+    })
+    .select("*, travel_order:travel_order(travel_order_no)")
+    .single();
 
   if (error) throw error;
 
   // Log the activity
   await InsertActivityLogAction(
     "Submitted a Post Travel Report",
-    `Post travel report submitted for travel order ${travelOrderData.travel_order_no} by ${travelOrderData.user?.[0]?.fullname || "Unknown User"}.`
+    `Post travel report submitted for travel order ${data.travel_order.travel_order_no}.`
+  );
+
+  return;
+}
+
+export async function ReviewPostTravelAction(postTravelID: string) {
+  const supabase = await createClient(cookies());
+
+  // Get the current user
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData?.user) {
+    throw new Error("Failed to retrieve the current user.");
+  }
+
+  // Update the post_travel record
+  const { data, error } = await supabase
+    .from("post_travel")
+    .update({
+      reviewer_id: userData.user.id, // Ensure this matches the schema
+      reviewed_at: new Date().toISOString(),
+    })
+    .eq("id", postTravelID)
+    .select(
+      `
+      *,
+      travel_order(travel_order_no)
+    `
+    )
+    .single();
+
+  if (error) throw error;
+
+  // Validate the returned data
+  const travelOrderNo = data?.travel_order?.travel_order_no || "Unknown";
+
+  // Log the activity
+  await InsertActivityLogAction(
+    "Reviewed a Post Travel Report",
+    `Reviewed a Post travel report submitted for travel order ${travelOrderNo}.`
   );
 
   return;

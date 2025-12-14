@@ -15,45 +15,37 @@ export const columns: ColumnDef<PostTravelReportType>[] = [
   },
   {
     accessorKey: "travel_order.travel_order_no",
-    header: "Travel Order No",
-  },
-  {
-    accessorKey: "user.fullname",
-    header: "Reporter Name",
-  },
-  {
-    accessorKey: "travel_order.is_active",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Status
+          Travel Order No
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
+    cell: ({ getValue }) => <span>{getValue() as string}</span>,
+    enableSorting: true,
+  },
+  {
+    accessorKey: "travel_order.user.fullname",
+    header: "Reporter Name",
+  },
+  {
+    accessorKey: "reviewer_id",
+    header: "Status",
     cell: ({ getValue }) => (
-      <Badge variant={getValue() ? "default" : "destructive"}>
-        {getValue() ? "Pending Review" : "Reviewed"}
+      <Badge variant={getValue() === null ? "destructive" : "default"}>
+        {getValue() === null ? "Pending Review" : "Reviewed"}
       </Badge>
     ),
   },
   {
     accessorKey: "created_at",
-    header: ({ column }) => {
-      return (
-        <div className="text-end">
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Date Created
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
-      );
+    header: () => {
+      return <div className="text-end">Date Submitted</div>;
     },
     cell: ({ getValue }) => (
       <div className="text-end">

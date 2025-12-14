@@ -34,7 +34,9 @@ export async function InsertProgramAction({
   );
 
   // Send Notification
-  await sendNotificationToAll(`New program created: ${program_name as string}.`);
+  await sendNotificationToAll(
+    `New program created: ${program_name as string}.`
+  );
 
   return data;
 }
@@ -107,17 +109,18 @@ export async function SelectAllProgramsByAgriculturistAction() {
 
   const { data, error } = await supabase
     .from("programs")
-    .select(`
+    .select(
+      `
       *,
       project_count:projects(count)
-    `)
+    `
+    )
     .order("created_at", { ascending: true });
 
   if (error) throw error;
 
   return data as ProgramType[];
 }
-
 
 export async function SelectAllProgramsByUserIDAction(userID: string) {
   const supabase = await createClient(cookies());
@@ -231,18 +234,19 @@ export async function SelectUserByProgramAssignedAction(programId?: string) {
   return users;
 }
 
-
 export async function SelectAllProgramsWithProjectsAction() {
   const supabase = await createClient(cookies());
   const { data, error } = await supabase
     .from("programs")
-    .select(`
+    .select(
+      `
       *,
       projects (
         *,
         project_location (*)
       )
-    `)
+    `
+    )
     .order("created_at", { ascending: true });
 
   if (error) throw error;

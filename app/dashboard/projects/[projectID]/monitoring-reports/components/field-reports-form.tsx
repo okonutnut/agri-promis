@@ -16,6 +16,7 @@ import dynamic from "next/dynamic";
 import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
 import MonitoringReportDocument from "@/components/custom/pdf/monitoring-reports-document";
 import PrintDownloadDropdown from "@/components/custom/print/print-download-dropdown";
+import { format } from "date-fns";
 const ImageCarousel = dynamic(
   () => import("@/components/custom/images/image-carousel"),
   { ssr: false }
@@ -59,34 +60,22 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
           />
           <NonFormInput
             label="Inclusive Date of Travel:"
-            defaultValue={travelDate || "N/A"}
+            defaultValue={travelDate ? format(new Date(travelDate), "MMM d, yyyy") : "N/A"}
             readOnly
           />
           <NonFormInput
-            label={
-              data?.report_type?.code === "MR"
-                ? "Purpose:"
-                : "Activities Undertaken:"
-            }
+            label="Purpose:"
             defaultValue={data?.purpose}
             readOnly
           />
-          {data?.report_type?.code === "MR" && (
-            <>
-              <NonFormMultiInput label="Findings" values={data?.findings} />
-              <NonFormTextarea
-                label="Observation"
-                defaultValue={data?.observation ?? "N/A"}
-                readOnly
-              />
-            </>
-          )}
+          <NonFormMultiInput label="Findings" values={data?.findings} />
+          <NonFormTextarea
+            label="Observation"
+            defaultValue={data?.observation ?? "N/A"}
+            readOnly
+          />
           <NonFormMultiInput
-            label={
-              data?.report_type?.code === "MR"
-                ? "Issues / Concerns:"
-                : "Issues / Concerns / Project % Accomplishment To Date:"
-            }
+            label="Issues / Concerns:"
             values={data?.issues_concern}
           />
           <NonFormTextarea

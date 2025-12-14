@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -20,12 +19,15 @@ import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
 import { useUniversalMutation } from "@/hooks/use-universal-mutation";
 import { InsertPostTravelReportAction } from "@/app/actions/PostTravelAction";
 import { useSupabaseSession } from "@/hooks/use-session";
-import { validateImages } from "@/utils/helpers/validateImages";
-import { postTravelReportSchema, PostTravelReportFormData } from "./post-travel-form-schema";
+import {
+  postTravelReportSchema,
+  PostTravelReportFormData,
+} from "./post-travel-form-schema";
 import { TravelOrderDropdown } from "../../../../components/custom/dropdown/travel-order-dropdown";
 import { TravelDateDropdown } from "../../../../components/custom/dropdown/travel-date-dropdown";
 import ImageCaptureForm from "../../../../components/custom/forms/image-report-form";
 import { toast } from "sonner";
+import ProgramDropdown from "@/components/custom/dropdown/program-dropdown";
 
 type CreatePostTravelFormProps = {
   isAddMode?: boolean;
@@ -64,8 +66,11 @@ export function CreatePostTravelForm({
   });
 
   const { mutate, isPending } = useUniversalMutation({
-    mutationFn: async (data: PostTravelReportFormData & { images: ImageData[] }) =>
+    mutationFn: async (
+      data: PostTravelReportFormData & { images: ImageData[] }
+    ) =>
       await InsertPostTravelReportAction({
+        program_id: data.program_id,
         travel_order_id: data.travel_order_id,
         travel_date_id: data.travel_date_id,
         projects_places_visited: data.projects_places_visited,
@@ -81,7 +86,9 @@ export function CreatePostTravelForm({
     try {
       const cleanedData = {
         ...data,
-        issues_concern: (data.issues_concern || []).filter((item) => item !== ""),
+        issues_concern: (data.issues_concern || []).filter(
+          (item) => item !== ""
+        ),
         images,
       };
 
@@ -94,17 +101,28 @@ export function CreatePostTravelForm({
           closeSheet();
         },
         onError: (error: any) => {
-          const errorMessage = error?.message || error?.toString() || "Failed to submit post-travel report. Please try again.";
+          const errorMessage =
+            error?.message ||
+            error?.toString() ||
+            "Failed to submit post-travel report. Please try again.";
           toast.error(errorMessage);
           console.error("Error submitting post-travel report:", error);
         },
       });
     } catch (error: any) {
-      const errorMessage = error?.message || error?.toString() || "An unexpected error occurred. Please try again.";
+      const errorMessage =
+        error?.message ||
+        error?.toString() ||
+        "An unexpected error occurred. Please try again.";
       toast.error(errorMessage);
       console.error("Error in form submission:", error);
     }
   };
+
+  const allowSubmit =
+    !!form.watch("travel_date_id") &&
+    !!form.watch("travel_order_id") &&
+    !!form.watch("program_id");
 
   return (
     <>
@@ -123,9 +141,14 @@ export function CreatePostTravelForm({
         >
           {isAddMode ? (
             <>
+              <ProgramDropdown
+                onChange={(program) => form.setValue("program_id", program)}
+              />
               <TravelOrderDropdown
                 form={form}
-                onTravelOrderSelect={(id: string) => setSelectedTravelOrderId(id)}
+                onTravelOrderSelect={(id: string) =>
+                  setSelectedTravelOrderId(id)
+                }
               />
               <TravelDateDropdown
                 form={form}
@@ -136,7 +159,13 @@ export function CreatePostTravelForm({
             <>
               <NonFormInput
                 label="Reporter Name:"
-                defaultValue={values?.travel_order?.user ? (Array.isArray(values.travel_order.user) ? values.travel_order.user[0]?.fullname : values.travel_order.user?.fullname) : userData?.user?.email}
+                defaultValue={
+                  values?.travel_order?.user
+                    ? Array.isArray(values.travel_order.user)
+                      ? values.travel_order.user[0]?.fullname
+                      : values.travel_order.user?.fullname
+                    : userData?.user?.email
+                }
                 readOnly
               />
               <NonFormInput
@@ -151,12 +180,12 @@ export function CreatePostTravelForm({
               />
             </>
           )}
-            <FormTextarea
-              label="Projects Places Visited:"
-              name="projects_places_visited"
-              form={form}
-              readOnly={!isAddMode}
-            />
+          <FormTextarea
+            label="Projects Places Visited:"
+            name="projects_places_visited"
+            form={form}
+            readOnly={!isAddMode}
+          />
           <FormInput
             label="Activities Undertaken:"
             name="activities_undertaken"
@@ -167,7 +196,15 @@ export function CreatePostTravelForm({
             label="Issues / Concerns / Project % Accomplishment To Date:"
             name="issues_concern"
             form={form}
-            values={values?.issues_concern ? (Array.isArray(values.issues_concern) ? values.issues_concern : typeof values.issues_concern === "string" ? values.issues_concern.split(", ").filter(Boolean) : [values.issues_concern]) : null}
+            values={
+              values?.issues_concern
+                ? Array.isArray(values.issues_concern)
+                  ? values.issues_concern
+                  : typeof values.issues_concern === "string"
+                  ? values.issues_concern.split(", ").filter(Boolean)
+                  : [values.issues_concern]
+                : null
+            }
             readOnly={!isAddMode}
           />
           <FormTextarea
@@ -200,7 +237,7 @@ export function CreatePostTravelForm({
               );
             }}
             size="sm"
-            disabled={isPending}
+            disabled={isPending || !allowSubmit}
           >
             {isPending ? (
               <Loader2 className="animate-spin" />
@@ -217,6 +254,10 @@ export function CreatePostTravelForm({
 }
 
 // Export for view mode
-export function PostTravelForm({ data }: { data: PostTravelReportType | null }) {
+export function PostTravelForm({
+  data,
+}: {
+  data: PostTravelReportType | null;
+}) {
   return <CreatePostTravelForm isAddMode={false} values={data} />;
 }

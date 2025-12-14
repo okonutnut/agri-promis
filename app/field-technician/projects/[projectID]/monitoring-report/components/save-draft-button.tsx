@@ -44,7 +44,6 @@ const createDraftData = (
     travel_order_id: formData.travel_order_id || "",
     travel_date_id: formData.travel_date_id || "",
     travel_order_no: formData.travel_order_no || "",
-    report_type_id: formData.report_type_id || "",
     created_at: currentDate.toLocaleString("en-US", {
       timeZone: "Asia/Manila",
     }),
