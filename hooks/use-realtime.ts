@@ -7,7 +7,7 @@ import { createClient } from "@/utils/supabase/client";
 type UseRealtimeQueryProps<T> = {
   queryKey: (string | number)[];
   table: string;
-  queryFn: () => Promise<T>; // supports single or array
+  queryFn: () => Promise<T>;
   schema?: string;
   staleTime?: number;
   refetchInterval?: number;
@@ -19,9 +19,9 @@ export function useRealtimeQuery<T>({
   table,
   queryFn,
   schema = "public",
-  staleTime = 1000 * 60,
-  refetchInterval = 600000,
-  networkMode = "online",
+  staleTime = 0, // Changed: Always consider data stale to fetch fresh
+  refetchInterval,
+  networkMode = "online", // Only fetch when online
 }: UseRealtimeQueryProps<T>) {
   const queryClient = useQueryClient();
   const supabase = createClient();
@@ -32,9 +32,15 @@ export function useRealtimeQuery<T>({
     staleTime,
     refetchInterval,
     networkMode,
+    refetchOnMount: true, // Always refetch on mount when online
+    refetchOnWindowFocus: true, // Refetch when window regains focus
+    refetchOnReconnect: true, // Refetch when network reconnects
   });
 
   useEffect(() => {
+    // Only subscribe to realtime when online
+    if (!navigator.onLine) return;
+
     const channel = supabase
       .channel(`${table}-changes`)
       .on("postgres_changes", { event: "*", schema, table }, (payload) => {
@@ -52,7 +58,7 @@ export function useRealtimeQuery<T>({
                 ) as T[];
               case "DELETE":
                 return old.filter(
-                  (row: any) => row.id !== payload.old.id
+                  (row: any) => row.id === payload.old.id
                 ) as T[];
               default:
                 return old;
@@ -66,10 +72,26 @@ export function useRealtimeQuery<T>({
       })
       .subscribe();
 
-    return () => {
+    // Handle online/offline events
+    const handleOnline = () => {
+      // Refetch when coming back online
+      queryClient.invalidateQueries({ queryKey });
+    };
+
+    const handleOffline = () => {
+      // Unsubscribe when going offline
       supabase.removeChannel(channel);
     };
-  }, [queryClient, queryKey, table, schema]);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      supabase.removeChannel(channel);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, [queryClient, queryKey, table, schema, supabase]);
 
   return query;
 }

@@ -11,14 +11,65 @@ const withPWA = require("@ducanh2912/next-pwa").default({
   workboxOptions: {
     disableDevLogs: true,
     runtimeCaching: [
+      // Cache pages (HTML) - NetworkFirst: try network, fallback to cache
+      {
+        urlPattern: /^https?:\/\/.*\/.*$/,
+        handler: "NetworkFirst",
+        options: {
+          cacheName: "pages-cache",
+          expiration: {
+            maxEntries: 50,
+            maxAgeSeconds: 24 * 60 * 60, // 24 hours
+          },
+          networkTimeoutSeconds: 3, // Try network for 3 seconds, then use cache
+        },
+      },
+      // API calls - NetworkFirst: always try network first, only use cache if offline
       {
         urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
         handler: "NetworkFirst",
         options: {
-          cacheName: "supabase-cache",
+          cacheName: "supabase-api-cache",
           expiration: {
             maxEntries: 50,
-            maxAgeSeconds: 24 * 60 * 60, // 24 hours
+            maxAgeSeconds: 5 * 60, // 5 minutes - short cache for API data
+          },
+          networkTimeoutSeconds: 10,
+        },
+      },
+      // Static assets - CacheFirst: cache forever, update in background
+      {
+        urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/,
+        handler: "CacheFirst",
+        options: {
+          cacheName: "static-images",
+          expiration: {
+            maxEntries: 100,
+            maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+          },
+        },
+      },
+      // Fonts - CacheFirst
+      {
+        urlPattern: /\.(?:woff|woff2|ttf|otf)$/,
+        handler: "CacheFirst",
+        options: {
+          cacheName: "static-fonts",
+          expiration: {
+            maxEntries: 20,
+            maxAgeSeconds: 365 * 24 * 60 * 60, // 1 year
+          },
+        },
+      },
+      // JS/CSS bundles - StaleWhileRevalidate: serve from cache, update in background
+      {
+        urlPattern: /\/_next\/static\/.*/i,
+        handler: "StaleWhileRevalidate",
+        options: {
+          cacheName: "next-static",
+          expiration: {
+            maxEntries: 64,
+            maxAgeSeconds: 365 * 24 * 60 * 60, // 1 year
           },
         },
       },
