@@ -116,6 +116,12 @@ export default function IssueTravelOrderForm({
   });
 
   const onSubmit = (data: TravelOrderSchema) => {
+    // Ensure itinerary has at least one entry
+    if (!data.travel_itinerary || data.travel_itinerary.length === 0) {
+      toast.error("At least one itinerary entry is required.");
+      return;
+    }
+    
     mutate(data, {
       onSuccess: () => {
         toast.success("Travel order inserted successfully.");
@@ -131,9 +137,9 @@ export default function IssueTravelOrderForm({
     values?.travel_itinerary || []
   );
 
-  // Sync itinerary state with form value
+  // Sync itinerary state with form value and trigger validation
   useEffect(() => {
-    form.setValue("travel_itinerary", itinerary);
+    form.setValue("travel_itinerary", itinerary, { shouldValidate: true });
   }, [itinerary, form]);
 
   return (
@@ -227,6 +233,11 @@ export default function IssueTravelOrderForm({
                     departureDate={form.watch("departure_date")}
                     returnDate={form.watch("return_date")}
                   />
+                  {form.formState.errors.travel_itinerary && (
+                    <p className="text-xs text-red-500 mt-2">
+                      {form.formState.errors.travel_itinerary.message}
+                    </p>
+                  )}
                 </div>
               ),
             },
@@ -237,22 +248,36 @@ export default function IssueTravelOrderForm({
         {isAddMode && (
           <Button
             variant={isPending ? "ghost" : "default"}
-            disabled={isPending}
+            disabled={isPending || itinerary.length === 0}
             size={"sm"}
             onClick={() => {
-              openModal(
-                "Attention!!!",
-                "Are you sure you want to submit?",
-                <Button
-                  className="w-full"
-                  onClick={() => {
-                    form.handleSubmit(onSubmit)();
-                    closeModal();
-                  }}
-                >
-                  Confirm
-                </Button>
-              );
+              // Validate form before opening modal
+              form.trigger("travel_itinerary").then((isValid) => {
+                if (!isValid) {
+                  toast.error("At least one itinerary entry is required.");
+                  return;
+                }
+                
+                // Check itinerary length as well
+                if (itinerary.length === 0) {
+                  toast.error("At least one itinerary entry is required.");
+                  return;
+                }
+                
+                openModal(
+                  "Attention!!!",
+                  "Are you sure you want to submit?",
+                  <Button
+                    className="w-full"
+                    onClick={() => {
+                      form.handleSubmit(onSubmit)();
+                      closeModal();
+                    }}
+                  >
+                    Confirm
+                  </Button>
+                );
+              });
             }}
           >
             {isPending ? (

@@ -43,30 +43,46 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
     throw itineraryError;
   }
 
-  // Fetch user profile for logging
-  const { data: userProfile, error: profileError } = await supabase
-    .from("user_profile")
-    .select("fullname")
-    .eq("id", data.user_id)
-    .single();
-
-  if (profileError) {
-    throw profileError;
+  // Fetch user profile for logging (non-critical, don't fail if this errors)
+  let userProfileFullname = "User";
+  try {
+    const { data: userProfile } = await supabase
+      .from("user_profile")
+      .select("fullname")
+      .eq("id", data.user_id)
+      .single();
+    
+    if (userProfile?.fullname) {
+      userProfileFullname = userProfile.fullname;
+    }
+  } catch (error) {
+    // Log error but don't fail the operation
+    console.error("Failed to fetch user profile for logging:", error);
   }
 
-  // Log the activity
-  await InsertActivityLogAction(
-    "Created a Travel Order",
-    `Travel order for ${userProfile.fullname} has been created.`
-  );
+  // Log the activity (non-critical, don't fail if this errors)
+  try {
+    await InsertActivityLogAction(
+      "Created a Travel Order",
+      `Travel order for ${userProfileFullname} has been created.`
+    );
+  } catch (error) {
+    // Log error but don't fail the operation
+    console.error("Failed to log activity:", error);
+  }
 
-  // Send Notification
-  await sendNotificationToUser(
-    `Your travel order has been created successfully.`,
-    user!.id
-  );
+  // Send Notification (non-critical, don't fail if this errors)
+  try {
+    await sendNotificationToUser(
+      `Your travel order has been created successfully.`,
+      user!.id
+    );
+  } catch (error) {
+    // Log error but don't fail the operation
+    console.error("Failed to send notification:", error);
+  }
 
-  return;
+  return TOData;
 }
 
 export async function SelectAllTravelOrdersByUserIDAction(user_id?: string) {
