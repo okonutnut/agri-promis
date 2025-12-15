@@ -107,7 +107,7 @@ export async function SelectAllPostTravelReportsByCurrentUserAction() {
     throw userError;
   }
 
-  // Fetch post travel reports for travel orders created by this user
+  // Fetch post travel reports for travel orders assigned to this user
   const { data, error } = await supabase
     .from("post_travel")
     .select(
