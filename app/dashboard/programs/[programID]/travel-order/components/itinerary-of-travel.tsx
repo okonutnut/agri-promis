@@ -19,12 +19,16 @@ type ItineraryOfTravelProps = {
   setItinerary: React.Dispatch<React.SetStateAction<TravelOrderProjectsType[]>>;
   itinerary: TravelOrderProjectsType[];
   isPending?: boolean;
+  departureDate?: string;
+  returnDate?: string;
 };
 export default function ItineraryOfTravel({
   isAddMode,
   setItinerary,
   itinerary,
   isPending,
+  departureDate,
+  returnDate,
 }: ItineraryOfTravelProps) {
   const { openModal, closeModal } = useModal();
 
@@ -37,14 +41,14 @@ export default function ItineraryOfTravel({
           setItinerary((prev) => [...prev, form]);
           closeModal();
         }}
+        departureDate={departureDate}
+        returnDate={returnDate}
       />
     );
   };
 
   return (
-    <section>
-      <div className="flex justify-between items-center">
-        <Label className="my-4 text-md uppercase">Itinerary of Travel</Label>
+    <section className="flex flex-col h-full">
         {isAddMode && (
           <Button
             type="button"
@@ -56,37 +60,44 @@ export default function ItineraryOfTravel({
             Add
           </Button>
         )}
+      <div className="flex-1 overflow-y-auto min-h-0">
+        <section className="flex-col items-start gap-4 space-y-4 pb-4">
+          {itinerary.length === 0 ? (
+            <div className="text-center text-muted-foreground py-8">
+              No itinerary entries yet. Click "Add" to create one.
+            </div>
+          ) : (
+            itinerary.map((item, index) => (
+              <Accordion
+                type="single"
+                collapsible
+                key={index}
+                className="w-full rounded-md border shadow-xs"
+              >
+                <AccordionItem value={`item-${index}`}>
+                  <AccordionTrigger className="px-4">
+                    Travel Iteration {index + 1}
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="flex flex-col gap-2 w-full p-4">
+                      <Label>Date</Label>
+                      <Input type="date" value={item.date} readOnly />
+                      <Label>Destination</Label>
+                      <Textarea value={item.destination} readOnly />
+                      <Label>Purpose</Label>
+                      <Textarea value={item.purpose} readOnly />
+                      <Label>Departure Time</Label>
+                      <Input type="time" value={item.departure_time} readOnly />
+                      <Label>Arrival Time</Label>
+                      <Input type="time" value={item.arrival_time} readOnly />
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            ))
+          )}
+        </section>
       </div>
-      <section className="flex-col items-start gap-4 space-y-4">
-        {itinerary.map((item, index) => (
-          <Accordion
-            type="single"
-            collapsible
-            key={index}
-            className="w-full rounded-md border shadow-xs"
-          >
-            <AccordionItem value={`item-${index}`}>
-              <AccordionTrigger className="px-4">
-                Travel Iteration {index + 1}
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="flex flex-col gap-2 w-full p-4">
-                  <Label>Date</Label>
-                  <Input type="date" value={item.date} readOnly />
-                  <Label>Destination</Label>
-                  <Textarea value={item.destination} readOnly />
-                  <Label>Purpose</Label>
-                  <Textarea value={item.purpose} readOnly />
-                  <Label>Departure Time</Label>
-                  <Input type="time" value={item.departure_time} readOnly />
-                  <Label>Arrival Time</Label>
-                  <Input type="time" value={item.arrival_time} readOnly />
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        ))}
-      </section>
     </section>
   );
 }

@@ -18,10 +18,10 @@ import NonFormInput from "@/components/custom/input/non-form-input";
 import * as z from "zod";
 import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
 import ItineraryOfTravel from "./itinerary-of-travel";
-import { Label } from "@/components/ui/label";
 import { useUniversalMutation } from "@/hooks/use-universal-mutation";
 import { InsertTravelOrderAction } from "@/app/actions/TravelOrderAction";
 import { toast } from "sonner";
+import { CustomTabList } from "@/components/custom/layout/custom-tab-list";
 
 const formSchema = z
   .object({
@@ -137,83 +137,102 @@ export default function IssueTravelOrderForm({
   }, [itinerary, form]);
 
   return (
-    <>
-      <form
-        className="space-y-4 overflow-y-scroll p-2 pb-12 h-[calc(90vh)]"
-        id="travel-order-form"
-        onSubmit={form.handleSubmit(onSubmit)}
-      >
-        <Label className="mb-4 text-md uppercase">Travel Order Info</Label>
-        <FormInput
-          label="Travel Order No:"
-          name="travel_order_no"
-          form={form}
-          readOnly={!isAddMode}
+    <form
+      id="travel-order-form"
+      onSubmit={form.handleSubmit(onSubmit)}
+      className="flex flex-col h-full"
+    >
+      <div className="flex-1 min-h-0">
+        <CustomTabList
+          tabs={[
+            {
+              title: "Travel Order Info",
+              content: (
+                <div className="space-y-4 overflow-y-auto p-4 h-full">
+                  <FormInput
+                    label="Travel Order No:"
+                    name="travel_order_no"
+                    form={form}
+                    readOnly={!isAddMode}
+                  />
+                  {isAddMode ? (
+                    <UserComboBox form={form} />
+                  ) : (
+                    <NonFormInput
+                      label="Issued To:"
+                      defaultValue={values?.user?.fullname}
+                      readOnly={!isAddMode}
+                    />
+                  )}
+                  {/* <FormInput
+                    label="Office"
+                    name="office"
+                    form={form}
+                    readOnly={!isAddMode}
+                  />
+                  <FormInput
+                    label="Fund"
+                    name="fund"
+                    type="number"
+                    form={form}
+                    readOnly={!isAddMode}
+                  />
+                  <FormInput
+                    label="Estimated Cost"
+                    name="estimated_cost"
+                    type="number"
+                    form={form}
+                    readOnly={!isAddMode}
+                  /> */}
+                  <FormInput
+                    label="Date of Departure:"
+                    type="datetime-local"
+                    name="departure_date"
+                    form={form}
+                    readOnly={!isAddMode}
+                  />
+                  <FormInput
+                    label="Date of Return:"
+                    type="datetime-local"
+                    name="return_date"
+                    form={form}
+                    readOnly={!isAddMode}
+                  />
+                  {isAddMode ? (
+                    <FormSelect
+                      options={modeOfTransportOptions}
+                      label="Mode of Transportation:"
+                      name="mode_of_transport"
+                      form={form}
+                    />
+                  ) : (
+                    <NonFormInput
+                      label="Mode of Transportation:"
+                      defaultValue={values?.mode_of_transport?.toUpperCase()}
+                      readOnly
+                    />
+                  )}
+                </div>
+              ),
+            },
+            {
+              title: "Itinerary of Travel",
+              content: (
+                <div className="h-full p-4">
+                  <ItineraryOfTravel
+                    isAddMode={isAddMode}
+                    itinerary={itinerary}
+                    setItinerary={setItinerary}
+                    isPending={isPending}
+                    departureDate={form.watch("departure_date")}
+                    returnDate={form.watch("return_date")}
+                  />
+                </div>
+              ),
+            },
+          ]}
         />
-        {isAddMode ? (
-          <UserComboBox form={form} />
-        ) : (
-          <NonFormInput
-            label="Issued To:"
-            defaultValue={values?.user?.fullname}
-            readOnly={!isAddMode}
-          />
-        )}
-        {/* <FormInput
-          label="Office"
-          name="office"
-          form={form}
-          readOnly={!isAddMode}
-        />
-        <FormInput
-          label="Fund"
-          name="fund"
-          type="number"
-          form={form}
-          readOnly={!isAddMode}
-        />
-        <FormInput
-          label="Estimated Cost"
-          name="estimated_cost"
-          type="number"
-          form={form}
-          readOnly={!isAddMode}
-        /> */}
-        <FormInput
-          label="Date of Departure:"
-          type="datetime-local"
-          name="departure_date"
-          form={form}
-          readOnly={!isAddMode}
-        />
-        <FormInput
-          label="Date of Return:"
-          type="datetime-local"
-          name="return_date"
-          form={form}
-          readOnly={!isAddMode}
-        />
-        {isAddMode ? (
-          <FormSelect
-            options={modeOfTransportOptions}
-            label="Mode of Transportation:"
-            name="mode_of_transport"
-            form={form}
-          />
-        ) : (
-          <NonFormInput
-            label="Mode of Transportation:"
-            defaultValue={values?.mode_of_transport?.toUpperCase()}
-            readOnly
-          />
-        )}
-        <ItineraryOfTravel
-          isAddMode={isAddMode}
-          itinerary={itinerary}
-          setItinerary={setItinerary}
-          isPending={isPending}
-        />
-      </form>
+      </div>
       <CustomSheetFooter isPending={isPending}>
         {isAddMode && (
           <Button
@@ -246,6 +265,6 @@ export default function IssueTravelOrderForm({
           </Button>
         )}
       </CustomSheetFooter>
-    </>
+    </form>
   );
 }
