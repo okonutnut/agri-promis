@@ -25,12 +25,21 @@ export default function ItineraryForm({
   departureDate,
   returnDate,
 }: ItineraryFormProps) {
+  const extractTime = (datetime?: string) => {
+    if (!datetime) return "";
+    const [, timePart] = datetime.split("T");
+    return timePart ? timePart.slice(0, 5) : "";
+  };
+
+  const defaultDepartureTime = extractTime(departureDate);
+  const defaultArrivalTime = extractTime(returnDate);
+
   const [form, setForm] = useState<TravelOrderProjectsType>({
     date: "",
     destination: "",
     purpose: "",
-    departure_time: "",
-    arrival_time: "",
+    departure_time: defaultDepartureTime,
+    arrival_time: defaultArrivalTime,
   });
 
   // Generate date options from departure date to return date
@@ -86,8 +95,8 @@ export default function ItineraryForm({
       date: "",
       destination: "",
       purpose: "",
-      departure_time: "",
-      arrival_time: "",
+      departure_time: defaultDepartureTime,
+      arrival_time: defaultArrivalTime,
     });
   };
 
