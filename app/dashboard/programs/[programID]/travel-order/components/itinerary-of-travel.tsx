@@ -112,10 +112,7 @@ export default function ItineraryOfTravel({
                 <TableRow>
                   <TableHead className="w-[50px]">#</TableHead>
                   <TableHead>Date</TableHead>
-                  <TableHead>Destination</TableHead>
-                  <TableHead>Purpose</TableHead>
-                  <TableHead>Departure Time</TableHead>
-                  <TableHead>Arrival Time</TableHead>
+                  <TableHead className="text-end">Destination</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -129,14 +126,9 @@ export default function ItineraryOfTravel({
                       {index + 1}
                     </TableCell>
                     <TableCell>{formatDate(item.date)}</TableCell>
-                    <TableCell className="max-w-[200px] truncate">
+                    <TableCell className="max-w-[200px] truncate text-end">
                       {item.destination || "-"}
                     </TableCell>
-                    <TableCell className="max-w-[200px] truncate">
-                      {item.purpose || "-"}
-                    </TableCell>
-                    <TableCell>{formatTime(item.departure_time)}</TableCell>
-                    <TableCell>{formatTime(item.arrival_time)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
