@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,12 +18,18 @@ type ItineraryFormProps = {
   onSubmit: (form: TravelOrderProjectsType) => void;
   departureDate?: string;
   returnDate?: string;
+  initialValues?: TravelOrderProjectsType | null;
+  isEditMode?: boolean;
+  readOnly?: boolean;
 };
 
 export default function ItineraryForm({
   onSubmit,
   departureDate,
   returnDate,
+  initialValues,
+  isEditMode = false,
+  readOnly = false,
 }: ItineraryFormProps) {
   const extractTime = (datetime?: string) => {
     if (!datetime) return "";
@@ -34,13 +40,22 @@ export default function ItineraryForm({
   const defaultDepartureTime = extractTime(departureDate);
   const defaultArrivalTime = extractTime(returnDate);
 
-  const [form, setForm] = useState<TravelOrderProjectsType>({
-    date: "",
-    destination: "",
-    purpose: "",
-    departure_time: defaultDepartureTime,
-    arrival_time: defaultArrivalTime,
-  });
+  const [form, setForm] = useState<TravelOrderProjectsType>(
+    initialValues || {
+      date: "",
+      destination: "",
+      purpose: "",
+      departure_time: defaultDepartureTime,
+      arrival_time: defaultArrivalTime,
+    }
+  );
+
+  // Update form when initialValues change
+  useEffect(() => {
+    if (initialValues) {
+      setForm(initialValues);
+    }
+  }, [initialValues]);
 
   // Generate date options from departure date to return date
   const dateOptions = useMemo(() => {
@@ -91,13 +106,16 @@ export default function ItineraryForm({
   const handleAdd = () => {
     if (!form.date || !form.destination) return;
     onSubmit(form);
-    setForm({
-      date: "",
-      destination: "",
-      purpose: "",
-      departure_time: defaultDepartureTime,
-      arrival_time: defaultArrivalTime,
-    });
+    // Only reset form if adding new entry, not when editing
+    if (!isEditMode) {
+      setForm({
+        date: "",
+        destination: "",
+        purpose: "",
+        departure_time: defaultDepartureTime,
+        arrival_time: defaultArrivalTime,
+      });
+    }
   };
 
   const isFormIncomplete =
@@ -112,7 +130,7 @@ export default function ItineraryForm({
       <div className="flex flex-col gap-2 w-full">
         <Label>Date</Label>
         {shouldUseSelect ? (
-          <Select value={form.date} onValueChange={handleDateSelect}>
+          <Select value={form.date} onValueChange={handleDateSelect} disabled={readOnly}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select a date" />
             </SelectTrigger>
@@ -139,6 +157,7 @@ export default function ItineraryForm({
             name="date"
             value={form.date}
             onChange={handleChange}
+            readOnly={readOnly}
           />
         )}
       </div>
@@ -149,6 +168,7 @@ export default function ItineraryForm({
           placeholder="Enter Destination"
           value={form.destination}
           onChange={handleChange}
+          readOnly={readOnly}
         />
       </div>
       <div className="flex flex-col gap-2 w-full">
@@ -158,6 +178,7 @@ export default function ItineraryForm({
           placeholder="Enter Purpose"
           value={form.purpose}
           onChange={handleChange}
+          readOnly={readOnly}
         />
       </div>
       <div className="flex flex-col gap-2 w-full">
@@ -167,6 +188,7 @@ export default function ItineraryForm({
           name="departure_time"
           value={form.departure_time}
           onChange={handleChange}
+          readOnly={readOnly}
         />
       </div>
       <div className="flex flex-col gap-2 w-full">
@@ -176,16 +198,19 @@ export default function ItineraryForm({
           name="arrival_time"
           value={form.arrival_time}
           onChange={handleChange}
+          readOnly={readOnly}
         />
       </div>
-      <Button
-        type="button"
-        className="w-full mt-4"
-        onClick={handleAdd}
-        disabled={isFormIncomplete}
-      >
-        Add
-      </Button>
+      {!readOnly && (
+        <Button
+          type="button"
+          className="w-full mt-4"
+          onClick={handleAdd}
+          disabled={isFormIncomplete}
+        >
+          {isEditMode ? "Update" : "Add"}
+        </Button>
+      )}
     </section>
   );
 }

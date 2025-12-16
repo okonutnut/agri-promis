@@ -2,17 +2,17 @@
 
 import { TravelOrderProjectsType } from "@/components/types";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useModal } from "@/components/custom/layout/custom-page-layout";
 import ItineraryForm from "./ItineraryForm";
+import { format } from "date-fns";
 
 type ItineraryOfTravelProps = {
   isAddMode?: boolean;
@@ -43,60 +43,106 @@ export default function ItineraryOfTravel({
         }}
         departureDate={departureDate}
         returnDate={returnDate}
+        isEditMode={false}
       />
     );
   };
 
+  const openEditModal = (item: TravelOrderProjectsType, index: number) => {
+    openModal(
+      isAddMode ? "Edit Itinerary Entry" : "View Itinerary Entry",
+      "",
+      <ItineraryForm
+        onSubmit={(form) => {
+          if (isAddMode) {
+            setItinerary((prev) => {
+              const updated = [...prev];
+              updated[index] = form;
+              return updated;
+            });
+          }
+          closeModal();
+        }}
+        departureDate={departureDate}
+        returnDate={returnDate}
+        initialValues={item}
+        isEditMode={isAddMode}
+        readOnly={!isAddMode}
+      />
+    );
+  };
+
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return "-";
+    try {
+      const date = new Date(dateStr);
+      return format(date, "MMM dd, yyyy");
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const formatTime = (timeStr?: string) => {
+    if (!timeStr) return "-";
+    return timeStr;
+  };
+
   return (
     <section className="flex flex-col h-full">
-        {isAddMode && (
-          <Button
-            type="button"
-            size={"sm"}
-            className="px-10"
-            disabled={isPending}
-            onClick={openAddModal}
-          >
-            Add
-          </Button>
-        )}
+      {isAddMode && (
+        <Button
+          type="button"
+          size={"sm"}
+          className="px-10 mb-4"
+          disabled={isPending}
+          onClick={openAddModal}
+        >
+          Add
+        </Button>
+      )}
       <div className="flex-1 overflow-y-auto min-h-0">
-        <section className="flex-col items-start gap-4 space-y-4 pb-4">
-          {itinerary.length === 0 ? (
-            <div className="text-center text-muted-foreground py-8">
-              No itinerary entries yet. Click "Add" to create one.
-            </div>
-          ) : (
-            itinerary.map((item, index) => (
-              <Accordion
-                type="single"
-                collapsible
-                key={index}
-                className="w-full rounded-md border shadow-xs"
-              >
-                <AccordionItem value={`item-${index}`}>
-                  <AccordionTrigger className="px-4">
-                    Travel Iteration {index + 1}
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <div className="flex flex-col gap-2 w-full p-4">
-                      <Label>Date</Label>
-                      <Input type="date" value={item.date} readOnly />
-                      <Label>Destination</Label>
-                      <Textarea value={item.destination} readOnly />
-                      <Label>Purpose</Label>
-                      <Textarea value={item.purpose} readOnly />
-                      <Label>Departure Time</Label>
-                      <Input type="time" value={item.departure_time} readOnly />
-                      <Label>Arrival Time</Label>
-                      <Input type="time" value={item.arrival_time} readOnly />
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            ))
-          )}
-        </section>
+        {itinerary.length === 0 ? (
+          <div className="text-center text-muted-foreground py-8">
+            No itinerary entries yet. Click "Add" to create one.
+          </div>
+        ) : (
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[50px]">#</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Destination</TableHead>
+                  <TableHead>Purpose</TableHead>
+                  <TableHead>Departure Time</TableHead>
+                  <TableHead>Arrival Time</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {itinerary.map((item, index) => (
+                  <TableRow
+                    key={index}
+                    className="cursor-pointer hover:bg-accent"
+                    onClick={() => openEditModal(item, index)}
+                  >
+                    <TableCell className="font-medium">
+                      {index + 1}
+                    </TableCell>
+                    <TableCell>{formatDate(item.date)}</TableCell>
+                    <TableCell className="max-w-[200px] truncate">
+                      {item.destination || "-"}
+                    </TableCell>
+                    <TableCell className="max-w-[200px] truncate">
+                      {item.purpose || "-"}
+                    </TableCell>
+                    <TableCell>{formatTime(item.departure_time)}</TableCell>
+                    <TableCell>{formatTime(item.arrival_time)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
       </div>
     </section>
   );
