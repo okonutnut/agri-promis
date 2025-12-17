@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PostTravelReportType } from "@/components/types";
+import { PostTravelReportType, TravelOrderType } from "@/components/types";
 import { ImageData } from "@/components/interfaces";
 import {
   useModal,
@@ -58,7 +58,27 @@ export function CreatePostTravelForm({
         ? Array.isArray(values.issues_concern)
           ? values.issues_concern
           : typeof values.issues_concern === "string"
-          ? values.issues_concern.split(", ").filter(Boolean)
+          ? (() => {
+              // Try to parse as JSON array first (new format)
+              try {
+                const parsed = JSON.parse(values.issues_concern);
+                if (Array.isArray(parsed)) return parsed;
+              } catch {}
+              // Try new delimiter (|||) for backward compatibility
+              if (values.issues_concern.includes("|||")) {
+                return values.issues_concern.split("|||").filter(Boolean);
+              }
+              // Fall back to comma splitting only if it looks like multiple items
+              // (has ", " and appears to be a list, not a paragraph)
+              const commaSplit = values.issues_concern.split(", ");
+              // If split results in more than 1 item AND items are short (likely a list),
+              // treat as comma-separated list, otherwise treat as single paragraph
+              if (commaSplit.length > 1 && commaSplit.every(item => item.trim().length < 100)) {
+                return commaSplit.filter(Boolean);
+              }
+              // Otherwise, treat as a single paragraph
+              return [values.issues_concern];
+            })()
           : [values.issues_concern]
         : [],
       remarks: values?.remarks || "",
@@ -75,7 +95,9 @@ export function CreatePostTravelForm({
         travel_date_id: data.travel_date_id,
         projects_places_visited: data.projects_places_visited,
         activities_undertaken: data.activities_undertaken,
-        issues_concern: data.issues_concern?.join(", ") || "",
+        issues_concern: data.issues_concern?.length 
+          ? JSON.stringify(data.issues_concern) 
+          : "",
         remarks: data.remarks,
         images: data.images.map((img) => ({ file: img.file })),
       }),
@@ -146,9 +168,19 @@ export function CreatePostTravelForm({
               />
               <TravelOrderDropdown
                 form={form}
-                onTravelOrderSelect={(id: string) =>
-                  setSelectedTravelOrderId(id)
-                }
+                onTravelOrderSelect={(id: string, travelOrder) => {
+                  setSelectedTravelOrderId(id);
+                  // Set projects_places_visited from itinerary destinations
+                  if (travelOrder?.travel_itinerary && Array.isArray(travelOrder.travel_itinerary)) {
+                    const destinations = travelOrder.travel_itinerary
+                      .map((item) => item.destination)
+                      .filter((dest) => dest && dest.trim() !== "")
+                      .join(", ");
+                    if (destinations) {
+                      form.setValue("projects_places_visited", destinations);
+                    }
+                  }
+                }}
               />
               <TravelDateDropdown
                 form={form}
@@ -201,7 +233,27 @@ export function CreatePostTravelForm({
                 ? Array.isArray(values.issues_concern)
                   ? values.issues_concern
                   : typeof values.issues_concern === "string"
-                  ? values.issues_concern.split(", ").filter(Boolean)
+                  ? (() => {
+                      // Try to parse as JSON array first (new format)
+                      try {
+                        const parsed = JSON.parse(values.issues_concern);
+                        if (Array.isArray(parsed)) return parsed;
+                      } catch {}
+                      // Try new delimiter (|||) for backward compatibility
+                      if (values.issues_concern.includes("|||")) {
+                        return values.issues_concern.split("|||").filter(Boolean);
+                      }
+                      // Fall back to comma splitting only if it looks like multiple items
+                      // (has ", " and appears to be a list, not a paragraph)
+                      const commaSplit = values.issues_concern.split(", ");
+                      // If split results in more than 1 item AND items are short (likely a list),
+                      // treat as comma-separated list, otherwise treat as single paragraph
+                      if (commaSplit.length > 1 && commaSplit.every(item => item.trim().length < 100)) {
+                        return commaSplit.filter(Boolean);
+                      }
+                      // Otherwise, treat as a single paragraph
+                      return [values.issues_concern];
+                    })()
                   : [values.issues_concern]
                 : null
             }

@@ -26,10 +26,11 @@ import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllTravelOrdersByUserIDAction } from "@/app/actions/TravelOrderAction";
 import { useSupabaseSession } from "@/hooks/use-session";
 import { PostTravelReportFormData } from "../../../app/field-technician/post-travel-reports/components/post-travel-form-schema";
+import { TravelOrderType } from "@/components/types";
 
 type TravelOrderDropdownProps = {
   form: UseFormReturn<PostTravelReportFormData>;
-  onTravelOrderSelect?: (travelOrderId: string) => void;
+  onTravelOrderSelect?: (travelOrderId: string, travelOrder?: TravelOrderType) => void;
 };
 
 export function TravelOrderDropdown({ form, onTravelOrderSelect }: TravelOrderDropdownProps) {
@@ -84,7 +85,8 @@ export function TravelOrderDropdown({ form, onTravelOrderSelect }: TravelOrderDr
                         setValue(currentValue === value ? "" : currentValue);
                         form.setValue("travel_order_id", currentValue);
                         form.setValue("travel_date_id", ""); // Reset travel date
-                        onTravelOrderSelect?.(currentValue);
+                        const selectedOrder = data?.find((o) => o.id === currentValue);
+                        onTravelOrderSelect?.(currentValue, selectedOrder);
                         setOpen(false);
                       }}
                     >
