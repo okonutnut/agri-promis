@@ -209,6 +209,7 @@ export async function InsertPostTravelReportAction({
       activities_undertaken,
       issues_concern,
       remarks,
+      user_id: user.id,
       photo_url: photo_paths, // Will be empty array if no images
     })
     .select("*, travel_order:travel_order(travel_order_no)")
