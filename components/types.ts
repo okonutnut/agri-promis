@@ -125,7 +125,7 @@ export type PostTravelReportType = {
   travel_date_id?: string;
   projects_places_visited?: string;
   activities_undertaken?: string;
-  issues_concern?: string;
+  issues_concern?: string[];
   remarks?: string;
   photo_url?: string[];
   created_at?: string;

@@ -74,15 +74,7 @@ export function PostTravelForm({ data }: PostTravelFormProps) {
           />
           <NonFormMultiInput
             label="Issues / Concerns / Project % Accomplishment To Date:"
-            values={
-              data.issues_concern
-                ? Array.isArray(data.issues_concern)
-                  ? data.issues_concern
-                  : typeof data.issues_concern === "string"
-                  ? data.issues_concern.split(", ").filter(Boolean)
-                  : [data.issues_concern]
-                : null
-            }
+            values={Array.isArray(data.issues_concern) ? data.issues_concern : []}
           />
           <NonFormTextarea
             label="Remarks:"
