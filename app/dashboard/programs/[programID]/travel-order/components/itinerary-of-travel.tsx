@@ -72,11 +72,18 @@ export default function ItineraryOfTravel({
     );
   };
 
-  const formatDate = (dateStr?: string) => {
+  const formatDate = (dateStr?: string, endDateStr?: string) => {
     if (!dateStr) return "-";
     try {
-      const date = new Date(dateStr);
-      return format(date, "MMM dd, yyyy");
+      const start = new Date(dateStr);
+      const formattedStart = format(start, "MMM dd, yyyy");
+      
+      if (endDateStr && endDateStr !== dateStr) {
+        const end = new Date(endDateStr);
+        return `${formattedStart} - ${format(end, "MMM dd, yyyy")}`;
+      }
+      
+      return formattedStart;
     } catch {
       return dateStr;
     }
@@ -111,7 +118,7 @@ export default function ItineraryOfTravel({
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[50px]">#</TableHead>
-                  <TableHead>Date</TableHead>
+                  <TableHead>Date / Period</TableHead>
                   <TableHead className="text-end">Destination</TableHead>
                 </TableRow>
               </TableHeader>
@@ -125,7 +132,7 @@ export default function ItineraryOfTravel({
                     <TableCell className="font-medium">
                       {index + 1}
                     </TableCell>
-                    <TableCell>{formatDate(item.date)}</TableCell>
+                    <TableCell>{formatDate(item.date, item.end_date)}</TableCell>
                     <TableCell className="max-w-[200px] truncate text-end">
                       {item.destination || "-"}
                     </TableCell>

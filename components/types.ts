@@ -179,6 +179,7 @@ export type TravelOrderProjectsType = {
   id?: string;
   travel_order_id?: string;
   date?: string;
+  end_date?: string;
   destination?: string;
   purpose?: string;
   departure_time?: string;

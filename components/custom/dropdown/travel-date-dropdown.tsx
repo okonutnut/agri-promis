@@ -61,7 +61,14 @@ export function TravelDateDropdown({ form, travelOrderId }: TravelDateDropdownPr
             disabled={!travelOrderId || itineraryItems.length === 0}
           >
             {value
-              ? `${itineraryItems.find((item: TravelOrderProjectsType) => item.id === value)?.date} - ${itineraryItems.find((item: TravelOrderProjectsType) => item.id === value)?.destination}`
+              ? (() => {
+                  const item = itineraryItems.find((item: TravelOrderProjectsType) => item.id === value);
+                  if (!item) return "Select travel date...";
+                  const dateStr = item.end_date && item.end_date !== item.date 
+                    ? `${item.date} to ${item.end_date}` 
+                    : item.date;
+                  return `${dateStr} - ${item.destination}`;
+                })()
               : travelOrderId
               ? "Select travel date..."
               : "Select travel order first"}
@@ -84,7 +91,7 @@ export function TravelDateDropdown({ form, travelOrderId }: TravelDateDropdownPr
                       setOpen(false);
                     }}
                   >
-                    {item.date} - {item.destination}
+                    {item.date}{item.end_date && item.end_date !== item.date ? ` to ${item.end_date}` : ""} - {item.destination}
                     <Check
                       className={cn(
                         "ml-auto",

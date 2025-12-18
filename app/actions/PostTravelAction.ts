@@ -18,7 +18,7 @@ export async function SelectAllPostTravelReportsByTravelOrderIDAction(
       `
       *,
       travel_order:travel_order(travel_order_no, user_id, user:user_profile!travel_order_user_id_fkey(fullname)),
-      travel_date:travel_order_itinerary_items(date, destination)
+      travel_date:travel_order_itinerary_items(date, end_date, destination)
     `
     )
     .eq("travel_order_id", travelOrderID)
@@ -67,7 +67,7 @@ export async function SelectAllPostTravelReportsByProgramIDAction(
         program_id,
         user:user_profile!travel_order_user_id_fkey(fullname)
       ),
-      travel_date:travel_order_itinerary_items(date, destination)
+      travel_date:travel_order_itinerary_items(date, end_date, destination)
     `
     )
     .eq("travel_order.program_id", programID)
@@ -118,7 +118,7 @@ export async function SelectAllPostTravelReportsByCurrentUserAction() {
         user_id,
         user:user_profile!travel_order_user_id_fkey(fullname)
       ),
-      travel_date:travel_order_itinerary_items(date, destination)
+      travel_date:travel_order_itinerary_items(date, end_date, destination)
     `
     )
     .eq("travel_order.user_id", userData.user.id)

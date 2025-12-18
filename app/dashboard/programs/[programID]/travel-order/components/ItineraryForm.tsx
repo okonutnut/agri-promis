@@ -43,6 +43,7 @@ export default function ItineraryForm({
   const [form, setForm] = useState<TravelOrderProjectsType>(
     initialValues || {
       date: "",
+      end_date: "",
       destination: "",
       purpose: "",
       departure_time: defaultDepartureTime,
@@ -53,7 +54,10 @@ export default function ItineraryForm({
   // Update form when initialValues change
   useEffect(() => {
     if (initialValues) {
-      setForm(initialValues);
+      setForm({
+        ...initialValues,
+        end_date: initialValues.end_date || initialValues.date,
+      });
     }
   }, [initialValues]);
 
@@ -62,15 +66,12 @@ export default function ItineraryForm({
     if (!departureDate || !returnDate) return [];
 
     // Extract date part directly from datetime-local format (YYYY-MM-DDTHH:mm)
-    // This avoids timezone conversion issues
-    const startDateStr = departureDate.split("T")[0]; // YYYY-MM-DD
-    const endDateStr = returnDate.split("T")[0]; // YYYY-MM-DD
+    const startDateStr = departureDate.split("T")[0];
+    const endDateStr = returnDate.split("T")[0];
 
-    // Parse date components to avoid timezone issues
     const [startYear, startMonth, startDay] = startDateStr.split("-").map(Number);
     const [endYear, endMonth, endDay] = endDateStr.split("-").map(Number);
 
-    // Create date objects in local timezone
     const startDate = new Date(startYear, startMonth - 1, startDay);
     const endDate = new Date(endYear, endMonth - 1, endDay);
 
@@ -78,7 +79,6 @@ export default function ItineraryForm({
     const currentDate = new Date(startDate);
 
     while (currentDate <= endDate) {
-      // Format as YYYY-MM-DD using local date methods
       const year = currentDate.getFullYear();
       const month = String(currentDate.getMonth() + 1).padStart(2, "0");
       const day = String(currentDate.getDate()).padStart(2, "0");
@@ -100,16 +100,32 @@ export default function ItineraryForm({
   };
 
   const handleDateSelect = (value: string) => {
-    setForm((prev) => ({ ...prev, date: value }));
+    setForm((prev) => ({ 
+      ...prev, 
+      date: value,
+      end_date: prev.end_date && prev.end_date < value ? value : prev.end_date || value 
+    }));
+  };
+
+  const handleEndDateSelect = (value: string) => {
+    setForm((prev) => ({ ...prev, end_date: value }));
   };
 
   const handleAdd = () => {
     if (!form.date || !form.destination) return;
-    onSubmit(form);
+    
+    // Ensure end_date is at least the same as date
+    const finalForm = {
+      ...form,
+      end_date: form.end_date || form.date
+    };
+    
+    onSubmit(finalForm);
     // Only reset form if adding new entry, not when editing
     if (!isEditMode) {
       setForm({
         date: "",
+        end_date: "",
         destination: "",
         purpose: "",
         departure_time: defaultDepartureTime,
@@ -127,39 +143,82 @@ export default function ItineraryForm({
 
   return (
     <section className="flex-col items-start gap-4 space-y-4">
-      <div className="flex flex-col gap-2 w-full">
-        <Label>Date</Label>
-        {shouldUseSelect ? (
-          <Select value={form.date} onValueChange={handleDateSelect} disabled={readOnly}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select a date" />
-            </SelectTrigger>
-            <SelectContent>
-              {dateOptions.map((date) => {
-                const dateObj = new Date(date);
-                const formattedDate = dateObj.toLocaleDateString("en-US", {
-                  weekday: "short",
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                });
-                return (
-                  <SelectItem key={date} value={date}>
-                    {formattedDate}
-                  </SelectItem>
-                );
-              })}
-            </SelectContent>
-          </Select>
-        ) : (
-          <Input
-            type="date"
-            name="date"
-            value={form.date}
-            onChange={handleChange}
-            readOnly={readOnly}
-          />
-        )}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="flex flex-col gap-2 w-full">
+          <Label>Date From</Label>
+          {shouldUseSelect ? (
+            <Select value={form.date} onValueChange={handleDateSelect} disabled={readOnly}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a date" />
+              </SelectTrigger>
+              <SelectContent>
+                {dateOptions.map((date) => {
+                  const dateObj = new Date(date);
+                  const formattedDate = dateObj.toLocaleDateString("en-US", {
+                    weekday: "short",
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  });
+                  return (
+                    <SelectItem key={date} value={date}>
+                      {formattedDate}
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+          ) : (
+            <Input
+              type="date"
+              name="date"
+              value={form.date}
+              onChange={handleChange}
+              readOnly={readOnly}
+            />
+          )}
+        </div>
+        <div className="flex flex-col gap-2 w-full">
+          <Label>Date To</Label>
+          {shouldUseSelect ? (
+            <Select 
+              value={form.end_date || form.date} 
+              onValueChange={handleEndDateSelect} 
+              disabled={readOnly || !form.date}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select end date" />
+              </SelectTrigger>
+              <SelectContent>
+                {dateOptions
+                  .filter(date => !form.date || date >= form.date)
+                  .map((date) => {
+                    const dateObj = new Date(date);
+                    const formattedDate = dateObj.toLocaleDateString("en-US", {
+                      weekday: "short",
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    });
+                    return (
+                      <SelectItem key={date} value={date}>
+                        {formattedDate}
+                      </SelectItem>
+                    );
+                  })}
+              </SelectContent>
+            </Select>
+          ) : (
+            <Input
+              type="date"
+              name="end_date"
+              value={form.end_date || form.date}
+              onChange={handleChange}
+              readOnly={readOnly}
+              min={form.date}
+            />
+          )}
+        </div>
       </div>
       <div className="flex flex-col gap-2 w-full">
         <Label>Destination</Label>
