@@ -12,11 +12,24 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+// Helper function to detect mobile devices
+const isMobileDevice = (): boolean => {
+  if (typeof window === "undefined") return false;
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  ) || window.innerWidth < 768;
+};
+
 export default function PermissionChecker() {
   const [showLocationDialog, setShowLocationDialog] = useState(false);
   const [showNotificationDialog, setShowNotificationDialog] = useState(false);
   const [hasCheckedLocation, setHasCheckedLocation] = useState(false);
   const [hasCheckedNotification, setHasCheckedNotification] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setIsMobile(isMobileDevice());
+  }, []);
 
   useEffect(() => {
     // Delay checks slightly to avoid showing dialogs immediately on page load
@@ -26,26 +39,58 @@ export default function PermissionChecker() {
         // Check if we've already shown the dialog in this session
         const locationDialogShown = sessionStorage.getItem("locationDialogShown");
         
-        // Try to get position with a very short timeout to check if permission is denied
-        // Note: If permission hasn't been requested, this will show browser's native prompt
-        // If permission was denied, it will fail immediately with PERMISSION_DENIED
+        // On mobile devices, show dialog proactively if not shown before
+        // This ensures users see instructions to enable GPS even if the check fails silently
+        if (isMobile && !locationDialogShown) {
+          // Show dialog immediately on mobile, then check if GPS is actually working
+          setShowLocationDialog(true);
+          sessionStorage.setItem("locationDialogShown", "true");
+        }
+        
+        // Try to get position with a timeout to check if permission is denied or unavailable
+        // Use longer timeout on mobile to detect GPS issues
+        const timeout = isMobile ? 5000 : 2000;
+        
         navigator.geolocation.getCurrentPosition(
           () => {
-            // Permission is granted, no need to show dialog
+            // Permission is granted and location is available
             setHasCheckedLocation(true);
+            // If dialog was shown proactively, close it now
+            if (isMobile) {
+              setShowLocationDialog(false);
+            }
           },
           (error) => {
             setHasCheckedLocation(true);
-            // Only show dialog if permission was explicitly denied
-            if (error.code === error.PERMISSION_DENIED && !locationDialogShown) {
-              setShowLocationDialog(true);
-              sessionStorage.setItem("locationDialogShown", "true");
+            // On mobile, dialog is already shown proactively
+            // On desktop, show dialog for explicit permission denial or unavailable
+            if (!isMobile && !locationDialogShown) {
+              if (
+                error.code === error.PERMISSION_DENIED ||
+                error.code === error.POSITION_UNAVAILABLE
+              ) {
+                setShowLocationDialog(true);
+                sessionStorage.setItem("locationDialogShown", "true");
+              }
             }
-            // For other errors (timeout, unavailable), we don't show dialog
-            // as location might just be temporarily unavailable
+            // On mobile, if GPS is not working, dialog is already shown
+            // If it was closed, we'll handle re-showing in handleLocationRequest
           },
-          { timeout: 100, maximumAge: 0 }
+          { 
+            timeout, 
+            maximumAge: 0,
+            enableHighAccuracy: true 
+          }
         );
+      } else if (!navigator.geolocation && !hasCheckedLocation) {
+        // Geolocation not supported
+        setHasCheckedLocation(true);
+        // Show dialog if geolocation is not supported
+        const locationDialogShown = sessionStorage.getItem("locationDialogShown");
+        if (!locationDialogShown) {
+          setShowLocationDialog(true);
+          sessionStorage.setItem("locationDialogShown", "true");
+        }
       }
 
       // Check notification permission (but don't show dialog yet if location dialog might show)
@@ -58,39 +103,90 @@ export default function PermissionChecker() {
     // Small delay to avoid showing dialogs immediately on page load
     const timer = setTimeout(checkPermissions, 1000);
     return () => clearTimeout(timer);
-  }, [hasCheckedLocation, hasCheckedNotification]);
+  }, [hasCheckedLocation, hasCheckedNotification, isMobile]);
 
   const handleLocationRequest = () => {
-    setShowLocationDialog(false);
     if (navigator.geolocation) {
       // Request location permission - this will show the browser's native prompt
       // if permission hasn't been requested yet
+      // On mobile, this will also prompt to enable GPS if it's disabled
       navigator.geolocation.getCurrentPosition(
         () => {
-          // Permission granted
+          // Permission granted and GPS is working
+          console.log("Location permission granted");
+          setShowLocationDialog(false);
+          // Check notification permission after location is granted
+          setTimeout(() => {
+            if ("Notification" in window) {
+              const permission = Notification.permission;
+              const notificationDialogShown = sessionStorage.getItem("notificationDialogShown");
+              if ((permission === "default" || permission === "denied") && !notificationDialogShown) {
+                setShowNotificationDialog(true);
+                sessionStorage.setItem("notificationDialogShown", "true");
+              }
+            }
+          }, 500);
         },
         (error) => {
-          // Permission denied or other error
-          if (error.code === error.PERMISSION_DENIED) {
-            // User denied permission, they can enable it in browser settings
-            console.log("Location permission denied by user");
+          // Permission denied or GPS unavailable
+          console.log("Location error:", error.code, error.message);
+          
+          // On mobile, if GPS is still not working, show dialog again after a delay
+          // This gives user time to enable GPS in device settings
+          if (isMobile) {
+            if (
+              error.code === error.PERMISSION_DENIED ||
+              error.code === error.POSITION_UNAVAILABLE ||
+              error.code === error.TIMEOUT
+            ) {
+              // Close dialog first, then re-check after user has time to enable GPS
+              setShowLocationDialog(false);
+              
+              // Re-check after 3 seconds to see if user enabled GPS
+              setTimeout(() => {
+                navigator.geolocation.getCurrentPosition(
+                  () => {
+                    // GPS is now working, don't show dialog again
+                    console.log("GPS enabled successfully");
+                  },
+                  () => {
+                    // Still not working, show dialog again to remind user
+                    const locationDialogShown = sessionStorage.getItem("locationDialogShown");
+                    if (!locationDialogShown) {
+                      setShowLocationDialog(true);
+                    }
+                  },
+                  { timeout: 5000, enableHighAccuracy: true }
+                );
+              }, 3000);
+            } else {
+              setShowLocationDialog(false);
+            }
+          } else {
+            setShowLocationDialog(false);
           }
+          
+          // Check notification permission after handling location
+          setTimeout(() => {
+            if ("Notification" in window) {
+              const permission = Notification.permission;
+              const notificationDialogShown = sessionStorage.getItem("notificationDialogShown");
+              if ((permission === "default" || permission === "denied") && !notificationDialogShown) {
+                setShowNotificationDialog(true);
+                sessionStorage.setItem("notificationDialogShown", "true");
+              }
+            }
+          }, 500);
         },
-        { enableHighAccuracy: true, timeout: 10000 }
-      );
-    }
-    
-    // After location dialog closes, check if we should show notification dialog
-    setTimeout(() => {
-      if ("Notification" in window) {
-        const permission = Notification.permission;
-        const notificationDialogShown = sessionStorage.getItem("notificationDialogShown");
-        if ((permission === "default" || permission === "denied") && !notificationDialogShown) {
-          setShowNotificationDialog(true);
-          sessionStorage.setItem("notificationDialogShown", "true");
+        { 
+          enableHighAccuracy: true, 
+          timeout: isMobile ? 20000 : 15000, // Longer timeout for mobile GPS
+          maximumAge: 0 
         }
-      }
-    }, 500);
+      );
+    } else {
+      setShowLocationDialog(false);
+    }
   };
 
   // Check notification permission after location check completes and location dialog is closed
@@ -121,19 +217,74 @@ export default function PermissionChecker() {
   return (
     <>
       {/* Location Permission Dialog */}
-      <AlertDialog open={showLocationDialog} onOpenChange={setShowLocationDialog}>
-        <AlertDialogContent>
+      <AlertDialog 
+        open={showLocationDialog} 
+        onOpenChange={(open) => {
+          setShowLocationDialog(open);
+          if (!open) {
+            // When dialog is closed, check notification permission
+            setTimeout(() => {
+              if ("Notification" in window) {
+                const permission = Notification.permission;
+                const notificationDialogShown = sessionStorage.getItem("notificationDialogShown");
+                if ((permission === "default" || permission === "denied") && !notificationDialogShown) {
+                  setShowNotificationDialog(true);
+                  sessionStorage.setItem("notificationDialogShown", "true");
+                }
+              }
+            }, 500);
+          }
+        }}
+      >
+        <AlertDialogContent className={isMobile ? "max-w-[95vw] mx-4" : ""}>
           <AlertDialogHeader>
-            <AlertDialogTitle>Location Access Required</AlertDialogTitle>
-            <AlertDialogDescription>
-              This app needs access to your location to provide location-based features.
-              Please enable location access in your browser settings to continue.
+            <AlertDialogTitle className={isMobile ? "text-lg" : ""}>
+              {isMobile ? "🔒 GPS & Location Access Required" : "Location Access Required"}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3">
+              <p>
+                This app needs access to your location to provide location-based features.
+              </p>
+              {isMobile && (
+                <div className="mt-3 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md space-y-3">
+                  <p className="font-semibold text-sm text-yellow-900 dark:text-yellow-100">
+                    ⚠️ Please enable GPS on your device:
+                  </p>
+                  <ol className="list-decimal list-inside space-y-2 text-sm text-yellow-800 dark:text-yellow-200">
+                    <li>
+                      <strong>Open your device Settings</strong> → Location/GPS
+                    </li>
+                    <li>
+                      <strong>Turn ON Location Services</strong> (GPS)
+                    </li>
+                    <li>
+                      <strong>Return to this app</strong> and tap "Enable GPS & Location"
+                    </li>
+                    <li>
+                      <strong>Allow location access</strong> when your browser prompts you
+                    </li>
+                  </ol>
+                  <p className="text-xs text-yellow-700 dark:text-yellow-300 italic">
+                    Note: GPS must be enabled in device settings before the browser can access your location.
+                  </p>
+                </div>
+              )}
+              {!isMobile && (
+                <p className="text-sm mt-2">
+                  Please enable location access in your browser settings to continue.
+                </p>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleLocationRequest}>
-              Enable Location
+          <AlertDialogFooter className={isMobile ? "flex-col gap-2 sm:flex-row" : ""}>
+            <AlertDialogCancel className={isMobile ? "w-full sm:w-auto" : ""}>
+              {isMobile ? "I'll Enable It Later" : "Cancel"}
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleLocationRequest}
+              className={isMobile ? "w-full sm:w-auto" : ""}
+            >
+              {isMobile ? "Enable GPS & Location" : "Enable Location"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
