@@ -250,6 +250,7 @@ export default function IssueTravelOrderForm({
             variant={isPending ? "ghost" : "default"}
             disabled={isPending || itinerary.length === 0}
             size={"sm"}
+            type="button"
             onClick={() => {
               // Validate form before opening modal
               form.trigger("travel_itinerary").then((isValid) => {
@@ -265,8 +266,8 @@ export default function IssueTravelOrderForm({
                 }
                 
                 openModal(
-                  "Attention!!!",
-                  "Are you sure you want to submit?",
+                  "Attention",
+                  "You confirm that all information provided is correct.",
                   <Button
                     className="w-full"
                     onClick={() => {

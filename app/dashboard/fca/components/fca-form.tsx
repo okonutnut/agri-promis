@@ -9,7 +9,7 @@ import { Loader2, Send } from "lucide-react";
 import { useEditFCAHook, useInsertFCAHook } from "@/app/hooks/FCAHook";
 import { FCAType } from "@/components/types";
 import { Label } from "@/components/ui/label";
-import { useSheet } from "@/components/custom/layout/custom-page-layout";
+import { useModal, useSheet } from "@/components/custom/layout/custom-page-layout";
 import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
 import FCAActiveStatusButton from "./active-status-button";
 import { useState } from "react";
@@ -30,6 +30,7 @@ type FCAFormProps = {
 export function FCAForm({ isAddMode, data }: FCAFormProps) {
   const [pageState, setPageState] = useState<"idle" | "loading">("idle");
   const { closeSheet } = useSheet();
+  const { openModal, closeModal } = useModal();
 
   const form = useForm<FormType>({
     resolver: zodResolver(formSchema),
@@ -103,7 +104,21 @@ export function FCAForm({ isAddMode, data }: FCAFormProps) {
         <Button
           variant={isPending ? "ghost" : "default"}
           size="sm"
-          onClick={() => form.handleSubmit(onSubmit)()}
+          onClick={() => {
+            openModal(
+              "Attention",
+              "You confirm that all information provided is correct.",
+              <Button
+                className="w-full"
+                onClick={() => {
+                  form.handleSubmit(onSubmit)();
+                  closeModal();
+                }}
+              >
+                Confirm
+              </Button>
+            );
+          }}
           disabled={isPending || pageState === "loading"}
         >
           {isPending ? (

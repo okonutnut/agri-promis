@@ -148,6 +148,7 @@ CREATE TABLE public.travel_order_itinerary_items (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   travel_order_id uuid DEFAULT gen_random_uuid(),
   date date,
+  end_date date,
   destination text,
   departure_time time without time zone,
   arrival_time time without time zone,

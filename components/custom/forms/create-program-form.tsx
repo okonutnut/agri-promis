@@ -10,6 +10,7 @@ import FormTextarea from "../input/form-textarea";
 import { CardFooter } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
+import { useModal } from "../layout/custom-page-layout";
 
 const formSchema = z.object({
   program_name: z
@@ -23,6 +24,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function CreateProgramForm() {
+  const { openModal, closeModal } = useModal();
   const router = useRouter();
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -54,7 +56,22 @@ export default function CreateProgramForm() {
       <CardFooter className="flex-col gap-2 border-t p-2">
         <Button
           size="sm"
-          form="create-program-form"
+          type="button"
+          onClick={() => {
+            openModal(
+              "Attention",
+              "You confirm that all information provided is correct.",
+              <Button
+                className="w-full"
+                onClick={() => {
+                  form.handleSubmit(handleSubmit)();
+                  closeModal();
+                }}
+              >
+                Confirm
+              </Button>
+            );
+          }}
           className="w-full px-4 py-2"
           variant={isPending ? "ghost" : "default"}
           disabled={isPending}

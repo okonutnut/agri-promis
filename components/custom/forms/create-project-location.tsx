@@ -16,6 +16,7 @@ import FormTextarea from "../input/form-textarea";
 import LocationSelector from "@/components/custom/dropdown/location-selector";
 import FCASelector from "../dropdown/fca-selector";
 import { toast } from "sonner";
+import { useModal } from "../layout/custom-page-layout";
 
 const formSchema = z.object({
   project_id: z.string().min(1, "Project ID is required"),
@@ -39,6 +40,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function CreateProjectLocationForm() {
+  const { openModal, closeModal } = useModal();
   const { id: projectID, programUID } = useParams();
   const router = useRouter();
 
@@ -118,7 +120,22 @@ export default function CreateProjectLocationForm() {
       </form>
       <CardFooter className="flex-col gap-2 border-t p-2">
         <Button
-          form="create-project-form"
+          type="button"
+          onClick={() => {
+            openModal(
+              "Attention",
+              "You confirm that all information provided is correct.",
+              <Button
+                className="w-full"
+                onClick={() => {
+                  form.handleSubmit(handleSubmit)();
+                  closeModal();
+                }}
+              >
+                Confirm
+              </Button>
+            );
+          }}
           className="w-full"
           variant={isPending ? "ghost" : "default"}
           disabled={isPending || disabled}

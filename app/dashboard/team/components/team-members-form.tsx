@@ -152,8 +152,8 @@ export function TeamMemberForm({ isAddMode, data }: TeamMemberFormProps) {
           size={"sm"}
           onClick={() =>
             openModal(
-              "Attention!!!",
-              "Are you sure you want to submit this form?",
+              "Attention",
+              "You confirm that all information provided is correct.",
               <Button
                 className="w-full"
                 onClick={() => {
@@ -161,7 +161,7 @@ export function TeamMemberForm({ isAddMode, data }: TeamMemberFormProps) {
                   closeModal();
                 }}
               >
-                Submit
+                Confirm
               </Button>
             )
           }
