@@ -6,6 +6,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import PWA from "@/components/pwa";
+import PermissionChecker from "@/components/custom/permissions/permission-checker";
 
 export const metadata: Metadata = {
   title: "Agri-ProMIS",
@@ -58,6 +59,7 @@ export default function RootLayout({
           <Toaster richColors position="top-center" />
           <SidebarProvider>{children}</SidebarProvider>
           <PWA />
+          <PermissionChecker />
         </ReactQueryProvider>
       </body>
     </html>
