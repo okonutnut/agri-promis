@@ -11,7 +11,7 @@ import { dataTagErrorSymbol } from "@tanstack/react-query";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllTravelOrdersByUserIDAction } from "@/app/actions/TravelOrderAction";
 import { useSupabaseSession } from "@/hooks/use-session";
-import IssueTravelOrderForm from "@/app/dashboard/programs/[programID]/travel-order/components/travel-order-form";
+import IssueTravelOrderForm from "./components/travel-order-form";
 
 function TravelOrderContent({ data }: { data: TravelOrderType[] | undefined }) {
   const { openSheet } = useSheet();
@@ -23,6 +23,13 @@ function TravelOrderContent({ data }: { data: TravelOrderType[] | undefined }) {
     );
   };
 
+  const handleAdd = () => {
+    openSheet(
+      "Create Travel Order",
+      <IssueTravelOrderForm isAddMode={true} values={null} key="add-mode" />
+    );
+  };
+
   if (!dataTagErrorSymbol) return null;
 
   return (
@@ -30,6 +37,7 @@ function TravelOrderContent({ data }: { data: TravelOrderType[] | undefined }) {
       columns={columns}
       data={data || []}
       onRowSelect={handleRowSelect}
+      onAdd={handleAdd}
     />
   );
 }

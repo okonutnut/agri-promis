@@ -27,12 +27,14 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   onRowSelect?: (row: TData) => void;
+  onAdd?: () => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   onRowSelect,
+  onAdd,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
@@ -51,10 +53,15 @@ export function DataTable<TData, TValue>({
   return (
     <div className="space-y-4">
       {/* Global Search Bar and Add Button */}
-      <SearchInput
-        setSearchTerm={table.setGlobalFilter}
-        className="w-full max-w-md"
-      />
+      <div className="flex items-center justify-between gap-2">
+        <SearchInput
+          setSearchTerm={table.setGlobalFilter}
+          className="w-full max-w-md"
+        />
+        {onAdd && (
+          <Button onClick={onAdd}>New Travel Order</Button>
+        )}
+      </div>
 
       {/* Table */}
       <div className="rounded-md border">
