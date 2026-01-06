@@ -110,7 +110,7 @@ export default function ItineraryOfTravel({
       <div className="flex-1 overflow-y-auto min-h-0">
         {itinerary.length === 0 ? (
           <div className="text-center text-muted-foreground py-8">
-            No itinerary entries yet. Click "Add" to create one.
+            No itinerary entries yet. Click &quot;Add&quot; to create one.
           </div>
         ) : (
           <div className="rounded-md border">

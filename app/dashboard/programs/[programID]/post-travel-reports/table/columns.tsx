@@ -1,6 +1,6 @@
 "use client";
 
-import { PostTravelReportType, TravelOrderType } from "@/components/types";
+import { PostTravelReportType } from "@/components/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";

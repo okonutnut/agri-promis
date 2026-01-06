@@ -123,7 +123,7 @@ function ProjectDashboardInfo(data: ProjectType) {
             </Button>
           )}
           <Link
-            href={`/dashboard/programs/${data?.program_id}`}
+            href={`/dashboard/programs/${data?.program_id}/projects`}
             prefetch={true}
           >
             <Button variant={"outline"} className="w-full" size="sm">

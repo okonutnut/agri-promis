@@ -7,7 +7,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { DoorOpen } from "lucide-react";
 import { useState } from "react";
 import LoadingPage from "../layout/loading-page";
-import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 
 export default function SidebarLogoutButton() {
   const [isLoading, setIsLoading] = useState(false);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,13 @@ export default function ProjectYearsDropdown({
     : years[0]?.value || "";
   const [year, setYear] = useState<string>(defaultYear);
   const [openYear, setOpenYear] = useState(false);
+
+  // Call onChange with default year on mount to initialize parent state
+  useEffect(() => {
+    if (defaultYear) {
+      onChange?.(defaultYear);
+    }
+  }, []); // Empty dependency array - only run on mount
 
   function handleYearChange(value: string) {
     // Always select a year, never empty

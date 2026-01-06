@@ -15,7 +15,7 @@ type ScheduledMonitoringTableProps = {
     id: string;
     travel_order: {
       travel_order_no: string;
-      user_profile: { fullname: string };
+      user: { fullname: string };
     } | null;
     projects?: { project_name: string };
     user?: { fullname: string };
@@ -26,11 +26,11 @@ export default function ScheduledMonitoringTable({
   data,
 }: ScheduledMonitoringTableProps) {
   return (
-    <div className="w-full h-full">
-      <Card className="shadow-xs rounded-md p-2">
+    <div className="w-full">
+      <Card className="shadow-xs rounded-md p-2 h-full">
         <CardHeader className="items-center p-0">
           <CardTitle className="text-lg">
-            Scheduled Monitoring ({new Date().toLocaleDateString()})
+            Scheduled Monitoring (Upcoming)
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
@@ -56,7 +56,7 @@ export default function ScheduledMonitoringTable({
                       {item.purpose ?? "No Purpose Provided"}
                     </TableCell>
                     <TableCell className="text-end">
-                      {item.travel_order?.user_profile?.fullname ||
+                      {item.travel_order?.user?.fullname ||
                         "Unknown Operator"}
                     </TableCell>
                   </TableRow>
@@ -64,7 +64,7 @@ export default function ScheduledMonitoringTable({
               ) : (
                 <TableRow>
                   <TableCell colSpan={4} className="text-center">
-                    No activities scheduled for today.
+                    No upcoming activities scheduled.
                   </TableCell>
                 </TableRow>
               )}

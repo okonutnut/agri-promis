@@ -14,11 +14,55 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 
 export default function ProjectQuickAccessCard() {
+  const [projectIDs, setProjectIDs] = useState<string[]>([]);
+
+  // Read from localStorage on mount and listen for changes
+  useEffect(() => {
+    // Initial read
+    const initialIDs = getQuickAccessProjects();
+    setProjectIDs(initialIDs);
+
+    // Listen for storage changes (when localStorage is updated in other tabs/windows)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "quickAccessProjects") {
+        const newIDs = getQuickAccessProjects();
+        setProjectIDs(newIDs);
+      }
+    };
+
+    // Listen for custom storage events (for same-tab updates)
+    const handleCustomStorageChange = () => {
+      const newIDs = getQuickAccessProjects();
+      setProjectIDs(newIDs);
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("quickAccessUpdated", handleCustomStorageChange);
+
+    // Poll for changes (in case custom events aren't fired)
+    const interval = setInterval(() => {
+      const currentIDs = getQuickAccessProjects();
+      setProjectIDs((prevIDs) => {
+        if (JSON.stringify(currentIDs) !== JSON.stringify(prevIDs)) {
+          return currentIDs;
+        }
+        return prevIDs;
+      });
+    }, 1000);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("quickAccessUpdated", handleCustomStorageChange);
+      clearInterval(interval);
+    };
+  }, []);
+
   const { data } = useRealtimeQuery({
-    queryKey: ["quick-access-projects"],
-    queryFn: () => SelectProjectByIDsAction(getQuickAccessProjects()),
+    queryKey: ["quick-access-projects", projectIDs],
+    queryFn: () => SelectProjectByIDsAction(projectIDs.length > 0 ? projectIDs : []),
     table: "projects",
   });
 

@@ -186,7 +186,9 @@ export default function CustomPageLayout({
   >(null);
 
   const setFooter = useCallback((renderer: () => ReactNode) => {
-    setFooterRenderer(() => renderer);
+    // Avoid useless state updates that retrigger renders when the footer
+    // renderer reference is unchanged.
+    setFooterRenderer((prev) => (prev === renderer ? prev : renderer));
   }, []);
 
   const clearFooter = useCallback(() => {

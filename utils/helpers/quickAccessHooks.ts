@@ -15,6 +15,11 @@ export function addProjectToQuickAccess(projectId: string) {
   }
 
   localStorage.setItem("quickAccessProjects", JSON.stringify(quickAccess));
+  
+  // Dispatch custom event to notify components of the change
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("quickAccessUpdated"));
+  }
 }
 
 export function getQuickAccessProjects(): string[] {

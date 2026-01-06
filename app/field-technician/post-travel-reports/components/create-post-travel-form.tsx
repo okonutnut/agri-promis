@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PostTravelReportType, TravelOrderType } from "@/components/types";
+import { PostTravelReportType } from "@/components/types";
 import { ImageData } from "@/components/interfaces";
 import {
   useModal,

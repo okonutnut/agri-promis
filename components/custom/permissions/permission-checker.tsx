@@ -258,7 +258,7 @@ export default function PermissionChecker() {
                       <strong>Turn ON Location Services</strong> (GPS)
                     </li>
                     <li>
-                      <strong>Return to this app</strong> and tap "Enable GPS & Location"
+                      <strong>Return to this app</strong> and tap &quot;Enable GPS & Location&quot;
                     </li>
                     <li>
                       <strong>Allow location access</strong> when your browser prompts you

@@ -6,10 +6,9 @@ import CustomPageLayout, {
   useSheet,
 } from "@/components/custom/layout/custom-page-layout";
 import { useParams } from "next/navigation";
-import { PostTravelReportType, TravelOrderType } from "@/components/types";
+import { PostTravelReportType } from "@/components/types";
 import { getProgramNavItems } from "@/components/sidebar/navitems";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
-import { SelectAllTravelOrdersByProgramIDAction } from "@/app/actions/TravelOrderAction";
 import { PostTravelForm } from "./components/post-travel-form";
 import { SelectAllPostTravelReportsByProgramIDAction } from "@/app/actions/PostTravelAction";
 

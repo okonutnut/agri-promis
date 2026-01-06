@@ -8,6 +8,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { Loader2 } from "lucide-react";
 import { Controller, UseFormReturn } from "react-hook-form";
 
 type FormSelectProps = {
@@ -16,6 +17,7 @@ type FormSelectProps = {
   options: { value: any; label: string }[];
   form: UseFormReturn<any>;
   onClick?: () => void;
+  isLoading?: boolean;
 };
 export default function FormSelect({
   label,
@@ -23,6 +25,7 @@ export default function FormSelect({
   options,
   form,
   onClick,
+  isLoading,
 }: FormSelectProps) {
   return (
     <div>
@@ -43,15 +46,21 @@ export default function FormSelect({
               <SelectValue placeholder={`Select ${label.toLowerCase()}`} />
             </SelectTrigger>
             <SelectContent>
-              {options.map((option) => (
-                <SelectItem
-                  key={option.value}
-                  value={option.value.toString()}
-                  onClick={onClick}
-                >
-                  {option.label}
+              {isLoading ? (
+                <SelectItem value="loading">
+                  <Loader2 className="animate-spin" />
                 </SelectItem>
-              ))}
+              ) : (
+                options.map((option) => (
+                  <SelectItem
+                    key={option.value}
+                    value={option.value.toString()}
+                    onClick={onClick}
+                  >
+                    {option.label}
+                  </SelectItem>
+                ))
+              )}
             </SelectContent>
           </Select>
         )}

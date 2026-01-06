@@ -92,7 +92,9 @@ export async function SelectUserDashboardItemsAction() {
 
 export async function SelectAdminDashboardItemsAction() {
   const supabase = await createClient(cookies());
-
+  
+  const nowDate = new Date().toISOString().split("T")[0]; // e.g. "2025-09-18"
+  
   const { count: userCount } = await supabase
     .from("user_profile")
     .select("*", { count: "exact", head: true });
@@ -105,26 +107,31 @@ export async function SelectAdminDashboardItemsAction() {
     .from("projects")
     .select("*", { count: "exact", head: true });
 
-  const nowDate = new Date().toISOString().split("T")[0]; // e.g. "2025-09-18"
 
-  const { data: futureOrders } = await supabase
+  const { data: futureTravelOrders, error: futureTravelOrdersError } = await supabase
     .from("travel_order_itinerary_items")
     .select(
       `
     *,
-    travel_order (
+    travel_order!inner (
       travel_order_no,
-      user_profile: user_id (
+      is_active,
+      user:user_profile!travel_order_user_id_fkey (
         fullname
-      ),
-      projects: project_id (
-        project_name
       )
     )
   `
     )
-    .eq("date", nowDate)
+    .gte("date", nowDate)
+    .order("date", { ascending: true })
     .limit(5);
+
+  if (futureTravelOrdersError) {
+    console.error("Error fetching future travel orders:", futureTravelOrdersError);
+  }
+
+  console.log("Future travel orders:", futureTravelOrders);
+  console.log("Now date:", nowDate);
 
   const { data: activityLogs } = await supabase
     .from("activity_logs")
@@ -137,7 +144,7 @@ export async function SelectAdminDashboardItemsAction() {
     totalPrograms: programCount ?? 0,
     totalProjects: projectCount ?? 0,
     recentActivityLogs: activityLogs ?? [],
-    futureTravelOrders: futureOrders ?? [],
+    futureTravelOrders: futureTravelOrders ?? [],
   };
 }
 

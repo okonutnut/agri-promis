@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { TravelOrderProjectsType, TravelOrderType } from "@/components/types";
@@ -25,14 +25,6 @@ import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllAssignedProjectsByFieldTechnicianIDAction } from "@/app/actions/AssignedProjectAction";
 import { SelectAllProgramsAction } from "@/app/actions/ProgramAction";
 import { useSelectUserProfileHook } from "@/app/hooks/UserProfileHook";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 const formSchema = z
   .object({
@@ -94,39 +86,27 @@ export default function IssueTravelOrderForm({
   });
 
   // Get all programs to match with program_ids
-  const { data: allPrograms } = useRealtimeQuery({
+  const { data: allPrograms, isLoading: isLoadingAllPrograms } = useRealtimeQuery({
     queryKey: ["all-programs-for-travel-order"],
     queryFn: SelectAllProgramsAction,
     table: "programs",
   });
 
-  // Extract unique program_ids from assigned projects
-  const programIds = assignedProjects
-    ? Array.from(
-        new Set(
-          assignedProjects
-            .map((project) => project.project?.program_id)
-            .filter((id): id is string => !!id)
-        )
-      )
-    : [];
+  const programOptions = useMemo(() => {
+    return allPrograms?.map((program) => ({
+      value: program.id,
+      label: program.program_name,
+    }));
+  }, [allPrograms]);
 
-  // Create program options by matching program_ids with all programs
-  const programOptions = programIds
-    .map((programId) => {
-      const program = allPrograms?.find((p) => p.id === programId);
-      return {
-        value: programId,
-        label: program?.program_name || `Program ${programId}`,
-      };
-    })
-    .filter((option) => option.value); // Filter out any invalid options
+    console.log("Program options:", programOptions);
+    console.log("All programs:", allPrograms);
 
   const form = useForm<TravelOrderSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       travel_order_no: values?.travel_order_no || "",
-      program_id: values?.program_id || programOptions[0]?.value || "",
+      program_id: values?.program_id || programOptions?.[0]?.value || "",
       user_id: values?.user_id || userData?.user.id || "",
       departure_date: values?.departure_date || "",
       return_date: values?.return_date || "",
@@ -149,7 +129,7 @@ export default function IssueTravelOrderForm({
 
   // Set default program_id when program options are loaded
   useEffect(() => {
-    if (isAddMode && programOptions.length > 0 && !form.getValues("program_id")) {
+    if (isAddMode && programOptions?.length && !form.getValues("program_id")) {
       form.setValue("program_id", programOptions[0].value);
     }
   }, [programOptions, isAddMode, form]);
@@ -220,36 +200,13 @@ export default function IssueTravelOrderForm({
                         defaultValue={userProfile?.fullname || "You"}
                         readOnly
                       />
-                      {programOptions.length > 0 && (
-                        <div className="space-y-2">
-                          <Label className="capitalize text-sm font-semibold">
-                            Program:
-                          </Label>
-                          <Select
-                            value={form.watch("program_id") || ""}
-                            onValueChange={(value) =>
-                              form.setValue("program_id", value)
-                            }
-                            disabled={!isAddMode}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select program..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {programOptions.map((option) => (
-                                <SelectItem key={option.value} value={option.value}>
-                                  {option.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          {form.formState.errors.program_id && (
-                            <p className="text-xs text-red-500">
-                              {form.formState.errors.program_id.message}
-                            </p>
-                          )}
-                        </div>
-                      )}
+                      <FormSelect
+                        options={programOptions || []}
+                        label="Program:"
+                        name="program_id"
+                        form={form}
+                        isLoading={isLoadingAllPrograms}
+                      />
                     </>
                   ) : (
                     <>

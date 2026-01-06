@@ -61,17 +61,18 @@ CREATE TABLE public.post_travel (
   travel_date_id uuid,
   projects_places_visited text,
   activities_undertaken text,
-  issues_concern text,
+  issues_concern ARRAY,
   remarks text,
   photo_url ARRAY,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
-  user_id uuid,
   reviewer_id uuid,
+  reviewed_at timestamp with time zone,
+  program_id uuid,
   CONSTRAINT post_travel_pkey PRIMARY KEY (id),
   CONSTRAINT post_travel_reviewer_id_fkey FOREIGN KEY (reviewer_id) REFERENCES public.user_profile(id),
+  CONSTRAINT post_travel_program_id_fkey FOREIGN KEY (program_id) REFERENCES public.programs(id),
   CONSTRAINT post_travel_travel_order_id_fkey FOREIGN KEY (travel_order_id) REFERENCES public.travel_order(id),
-  CONSTRAINT post_travel_travel_date_id_fkey FOREIGN KEY (travel_date_id) REFERENCES public.travel_order_itinerary_items(id),
-  CONSTRAINT post_travel_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.user_profile(id)
+  CONSTRAINT post_travel_travel_date_id_fkey FOREIGN KEY (travel_date_id) REFERENCES public.travel_order_itinerary_items(id)
 );
 CREATE TABLE public.programs (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -118,17 +119,10 @@ CREATE TABLE public.push_subscriptions (
   CONSTRAINT push_subscriptions_pkey PRIMARY KEY (id),
   CONSTRAINT push_subscriptions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.user_profile(id)
 );
-CREATE TABLE public.report_type (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  code text,
-  description text,
-  created_at timestamp with time zone NOT NULL DEFAULT now(),
-  CONSTRAINT report_type_pkey PRIMARY KEY (id)
-);
 CREATE TABLE public.travel_order (
   created_by uuid,
   user_id uuid,
-  travel_order_no character varying NOT NULL UNIQUE,
+  travel_order_no text NOT NULL,
   office text,
   departure_date timestamp without time zone,
   return_date timestamp without time zone,
@@ -148,12 +142,11 @@ CREATE TABLE public.travel_order_itinerary_items (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   travel_order_id uuid DEFAULT gen_random_uuid(),
   date date,
-  end_date date,
   destination text,
   departure_time time without time zone,
   arrival_time time without time zone,
   purpose text,
-  created_at timestamp with time zone DEFAULT now(),
+  end_date date,
   CONSTRAINT travel_order_itinerary_items_pkey PRIMARY KEY (id),
   CONSTRAINT travel_order_projects_travel_order_id_fkey FOREIGN KEY (travel_order_id) REFERENCES public.travel_order(id)
 );

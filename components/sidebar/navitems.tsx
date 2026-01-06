@@ -4,6 +4,7 @@ import {
   ChartLine,
   ClipboardPen,
   Contact,
+  FolderKanban,
   House,
   LayoutDashboard,
   NotebookPen,
@@ -63,6 +64,11 @@ export function getProgramNavItems(id: string) {
       title: "Overview",
       href: `/dashboard/programs/${id}`,
       icon: House,
+    },
+    {
+      title: "Project List",
+      href: `/dashboard/programs/${id}/projects`,
+      icon: FolderKanban,
     },
     {
       title: "Post-Travel Reports",
