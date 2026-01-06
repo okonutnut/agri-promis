@@ -17,14 +17,6 @@ export default function SidebarLogoutButton() {
   const handleLogout = async () => {
     try {
       setIsLoading(true);
-      // Sign out the user
-      // Log the logout event
-      await InsertActivityLogAction(
-        "Logout",
-        "Signed out the system",
-        undefined
-      );
-
       const { error } = await supabase.auth.signOut();
       if (error) throw new Error("Error logging out");
 

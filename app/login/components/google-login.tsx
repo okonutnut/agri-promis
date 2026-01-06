@@ -26,11 +26,6 @@ export default function GoogleSignInButton() {
       const user = (await supabase.auth.getUser()).data.user;
 
       if (user !== null) {
-        await InsertActivityLogAction(
-          "Login",
-          `Signed into the system.`,
-          undefined
-        );
         setState("disabled");
       } else {
         setState("ready");
