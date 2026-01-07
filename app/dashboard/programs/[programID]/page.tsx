@@ -1,12 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ProjectType } from "@/components/types";
 import {
-  Archive,
-  ChevronLeft,
-  ChevronRight,
-  Funnel,
   FolderKanban,
   MapPin,
   CheckCircle,
@@ -24,21 +19,7 @@ import { SelectProgramByIdAction } from "@/app/actions/ProgramAction";
 import { SelectAllTravelOrdersByProgramIDAction } from "@/app/actions/TravelOrderAction";
 import { SelectAllPostTravelReportsByProgramIDAction } from "@/app/actions/PostTravelAction";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
-import SearchInput from "@/components/custom/input/search-input";
-import CardLink from "@/components/custom/link/card-link";
-import { format } from "date-fns";
-import MunicipalitySelector from "@/components/custom/dropdown/municipality-dropdown";
-import YearsDropdown from "@/components/custom/dropdown/years-dropdown";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
-import growthStages from "@/data/growth-stages.json";
 import SummaryCard from "@/components/custom/card/summary-cards";
 import {
   Command,
@@ -56,144 +37,6 @@ import {
 import { cn } from "@/lib/utils";
 import years from "@/data/years.json";
 
-function useSearchFilter<T>(
-  items: T[],
-  searchQuery: string,
-  filterFn: (item: T, query: string) => boolean
-): T[] {
-  return useMemo(
-    () => items.filter((item) => filterFn(item, searchQuery)),
-    [items, searchQuery, filterFn]
-  );
-}
-
-type ProjectListTabProps = {
-  project: ProjectType;
-};
-function ProjectListTab({ project }: ProjectListTabProps) {
-  const { programID } = useParams();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filter, setFilter] = useState("");
-  const [yearFilter, setYearFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState<number | null>(null);
-
-  const filteredLocations = useSearchFilter(
-    project.project_location ?? [],
-    searchQuery,
-    (location, query) =>
-      location.location!.toLowerCase().includes(query.toLowerCase())
-  )
-    .filter((location) =>
-      filter
-        ? location.location!.toLowerCase().includes(filter.toLowerCase())
-        : true
-    )
-    .filter((location) =>
-      yearFilter
-        ? new Date(location.created_at!).getFullYear().toString() === yearFilter
-        : true
-    )
-    .filter((location) =>
-      statusFilter !== null ? location.status === statusFilter : true
-    );
-
-  return (
-    <>
-      <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-start gap-2 sm:gap-3 mb-4">
-        <Link
-          href={`/dashboard/new/${programID}/project/${project.id}`}
-          prefetch={true}
-          className="w-full sm:w-auto"
-        >
-          <Button className="w-full sm:w-auto px-6 sm:px-8">New</Button>
-        </Link>
-        <div className="w-full sm:flex-1 sm:max-w-md flex flex-nowrap gap-2 sm:gap-3">
-          <SearchInput
-            placeholder="Search locations..."
-            setSearchTerm={setSearchQuery}
-            className="flex-1"
-          />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="shadow-xs shrink-0">
-                <Funnel className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="mx-1">
-              <DropdownMenuItem onClick={() => setStatusFilter(null)}>
-                {statusFilter === null && <Check />}
-                <span className={`w-2 h-2 bg-gray-500 rounded-full`} />
-                All
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setStatusFilter(1)}>
-                {statusFilter === 1 && <Check />}
-                <span className={`w-2 h-2 bg-primary rounded-full`} />
-                Active
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setStatusFilter(0)}>
-                {statusFilter === 0 && <Check />}
-                <span className={`w-2 h-2 bg-red-500 rounded-full`} />
-                Inactive
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        <div className="w-full sm:w-auto sm:max-w-md flex flex-wrap gap-2">
-          <MunicipalitySelector onChange={setFilter} />
-          <YearsDropdown onChange={setYearFilter} />
-        </div>
-      </div>
-      {filteredLocations.length > 0 ? (
-        <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-4">
-          {filteredLocations.map((location, index: number) => (
-            <CardLink
-              href={`/dashboard/projects/${location.id}`}
-              key={index}
-              className="h-auto min-w-sm group flex flex-col items-start p-3 sm:p-4 space-y-2 gap-0"
-            >
-              <div className="w-full flex justify-between items-start gap-2">
-                <div className="flex items-start gap-2 sm:gap-4 flex-1 min-w-0">
-                  <span className="border rounded-full p-1.5 sm:p-2 border-primary shrink-0">
-                    <Archive className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                  </span>
-                  <div className="flex flex-col gap-1 sm:gap-2 min-w-0 flex-1">
-                    <span className="font-semibold text-sm sm:text-base break-words">{location.location}</span>
-                    <small className="italic text-xs sm:text-sm line-clamp-2">
-                      {location.description || "No Description"}
-                    </small>
-                    <Badge className="font-semibold rounded-md text-xs w-fit">
-                      {
-                        growthStages.find(
-                          (stage) =>
-                            stage.value ===
-                            location.progress_indicator!.toString()
-                        )?.label
-                      }
-                      &nbsp;
-                      {location.progress_indicator == 1 ? "" : "Stages"}
-                    </Badge>
-                    <small className="text-xs sm:text-sm">
-                      Date Created:&nbsp;
-                      {format(new Date(location.created_at!), "PP")}
-                    </small>
-                  </div>
-                </div>
-                <span className="ml-1 sm:ml-2 transform transition-transform group-hover:translate-x-2 shrink-0">
-                  <ChevronRight className="h-4 w-4" />
-                </span>
-              </div>
-            </CardLink>
-          ))}
-        </div>
-      ) : (
-        <>
-          <span className="italic">No project locations found</span>
-        </>
-      )}
-    </>
-  );
-}
-
 // Year selector component with "All" option
 function YearSelector({
   value,
@@ -203,7 +46,6 @@ function YearSelector({
   onChange: (value: string) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const currentYear = new Date().getFullYear().toString();
 
   const yearOptions = [
     { label: "All", value: "all" },
@@ -257,7 +99,7 @@ function YearSelector({
   );
 }
 
-export default function ProjectsByProgramPage() {
+export default function ProgramOverviewPage() {
   const { programID } = useParams();
   const searchParams = useSearchParams();
 
@@ -329,7 +171,7 @@ export default function ProjectsByProgramPage() {
           return hasLocationInYear || false;
         });
     
-    const totalProjects = filteredProjects.length;
+    const totalProjects = data.length;
     
     // Filter locations by year (based on created_at)
     const filteredLocations = filteredProjects.flatMap((project) => 
@@ -415,23 +257,7 @@ export default function ProjectsByProgramPage() {
       isLoading={isLoading || programLoading}
       error={error}
       navItems={getProgramNavItems(programID as string)}
-      topRightComponent={
-        <>
-          {searchParams?.get("i") && (
-            <Link href={`/dashboard/programs/${programID}`} prefetch={true}>
-              <Button variant={"outline"} className="w-full sm:w-auto">
-                <ChevronLeft className="h-4 w-4" />
-                <span className="ml-1 sm:ml-2">Back</span>
-              </Button>
-            </Link>
-          )}
-        </>
-      }
     >
-      {searchParams?.get("i") && data ? (
-        <ProjectListTab project={data[Number(searchParams.get("i"))]} />
-      ) : (
-        <>
           <div className="mb-4 flex justify-end items-center gap-2">
             <YearSelector value={selectedYear} onChange={setSelectedYear} />
           </div>
@@ -485,8 +311,6 @@ export default function ProjectsByProgramPage() {
               <strong className="text-3xl sm:text-4xl">{stats.upcomingPostTravels}</strong>
             </SummaryCard>
           </section>
-        </>
-      )}
     </CustomPageLayout>
   );
 }
