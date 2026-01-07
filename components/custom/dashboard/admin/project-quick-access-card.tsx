@@ -61,7 +61,7 @@ export default function ProjectQuickAccessCard() {
   }, []);
 
   const { data } = useRealtimeQuery({
-    queryKey: ["quick-access-projects", projectIDs],
+    queryKey: ["quick-access-projects", ...projectIDs],
     queryFn: () => SelectProjectByIDsAction(projectIDs.length > 0 ? projectIDs : []),
     table: "projects",
   });
