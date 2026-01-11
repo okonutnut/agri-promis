@@ -24,11 +24,9 @@ const formSchema = z.object({
 
 type EditProgramNameFormProps = {
   programData: ProgramType;
-  isAdmin: boolean;
 };
 export default function EditProgramNameForm({
   programData,
-  isAdmin,
 }: EditProgramNameFormProps) {
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -54,48 +52,32 @@ export default function EditProgramNameForm({
         onSubmit={form.handleSubmit(handleSubmit)}
       >
         <FormInput label="Program ID" name="id" form={form} readOnly copy />
-        <FormInput
-          label="Program name"
-          name="program_name"
-          form={form}
-          readOnly={!isAdmin}
-        />
-        {/* <NonFormInput
-          label="Program Creator"
-          defaultValue={programData.user_profile?.fullname ?? "N/A"}
-          readOnly
-        /> */}
-        {isAdmin && (
-          <CardFooter className="w-full justify-end p-0">
-            <Button
-              type="button"
-              onClick={() =>
-                openModal(
-                  "Are you sure?",
-                  "This action cannot be undone. Do you want to proceed?",
-                  <Button
-                    onClick={() => {
-                      form.handleSubmit(handleSubmit)();
-                      closeModal();
-                    }}
-                    className="w-full"
-                  >
-                    Confirm
-                  </Button>
-                )
-              }
-              size={"sm"}
-              variant={isPending ? "ghost" : "default"}
-              disabled={isPending}
-            >
-              {isPending ? (
-                <Loader2 className="animate-spin" />
-              ) : (
-                "Save Changes"
-              )}
-            </Button>
-          </CardFooter>
-        )}
+        <FormInput label="Program name" name="program_name" form={form} />
+        <CardFooter className="w-full justify-end p-0">
+          <Button
+            type="button"
+            onClick={() =>
+              openModal(
+                "Are you sure?",
+                "This action cannot be undone. Do you want to proceed?",
+                <Button
+                  onClick={() => {
+                    form.handleSubmit(handleSubmit)();
+                    closeModal();
+                  }}
+                  className="w-full"
+                >
+                  Confirm
+                </Button>
+              )
+            }
+            size={"sm"}
+            variant={isPending ? "ghost" : "default"}
+            disabled={isPending}
+          >
+            {isPending ? <Loader2 className="animate-spin" /> : "Save Changes"}
+          </Button>
+        </CardFooter>
       </form>
     </Card>
   );

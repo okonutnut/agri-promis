@@ -22,19 +22,21 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import SearchInput from "@/components/custom/input/search-input";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   onRowSelect?: (row: TData) => void;
+  onAdd?: () => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   onRowSelect,
+  onAdd,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -61,6 +63,10 @@ export function DataTable<TData, TValue>({
           setSearchTerm={table.setGlobalFilter}
           className="w-full max-w-md"
         />
+        <Button onClick={onAdd} size="sm">
+          <Plus className="mr-2 h-4 w-4" />
+          Create New
+        </Button>
       </div>
 
       {/* Table */}

@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,11 +24,15 @@ import {
   postTravelReportSchema,
   PostTravelReportFormData,
 } from "./post-travel-form-schema";
-import { TravelOrderDropdown } from "../../../../components/custom/dropdown/travel-order-dropdown";
-import { TravelDateDropdown } from "../../../../components/custom/dropdown/travel-date-dropdown";
-import ImageCaptureForm from "../../../../components/custom/forms/image-report-form";
+import { TravelOrderDropdown } from "@/components/custom/dropdown/travel-order-dropdown";
+import { TravelDateDropdown } from "@/components/custom/dropdown/travel-date-dropdown";
 import { toast } from "sonner";
+import { useParams } from "next/navigation";
 import ProgramDropdown from "@/components/custom/dropdown/program-dropdown";
+const ImageCaptureForm = dynamic(
+  () => import("@/components/custom/forms/image-report-form"),
+  { ssr: false }
+);
 
 type CreatePostTravelFormProps = {
   isAddMode?: boolean;
@@ -38,6 +43,7 @@ export function CreatePostTravelForm({
   isAddMode = true,
   values,
 }: CreatePostTravelFormProps) {
+  const { programID } = useParams();
   const { closeSheet } = useSheet();
   const { openModal, closeModal } = useModal();
   const { data: userData } = useSupabaseSession();
@@ -54,7 +60,9 @@ export function CreatePostTravelForm({
       travel_date_id: values?.travel_date_id || "",
       projects_places_visited: values?.projects_places_visited || "",
       activities_undertaken: values?.activities_undertaken || "",
-      issues_concern: Array.isArray(values?.issues_concern) ? values.issues_concern : [],
+      issues_concern: Array.isArray(values?.issues_concern)
+        ? values.issues_concern
+        : [],
       remarks: values?.remarks || "",
     },
   });
@@ -135,15 +143,20 @@ export function CreatePostTravelForm({
         >
           {isAddMode ? (
             <>
-              <ProgramDropdown
-                onChange={(program) => form.setValue("program_id", program)}
-              />
+              {!programID && (
+                <ProgramDropdown
+                  onChange={(program) => form.setValue("program_id", program)}
+                />
+              )}
               <TravelOrderDropdown
                 form={form}
                 onTravelOrderSelect={(id: string, travelOrder) => {
                   setSelectedTravelOrderId(id);
                   // Set projects_places_visited from itinerary destinations
-                  if (travelOrder?.travel_itinerary && Array.isArray(travelOrder.travel_itinerary)) {
+                  if (
+                    travelOrder?.travel_itinerary &&
+                    Array.isArray(travelOrder.travel_itinerary)
+                  ) {
                     const destinations = travelOrder.travel_itinerary
                       .map((item) => item.destination)
                       .filter((dest) => dest && dest.trim() !== "")
@@ -200,7 +213,9 @@ export function CreatePostTravelForm({
             label="Issues / Concerns / Project % Accomplishment To Date:"
             name="issues_concern"
             form={form}
-            values={Array.isArray(values?.issues_concern) ? values.issues_concern : []}
+            values={
+              Array.isArray(values?.issues_concern) ? values.issues_concern : []
+            }
             readOnly={!isAddMode}
           />
           <FormTextarea

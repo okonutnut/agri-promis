@@ -77,21 +77,16 @@ export default function ItineraryOfTravel({
     try {
       const start = new Date(dateStr);
       const formattedStart = format(start, "MMM dd, yyyy");
-      
+
       if (endDateStr && endDateStr !== dateStr) {
         const end = new Date(endDateStr);
         return `${formattedStart} - ${format(end, "MMM dd, yyyy")}`;
       }
-      
+
       return formattedStart;
     } catch {
       return dateStr;
     }
-  };
-
-  const formatTime = (timeStr?: string) => {
-    if (!timeStr) return "-";
-    return timeStr;
   };
 
   return (
@@ -129,10 +124,10 @@ export default function ItineraryOfTravel({
                     className="cursor-pointer hover:bg-accent"
                     onClick={() => openEditModal(item, index)}
                   >
-                    <TableCell className="font-medium">
-                      {index + 1}
+                    <TableCell className="font-medium">{index + 1}</TableCell>
+                    <TableCell>
+                      {formatDate(item.date, item.end_date)}
                     </TableCell>
-                    <TableCell>{formatDate(item.date, item.end_date)}</TableCell>
                     <TableCell className="max-w-[200px] truncate text-end">
                       {item.destination || "-"}
                     </TableCell>

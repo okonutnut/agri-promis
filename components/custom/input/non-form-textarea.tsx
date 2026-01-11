@@ -6,19 +6,19 @@ import { cn } from "@/lib/utils";
 
 type NonFormTextareaType = {
   label: string;
-  readOnly?: boolean;
   className?: string;
   rows?: number;
   noPlaceholder?: boolean;
-  defaultValue?: string;
+  readOnly?: boolean; // Added readOnly property
+  props?: React.TextareaHTMLAttributes<HTMLTextAreaElement>;
 };
+
 export default function NonFormTextarea({
   label,
-  readOnly,
   className,
-  defaultValue,
   rows = 5,
   noPlaceholder = false,
+  ...props
 }: NonFormTextareaType) {
   return (
     <div className={cn(`w-full mt-2 mb-4`, className)}>
@@ -26,11 +26,10 @@ export default function NonFormTextarea({
         {label}
       </Label>
       <Textarea
-        defaultValue={defaultValue}
         rows={rows || 7}
         tabIndex={-1}
         placeholder={noPlaceholder ? undefined : `Enter ${label.toLowerCase()}`}
-        readOnly={readOnly}
+        {...props}
       />
     </div>
   );

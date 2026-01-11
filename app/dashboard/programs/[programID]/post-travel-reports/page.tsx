@@ -11,6 +11,7 @@ import { getProgramNavItems } from "@/components/sidebar/navitems";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { PostTravelForm } from "./components/post-travel-form";
 import { SelectAllPostTravelReportsByProgramIDAction } from "@/app/actions/PostTravelAction";
+import { CreatePostTravelForm } from "@/app/field-technician/post-travel-reports/components/create-post-travel-form";
 
 type PostTravelContentProps = {
   values: PostTravelReportType[] | undefined;
@@ -25,12 +26,12 @@ function PostTravelContent({ values }: PostTravelContentProps) {
     );
   };
 
-  // const handleAdd = () => {
-  //   openSheet(
-  //     "Issue Post-Travel Report",
-  //     <IssueTravelOrderForm isAddMode={true} values={null} key="add-mode" />
-  //   );
-  // };
+  const handleAdd = () => {
+    openSheet(
+      "Issue Post-Travel Report",
+      <CreatePostTravelForm isAddMode={true} values={null} key="add-mode" />
+    );
+  };
 
   if (!values) return null;
 
@@ -39,6 +40,7 @@ function PostTravelContent({ values }: PostTravelContentProps) {
       columns={columns}
       data={values || []}
       onRowSelect={handleRowSelect}
+      onAdd={handleAdd}
     />
   );
 }

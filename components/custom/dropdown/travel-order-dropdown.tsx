@@ -1,6 +1,3 @@
-
-
-
 "use client";
 
 import * as React from "react";
@@ -30,10 +27,16 @@ import { TravelOrderType } from "@/components/types";
 
 type TravelOrderDropdownProps = {
   form: UseFormReturn<PostTravelReportFormData>;
-  onTravelOrderSelect?: (travelOrderId: string, travelOrder?: TravelOrderType) => void;
+  onTravelOrderSelect?: (
+    travelOrderId: string,
+    travelOrder?: TravelOrderType
+  ) => void;
 };
 
-export function TravelOrderDropdown({ form, onTravelOrderSelect }: TravelOrderDropdownProps) {
+export function TravelOrderDropdown({
+  form,
+  onTravelOrderSelect,
+}: TravelOrderDropdownProps) {
   const { data: userData } = useSupabaseSession();
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
@@ -85,7 +88,9 @@ export function TravelOrderDropdown({ form, onTravelOrderSelect }: TravelOrderDr
                         setValue(currentValue === value ? "" : currentValue);
                         form.setValue("travel_order_id", currentValue);
                         form.setValue("travel_date_id", ""); // Reset travel date
-                        const selectedOrder = data?.find((o) => o.id === currentValue);
+                        const selectedOrder = data?.find(
+                          (o) => o.id === currentValue
+                        );
                         onTravelOrderSelect?.(currentValue, selectedOrder);
                         setOpen(false);
                       }}

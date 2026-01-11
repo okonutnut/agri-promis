@@ -20,6 +20,7 @@ import {
 import { useUniversalMutation } from "@/hooks/use-universal-mutation";
 import { InsertMemberAction } from "@/app/actions/MemberAction";
 import FormInput from "@/components/custom/input/form-input";
+import FTGPSCard from "../../projects/[projectID]/field-technicians/components/gps/gps-card";
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -105,6 +106,7 @@ export function TeamMemberForm({ isAddMode, data }: TeamMemberFormProps) {
 
   return (
     <>
+      <FTGPSCard user_id={data?.id || ""} />
       <Label className="px-3 my-2 text-xl">Account Info</Label>
       <form
         className="p-3 space-y-4 mb-4"

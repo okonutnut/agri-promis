@@ -9,19 +9,15 @@ import { toast } from "sonner";
 
 type NonFormInputType = {
   label: string;
-  defaultValue?: string;
-  readOnly?: boolean;
-  disabled?: boolean;
   className?: string;
   copy?: boolean;
-};
+} & React.InputHTMLAttributes<HTMLInputElement>;
+
 export default function NonFormInput({
   label,
-  defaultValue,
-  readOnly,
-  disabled,
   className,
   copy = false,
+  ...props
 }: NonFormInputType) {
   return (
     <div className={cn(`w-full`, className)}>
@@ -36,7 +32,9 @@ export default function NonFormInput({
             variant="ghost"
             onClick={() => {
               if (copy) {
-                navigator.clipboard.writeText(defaultValue || "");
+                navigator.clipboard.writeText(
+                  props.defaultValue?.toString() || ""
+                );
                 toast.info(`Copied ${label} to clipboard`, {
                   position: "bottom-right",
                   duration: 2000,
@@ -50,11 +48,9 @@ export default function NonFormInput({
       </div>
       <Input
         placeholder={`Enter ${label.toLowerCase()}`}
-        defaultValue={defaultValue}
-        disabled={disabled}
-        readOnly={readOnly}
         autoFocus={false}
         tabIndex={-1}
+        {...props}
       />
     </div>
   );

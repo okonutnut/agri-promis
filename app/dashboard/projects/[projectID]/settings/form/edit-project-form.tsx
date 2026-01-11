@@ -45,11 +45,9 @@ type FormSchemaType = z.infer<typeof formSchema>;
 
 type EditProjectNameFormProps = {
   project: ProjectLocationType;
-  isAdmin: boolean;
 };
 export default function EditProjectNameForm({
   project,
-  isAdmin,
 }: EditProjectNameFormProps) {
   const { projectID } = useParams();
   const { openModal, closeModal } = useModal();
@@ -101,18 +99,18 @@ export default function EditProjectNameForm({
           form={form}
           name="description"
           label="Project Description"
-          readOnly={!isAdmin || isPending}
+          readOnly={isPending}
         />
         <FCASelector
           onChange={(value) => form.setValue("fca_ids", value)}
           defaultValue={project.fca_ids || []}
-          readOnly={!isAdmin || isPending}
+          readOnly={isPending}
         />
         <FormInput
           label="Total Allotment Area (in hectares)"
           name="total_alloted_area"
           form={form}
-          readOnly={!isAdmin || isPending}
+          readOnly={isPending}
         />
         <div className="w-full flex justify-between items-center">
           <Label>Set Active</Label>
@@ -121,7 +119,7 @@ export default function EditProjectNameForm({
             onCheckedChange={(checked) =>
               form.setValue("status", checked ? 1 : 0)
             }
-            disabled={!isAdmin || isPending}
+            disabled={isPending}
           />
         </div>
         <div className="w-full flex justify-between items-center">
@@ -131,7 +129,7 @@ export default function EditProjectNameForm({
             onValueChange={(value) =>
               form.setValue("progress_indicator", parseInt(value))
             }
-            disabled={!isAdmin || isPending}
+            disabled={isPending}
           >
             <SelectTrigger className="w-[230px]">
               <SelectValue placeholder="Progress" />
@@ -146,32 +144,30 @@ export default function EditProjectNameForm({
           </Select>
         </div>
       </form>
-      {isAdmin && (
-        <CardFooter className="w-full justify-end border-t mt-4 p-2">
-          <Button
-            onClick={() =>
-              openModal(
-                "Attention!!!",
-                "This action cannot be undone. Do you want to proceed?",
-                <Button
-                  onClick={() => {
-                    form.handleSubmit(handleSubmit)();
-                    closeModal();
-                  }}
-                  className="w-full"
-                >
-                  Confirm
-                </Button>
-              )
-            }
-            size={"sm"}
-            variant={isPending ? "ghost" : "default"}
-            disabled={isPending}
-          >
-            {isPending ? <Loader2 className="animate-spin" /> : "Save Changes"}
-          </Button>
-        </CardFooter>
-      )}
+      <CardFooter className="w-full justify-end border-t mt-4 p-2">
+        <Button
+          onClick={() =>
+            openModal(
+              "Attention!!!",
+              "This action cannot be undone. Do you want to proceed?",
+              <Button
+                onClick={() => {
+                  form.handleSubmit(handleSubmit)();
+                  closeModal();
+                }}
+                className="w-full"
+              >
+                Confirm
+              </Button>
+            )
+          }
+          size={"sm"}
+          variant={isPending ? "ghost" : "default"}
+          disabled={isPending}
+        >
+          {isPending ? <Loader2 className="animate-spin" /> : "Save Changes"}
+        </Button>
+      </CardFooter>
     </Card>
   );
 }

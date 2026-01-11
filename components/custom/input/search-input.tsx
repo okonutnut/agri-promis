@@ -13,11 +13,14 @@ type SearchInputProps = {
   placeholder?: string;
   setSearchTerm: (value: string) => void;
   className?: string;
+  props?: React.InputHTMLAttributes<HTMLInputElement>;
 };
+
 export default function SearchInput({
   placeholder,
   setSearchTerm,
   className,
+  ...props
 }: SearchInputProps) {
   const [value, setValue] = useState("");
   return (
@@ -29,6 +32,7 @@ export default function SearchInput({
           setValue(e.target.value);
           setSearchTerm(e.target.value);
         }}
+        {...props}
       />
       <InputGroupAddon>
         <SearchIcon />

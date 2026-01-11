@@ -1,7 +1,6 @@
 "use client";
 
 import { MonitoringReportType } from "@/components/types";
-import { Badge } from "@/components/ui/badge";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 
