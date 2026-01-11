@@ -20,7 +20,14 @@ import {
 import { useUniversalMutation } from "@/hooks/use-universal-mutation";
 import { InsertMemberAction } from "@/app/actions/MemberAction";
 import FormInput from "@/components/custom/input/form-input";
-import FTGPSCard from "../../projects/[projectID]/field-technicians/components/gps/gps-card";
+import dynamic from "next/dynamic";
+const FTGPSCard = dynamic(
+  () =>
+    import(
+      "../../projects/[projectID]/field-technicians/components/gps/gps-card"
+    ),
+  { ssr: false }
+);
 
 const formSchema = z.object({
   id: z.string().optional(),

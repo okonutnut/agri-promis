@@ -60,7 +60,9 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
           />
           <NonFormInput
             label="Inclusive Date of Travel:"
-            defaultValue={travelDate ? format(new Date(travelDate), "MMM d, yyyy") : "N/A"}
+            defaultValue={
+              travelDate ? format(new Date(travelDate), "MMM d, yyyy") : "N/A"
+            }
             readOnly
           />
           <NonFormInput
@@ -71,8 +73,8 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
           <NonFormMultiInput label="Findings" values={data?.findings} />
           <NonFormTextarea
             label="Observation"
-            defaultValue={data?.observation ?? "N/A"}
             readOnly
+            props={{ defaultValue: data?.observation ?? "N/A" }}
           />
           <NonFormMultiInput
             label="Issues / Concerns:"
@@ -80,7 +82,7 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
           />
           <NonFormTextarea
             label="Remarks"
-            defaultValue={data?.remarks}
+            props={{ defaultValue: data?.remarks ?? "" }}
             noPlaceholder={!!data}
             readOnly
           />
