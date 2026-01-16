@@ -159,7 +159,7 @@ export type TravelOrderType = {
   id?: string;
   user_id?: string;
   travel_order_no?: string;
-  user?: { fullname?: string };
+  user?: { fullname?: string; position?: string };
   createdBy?: { fullname?: string };
   office?: string;
   program_id?: string;

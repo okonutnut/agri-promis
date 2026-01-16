@@ -8,7 +8,6 @@ import {
 import NonFormInput from "@/components/custom/input/non-form-input";
 import NonFormMultiInput from "@/components/custom/input/non-form-multi-input";
 import NonFormTextarea from "@/components/custom/input/non-form-textarea";
-import dynamic from "next/dynamic";
 import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
 import { useParams } from "next/navigation";
 import { format } from "date-fns";
@@ -19,6 +18,11 @@ import { Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
 import { useMemo } from "react";
 import { useSupabaseSession } from "@/hooks/use-session";
+import dynamic from "next/dynamic";
+const PrintPostTravelButton = dynamic(
+  () => import("@/components/custom/print/print-post-travel-button"),
+  { ssr: false }
+);
 const ImageCarousel = dynamic(
   () => import("@/components/custom/images/image-carousel"),
   { ssr: false }
@@ -48,6 +52,9 @@ export function PostTravelForm({ data }: PostTravelFormProps) {
 
     return `${start_date}${end_date ? ` - ${end_date}` : ""}`;
   }, [data.travel_date]);
+
+  // Use data directly for PDF printing (component will transform it)
+  const printData = useMemo(() => data, [data]);
 
   return (
     <>
@@ -94,48 +101,53 @@ export function PostTravelForm({ data }: PostTravelFormProps) {
         </div>
       </section>
       <CustomSheetFooter isPending={isPending}>
-        {(!data?.reviewer_id || session?.user.id === data?.user_id) && (
-          <Button
-            size={"sm"}
-            variant={isPending ? "ghost" : "default"}
-            onClick={() => {
-              openModal(
-                "Confirm Action",
-                "Are you sure you want to submit for review?",
-                <Button
-                  className="w-full"
-                  onClick={() => {
-                    mutate(data.id as string, {
-                      onSuccess: () => {
-                        toast.success(
-                          "Post-travel report submitted for review"
-                        );
-                        closeSheet();
-                      },
-                      onError: () => {
-                        toast.error(
-                          "Failed to submit post-travel report for review"
-                        );
-                      },
-                    });
-                    closeModal();
-                  }}
-                >
-                  Confirm
-                </Button>
-              );
-            }}
-          >
-            {isPending ? (
-              <Loader2 className="animate-spin" />
-            ) : (
-              <>
-                <Send />
-                Review
-              </>
-            )}
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {data?.reviewer_id && (
+            <PrintPostTravelButton data={printData} btnName="Print" size="sm" />
+          )}
+          {(!data?.reviewer_id || session?.user.id === data?.user_id) && (
+            <Button
+              size={"sm"}
+              variant={isPending ? "ghost" : "default"}
+              onClick={() => {
+                openModal(
+                  "Confirm Action",
+                  "Are you sure you want to submit for review?",
+                  <Button
+                    className="w-full"
+                    onClick={() => {
+                      mutate(data.id as string, {
+                        onSuccess: () => {
+                          toast.success(
+                            "Post-travel report submitted for review"
+                          );
+                          closeSheet();
+                        },
+                        onError: () => {
+                          toast.error(
+                            "Failed to submit post-travel report for review"
+                          );
+                        },
+                      });
+                      closeModal();
+                    }}
+                  >
+                    Confirm
+                  </Button>
+                );
+              }}
+            >
+              {isPending ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <>
+                  <Send />
+                  Review
+                </>
+              )}
+            </Button>
+          )}
+        </div>
       </CustomSheetFooter>
     </>
   );

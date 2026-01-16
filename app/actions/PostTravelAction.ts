@@ -65,7 +65,7 @@ export async function SelectAllPostTravelReportsByProgramIDAction(
         travel_order_no,
         user_id,
         program_id,
-        user:user_profile!travel_order_user_id_fkey(fullname)
+        user:user_profile!travel_order_user_id_fkey(fullname, position)
       ),
       travel_date:travel_order_itinerary_items(date, end_date, destination)
     `

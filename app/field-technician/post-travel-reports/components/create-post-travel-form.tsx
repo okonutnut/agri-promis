@@ -29,6 +29,10 @@ import { TravelDateDropdown } from "@/components/custom/dropdown/travel-date-dro
 import { toast } from "sonner";
 import { useParams } from "next/navigation";
 import ProgramDropdown from "@/components/custom/dropdown/program-dropdown";
+const PrintPostTravelButton = dynamic(
+  () => import("@/components/custom/print/print-post-travel-button"),
+  { ssr: false }
+);
 const ImageCaptureForm = dynamic(
   () => import("@/components/custom/forms/image-report-form"),
   { ssr: false }
@@ -228,37 +232,42 @@ export function CreatePostTravelForm({
         </form>
       </div>
       <CustomSheetFooter isPending={isPending}>
-        {isAddMode && (
-          <Button
-            variant={isPending ? "ghost" : "default"}
-            type="button"
-            onClick={() => {
-              openModal(
-                "Attention",
-                "You confirm that all information provided is correct.",
-                <Button
-                  className="w-full"
-                  onClick={() => {
-                    form.handleSubmit(onSubmit)();
-                    closeModal();
-                  }}
-                >
-                  Confirm
-                </Button>
-              );
-            }}
-            size="sm"
-            disabled={isPending || !allowSubmit}
-          >
-            {isPending ? (
-              <Loader2 className="animate-spin" />
-            ) : (
-              <>
-                <Send /> Submit
-              </>
-            )}
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {!isAddMode && values?.reviewer_id && values && (
+            <PrintPostTravelButton data={values} btnName="Print" size="sm" />
+          )}
+          {isAddMode && (
+            <Button
+              variant={isPending ? "ghost" : "default"}
+              type="button"
+              onClick={() => {
+                openModal(
+                  "Attention",
+                  "You confirm that all information provided is correct.",
+                  <Button
+                    className="w-full"
+                    onClick={() => {
+                      form.handleSubmit(onSubmit)();
+                      closeModal();
+                    }}
+                  >
+                    Confirm
+                  </Button>
+                );
+              }}
+              size="sm"
+              disabled={isPending || !allowSubmit}
+            >
+              {isPending ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <>
+                  <Send /> Submit
+                </>
+              )}
+            </Button>
+          )}
+        </div>
       </CustomSheetFooter>
     </>
   );

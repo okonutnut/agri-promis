@@ -14,11 +14,11 @@ import { format } from "date-fns";
 // Register the Cambria font
 Font.register({
   family: "Cambria",
-  src: "/fonts/Cambria.ttf",
+  src: "/fonts/cambria.ttf",
 });
 Font.register({
   family: "Cambria",
-  src: "/fonts/Cambriab.ttf",
+  src: "/fonts/cambriab.ttf",
   fontWeight: "bold",
 });
 

@@ -229,12 +229,6 @@ export default function UploadFieldReportForm({
         </form>
       </div>
       <CustomSheetFooter isPending={isPending}>
-        {values?.reviewed_by_id && (
-          <PrintDownloadDropdown
-            data={<MonitoringReportDocument data={values} />}
-            values={values}
-          />
-        )}
         {values?.key && <DeleteDraftButton draftKey={values.key} />}
         {(isAddMode || isDraft) && (
           <>

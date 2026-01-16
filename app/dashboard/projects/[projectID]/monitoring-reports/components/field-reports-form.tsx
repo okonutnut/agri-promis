@@ -89,7 +89,7 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
         </div>
       </section>
       <CustomSheetFooter isPending={isPending}>
-        {!data?.reviewed_by_id ? (
+        {!data?.reviewed_by_id  && (
           <Button
             size={"sm"}
             disabled={isPending}
@@ -118,11 +118,6 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
               </>
             )}
           </Button>
-        ) : (
-          <PrintDownloadDropdown
-            data={<MonitoringReportDocument data={data} />}
-            values={data as MonitoringReportType}
-          />
         )}
       </CustomSheetFooter>
     </>
