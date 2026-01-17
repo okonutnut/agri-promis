@@ -6,22 +6,22 @@ import { format } from "date-fns";
 const DEFAULT_DOCUMENT_CODE = "DARFO2.FOD.271";
 const DEFAULT_EFFECTIVITY_DATE = "7/1/2025";
 const DEFAULT_REV_NO = "0";
-const DEFAULT_PREPARED_BY_TITLE = "Agriculturist I";
 const DEFAULT_REVIEWED_BY_NAME = "JONATHAN L. ARGONIA";
 const DEFAULT_REVIEWED_BY_TITLE = "Agri II/APCO";
 const DEFAULT_RECOMMENDING_APPROVAL_NAME = "MARVIN B. LUIS, DPA";
-const DEFAULT_RECOMMENDING_APPROVAL_TITLE = "OIC-Chief, Field Operations Division";
+const DEFAULT_RECOMMENDING_APPROVAL_TITLE =
+  "OIC-Chief, Field Operations Division";
 const DEFAULT_APPROVED_BY_NAME = "ROBERTO C. BUSANIA, DVM";
 const DEFAULT_APPROVED_BY_TITLE = "RTD for Operations and Extension";
 
 // Register Font
 Font.register({
   family: "Cambria",
-  src: "/fonts/Cambria.ttf",
+  src: "/fonts/Cambria.woff",
 });
 Font.register({
   family: "Cambria",
-  src: "/fonts/Cambriab.ttf",
+  src: "/fonts/Cambriab.woff",
   fontWeight: "bold",
 });
 
@@ -42,13 +42,13 @@ const HeaderSection = ({
       height: "57",
       display: "flex",
       flexDirection: "row",
-      borderWidth: "0.7",
+      borderWidth: "1",
     }}
   >
     <View
       style={{
-        width: 140,
-        borderRightWidth: "0.7",
+        width: 130,
+        borderRightWidth: "1",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
@@ -59,7 +59,7 @@ const HeaderSection = ({
     <View
       style={{
         width: 300,
-        borderRightWidth: "0.7",
+        borderRightWidth: "1",
         textAlign: "center",
         padding: "0.14in",
       }}
@@ -164,7 +164,7 @@ const MainTable = ({
     <View
       style={{
         height: 135,
-        borderWidth: "0.7",
+        borderWidth: "1",
       }}
     >
       <View
@@ -182,7 +182,10 @@ const MainTable = ({
             flexDirection: "column",
             justifyContent: "space-between",
             alignItems: "center",
-            borderWidth: "0.7",
+            borderRightWidth: "1",
+            borderBottomWidth: "1",
+            borderLeftWidth: "0",
+            borderTopWidth: "0",
           }}
         >
           <Text
@@ -206,7 +209,10 @@ const MainTable = ({
             flexDirection: "column",
             justifyContent: "space-between",
             alignItems: "center",
-            borderBottomWidth: "0.7",
+            borderBottomWidth: "1",
+            borderRightWidth: "1",
+            borderLeftWidth: "0",
+            borderTopWidth: "0",
           }}
         >
           <View
@@ -239,7 +245,10 @@ const MainTable = ({
             flexDirection: "column",
             justifyContent: "space-between",
             alignItems: "center",
-            borderWidth: "0.7",
+            borderRightWidth: "1",
+            borderBottomWidth: "1",
+            borderLeftWidth: "0",
+            borderTopWidth: "0",
           }}
         >
           <View
@@ -271,7 +280,10 @@ const MainTable = ({
             flexDirection: "column",
             justifyContent: "space-between",
             alignItems: "center",
-            borderBottomWidth: "0.7",
+            borderBottomWidth: "1",
+            borderRightWidth: "1",
+            borderLeftWidth: "0",
+            borderTopWidth: "0",
           }}
         >
           <View
@@ -304,7 +316,10 @@ const MainTable = ({
             flexDirection: "column",
             justifyContent: "space-between",
             alignItems: "center",
-            borderWidth: "0.7",
+            borderBottomWidth: "1",
+            borderRightWidth: "1",
+            borderLeftWidth: "0",
+            borderTopWidth: "0",
           }}
         >
           <View
@@ -335,7 +350,9 @@ const MainTable = ({
             flexDirection: "column",
             justifyContent: "space-between",
             alignItems: "center",
-            borderBottomWidth: "0.7",
+            borderBottomWidth: "1",
+            borderLeftWidth: "0",
+            borderTopWidth: "0",
           }}
         >
           <Text
@@ -363,7 +380,7 @@ const MainTable = ({
             flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
-            borderRightWidth: "0.7",
+            borderRightWidth: "1",
             padding: 5,
           }}
         >
@@ -376,7 +393,7 @@ const MainTable = ({
             flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
-            borderRightWidth: "0.7",
+            borderRightWidth: "1",
             padding: 5,
           }}
         >
@@ -389,7 +406,7 @@ const MainTable = ({
             flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
-            borderRightWidth: "0.7",
+            borderRightWidth: "1",
             padding: 5,
           }}
         >
@@ -403,7 +420,7 @@ const MainTable = ({
             justifyContent: "center",
             alignItems: "center",
             padding: 5,
-            borderRightWidth: "0.7",
+            borderRightWidth: "1",
           }}
         >
           <Text style={{ textAlign: "center" }}>{activitiesUndertaken}</Text>
@@ -416,7 +433,7 @@ const MainTable = ({
             justifyContent: "center",
             alignItems: "center",
             padding: 5,
-            borderRightWidth: "0.7",
+            borderRightWidth: "1",
           }}
         >
           <Text style={{ textAlign: "center" }}>{issuesConcerns}</Text>
@@ -456,9 +473,9 @@ const SignatureSection = ({
         marginTop: 3,
       }}
     >
-      <Text style={{ width: 262 }}>Prepared by:</Text>
+      <Text style={{ width: 254 }}>Prepared by:</Text>
       <Text style={{ width: 176 }}>Reviewed by:</Text>
-      <Text style={{ width: 215 }}>Recommending Approval:</Text>
+      <Text style={{ width: 218 }}>Recommending Approval:</Text>
       <Text style={{ flex: 1 }}>Approved by:</Text>
     </View>
     <View
@@ -472,13 +489,19 @@ const SignatureSection = ({
       {/* PREPARED BY */}
       <View
         style={{
-          width: 262,
+          width: 254,
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
         }}
       >
-        <Text style={{ textDecoration: "underline", fontWeight: "bold", marginBottom: 3 }}>
+        <Text
+          style={{
+            textDecoration: "underline",
+            fontWeight: "bold",
+            marginBottom: 3,
+          }}
+        >
           {preparedBy.toUpperCase()}
         </Text>
         <Text>{preparedByRole}</Text>
@@ -491,20 +514,32 @@ const SignatureSection = ({
           alignItems: "center",
         }}
       >
-        <Text style={{ textDecoration: "underline", fontWeight: "bold", marginBottom: 3 }}>
+        <Text
+          style={{
+            textDecoration: "underline",
+            fontWeight: "bold",
+            marginBottom: 3,
+          }}
+        >
           {DEFAULT_REVIEWED_BY_NAME}
         </Text>
         <Text>{DEFAULT_REVIEWED_BY_TITLE}</Text>
       </View>
       <View
         style={{
-          width: 215,
+          width: 218,
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
         }}
       >
-        <Text style={{ textDecoration: "underline", fontWeight: "bold", marginBottom: 3 }}>
+        <Text
+          style={{
+            textDecoration: "underline",
+            fontWeight: "bold",
+            marginBottom: 3,
+          }}
+        >
           {DEFAULT_RECOMMENDING_APPROVAL_NAME}
         </Text>
         <Text>{DEFAULT_RECOMMENDING_APPROVAL_TITLE}</Text>
@@ -517,13 +552,237 @@ const SignatureSection = ({
           alignItems: "center",
         }}
       >
-        <Text style={{ textDecoration: "underline", fontWeight: "bold", marginBottom: 3 }}>
+        <Text
+          style={{
+            textDecoration: "underline",
+            fontWeight: "bold",
+            marginBottom: 3,
+          }}
+        >
           {DEFAULT_APPROVED_BY_NAME}
         </Text>
         <Text>{DEFAULT_APPROVED_BY_TITLE}</Text>
       </View>
     </View>
   </>
+);
+
+// Page 2 component
+type PhotoDocumentPageProps = {
+  projectTitle?: string;
+  location?: string;
+  iccFcaLguName?: string;
+  preparedBy?: string;
+  preparedByRole?: string;
+  photoUrls?: string[];
+};
+const PhotoDocumentPage = ({ projectTitle, location, iccFcaLguName, preparedBy, preparedByRole, photoUrls }: PhotoDocumentPageProps) => (
+  <Page
+    size="FOLIO"
+    orientation="landscape"
+    style={{
+      fontFamily: "Cambria",
+      fontSize: "7",
+      paddingVertical: "0.75in",
+      paddingHorizontal: "0.7in",
+    }}
+  >
+    <HeaderSection
+      documentCode={DEFAULT_DOCUMENT_CODE}
+      effectivityDate={DEFAULT_EFFECTIVITY_DATE}
+      revNo={DEFAULT_REV_NO}
+    />
+    <Text
+      style={{
+        textAlign: "center",
+        marginTop: 24,
+        marginBottom: 7,
+        fontSize: 10,
+        fontWeight: "bold",
+      }}
+    >
+      POST TRAVEL REPORT
+    </Text>
+
+    {/* MAIN TABLE */}
+    <View
+      style={{
+        height: 220,
+        borderWidth: "1",
+      }}
+    >
+      <View
+        style={{
+          flex: "1",
+          width: "100%",
+          display: "flex",
+          flexDirection: "row",
+        }}
+      >
+        {photoUrls && photoUrls.map((url, index) => (
+          <View key={index} style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", borderRightWidth: "1", padding: 5 }}>
+            <Image src={url} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+          </View>
+        ))}
+      </View>
+    </View>
+
+    {/* PROJECT INFORMATION */}
+    <View
+      style={{
+        width: "100%",
+        display: "flex",
+        flexDirection: "row",
+        borderWidth: 1,
+        borderTopWidth: 0,
+      }}
+    >
+      <Text style={{ width: 254, borderRightWidth: 1, padding: 1 }}>
+        Project Title/Activity: {projectTitle?.toUpperCase() || ""}
+      </Text>
+      <Text style={{ width: 394, borderRightWidth: 1, padding: 1 }}>
+        Location: {location?.toUpperCase() || ""}
+      </Text>
+      <Text style={{ flex: 1, padding: 1 }}>ICC/FCA/LGU Name: {iccFcaLguName?.toUpperCase() || ""}</Text>
+    </View>
+
+    {/* EMPTY LINE */}
+    <View
+      style={{
+        height: 15,
+        width: "100%",
+        display: "flex",
+        flexDirection: "row",
+        borderWidth: 1,
+        borderTopWidth: 0,
+      }}
+    >
+      <Text style={{ width: 254, borderRightWidth: 1, padding: 1 }}></Text>
+      <Text style={{ width: 394, borderRightWidth: 1, padding: 1 }}></Text>
+      <Text style={{ flex: 1, padding: 1 }}></Text>
+    </View>
+
+    {/* SIGNATURES */}
+    <View
+      style={{
+        width: "100%",
+        display: "flex",
+        flexDirection: "row",
+        borderWidth: 1,
+        borderTopWidth: 0,
+      }}
+    >
+      <Text style={{ width: 254, borderRightWidth: 1, padding: 1 }}>
+        Prepared by:
+      </Text>
+      <Text style={{ width: 176, borderRightWidth: 1, padding: 1 }}>
+        Reviewed by:
+      </Text>
+      <Text style={{ width: 218, borderRightWidth: 1, padding: 1 }}>
+        Recommending Approval:
+      </Text>
+      <Text style={{ flex: 1, padding: 1 }}>Approved by:</Text>
+    </View>
+
+    <View
+      style={{
+        width: "100%",
+        display: "flex",
+        flexDirection: "row",
+        borderWidth: 1,
+        borderTopWidth: 0,
+      }}
+    >
+      {/* PREPARED BY */}
+      <View
+        style={{
+          width: 254,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          borderRightWidth: 1,
+        }}
+      >
+        <Text
+          style={{
+            width: "100%",
+            textAlign: "center",
+            marginBottom: 3,
+            paddingTop: 15,
+            borderBottomWidth: 1,
+          }}
+        >
+          {preparedBy?.toUpperCase() || ""}
+        </Text>
+        <Text>{preparedByRole?.toWellFormed() || ""}</Text>
+      </View>
+      <View
+        style={{
+          width: 176,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          borderRightWidth: 1,
+        }}
+      >
+        <Text
+          style={{
+            width: "100%",
+            textAlign: "center",
+            marginBottom: 3,
+            paddingTop: 15,
+            borderBottomWidth: 1,
+          }}
+        >
+          JONATHAN L. ARGONIA
+        </Text>
+        <Text>Agri II/APCO</Text>
+      </View>
+      <View
+        style={{
+          width: 218,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          borderRightWidth: 1,
+        }}
+      >
+        <Text
+          style={{
+            width: "100%",
+            textAlign: "center",
+            marginBottom: 3,
+            paddingTop: 15,
+            borderBottomWidth: 1,
+          }}
+        >
+          MARVIN B. LUIS, DPA
+        </Text>
+        <Text>OIC-Chief, Field Operations Division</Text>
+      </View>
+      <View
+        style={{
+          flex: 1,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Text
+          style={{
+            width: "100%",
+            textAlign: "center",
+            marginBottom: 3,
+            paddingTop: 15,
+            borderBottomWidth: 1,
+          }}
+        >
+          ROBERTO C. BUSANIA, DVM
+        </Text>
+        <Text>RTD for Operations and Extension</Text>
+      </View>
+    </View>
+  </Page>
 );
 
 // Main component
@@ -534,12 +793,12 @@ export default function PostTravelReactPDF({ data }: PostTravelReactPDFProps) {
   // Format travel dates
   const formatTravelDates = (): string => {
     if (!data.travel_date?.date) return "";
-    
+
     const startDate = format(new Date(data.travel_date.date), "PP");
     const endDate = data.travel_date.end_date
       ? format(new Date(data.travel_date.end_date), "PP")
       : null;
-    
+
     return endDate ? `${startDate} - ${endDate}` : startDate;
   };
 
@@ -558,7 +817,7 @@ export default function PostTravelReactPDF({ data }: PostTravelReactPDFProps) {
           fontSize: "7",
           paddingVertical: "0.75in",
           paddingHorizontal: "0.7in",
-          fontFamily: "Times-Roman",
+          fontFamily: "Cambria",
         }}
       >
         <HeaderSection
@@ -586,10 +845,24 @@ export default function PostTravelReactPDF({ data }: PostTravelReactPDFProps) {
           remarksRecommendation={data.remarks || ""}
         />
         <SignatureSection
-          preparedBy={data.travel_order?.user?.fullname || data.user?.fullname || ""}
+          preparedBy={
+            data.travel_order?.user?.fullname || data.user?.fullname || ""
+          }
           preparedByRole={data.travel_order?.user?.position || ""}
         />
       </Page>
+
+      {/* Photo Document Page */}
+      {(data.photo_url && data.photo_url.length > 0) && (
+        <PhotoDocumentPage 
+          projectTitle={""} 
+          location={data.travel_date?.destination || ""} 
+          iccFcaLguName={""} 
+          preparedBy={data.travel_order?.user?.fullname || data.user?.fullname || ""} 
+          preparedByRole={data.travel_order?.user?.position || ""}
+          photoUrls={data.photo_url || []}
+        />
+      )}
     </Document>
   );
 }

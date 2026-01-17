@@ -80,6 +80,7 @@ export type ProjectLocationType = {
 
   // relation
   projects?: ProjectType;
+  fca?: FCAType[];
 };
 
 export type LocationType = {
@@ -134,6 +135,7 @@ export type PostTravelReportType = {
   // relations
   user?: UserProfileType;
   reviewer?: UserProfileType;
+  projectLocation?: ProjectLocationType;
   travel_order?: TravelOrderType;
   travel_date?: TravelOrderProjectsType;
 };
