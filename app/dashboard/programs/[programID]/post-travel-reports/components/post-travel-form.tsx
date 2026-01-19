@@ -105,7 +105,7 @@ export function PostTravelForm({ data }: PostTravelFormProps) {
           {data?.reviewer_id && (
             <PrintPostTravelButton data={printData} btnName="Print" size="sm" />
           )}
-          {(!data?.reviewer_id || session?.user.id === data?.user_id) && (
+          {(!data?.reviewer_id && session?.user.id !== data?.user_id) && (
             <Button
               size={"sm"}
               variant={isPending ? "ghost" : "default"}
