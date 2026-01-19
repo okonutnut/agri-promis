@@ -18,6 +18,7 @@ import { useParams } from "next/navigation";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectUserProfileAction } from "@/app/actions/UserProfileAction";
 import { SelectProjectDetailsByProjectLocationIDAction } from "@/app/actions/ProjectAction";
+import { SelectProgramByIdAction } from "@/app/actions/ProgramAction";
 import { LocationData } from "@/components/interfaces";
 
 const ImageModal = dynamic(() => import("@/components/ui/image-modal"), {
@@ -38,6 +39,7 @@ type ImageCaptureFormProps = {
   setImages: React.Dispatch<React.SetStateAction<ImageData[]>>;
   enableOverlay?: boolean;
   projectID?: string;
+  programID?: string;
 };
 
 export default function ImageCaptureForm({
@@ -47,9 +49,11 @@ export default function ImageCaptureForm({
   setImages,
   enableOverlay = true,
   projectID: propProjectID,
+  programID: propProgramID,
 }: ImageCaptureFormProps) {
   const params = useParams();
-  const projectID = propProjectID || (params?.projectID as string);
+  const projectID = propProjectID || (Array.isArray(params?.projectID) ? params.projectID[0] : params?.projectID as string);
+  const programID = propProgramID || (Array.isArray(params?.programID) ? params.programID[0] : params?.programID as string);
 
   const [isCompressing, setIsCompressing] = useState(false);
   const [fullScreenImage, setFullScreenImage] = useState<ImageData | null>(
@@ -64,12 +68,23 @@ export default function ImageCaptureForm({
 
   const { data: project, isLoading: isProjectLoading } = useRealtimeQuery({
     queryKey: ["project_details", projectID],
-    queryFn: () =>
-      SelectProjectDetailsByProjectLocationIDAction(projectID),
+    queryFn: async () => {
+      if (!projectID || !enableOverlay) return null;
+      return SelectProjectDetailsByProjectLocationIDAction(projectID);
+    },
     table: "projects",
   });
 
-  const isLoading = enableOverlay && isProjectLoading;
+  const { data: program, isLoading: isProgramLoading } = useRealtimeQuery({
+    queryKey: ["program_details", programID],
+    queryFn: async () => {
+      if (!programID || !enableOverlay || projectID) return null;
+      return SelectProgramByIdAction(programID);
+    },
+    table: "programs",
+  });
+
+  const isLoading = enableOverlay && (isProjectLoading || isProgramLoading);
 
   const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -81,7 +96,7 @@ export default function ImageCaptureForm({
     try {
       // Get GPS location once before processing all images
       let locationData: LocationData | null = null;
-      if (enableOverlay && projectID && userProfile && project) {
+      if (enableOverlay && userProfile && (project || program)) {
         try {
           locationData = await getLongtitudeLatitudeFromGPS();
           if (locationData.error) {
@@ -108,7 +123,7 @@ export default function ImageCaptureForm({
 
         let processedFile = file;
 
-        if (enableOverlay && projectID && userProfile && project) {
+        if (enableOverlay && userProfile && (project || program)) {
           // Use locationData if available, otherwise create empty location
           const location = locationData || {
             latitude: undefined,
@@ -117,12 +132,15 @@ export default function ImageCaptureForm({
             error: undefined,
           };
           
+          // Use project name if available, otherwise use program name
+          const displayName = project?.projects?.project_name || program?.program_name || "Unknown";
+          
           const overlayedFile = await addOverlayToImage(
             file,
             dateTimeCaptured,
             location,
             userProfile?.fullname || "Unknown User",
-            project?.projects?.project_name || "Unknown Project"
+            displayName
           );
 
           processedFile =

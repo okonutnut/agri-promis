@@ -162,6 +162,8 @@ export default function UploadFieldReportForm({
           values={values}
           images={images}
           setImages={setImages}
+          enableOverlay={true}
+          projectID={Array.isArray(projectID) ? projectID[0] : projectID as string}
         />
         <form
           className="space-y-3 p-2 border-t pt-4 mb-4"

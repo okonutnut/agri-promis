@@ -148,7 +148,8 @@ export function CreatePostTravelForm({
           values={values}
           images={images}
           setImages={setImages}
-          enableOverlay={false}
+          enableOverlay={true}
+          programID={programId || undefined}
         />
         <form
           className="space-y-3 p-2 border-t pt-4 mb-4"
