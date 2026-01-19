@@ -113,7 +113,9 @@ export function TeamMemberForm({ isAddMode, data }: TeamMemberFormProps) {
 
   return (
     <>
-      <FTGPSCard user_id={data?.id || ""} />
+      {!isAddMode && (
+        <FTGPSCard user_id={data?.id || ""} />
+      )}
       <Label className="px-3 my-2 text-xl">Account Info</Label>
       <form
         className="p-3 space-y-4 mb-4"
