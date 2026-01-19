@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PostTravelReportType } from "@/components/types";
@@ -56,6 +56,7 @@ export function CreatePostTravelForm({
   const [selectedTravelOrderId, setSelectedTravelOrderId] = useState<
     string | null
   >(values?.travel_order_id || null);
+  const [programId, setProgramId] = useState<string | null>(values?.program_id || programID as string || null);
 
   const form = useForm<PostTravelReportFormData>({
     resolver: zodResolver(postTravelReportSchema),
@@ -70,6 +71,15 @@ export function CreatePostTravelForm({
       remarks: values?.remarks || "",
     },
   });
+
+  useEffect(() => {
+    if (programID) {
+      setProgramId(programID as string);
+    } else if (values?.program_id) {
+      setProgramId(values.program_id);
+    }
+    form.setValue("program_id", programId as string);
+  }, [programID, values?.program_id, form, programId]);
 
   const { mutate, isPending } = useUniversalMutation({
     mutationFn: async (
