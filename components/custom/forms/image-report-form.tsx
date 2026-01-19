@@ -96,7 +96,9 @@ export default function ImageCaptureForm({
       const processedImages: ImageData[] = [];
 
       for (const file of files) {
-        const dateTimeCaptured = new Date().toLocaleDateString("en-PH", {
+        // Use ISO string for proper timestamp parsing
+        const dateTimeCaptured = new Date().toISOString();
+        const dateTimeDisplay = new Date().toLocaleString("en-PH", {
           year: "numeric",
           month: "2-digit",
           day: "2-digit",
@@ -106,13 +108,21 @@ export default function ImageCaptureForm({
 
         let processedFile = file;
 
-        if (enableOverlay && projectID && userProfile && project && locationData) {
+        if (enableOverlay && projectID && userProfile && project) {
+          // Use locationData if available, otherwise create empty location
+          const location = locationData || {
+            latitude: undefined,
+            longitude: undefined,
+            locationName: undefined,
+            error: undefined,
+          };
+          
           const overlayedFile = await addOverlayToImage(
             file,
             dateTimeCaptured,
-            locationData,
-            userProfile?.fullname as string,
-            project?.projects?.project_name as string
+            location,
+            userProfile?.fullname || "Unknown User",
+            project?.projects?.project_name || "Unknown Project"
           );
 
           processedFile =
@@ -126,7 +136,7 @@ export default function ImageCaptureForm({
           id: `${Date.now()}-${Math.random()}`,
           src: fileURL,
           file: processedFile,
-          dateTimeCaptured: dateTimeCaptured,
+          dateTimeCaptured: dateTimeDisplay,
         };
 
         processedImages.push(imageData);

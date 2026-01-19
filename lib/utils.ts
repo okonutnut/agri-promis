@@ -130,7 +130,14 @@ export const addOverlayToImage = (
         const formattedTime = date.toLocaleTimeString();
         const overlayLines: string[] = [`${formattedDate} ${formattedTime}`];
 
-        if (location.latitude && location.longitude) {
+        // Check if location coordinates are valid (not 0 and not undefined)
+        if (
+          location &&
+          typeof location.latitude === "number" &&
+          typeof location.longitude === "number" &&
+          location.latitude !== 0 &&
+          location.longitude !== 0
+        ) {
           overlayLines.push(
             `Lat: ${location.latitude.toFixed(6)}, Long: ${location.longitude.toFixed(6)}`
           );
@@ -161,61 +168,66 @@ export const addOverlayToImage = (
         }
 
         // Wrap project name and fullname if needed
-        const projectText = `Project: ${projectName}`;
-        const projectMetrics = ctx.measureText(projectText);
-        const maxTextWidth = img.width * 0.6;
-        
-        if (projectMetrics.width > maxTextWidth) {
-          // Split project name if too long
-          const words = projectName.split(" ");
-          let currentLine = "Project: ";
-          const projectLines: string[] = [];
+        if (projectName && projectName.trim()) {
+          const projectText = `Project: ${projectName}`;
+          const projectMetrics = ctx.measureText(projectText);
+          const maxTextWidth = img.width * 0.6;
           
-          words.forEach((word) => {
-            const testLine = currentLine + word + " ";
-            const metrics = ctx.measureText(testLine);
+          if (projectMetrics.width > maxTextWidth) {
+            // Split project name if too long
+            const words = projectName.split(" ");
+            let currentLine = "Project: ";
+            const projectLines: string[] = [];
             
-            if (metrics.width > maxTextWidth && currentLine !== "Project: ") {
+            words.forEach((word) => {
+              const testLine = currentLine + word + " ";
+              const metrics = ctx.measureText(testLine);
+              
+              if (metrics.width > maxTextWidth && currentLine !== "Project: ") {
+                projectLines.push(currentLine.trim());
+                currentLine = word + " ";
+              } else {
+                currentLine = testLine;
+              }
+            });
+            if (currentLine.trim() !== "Project:") {
               projectLines.push(currentLine.trim());
-              currentLine = word + " ";
-            } else {
-              currentLine = testLine;
             }
-          });
-          if (currentLine.trim() !== "Project:") {
-            projectLines.push(currentLine.trim());
+            overlayLines.push(...projectLines);
+          } else {
+            overlayLines.push(projectText);
           }
-          overlayLines.push(...projectLines);
-        } else {
-          overlayLines.push(projectText);
         }
 
-        const capturedByText = `Captured by ${fullname}`;
-        const capturedByMetrics = ctx.measureText(capturedByText);
-        
-        if (capturedByMetrics.width > maxTextWidth) {
-          // Split if too long
-          const words = fullname.split(" ");
-          let currentLine = "Captured by ";
-          const nameLines: string[] = [];
+        if (fullname && fullname.trim()) {
+          const capturedByText = `Captured by ${fullname}`;
+          const capturedByMetrics = ctx.measureText(capturedByText);
+          const maxTextWidth = img.width * 0.6;
           
-          words.forEach((word) => {
-            const testLine = currentLine + word + " ";
-            const metrics = ctx.measureText(testLine);
+          if (capturedByMetrics.width > maxTextWidth) {
+            // Split if too long
+            const words = fullname.split(" ");
+            let currentLine = "Captured by ";
+            const nameLines: string[] = [];
             
-            if (metrics.width > maxTextWidth && currentLine !== "Captured by ") {
+            words.forEach((word) => {
+              const testLine = currentLine + word + " ";
+              const metrics = ctx.measureText(testLine);
+              
+              if (metrics.width > maxTextWidth && currentLine !== "Captured by ") {
+                nameLines.push(currentLine.trim());
+                currentLine = word + " ";
+              } else {
+                currentLine = testLine;
+              }
+            });
+            if (currentLine.trim() !== "Captured by") {
               nameLines.push(currentLine.trim());
-              currentLine = word + " ";
-            } else {
-              currentLine = testLine;
             }
-          });
-          if (currentLine.trim() !== "Captured by") {
-            nameLines.push(currentLine.trim());
+            overlayLines.push(...nameLines);
+          } else {
+            overlayLines.push(capturedByText);
           }
-          overlayLines.push(...nameLines);
-        } else {
-          overlayLines.push(capturedByText);
         }
 
         const padding = fontSize * 0.8;
@@ -303,9 +315,60 @@ export const addOverlayToImage = (
             0.9
           );
         };
-        logo.onerror = () => reject(new Error("Failed to load logo"));
+        logo.onerror = () => {
+          // If logo fails to load, still draw the text overlay
+          console.warn("Logo failed to load, continuing without logo");
+          
+          ctx.fillStyle = "white";
+          ctx.strokeStyle = "black";
+          ctx.lineWidth = Math.max(2, fontSize / 10);
+
+          // Calculate text area width (without logo)
+          const textAreaX = margin;
+          const textAreaWidth = img.width - textAreaX - margin;
+
+          overlayLines.forEach((line, index) => {
+            const textY = overlayY + padding + index * lineHeight;
+            
+            // Measure text and truncate if it exceeds available width
+            let displayLine = line;
+            let textMetrics = ctx.measureText(displayLine);
+            
+            if (textMetrics.width > textAreaWidth) {
+              // Truncate text with ellipsis
+              while (textMetrics.width > textAreaWidth - ctx.measureText("...").width && displayLine.length > 0) {
+                displayLine = displayLine.slice(0, -1);
+                textMetrics = ctx.measureText(displayLine + "...");
+              }
+              displayLine = displayLine + "...";
+            }
+            
+            // Ensure text doesn't go outside image bounds
+            const finalTextX = Math.min(textAreaX, img.width - margin - textMetrics.width);
+            
+            ctx.strokeText(displayLine, finalTextX, textY);
+            ctx.fillText(displayLine, finalTextX, textY);
+          });
+
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                const overlayedFile = new File([blob], file.name, {
+                  type: "image/jpeg",
+                  lastModified: Date.now(),
+                });
+                resolve(overlayedFile);
+              } else {
+                resolve(file);
+              }
+            },
+            "image/jpeg",
+            0.9
+          );
+        };
         logo.src = "/da-logo.png"; // from public folder
-      } catch {
+      } catch (error) {
+        console.error("Error adding overlay to image:", error);
         resolve(file);
       }
     };
