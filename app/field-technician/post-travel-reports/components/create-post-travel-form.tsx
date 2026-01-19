@@ -236,6 +236,7 @@ export function CreatePostTravelForm({
             label="Remarks:"
             name="remarks"
             form={form}
+            {...(values?.remarks ? { defaultValue: values?.remarks } : { noPlaceholder: true })}
             readOnly={!isAddMode}
             noPlaceholder={!isAddMode}
           />
