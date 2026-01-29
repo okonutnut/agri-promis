@@ -12,6 +12,7 @@ import { useMemo } from "react";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllMonitoringReportsByProjectIDAndUserAction } from "@/app/actions/MonitoringAction";
 import { SelectProjectDetailsByProjectLocationIDAction } from "@/app/actions/ProjectAction";
+import { CheckUserAssignedToProgramByProjectLocationAction } from "@/app/actions/AssignedProgramAction";
 import SkeletonLoading from "@/components/custom/layout/skeleton-loading";
 import UploadFieldReportForm from "./form/monitoring-report-form";
 import ViewDraftsSheet from "./components/view-drafts-sheet";
@@ -61,7 +62,18 @@ function MonitoringReportContent({
     table: "projects",
   });
 
+  // Check if user is assigned to the program
+  const { data: isAssignedToProgram } = useRealtimeQuery({
+    queryKey: ["user-program-assignment", projectID as string],
+    queryFn: () =>
+      CheckUserAssignedToProgramByProjectLocationAction(projectID as string),
+    table: "assigned_fieldtechnicians",
+  });
+
   const isEnabledReports = useMemo(() => {
+    // First check if user is assigned to program
+    if (!isAssignedToProgram) return false;
+
     const currentDate = new Date();
     const startDate = projectData?.start_date
       ? new Date(projectData.start_date)
@@ -83,7 +95,7 @@ function MonitoringReportContent({
 
     // Both dates valid: enable when current is between start and end.
     return currentDate >= startDate && currentDate <= endDate;
-  }, [projectData]);
+  }, [projectData, isAssignedToProgram]);
 
   return (
     <DataTable
@@ -98,11 +110,11 @@ function MonitoringReportContent({
 }
 
 export default function MonitoringReportPage() {
-  const { projectID } = useParams();
+  const { programID, locationID } = useParams();
   const { data, isLoading, error } = useRealtimeQuery({
-    queryKey: ["monitoring-report", projectID as string],
+    queryKey: ["monitoring-report", locationID as string],
     queryFn: () =>
-      SelectAllMonitoringReportsByProjectIDAndUserAction(projectID as string),
+      SelectAllMonitoringReportsByProjectIDAndUserAction(locationID as string),
     table: "monitoring",
   });
 
@@ -112,12 +124,12 @@ export default function MonitoringReportPage() {
       pageDescription="View all submitted reports for this project."
       isLoading={isLoading}
       error={error}
-      navItems={getUserProjectNavItems(projectID as string)}
+      navItems={getUserProjectNavItems(programID as string, locationID as string)}
       role="user"
     >
       <MonitoringReportContent
         data={data ?? undefined}
-        projectID={projectID as string}
+        projectID={locationID as string}
       />
     </CustomPageLayout>
   );

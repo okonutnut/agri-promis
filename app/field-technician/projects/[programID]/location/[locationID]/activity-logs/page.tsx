@@ -9,12 +9,12 @@ import { useParams } from "next/navigation";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 
 export default function ActivityLogsPage() {
-  const { projectID } = useParams();
+  const { programID, locationID } = useParams();
 
   const { data, isLoading, error } = useRealtimeQuery({
-    queryKey: ["activity-logs", projectID as string],
+    queryKey: ["activity-logs", locationID as string],
     table: "activity_logs",
-    queryFn: () => SelectActivityLogsByProjectIDAction(projectID as string),
+    queryFn: () => SelectActivityLogsByProjectIDAction(locationID as string),
   });
 
   return (
@@ -24,7 +24,7 @@ export default function ActivityLogsPage() {
       isLoading={isLoading}
       error={error}
       role="user"
-      navItems={getUserProjectNavItems(projectID as string)}
+      navItems={getUserProjectNavItems(programID as string, locationID as string)}
     >
       <DataTable columns={columns} data={data ?? []} />
     </CustomPageLayout>

@@ -21,12 +21,13 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function MonitoringReportsChart() {
-  const { projectID } = useParams();
+  const params = useParams();
+  const projectLocationID = (params.projectID || params.locationID) as string;
 
   const { data: chartData = [] } = useRealtimeQuery({
-    queryKey: ["monitoring-reports-count-by-date", projectID as string],
+    queryKey: ["monitoring-reports-count-by-date", projectLocationID],
     table: "monitoring",
-    queryFn: () => SelectMonitoringReportsCountByDate(projectID as string),
+    queryFn: () => SelectMonitoringReportsCountByDate(projectLocationID),
   });
 
   return (

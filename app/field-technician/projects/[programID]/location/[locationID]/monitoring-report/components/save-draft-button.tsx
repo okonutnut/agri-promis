@@ -56,7 +56,7 @@ export default function SaveDraftButton({
   images,
   isPending,
 }: SaveDraftButtonProps) {
-  const { projectID } = useParams();
+  const { locationID } = useParams();
   const { closeSheet } = useSheet();
 
   const { data, isFetched } = useSelectCurrentUserSessionHook();
@@ -72,7 +72,7 @@ export default function SaveDraftButton({
       setIsSaving(true);
 
       const formData = form.getValues();
-      const draftData = createDraftData(projectID as string, formData, images);
+      const draftData = createDraftData(locationID as string, formData, images);
 
       const key =
         draftKey || `draft_${data?.user.id}_${new Date().toISOString()}`;

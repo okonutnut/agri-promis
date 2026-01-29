@@ -21,7 +21,7 @@ import {
 import { useUniversalMutation } from "@/hooks/use-universal-mutation";
 import { InsertMonitoringReportAction } from "@/app/actions/MonitoringAction";
 import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
-import ImageCaptureForm from "../../../../../../components/custom/forms/image-report-form";
+import ImageCaptureForm from "@/components/custom/forms/image-report-form";
 import PrintDownloadDropdown from "@/components/custom/print/print-download-dropdown";
 import MonitoringReportDocument from "@/components/custom/pdf/monitoring-reports-document";
 import SaveDraftButton from "../components/save-draft-button";
@@ -30,6 +30,7 @@ import { TravelOrderDropdown } from "@/components/custom/dropdown/travel-order-d
 import { TravelDateDropdown } from "@/components/custom/dropdown/travel-date-dropdown";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllTravelOrdersByUserIDAction } from "@/app/actions/TravelOrderAction";
+import { CheckUserAssignedToProgramByProjectLocationAction } from "@/app/actions/AssignedProgramAction";
 import { useSupabaseSession } from "@/hooks/use-session";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -58,7 +59,7 @@ export default function UploadFieldReportForm({
   isDraft,
   values,
 }: UploadFieldReportFormProps) {
-  const { projectID } = useParams();
+  const { locationID } = useParams();
   const { closeSheet } = useSheet();
   const { openModal, closeModal } = useModal();
   const { data: userData } = useSupabaseSession();
@@ -75,10 +76,18 @@ export default function UploadFieldReportForm({
     table: "travel_order",
   });
 
+  // Check if user is assigned to the program
+  const { data: isAssignedToProgram } = useRealtimeQuery({
+    queryKey: ["user-program-assignment-form", locationID as string],
+    queryFn: () =>
+      CheckUserAssignedToProgramByProjectLocationAction(locationID as string),
+    table: "assigned_fieldtechnicians",
+  });
+
   const form = useForm<FieldReportFormData>({
     resolver: zodResolver(fieldReportSchema),
     defaultValues: {
-      project_location_id: projectID as string,
+      project_location_id: locationID as string,
       travel_order_id: values?.travel_order?.id || values?.travel_order_id || "",
       travel_date_id: values?.travel_order?.travel_itinerary?.[0]?.id || values?.travel_date_id || "",
       travel_order_no: values?.travel_order_no || "",
@@ -96,11 +105,17 @@ export default function UploadFieldReportForm({
 
   const { mutate, isPending } = useUniversalMutation({
     mutationFn: async (data: any) => await InsertMonitoringReportAction(data),
-    invalidateKeys: ["monitoring-report", projectID as string],
+    invalidateKeys: ["monitoring-report", locationID as string],
   });
 
   const onSubmit = async (data: FieldReportFormData) => {
     try {
+      // Check if user is assigned to program
+      if (!isAssignedToProgram) {
+        toast.error("You are not assigned to this program. Please contact your administrator.");
+        return;
+      }
+
       // Remove image validation - images are now optional
       // if (!validateImages(images)) {
       //   toast.error("Please add at least one image to submit the report.");
@@ -116,7 +131,7 @@ export default function UploadFieldReportForm({
         ...data,
         findings: (data.findings || []).filter((item) => item !== ""),
         issues_concern: (data.issues_concern || []).filter((item) => item !== ""),
-        project_location_id: projectID as string,
+        project_location_id: locationID as string,
         travel_order_no: selectedTravelOrder?.travel_order_no || data.travel_order_no || "",
         travel_date_id: data.travel_date_id,
         images,
@@ -150,7 +165,7 @@ export default function UploadFieldReportForm({
   // Check if submit should be disabled - properly handle empty strings, null, undefined
   const hasTravelOrder = travelOrderId && travelOrderId.trim() !== "";
   const hasTravelDate = travelDateId && travelDateId.trim() !== "";
-  const isSubmitDisabled = isPending || !hasTravelOrder || !hasTravelDate;
+  const isSubmitDisabled = isPending || !hasTravelOrder || !hasTravelDate || !isAssignedToProgram;
 
   return (
     <>
@@ -161,7 +176,7 @@ export default function UploadFieldReportForm({
           images={images}
           setImages={setImages}
           enableOverlay={true}
-          projectID={Array.isArray(projectID) ? projectID[0] : projectID as string}
+          projectID={Array.isArray(locationID) ? locationID[0] : locationID as string}
         />
         <form
           className="space-y-3 p-2 border-t pt-4 mb-4"

@@ -45,6 +45,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { SelectAllAssignedProjectsByFieldTechnicianIDAction } from "@/app/actions/AssignedProjectAction";
+import { SelectAllProgramsAssignedToCurrentUserAction } from "@/app/actions/AssignedProgramAction";
+import { SelectAllProjectsByProgramIDAction } from "@/app/actions/ProjectAction";
 
 const PATHS = {
   FIELD_TECHNICIAN: "/field-technician/projects",
@@ -367,25 +369,26 @@ const ProjectDetailsBreadcrumb = memo(
   }
 );
 
-const UserProjectsDropdown = memo(function UserProjectsDropdown() {
-  const { projectID } = useParams();
-
-  const { data } = useRealtimeQuery({
-    queryFn: SelectAllAssignedProjectsByFieldTechnicianIDAction,
-    queryKey: ["assignedProjectsByUserID"],
-    table: "assigned_projects",
-  });
-
-  const currentProject = data?.find(
-    (project: ProjectLocationType) => project.id === projectID
-  );
+const UserProgramsDropdown = memo(function UserProgramsDropdown({
+  programID,
+}: {
+  programID?: string;
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState<string | undefined>(projectID as string);
+  const [value, setValue] = useState<string | undefined>(programID);
+
+  const { data: programs } = useRealtimeQuery({
+    queryFn: SelectAllProgramsAssignedToCurrentUserAction,
+    queryKey: ["assigned-programs-navbar"],
+    table: "assigned_fieldtechnicians",
+  });
+
+  const currentProgram = programs?.find((p) => p.id === programID);
 
   useEffect(() => {
-    setValue(projectID as string);
-  }, [projectID]);
+    setValue(programID);
+  }, [programID]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -394,14 +397,135 @@ const UserProjectsDropdown = memo(function UserProjectsDropdown() {
         prefetch={true}
         className="flex flex-1 gap-2"
       >
+        <Boxes className="h-4 w-4 text-[#707070]" />
+        <div className="min-w-[150px] truncate">
+          {currentProgram ? (
+            <span>{currentProgram.program_name}</span>
+          ) : (
+            <Skeleton className="w-full h-5" />
+          )}
+        </div>
+      </Link>
+      <PopoverTrigger asChild>
+        <Button className="ml-2 h-7 w-4 text-[#707070]" variant="ghost">
+          <ChevronsUpDown />
+        </Button>
+      </PopoverTrigger>
+
+      <PopoverContent align="start" className="m-1 p-0 w-[300px]">
+        <Command>
+          <CommandInput placeholder="Search programs..." />
+          <CommandList>
+            <CommandEmpty>No program found.</CommandEmpty>
+            <CommandGroup>
+              {(programs ?? []).map((program: ProgramType) => (
+                <CommandItem
+                  key={program.id}
+                  value={program.id}
+                  onSelect={(currentValue: string) => {
+                    setValue(currentValue);
+                    setOpen(false);
+                    router.push(`/field-technician/projects/${currentValue}`);
+                  }}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <span>{program.program_name}</span>
+                    {program.id === value && <Check className="ml-2 h-4 w-4" />}
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+        <Separator />
+        <Link href="/field-technician/projects" prefetch={true}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start font-medium"
+          >
+            All Programs
+          </Button>
+        </Link>
+      </PopoverContent>
+    </Popover>
+  );
+});
+
+const UserProjectsDropdown = memo(function UserProjectsDropdown() {
+  const { programID, locationID } = useParams();
+
+  const { data } = useRealtimeQuery({
+    queryFn: () => SelectAllProjectsByProgramIDAction(programID as string),
+    queryKey: ["allProjectsByProgramId", programID as string],
+    table: "projects",
+  });
+
+  // Find the project that contains the location with matching locationID
+  const currentProjectData = useMemo(() => {
+    if (!data || !locationID) return null;
+    for (const project of data) {
+      const location = project.project_location?.find(
+        (loc: ProjectLocationType) => loc.id === locationID
+      );
+      if (location) {
+        return { project, location };
+      }
+    }
+    return null;
+  }, [data, locationID]);
+
+  // Flatten all locations from all projects for the dropdown
+  // If currentProjectData exists, only show locations from the same project
+  const programProjects = useMemo(() => {
+    if (!data || !programID) return [];
+    const locations: Array<ProjectLocationType & { project: ProjectType }> = [];
+    data.forEach((project: ProjectType) => {
+      // If we have a current project, only include locations from that project
+      if (currentProjectData && project.id !== currentProjectData.project?.id) {
+        return;
+      }
+      project.project_location?.forEach((location: ProjectLocationType) => {
+        locations.push({
+          ...location,
+          project,
+        });
+      });
+    });
+    return locations;
+  }, [data, programID, currentProjectData]);
+  
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState<string | undefined>(locationID as string);
+
+  useEffect(() => {
+    setValue(locationID as string);
+  }, [locationID]);
+
+  const projectLink = useMemo(() => {
+    if (!programID) return "/field-technician/projects";
+    if (currentProjectData?.project?.id) {
+      return `/field-technician/projects/${programID}/projects/${currentProjectData.project.id}`;
+    }
+    return `/field-technician/projects/${programID}`;
+  }, [programID, currentProjectData?.project?.id]);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <Link
+        href={projectLink}
+        prefetch={true}
+        className="flex flex-1 gap-2"
+      >
         <Box className="h-4 w-4 text-[#707070]" />
         <div className="min-w-[150px] truncate">
-          {currentProject ? (
+          {currentProjectData ? (
             <span className="flex items-center gap-2">
-              {currentProject?.projects.project_name}
+              {currentProjectData.project?.project_name}
               <ChevronRight className="mx-1 h-3 w-3 text-gray-400" />
               <MapPin className="h-4 w-4 text-[#707070] mr-1" />
-              <span>{currentProject?.location}</span>
+              <span>{currentProjectData.location?.location}</span>
             </span>
           ) : (
             <Skeleton className="w-full h-5" />
@@ -420,33 +544,32 @@ const UserProjectsDropdown = memo(function UserProjectsDropdown() {
           <CommandList>
             <CommandEmpty>No project found.</CommandEmpty>
             <CommandGroup>
-              {(data ?? []).map((project: ProjectLocationType) => (
+              {(programProjects ?? []).map((location: ProjectLocationType & { project: ProjectType }) => (
                 <CommandItem
-                  key={project.id}
-                  value={project.id}
+                  key={location.id}
+                  value={location.id}
                   onSelect={(currentValue: string) => {
                     setValue(currentValue);
                     setOpen(false);
-                    router.push(`/field-technician/projects/${currentValue}`);
+                    if (programID) {
+                      router.push(`/field-technician/projects/${programID}/location/${currentValue}`);
+                    }
                   }}
                 >
                   <div className="flex flex-col gap-1">
-                    <span className="font-medium">
-                      {project.projects?.project_name}
-                    </span>
-                    <small className="flex items-center">
+                    <span className="flex items-center">
                       <MapPin className="h-4 w-4 text-[#707070] mr-1" />{" "}
-                      {project.location}
-                    </small>
+                      {location.location}
+                    </span>
                   </div>
-                  {project.id === value && <Check className="ml-2 h-4 w-4" />}
+                  {location.id === value && <Check className="ml-2 h-4 w-4" />}
                 </CommandItem>
               ))}
             </CommandGroup>
           </CommandList>
         </Command>
         <Separator />
-        <Link href="/field-technician/projects" prefetch={true}>
+        <Link href={programID ? `/field-technician/projects/${programID}` : "/field-technician/projects"} prefetch={true}>
           <Button
             variant="ghost"
             size="sm"
@@ -500,13 +623,20 @@ export default function CustomNavbar({
     queryFn: SelectAllProgramsWithProjectsAction,
   });
 
+  const { data: userPrograms } = useRealtimeQuery({
+    table: "assigned_fieldtechnicians",
+    queryKey: ["assigned-programs-navbar"],
+    queryFn: SelectAllProgramsAssignedToCurrentUserAction,
+  });
+
   // Determine if we're on a project details page or project location page
   const isProjectDetailsPage = useMemo(() => {
     return (
       pathname?.includes("/programs/") &&
       pathname?.includes("/projects/") &&
       projectID &&
-      !pathname?.startsWith("/dashboard/projects/")
+      !pathname?.startsWith("/dashboard/projects/") &&
+      !pathname?.startsWith("/field-technician/projects/")
     );
   }, [pathname, projectID]);
 
@@ -518,11 +648,64 @@ export default function CustomNavbar({
     return (
       pathname?.includes("/programs/") &&
       pathname?.endsWith("/projects") &&
-      !projectID
+      !projectID &&
+      !pathname?.startsWith("/field-technician/projects/")
     );
   }, [pathname, projectID]);
 
+  // Field technician route detection
+  const isFieldTechnicianProgramsPage = useMemo(() => {
+    return (
+      pathname?.startsWith("/field-technician/projects") &&
+      !programID &&
+      !projectID &&
+      pathname === "/field-technician/projects"
+    );
+  }, [pathname, programID, projectID]);
+
+  const isFieldTechnicianProgramProjectsPage = useMemo(() => {
+    if (!pathname?.startsWith("/field-technician/projects/")) return false;
+    // Path should be like /field-technician/projects/[programID] (without /projects/ or /location/)
+    // Check pathname structure first, then verify params match
+    const hasProjectsInPath = pathname.includes("/projects/");
+    const hasLocationInPath = pathname.includes("/location/");
+    if (hasProjectsInPath || hasLocationInPath) return false;
+    // Path should match pattern: /field-technician/projects/[programID]
+    const pathParts = pathname.split("/").filter(Boolean);
+    return pathParts.length === 3 && pathParts[0] === "field-technician" && pathParts[1] === "projects";
+  }, [pathname]);
+
+  const isFieldTechnicianProjectLocationsPage = useMemo(() => {
+    if (!pathname?.startsWith("/field-technician/projects/")) return false;
+    // Path should be like /field-technician/projects/[programID]/projects/[projectID]
+    // Check pathname structure first
+    const hasProjectsInPath = pathname.includes("/projects/");
+    const hasLocationInPath = pathname.includes("/location/");
+    if (!hasProjectsInPath || hasLocationInPath) return false;
+    // Path should match pattern: /field-technician/projects/[programID]/projects/[projectID]
+    const pathParts = pathname.split("/").filter(Boolean);
+    return pathParts.length === 5 && 
+           pathParts[0] === "field-technician" && 
+           pathParts[1] === "projects" &&
+           pathParts[3] === "projects";
+  }, [pathname]);
+
+  const isFieldTechnicianLocationPage = useMemo(() => {
+    if (!pathname?.startsWith("/field-technician/projects/")) return false;
+    // Path should match pattern: /field-technician/projects/[programID]/location/[locationID]
+    const hasLocationInPath = pathname.includes("/location/");
+    if (!hasLocationInPath) return false;
+    const pathParts = pathname.split("/").filter(Boolean);
+    return pathParts.length === 5 && 
+           pathParts[0] === "field-technician" && 
+           pathParts[1] === "projects" &&
+           pathParts[3] === "location";
+  }, [pathname]);
+
   const currentProgram = useMemo(() => {
+    if (role === "user" && programID && userPrograms) {
+      return userPrograms.find((p) => p.id === programID);
+    }
     if (programID && programs) {
       return programs.find((p) => p.id === programID);
     }
@@ -536,7 +719,7 @@ export default function CustomNavbar({
       );
     }
     return undefined;
-  }, [programID, projectID, programs, isProjectLocationPage, isProjectDetailsPage]);
+  }, [programID, projectID, programs, userPrograms, isProjectLocationPage, isProjectDetailsPage, role]);
 
   return (
     <>
@@ -637,7 +820,63 @@ export default function CustomNavbar({
                     )}
                   </>
                 ) : (
-                  <UserProjectsDropdown />
+                  <>
+                    {/* Field technician programs list page */}
+                    {isFieldTechnicianProgramsPage && (
+                      <span className="text-black whitespace-nowrap flex items-center gap-2">
+                        <Boxes className="h-4 w-4 text-[#707070]" />
+                        {pageTitle || "Assigned Programs"}
+                      </span>
+                    )}
+
+                    {/* Field technician program projects page */}
+                    {isFieldTechnicianProgramProjectsPage && (
+                      <>
+                        <UserProgramsDropdown programID={programID as string} />
+                        <BreadcrumbSeparator />
+                        <Link
+                          href={`/field-technician/projects/${programID}`}
+                          className="text-black whitespace-nowrap"
+                        >
+                          <span className="w-[150px] flex items-center gap-2">
+                            <Archive className="h-4 w-4 text-[#707070]" />
+                            Projects
+                          </span>
+                        </Link>
+                      </>
+                    )}
+
+                    {/* Field technician project locations page */}
+                    {isFieldTechnicianProjectLocationsPage && (
+                      <>
+                        <UserProgramsDropdown programID={programID as string} />
+                        <BreadcrumbSeparator />
+                        <span className="text-black whitespace-nowrap flex items-center gap-2">
+                          <Archive className="h-4 w-4 text-[#707070]" />
+                          {pageTitle || "Locations"}
+                        </span>
+                      </>
+                    )}
+
+                    {/* Field technician location dashboard page */}
+                    {isFieldTechnicianLocationPage && (
+                      <>
+                        <UserProgramsDropdown programID={programID as string} />
+                        <BreadcrumbSeparator />
+                        <UserProjectsDropdown />
+                      </>
+                    )}
+
+                    {/* Fallback for other field technician pages */}
+                    {!isFieldTechnicianProgramsPage &&
+                      !isFieldTechnicianProgramProjectsPage &&
+                      !isFieldTechnicianProjectLocationsPage &&
+                      !isFieldTechnicianLocationPage && (
+                        <span className="text-black whitespace-nowrap">
+                          {pageTitle || "Projects"}
+                        </span>
+                      )}
+                  </>
                 )}
               </>
             )}

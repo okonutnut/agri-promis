@@ -23,7 +23,7 @@ type ViewDraftsSheetProps = {
 };
 
 function DraftsContent({ handleModify }: ViewDraftsSheetProps) {
-  const { projectID } = useParams();
+  const { locationID } = useParams();
   const { data } = useSupabaseSession();
   const [drafts, setDrafts] = useState<MonitoringReportType[]>([]);
 
@@ -33,13 +33,13 @@ function DraftsContent({ handleModify }: ViewDraftsSheetProps) {
         const res = await loadDrafts(data?.user?.id as string);
         setDrafts(
           res.filter(
-            (d) => d.project_location_id === projectID
+            (d) => d.project_location_id === locationID
           ) as MonitoringReportType[]
         );
       }
       fetchDrafts();
     }
-  }, [data?.user?.id]);
+  }, [data?.user?.id, locationID]);
 
   return (
     <>

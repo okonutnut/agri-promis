@@ -16,11 +16,12 @@ import { SelectActivityLogsByProjectIDAction } from "@/app/actions/ActivityLogAc
 import { useParams } from "next/navigation";
 
 export default function ProjectActivityLogTable() {
-  const { projectID } = useParams();
+  const params = useParams();
+  const projectLocationID = (params.projectID || params.locationID) as string;
 
   const { data, isLoading, error } = useRealtimeQuery({
-    queryKey: ["project-activity-logs", projectID as string],
-    queryFn: () => SelectActivityLogsByProjectIDAction(projectID as string),
+    queryKey: ["project-activity-logs", projectLocationID],
+    queryFn: () => SelectActivityLogsByProjectIDAction(projectLocationID),
     table: "activity_logs",
   });
 

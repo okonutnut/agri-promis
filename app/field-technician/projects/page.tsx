@@ -1,167 +1,83 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Box, ChevronRight, Funnel } from "lucide-react";
+import { useState } from "react";
+import { Boxes, ChevronRight } from "lucide-react";
 import { getUserDashboardNavItems } from "@/components/sidebar/navitems";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import CardLink from "@/components/custom/link/card-link";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
-import { SelectAllAssignedProjectsByFieldTechnicianIDAction } from "@/app/actions/AssignedProjectAction";
-import growthStages from "@/data/growth-stages.json";
-import { CirclePercent } from "@/components/custom/charts/circle-percent";
-import { getPercentFromStages } from "@/lib/utils";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import MunicipalitySelector from "@/components/custom/dropdown/municipality-dropdown";
-import YearsDropdown from "@/components/custom/dropdown/years-dropdown";
+import { SelectAllProgramsAssignedToCurrentUserAction } from "@/app/actions/AssignedProgramAction";
 import SearchInput from "@/components/custom/input/search-input";
-import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
 
-export default function AssignedProjectsPage() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filter, setFilter] = useState("");
-  const [projectStatus, setProjectStatus] = useState<number>(1);
-  const [yearFilter, setYearFilter] = useState("");
+export default function AssignedProgramsPage() {
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data, isLoading, error } = useRealtimeQuery({
-    queryKey: ["assigned-projects"],
-    queryFn: SelectAllAssignedProjectsByFieldTechnicianIDAction,
-    table: "assigned_projects",
+    queryKey: ["assigned-programs"],
+    queryFn: SelectAllProgramsAssignedToCurrentUserAction,
+    table: "assigned_fieldtechnicians",
   });
 
-  const filteredData = useMemo(
-    () =>
-      data
-        ?.filter((project) =>
-          project.projects.project_name
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase())
-        )
-        .filter((project) =>
-          filter
-            ? project.location?.toLowerCase().includes(filter.toLowerCase())
-            : true
-        )
-        .filter((project) =>
-          yearFilter
-            ? new Date(project.start_date!).getFullYear().toString() ===
-              yearFilter
-            : true
-        )
-        .filter((project) => project.status === projectStatus),
-    [data, searchTerm, filter, yearFilter, projectStatus]
+  // Filter programs based on the search query
+  const filteredPrograms = data?.filter((program) =>
+    program.program_name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
     <CustomPageLayout
-      pageTitle="Assigned Projects"
-      pageDescription="List of your assigned projects."
+      pageTitle="Assigned Programs"
+      pageDescription="List of programs you are assigned to."
       navItems={getUserDashboardNavItems()}
       isLoading={isLoading}
       error={error}
       role="user"
     >
-      <div className="flex flex-wrap items-start gap-2 mb-4">
-        <div className="w-full md:max-w-md flex flex-nowrap gap-3">
-          <SearchInput
-            placeholder="Search projects..."
-            setSearchTerm={setSearchTerm}
-          />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="shadow-xs">
-                <Funnel />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="mx-1">
-              <DropdownMenuItem onClick={() => setProjectStatus(1)}>
-                {projectStatus === 1 && <Check />}
-                <span className={`w-2 h-2 bg-primary rounded-full`} />
-                Active
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setProjectStatus(0)}>
-                {projectStatus === 0 && <Check />}
-                <span className={`w-2 h-2 bg-red-500 rounded-full`} />
-                Inactive
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        <div className="w-full md:max-w-md flex flex-wrap gap-2 ">
-          <MunicipalitySelector onChange={setFilter} />
-          <YearsDropdown onChange={setYearFilter} />
-        </div>
+      <div className="flex flex-wrap items-start gap-4 mb-4">
+        <SearchInput
+          setSearchTerm={setSearchQuery}
+          className="w-full max-w-md"
+          placeholder="Search programs..."
+        />
       </div>
-      {data && data.length > 0 ? (
-        <>
-          {filteredData && filteredData.length > 0 ? (
-            <div className="flex flex-wrap justify-start items-center gap-2">
-              {filteredData.map((project) => (
-                <CardLink
-                  href={`/field-technician/projects/${project.id}`}
-                  key={project.id}
-                  className="group min-w-sm flex flex-col items-start h-full p-4 space-y-2 gap-0"
-                >
-                  <div className="w-full flex justify-between items-start">
-                    <div className="flex items-start gap-4">
-                      <span className="border rounded-full p-2 border-primary">
-                        <Box className="h-5 w-5 text-primary" />
-                      </span>
-                      <div className="font-semibold flex flex-col gap-2">
-                        {project.projects.project_name}
-                        <pre className="text-xs font-normal">
-                          {project.location}
-                        </pre>
-                        <small>
-                          Date Created:&nbsp;
-                          {format(new Date(project.created_at!), "PPp")}
-                        </small>
-                        <Badge className="font-semibold rounded-md">
-                          {
-                            growthStages.find(
-                              (stage) =>
-                                stage.value ===
-                                project.progress_indicator!.toString()
-                            )?.label
-                          }
-                          &nbsp;
-                          {project.progress_indicator == 1 ? "" : "Stages"}
-                        </Badge>
-                        <div className="flex items-center justify-end">
-                          <span className="w-16 h-16">
-                            <CirclePercent
-                              percent={getPercentFromStages(
-                                growthStages,
-                                project.progress_indicator!.toString()
-                              )}
-                            />
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <span className="ml-2 transform transition-transform group-hover:translate-x-2">
-                      <ChevronRight className="h-4 w-4" />
+
+      {filteredPrograms && filteredPrograms?.length > 0 ? (
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+          {filteredPrograms.map((program) => (
+            <CardLink
+              href={`/field-technician/projects/${program.id}`}
+              key={program.id}
+              className="flex flex-col items-start h-[120px] p-4 space-y-2 gap-0"
+            >
+              <div className="w-full flex justify-between items-start">
+                <div className="flex items-start gap-4">
+                  <span className="border border-primary rounded-full p-2">
+                    <Boxes className="h-5 w-5 text-primary" />
+                  </span>
+                  <div className="flex flex-col">
+                    <span className="font-semibold">
+                      {program.program_name}
                     </span>
+                    <small className="mb-2">
+                      Created on:&nbsp;
+                      {format(new Date(program.created_at!), "PPp")}
+                    </small>
+                    <Badge className="font-normal rounded-md">
+                      {program.project_count?.[0]?.count ?? 0} project/s
+                    </Badge>
                   </div>
-                </CardLink>
-              ))}
-            </div>
-          ) : (
-            <span>
-              No results found. <br />
-            </span>
-          )}
-        </>
+                </div>
+                <span className="ml-2 transform transition-transform group-hover:translate-x-2">
+                  <ChevronRight className="h-4 w-4" />
+                </span>
+              </div>
+            </CardLink>
+          ))}
+        </div>
       ) : (
         <span className="italic">
-          No assigned projects found. <br /> Please contact your admin for
+          No assigned programs found. <br /> Please contact your admin for
           assistance.
         </span>
       )}

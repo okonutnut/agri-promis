@@ -1,4 +1,5 @@
 import {
+  ArrowLeft,
   BookOpen,
   Cctv,
   ChartLine,
@@ -71,6 +72,11 @@ export function getProgramNavItems(id: string) {
       icon: FolderKanban,
     },
     {
+      title: "Field Technicians",
+      href: `/dashboard/programs/${id}/field-technicians`,
+      icon: UserPen,
+    },
+    {
       title: "Post-Travel Reports",
       href: `/dashboard/programs/${id}/post-travel-reports`,
       icon: NotebookPen,
@@ -95,11 +101,12 @@ export function getProjectNavItems(id: string) {
       href: `/dashboard/projects/${id}`,
       icon: House,
     },
-    {
-      title: "Field Technicians",
-      href: `/dashboard/projects/${id}/field-technicians`,
-      icon: UserPen,
-    },
+    // Temporarily disabled
+    // {
+    //   title: "Field Technicians",
+    //   href: `/dashboard/projects/${id}/field-technicians`,
+    //   icon: UserPen,
+    // },
     {
       title: "Monitoring Reports",
       href: `/dashboard/projects/${id}/monitoring-reports`,
@@ -148,22 +155,27 @@ export function getUserDashboardNavItems() {
   ];
 }
 
-export function getUserProjectNavItems(id: string) {
+export function getUserProjectNavItems(programID: string, locationID: string) {
   return [
     {
       title: "Project Overview",
-      href: `/field-technician/projects/${id}`,
+      href: `/field-technician/projects/${programID}/location/${locationID}`,
       icon: House,
     },
     {
       title: "Monitoring Report",
-      href: `/field-technician/projects/${id}/monitoring-report`,
+      href: `/field-technician/projects/${programID}/location/${locationID}/monitoring-report`,
       icon: Cctv,
     },
     {
       title: "Activity Logs",
-      href: `/field-technician/projects/${id}/activity-logs`,
+      href: `/field-technician/projects/${programID}/location/${locationID}/activity-logs`,
       icon: ChartLine,
     },
+    {
+      title: "Back to Projects",
+      href: `/field-technician/projects/${programID}`,
+      icon: ArrowLeft,
+    }
   ];
 }

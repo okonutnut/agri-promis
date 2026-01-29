@@ -10,11 +10,12 @@ import { SelectDashboardItemsAction } from "@/app/actions/DashboardAction";
 import { useUniversalRealtime } from "@/hooks/use-universal-realtime";
 
 export default function ProjectDashboardItems() {
-  const { projectID } = useParams();
+  const params = useParams();
+  const projectLocationID = (params.projectID || params.locationID) as string;
 
   const { data, isLoading, error } = useUniversalRealtime({
-    queryKey: ["dashboard_items", projectID as string],
-    queryFn: () => SelectDashboardItemsAction(projectID as string),
+    queryKey: ["dashboard_items", projectLocationID],
+    queryFn: () => SelectDashboardItemsAction(projectLocationID),
     tables: ["projects", "farmers", "project_location"],
   });
 

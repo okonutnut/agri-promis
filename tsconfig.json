@@ -16,7 +16,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "incremental": true,
     "plugins": [
       {
@@ -37,7 +37,7 @@
     "worker/**/*.ts",
     "types/**/*.ts",
     "app/field-technician/dashboard/layout.tsx",
-    "app/field-technician/projects/[projectID]/monitoring-report/loading.tsx.bak",
+    "app/field-technician/projects/[projectUID]/monitoring-report/loading.tsx.bak",
     "app/dashboard/projects/[projectID]/monitoring-reports/loading.tsx.back",
     "app/dashboard/projects/[projectID]/field-technicians/loading.tsx.back",
     "app/field-technician/travel-order/components/travel-order-form.tsx.bak",
