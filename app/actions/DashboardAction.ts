@@ -130,9 +130,6 @@ export async function SelectAdminDashboardItemsAction() {
     console.error("Error fetching future travel orders:", futureTravelOrdersError);
   }
 
-  console.log("Future travel orders:", futureTravelOrders);
-  console.log("Now date:", nowDate);
-
   const { data: activityLogs } = await supabase
     .from("activity_logs")
     .select("*, user:user_profile (fullname)")

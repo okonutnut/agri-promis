@@ -122,8 +122,6 @@ export default function UploadFieldReportForm({
         images,
       };
 
-      console.log(cleanedData);
-
       mutate(
         { ...cleanedData },
         {

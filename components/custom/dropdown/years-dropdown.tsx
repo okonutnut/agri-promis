@@ -42,11 +42,15 @@ export default function ProjectYearsDropdown({
   }, []); // Empty dependency array - only run on mount
 
   function handleYearChange(value: string) {
-    // Always select a year, never empty
     setYear(value);
     setOpenYear(false);
     onChange?.(value);
   }
+
+  const displayText =
+    year === "all"
+      ? "All Years"
+      : "Year " + (years.find((m) => m.value === year)?.label || year);
 
   return (
     <Popover open={openYear} onOpenChange={setOpenYear}>
@@ -57,7 +61,7 @@ export default function ProjectYearsDropdown({
           aria-expanded={openYear}
           className="w-[200px] justify-between shadow-xs font-normal"
         >
-          {"Year " + (years.find((m) => m.value === year)?.label || year)}
+          {displayText}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -67,6 +71,19 @@ export default function ProjectYearsDropdown({
           <CommandList>
             <CommandEmpty>No years found.</CommandEmpty>
             <CommandGroup>
+              <CommandItem
+                key="all"
+                value="all"
+                onSelect={() => handleYearChange("all")}
+              >
+                <Check
+                  className={cn(
+                    "mr-2 h-4 w-4",
+                    year === "all" ? "opacity-100" : "opacity-0"
+                  )}
+                />
+                All
+              </CommandItem>
               {years.map((m) => (
                 <CommandItem
                   key={m.value}

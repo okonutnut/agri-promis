@@ -1,7 +1,12 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext", "WebWorker"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext",
+      "WebWorker"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -11,7 +16,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
     "plugins": [
       {
@@ -19,9 +24,29 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": [
+        "./*"
+      ]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "worker/**/*.ts", "types/**/*.ts", "app/field-technician/dashboard/layout.tsx", "app/field-technician/projects/[projectID]/monitoring-report/loading.tsx.bak", "app/dashboard/projects/[projectID]/monitoring-reports/loading.tsx.back", "app/dashboard/projects/[projectID]/field-technicians/loading.tsx.back", "app/field-technician/travel-order/components/travel-order-form.tsx.bak", "components/custom/navbar/custom-navbar copy.tsx.bak", "components/custom/pdf/monitoring-reports-docx.tsx.bak", "components/custom/print/print-post-travel-pdfmake.tsx.bak"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "worker/**/*.ts",
+    "types/**/*.ts",
+    "app/field-technician/dashboard/layout.tsx",
+    "app/field-technician/projects/[projectID]/monitoring-report/loading.tsx.bak",
+    "app/dashboard/projects/[projectID]/monitoring-reports/loading.tsx.back",
+    "app/dashboard/projects/[projectID]/field-technicians/loading.tsx.back",
+    "app/field-technician/travel-order/components/travel-order-form.tsx.bak",
+    "components/custom/navbar/custom-navbar copy.tsx.bak",
+    "components/custom/pdf/monitoring-reports-docx.tsx.bak",
+    "components/custom/print/print-post-travel-pdfmake.tsx.bak",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

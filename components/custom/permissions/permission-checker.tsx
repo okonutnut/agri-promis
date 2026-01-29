@@ -119,7 +119,6 @@ export default function PermissionChecker() {
       navigator.geolocation.getCurrentPosition(
         () => {
           // Permission granted and GPS is working
-          console.log("Location permission granted");
           setShowLocationDialog(false);
           // Check notification permission after location is granted
           setTimeout(() => {
@@ -140,8 +139,6 @@ export default function PermissionChecker() {
         },
         (error) => {
           // Permission denied or GPS unavailable
-          console.log("Location error:", error.code, error.message);
-
           // On mobile, if GPS is still not working, show dialog again after a delay
           // This gives user time to enable GPS in device settings
           if (isMobile) {
@@ -158,7 +155,6 @@ export default function PermissionChecker() {
                 navigator.geolocation.getCurrentPosition(
                   () => {
                     // GPS is now working, don't show dialog again
-                    console.log("GPS enabled successfully");
                   },
                   () => {
                     // Still not working, show dialog again to remind user

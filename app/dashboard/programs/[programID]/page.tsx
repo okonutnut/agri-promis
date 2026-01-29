@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   FolderKanban,
   MapPin,
@@ -8,8 +8,6 @@ import {
   Plane,
   Calendar,
   FileText,
-  Check,
-  ChevronsUpDown,
 } from "lucide-react";
 import { useParams, useSearchParams } from "next/navigation";
 import { getProgramNavItems } from "@/components/sidebar/navitems";
@@ -18,100 +16,12 @@ import { SelectAllProjectsByProgramIDAction } from "@/app/actions/ProjectAction"
 import { SelectProgramByIdAction } from "@/app/actions/ProgramAction";
 import { SelectAllTravelOrdersByProgramIDAction } from "@/app/actions/TravelOrderAction";
 import { SelectAllPostTravelReportsByProgramIDAction } from "@/app/actions/PostTravelAction";
-import { Button } from "@/components/ui/button";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import SummaryCard from "@/components/custom/card/summary-cards";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import years from "@/data/years.json";
-
-// Year selector component with "All" option
-function YearSelector({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  const [open, setOpen] = useState(false);
-
-  const yearOptions = [
-    { label: "All", value: "all" },
-    ...years.map((y) => ({ label: y.label.toString(), value: y.value })),
-  ];
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-[180px] justify-between shadow-xs font-normal"
-        >
-          {value === "all"
-            ? "All Years"
-            : `Year ${
-                yearOptions.find((y) => y.value === value)?.label || value
-              }`}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[180px] p-0">
-        <Command>
-          <CommandInput placeholder="Search year..." />
-          <CommandList>
-            <CommandEmpty>No year found.</CommandEmpty>
-            <CommandGroup>
-              {yearOptions.map((option) => (
-                <CommandItem
-                  key={option.value}
-                  value={option.value}
-                  onSelect={() => {
-                    onChange(option.value);
-                    setOpen(false);
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value === option.value ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {option.label}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  );
-}
 
 export default function ProgramOverviewPage() {
   const { programID } = useParams();
   const searchParams = useSearchParams();
-
-  // Year filter state - default to current year
-  const currentYear = new Date().getFullYear().toString();
-  const [selectedYear, setSelectedYear] = useState<string>(() => {
-    // Check if current year exists in years data, otherwise default to "all"
-    const yearExists = years.some((y) => y.value === currentYear);
-    return yearExists ? currentYear : "all";
-  });
 
   const { data: programData, isLoading: programLoading } = useRealtimeQuery({
     queryKey: ["programDetails", programID as string],
@@ -143,14 +53,6 @@ export default function ProgramOverviewPage() {
       table: "post_travel",
     });
 
-  // Helper function to check if a date falls within the selected year
-  const isInSelectedYear = (dateString: string | undefined | null): boolean => {
-    if (!dateString) return false;
-    if (selectedYear === "all") return true;
-    const date = new Date(dateString);
-    return date.getFullYear().toString() === selectedYear;
-  };
-
   // Calculate statistics
   const stats = useMemo(() => {
     if (!data)
@@ -163,30 +65,10 @@ export default function ProgramOverviewPage() {
         totalTravelOrders: 0,
       };
 
-    // Filter projects by year - a project is included if it has locations created in that year
-    // or if the project itself was created in that year
-    const filteredProjects =
-      selectedYear === "all"
-        ? data
-        : data.filter((project) => {
-            // Include project if it was created in the selected year
-            if (isInSelectedYear(project.created_at)) return true;
-
-            // Include project if it has any location created in the selected year
-            const hasLocationInYear = project.project_location?.some((loc) =>
-              isInSelectedYear(loc.created_at)
-            );
-            return hasLocationInYear || false;
-          });
-
     const totalProjects = data.length;
 
-    // Filter locations by year (based on created_at)
-    const filteredLocations = filteredProjects.flatMap(
-      (project) =>
-        project.project_location?.filter(
-          (loc) => selectedYear === "all" || isInSelectedYear(loc.created_at)
-        ) || []
+    const filteredLocations = data.flatMap(
+      (project) => project.project_location || []
     );
 
     const totalLocations = filteredLocations.length;
@@ -195,16 +77,7 @@ export default function ProgramOverviewPage() {
     ).length;
 
     // Calculate travel order statistics
-    // Filter travel orders by year (based on created_at or departure_date)
-    const filteredTravelOrders =
-      travelOrders?.filter((to) => {
-        if (selectedYear === "all") return true;
-        return (
-          isInSelectedYear(to.created_at) ||
-          isInSelectedYear(to.departure_date) ||
-          isInSelectedYear(to.return_date)
-        );
-      }) || [];
+    const filteredTravelOrders = travelOrders || [];
 
     // Filter active travel orders
     const activeTravelOrders = filteredTravelOrders.filter((to) => {
@@ -217,12 +90,7 @@ export default function ProgramOverviewPage() {
       );
     });
 
-    // Filter post travel reports by year (based on created_at)
-    const filteredPostTravelReports =
-      postTravelReports?.filter((ptr) => {
-        if (selectedYear === "all") return true;
-        return isInSelectedYear(ptr.created_at);
-      }) || [];
+    const filteredPostTravelReports = postTravelReports || [];
 
     const totalPostTravels = filteredPostTravelReports.length;
 
@@ -263,7 +131,7 @@ export default function ProgramOverviewPage() {
       upcomingPostTravels,
       totalTravelOrders,
     };
-  }, [data, travelOrders, postTravelReports, selectedYear]);
+  }, [data, travelOrders, postTravelReports]);
 
   return (
     <CustomPageLayout
@@ -281,9 +149,6 @@ export default function ProgramOverviewPage() {
       isLoading={isLoading || programLoading}
       error={error}
       navItems={getProgramNavItems(programID as string)}
-      topRightComponent={
-        <YearSelector value={selectedYear} onChange={setSelectedYear} />
-      }
     >
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-3 sm:gap-4">
         <SummaryCard

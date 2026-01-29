@@ -64,11 +64,10 @@ function ProjectDashboardInfo(data: ProjectType) {
   return (
     <>
       <div className="py-5 px-4 flex justify-between items-start cursor-default">
-        <div className="flex flex-col gap-1 text-2xl font-medium ">
-          {data?.project_name ?? "..."}
-          <br />
+        <div className="flex flex-col gap-1 text-2xl font-medium">
+          <span className="font-bold">{data?.project_name ?? "..."}</span>
           <pre className="text-xs italic">{data?.description}</pre>
-          <span className="text-sm text-muted-foreground mt-4">
+          <span className="text-md mb-4">
             Location: {locationDetails?.location ?? "NOT SPECIFIED"}
           </span>
           <span className="text-sm text-muted-foreground">
@@ -123,7 +122,7 @@ function ProjectDashboardInfo(data: ProjectType) {
             </Button>
           )}
           <Link
-            href={`/dashboard/programs/${data?.program_id}/projects`}
+            href={`/dashboard/programs/${data?.program_id}/projects/${data?.id}`}
             prefetch={true}
           >
             <Button variant={"outline"} className="w-full" size="sm">

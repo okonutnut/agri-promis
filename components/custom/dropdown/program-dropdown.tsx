@@ -36,8 +36,6 @@ export default function ProgramDropdown({ onChange }: ProgramDropdownProps) {
     table: "programs",
   });
 
-  console.log("Programs data:", data);
-
   function handleProgramChange(value: string) {
     const newValue = program === value ? "" : value;
     setProgram(newValue);

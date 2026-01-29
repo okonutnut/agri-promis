@@ -60,7 +60,6 @@ export async function SendPushNotificationToAllAction(message: string) {
   }
 
   if (!subscriptions || subscriptions.length === 0) {
-    console.log("No subscriptions found");
     return;
   }
 
@@ -83,7 +82,6 @@ export async function SendPushNotificationToAllAction(message: string) {
             .from("push_subscriptions")
             .delete()
             .eq("id", sub.id);
-          console.log(`Removed invalid subscription: ${sub.id}`);
         } else {
           console.error(`Error sending notification to subscription ${sub.id}:`, error);
         }
@@ -93,9 +91,6 @@ export async function SendPushNotificationToAllAction(message: string) {
   );
 
   const failed = results.filter((r) => r.status === "rejected").length;
-  if (failed > 0) {
-    console.log(`Failed to send ${failed} out of ${subscriptions.length} notifications`);
-  }
 
   return;
 }
@@ -127,7 +122,6 @@ export async function SendPushNotificationToUserAction(
   }
 
   if (!subscription) {
-    console.log(`No subscription found for user: ${user_id}`);
     return;
   }
 
@@ -147,7 +141,6 @@ export async function SendPushNotificationToUserAction(
         .from("push_subscriptions")
         .delete()
         .eq("id", subscription.id);
-      console.log(`Removed invalid subscription: ${subscription.id}`);
     } else {
       console.error("Error sending notification:", error);
     }

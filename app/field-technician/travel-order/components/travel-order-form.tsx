@@ -99,9 +99,6 @@ export default function IssueTravelOrderForm({
     }));
   }, [allPrograms]);
 
-    console.log("Program options:", programOptions);
-    console.log("All programs:", allPrograms);
-
   const form = useForm<TravelOrderSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {

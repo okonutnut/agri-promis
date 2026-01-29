@@ -19,7 +19,6 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
       *,
       project_location:project_location(*, projects(*)),
       travel_order:travel_order(travel_order_no, travel_itinerary:travel_order_itinerary_items(*)),
-      report_type:report_type(description),
       reporter:user_profile!monitoring_reporter_id_fkey(fullname),
       reviewedBy:user_profile!monitoring_reviewed_by_id_fkey(fullname)
     `

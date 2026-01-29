@@ -5,7 +5,6 @@ import { format } from "date-fns";
 import { MonitoringReportType } from "@/components/types";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 
 export const columns: ColumnDef<MonitoringReportType>[] = [
   {
@@ -32,23 +31,6 @@ export const columns: ColumnDef<MonitoringReportType>[] = [
       );
     },
     enableSorting: true,
-  },
-  {
-    accessorKey: "report_type.description",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="h-8 p-0 hover:bg-transparent"
-        >
-          Report Type
-          <ArrowUpDown className="ml-1 h-3 w-3 text-muted-foreground" />
-        </Button>
-      );
-    },
-    enableSorting: true,
-    cell: ({ getValue }) => <Badge>{String(getValue() || "Unknown")}</Badge>,
   },
   {
     accessorKey: "remarkBy.fullname",

@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import {
   ColumnDef,
   flexRender,
@@ -30,12 +31,16 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   onRowSelect?: (row: TData) => void;
   onAdd?: () => void;
+  topComponent?: (setGlobalFilter: (value: string) => void) => React.ReactNode;
+  hideSearch?: boolean;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   onRowSelect,
+  topComponent,
+  hideSearch = false,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -57,11 +62,15 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      {/* Global Search Bar and Add Button */}
-      <SearchInput
-        setSearchTerm={table.setGlobalFilter}
-        className="w-full max-w-md"
-      />
+      {/* Custom Top Component or Default Search Bar */}
+      {topComponent ? (
+        topComponent(table.setGlobalFilter)
+      ) : !hideSearch ? (
+        <SearchInput
+          setSearchTerm={table.setGlobalFilter}
+          className="w-full max-w-md"
+        />
+      ) : null}
 
       {/* Table */}
       <div className="rounded-md border">

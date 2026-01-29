@@ -31,7 +31,6 @@ export const sendNotificationToUser = async (message: string, user_id: string) =
   }
 
   if (!data) {
-    console.log(`No subscription found for user: ${user_id}`);
     return "{}";
   }
 
@@ -52,7 +51,6 @@ export const sendNotificationToUser = async (message: string, user_id: string) =
         .from("push_subscriptions")
         .delete()
         .eq("id", data.id);
-      console.log(`Removed invalid subscription: ${data.id}`);
     } else {
       console.error("Error sending notification:", error);
     }
@@ -83,7 +81,6 @@ export const sendNotificationToAll = async (message: string) => {
   }
 
   if (!data || data.length === 0) {
-    console.log("No subscriptions found");
     return;
   }
 
@@ -106,7 +103,6 @@ export const sendNotificationToAll = async (message: string) => {
             .from("push_subscriptions")
             .delete()
             .eq("id", subscription.id);
-          console.log(`Removed invalid subscription: ${subscription.id}`);
         } else {
           console.error(`Error sending notification to subscription ${subscription.id}:`, error);
         }
