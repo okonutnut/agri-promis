@@ -56,26 +56,76 @@ export default function NotificationRequest() {
   };
 
   async function subscribeUser() {
-    if ("serviceWorker" in navigator) {
-      try {
-        // Check if service worker is already registered
-        const registration = await navigator.serviceWorker.getRegistration();
-        if (registration) {
-          generateSubscribeEndPoint(registration);
-        } else {
-          // Register the service worker
-          const newRegistration = await navigator.serviceWorker.register(
-            "/sw.js"
-          );
-          // Subscribe to push notifications
-          generateSubscribeEndPoint(newRegistration);
-        }
-      } catch (error) {
-        console.error("Error during service worker registration:", error);
-        toast.error("Error during service worker registration or subscription.");
-      }
-    } else {
+    if (!("serviceWorker" in navigator)) {
       toast.error("Service workers are not supported in this browser");
+      return;
+    }
+
+    if (!("PushManager" in window)) {
+      toast.error("Push notifications are not supported in this browser");
+      return;
+    }
+
+    try {
+      // Check if service worker is already registered
+      let registration = await navigator.serviceWorker.getRegistration();
+      
+      if (!registration) {
+        // Register the service worker
+        registration = await navigator.serviceWorker.register("/sw.js", {
+          scope: "/",
+        });
+        
+        // Wait for the service worker to be ready
+        await navigator.serviceWorker.ready;
+      }
+
+      // Ensure service worker is activated
+      if (registration.waiting) {
+        // If there's a waiting service worker, skip waiting and activate it
+        registration.waiting.postMessage({ type: "SKIP_WAITING" });
+        // Wait a bit for activation
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        // Get the updated registration
+        registration = await navigator.serviceWorker.getRegistration();
+      }
+
+      // Ensure registration is available
+      if (!registration) {
+        toast.error("Service worker registration failed. Please refresh the page and try again.");
+        return;
+      }
+
+      // Wait for the service worker to be ready/activated
+      if (registration.installing) {
+        await new Promise<void>((resolve) => {
+          const installingWorker = registration.installing;
+          if (installingWorker) {
+            installingWorker.addEventListener("statechange", () => {
+              if (installingWorker.state === "activated") {
+                resolve();
+              }
+            });
+          } else {
+            resolve();
+          }
+        });
+      }
+
+      // Double-check that pushManager is available
+      if (!registration.pushManager) {
+        toast.error("Push Manager is not available. Please try again.");
+        return;
+      }
+
+      // Subscribe to push notifications
+      await generateSubscribeEndPoint(registration);
+    } catch (error: any) {
+      console.error("Error during service worker registration:", error);
+      const errorMessage = error?.message || "Unknown error";
+      toast.error(
+        `Error during service worker registration: ${errorMessage}. Please check the console for details.`
+      );
     }
   }
 
@@ -83,14 +133,34 @@ export default function NotificationRequest() {
     newRegistration: ServiceWorkerRegistration
   ) => {
     try {
-      const applicationServerKey = urlBase64ToUint8Array(
-        process.env.NEXT_PUBLIC_VAPID_KEY!
-      );
-      const options = {
-        applicationServerKey,
-        userVisibleOnly: true,
-      };
-      const subscription = await newRegistration.pushManager.subscribe(options);
+      // Check if VAPID key is available
+      if (!process.env.NEXT_PUBLIC_VAPID_KEY) {
+        console.error("VAPID key is not configured");
+        toast.error("Push notification configuration error. Please contact support.");
+        return;
+      }
+
+      // Check if pushManager is available
+      if (!newRegistration.pushManager) {
+        console.error("PushManager is not available");
+        toast.error("Push Manager is not available. Please refresh the page and try again.");
+        return;
+      }
+
+      // Check if already subscribed
+      const existingPushSubscription = await newRegistration.pushManager.getSubscription();
+      let subscription = existingPushSubscription;
+
+      if (!subscription) {
+        const applicationServerKey = urlBase64ToUint8Array(
+          process.env.NEXT_PUBLIC_VAPID_KEY
+        );
+        const options = {
+          applicationServerKey,
+          userVisibleOnly: true,
+        };
+        subscription = await newRegistration.pushManager.subscribe(options);
+      }
 
       const supabase = createClient();
       const { data: userData } = await supabase.auth.getUser();
@@ -100,7 +170,7 @@ export default function NotificationRequest() {
         return;
       }
 
-      // Check if subscription already exists
+      // Check if subscription already exists in database
       const { data: existingSubscription } = await supabase
         .from("push_subscriptions")
         .select("id")
@@ -142,7 +212,17 @@ export default function NotificationRequest() {
       }
     } catch (error: any) {
       console.error("Error generating subscription:", error);
-      toast.error("Failed to subscribe to notifications. Please try again.");
+      
+      // Provide more specific error messages
+      if (error.name === "NotAllowedError") {
+        toast.error("Notification permission was denied. Please enable notifications in your browser settings.");
+      } else if (error.name === "AbortError") {
+        toast.error("Subscription was aborted. Please try again.");
+      } else if (error.message?.includes("VAPID")) {
+        toast.error("Push notification configuration error. Please contact support.");
+      } else {
+        toast.error(`Failed to subscribe to notifications: ${error.message || "Unknown error"}. Please try again.`);
+      }
     }
   };
 

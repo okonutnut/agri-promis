@@ -12,7 +12,7 @@ export const sendNotificationToUser = async (message: string, user_id: string) =
   };
   
   webpush.setVapidDetails(
-    vapidKeys.vapidEmail,
+    `mailto:${vapidKeys.vapidEmail}`,
     vapidKeys.publicKey,
     vapidKeys.privateKey
   );
@@ -66,7 +66,7 @@ export const sendNotificationToAll = async (message: string) => {
   };
   
   webpush.setVapidDetails(
-    vapidKeys.vapidEmail,
+    `mailto:${vapidKeys.vapidEmail}`,
     vapidKeys.publicKey,
     vapidKeys.privateKey
   );

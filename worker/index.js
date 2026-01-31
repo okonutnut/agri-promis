@@ -20,3 +20,10 @@ self.addEventListener('notificationclick', function (event) {
   // Use the current origin instead of hardcoded localhost
   event.waitUntil(clients.openWindow(self.location.origin))
 })
+
+// Handle messages from the client to skip waiting
+self.addEventListener('message', function (event) {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting()
+  }
+})
