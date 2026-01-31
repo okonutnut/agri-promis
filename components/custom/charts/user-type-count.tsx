@@ -69,41 +69,31 @@ export default function TotalUsersPerType() {
   } satisfies ChartConfig;
 
   return (
-    <>
-      <Card className="flex flex-col h-full w-full p-3 rounded-md shadow-xs">
-        <CardHeader className="items-center p-0">
-          <CardTitle className="text-lg">System User Types</CardTitle>
-        </CardHeader>
-        <CardContent className="flex-1 p-0">
-          <ChartContainer
-            config={chartConfig}
-            className="mx-auto aspect-square max-h-[250px]"
-          >
-            <PieChart>
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent hideLabel />}
-              />
-              <Pie
-                data={chartData}
-                dataKey="visitors"
-                nameKey="browser"
-                stroke="0"
-              />
-            </PieChart>
-          </ChartContainer>
-        </CardContent>
-        <CardFooter className="gap-2 text-sm p-0">
-          <div className="w-1/2 flex items-center">
-            <span className="inline-block h-3 w-3 bg-(--chart-1) rounded-full mr-2"></span>
-            <span>System Admin</span>
-          </div>
-          <div className="w-1/2 items-center">
-            <span className="inline-block h-3 w-3 bg-(--chart-2) rounded-full mr-2"></span>
-            <span>Field Operator</span>
-          </div>
-        </CardFooter>
-      </Card>
-    </>
+    <div className="h-full w-full flex items-center justify-center p-2 overflow-hidden">
+      <ChartContainer
+      config={chartConfig}
+      className="mx-auto h-full w-full"
+      >
+        <PieChart>
+          <ChartTooltip
+            cursor={false}
+            content={<ChartTooltipContent hideLabel />}
+          />
+          <Pie
+            data={chartData}
+            dataKey="visitors"
+            nameKey="browser"
+            stroke="0"
+            labelLine={false}
+            outerRadius="70%"
+            label={({ browser, percent }) => {
+              // Shorten labels to fit better
+              const shortName = browser.length > 12 ? browser.substring(0, 12) + "..." : browser;
+              return `${shortName}: ${(percent * 100).toFixed(0)}%`;
+            }}
+          />
+        </PieChart>
+      </ChartContainer>
+    </div>
   );
 }

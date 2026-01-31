@@ -21,9 +21,23 @@ export default function TeamMemberPanel({
 
   const [search, setSearch] = useState("");
 
-  // Filter admin_programs by program_name
+  // Combine admin_programs and assigned_fieldtechnicians programs
+  const allPrograms = [
+    ...(data.admin_programs?.map((p: any) => ({ ...p, type: "admin" })) || []),
+    ...(data.assigned_fieldtechnicians?.map((aft: any) => ({
+      ...aft.programs,
+      type: "assigned",
+    })).filter((p: any) => p && p.id) || []),
+  ];
+
+  // Remove duplicate programs (same ID)
+  const uniquePrograms = Array.from(
+    new Map(allPrograms.map((p: any) => [p.id, p])).values()
+  );
+
+  // Filter programs by program_name
   const filteredPrograms =
-    data.admin_programs?.filter((program: any) =>
+    uniquePrograms.filter((program: any) =>
       program.program_name?.toLowerCase().includes(search.toLowerCase())
     ) || [];
 
@@ -55,11 +69,13 @@ export default function TeamMemberPanel({
             <div className="flex flex-col gap-1 text-sm">
               <strong className="font-medium">{program.program_name}</strong>
               <small className="text-muted-foreground">
-                {program?.projects[0]?.count || 0} Projects
+                {program?.projects?.[0]?.count || program?.projects?.count || 0} Projects
               </small>
             </div>
             <div className="flex flex-col gap-2">
-              <Badge className="w-full rounded-md">PROGRAM</Badge>
+              <Badge className="w-full rounded-md">
+                {program.type === "admin" ? "ADMIN" : "ASSIGNED"}
+              </Badge>
               <Link href={`/dashboard/programs/${program.id}`} prefetch={true}>
                 <Button size={"sm"} variant={"outline"}>
                   View Program

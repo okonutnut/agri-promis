@@ -15,8 +15,9 @@ import { CreatePostTravelForm } from "@/app/field-technician/post-travel-reports
 
 type PostTravelContentProps = {
   values: PostTravelReportType[] | undefined;
+  programID: string;
 };
-function PostTravelContent({ values }: PostTravelContentProps) {
+function PostTravelContent({ values, programID }: PostTravelContentProps) {
   const { openSheet } = useSheet();
 
   const handleRowSelect = (row: PostTravelReportType) => {
@@ -29,7 +30,11 @@ function PostTravelContent({ values }: PostTravelContentProps) {
   const handleAdd = () => {
     openSheet(
       "Issue Post-Travel Report",
-      <CreatePostTravelForm isAddMode={true} values={null} key="add-mode" />
+      <CreatePostTravelForm 
+        isAddMode={true} 
+        values={{ program_id: programID } as PostTravelReportType} 
+        key="add-mode" 
+      />
     );
   };
 
@@ -62,7 +67,7 @@ export default function PostTravelReportsPage() {
       error={error}
       navItems={getProgramNavItems(programID as string)}
     >
-      <PostTravelContent values={data ?? undefined} />
+      <PostTravelContent values={data ?? undefined} programID={programID as string} />
     </CustomPageLayout>
   );
 }

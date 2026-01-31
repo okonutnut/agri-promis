@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { MonitoringReportType } from "../../components/types";
+import { CheckUserAssignedToProgramByProjectLocationAction } from "@/app/actions/AssignedProgramAction";
 
 // MONITORING REPORT ACTIONS
 export async function SelectAllMonitoringReportsByProjectIDAction(
@@ -259,6 +260,14 @@ export async function InsertMonitoringReportAction({
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("User not authenticated");
+
+  // Validate user is assigned to the program via assigned_fieldtechnicians
+  const isAssigned = await CheckUserAssignedToProgramByProjectLocationAction(
+    project_location_id as string
+  );
+  if (!isAssigned) {
+    throw new Error("You are not assigned to this program. Please contact your administrator.");
+  }
 
   // Upload images to Supabase Storage only if images are provided
   let photo_paths: string[] = [];

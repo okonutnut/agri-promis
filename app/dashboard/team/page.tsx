@@ -9,7 +9,7 @@ import CustomPageLayout, {
 } from "@/components/custom/layout/custom-page-layout";
 import { getDashboardNavItems } from "@/components/sidebar/navitems";
 import { useMemo, useState } from "react";
-import { useRealtimeQuery } from "@/hooks/use-realtime";
+import { useUniversalRealtime } from "@/hooks/use-universal-realtime";
 import { SelectAllMembersAction } from "@/app/actions/MemberAction";
 import { CustomTabList } from "@/components/custom/layout/custom-tab-list";
 import TeamMemberPanel from "./components/team-member-panel";
@@ -68,10 +68,10 @@ function TeamMembersContent({ values }: TeamMembersContentProps) {
 }
 
 export default function TeamMemberPage() {
-  const { data, isLoading, error } = useRealtimeQuery({
+  const { data, isLoading, error } = useUniversalRealtime({
     queryFn: SelectAllMembersAction,
     queryKey: ["team-members"],
-    table: "user_profile",
+    tables: ["user_profile", "assigned_fieldtechnicians", "assigned_projects", "programs"],
   });
 
   return (

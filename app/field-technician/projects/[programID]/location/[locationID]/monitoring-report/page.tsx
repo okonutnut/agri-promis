@@ -111,6 +111,15 @@ function MonitoringReportContent({
 
 export default function MonitoringReportPage() {
   const { programID, locationID } = useParams();
+  
+  // Check if user is assigned to the program (page-level access check)
+  const { data: isAssignedToProgram, isLoading: isCheckingAccess } = useRealtimeQuery({
+    queryKey: ["user-program-assignment-page", locationID as string],
+    queryFn: () =>
+      CheckUserAssignedToProgramByProjectLocationAction(locationID as string),
+    table: "assigned_fieldtechnicians",
+  });
+
   const { data, isLoading, error } = useRealtimeQuery({
     queryKey: ["monitoring-report", locationID as string],
     queryFn: () =>
@@ -118,11 +127,31 @@ export default function MonitoringReportPage() {
     table: "monitoring",
   });
 
+  // Show access denied if user is not assigned (only after we've checked)
+  if (isAssignedToProgram === false && !isCheckingAccess) {
+    return (
+      <CustomPageLayout
+        pageTitle="Access Denied"
+        pageDescription="You are not assigned to this program."
+        isLoading={false}
+        error={null}
+        navItems={getUserProjectNavItems(programID as string, locationID as string)}
+        role="user"
+      >
+        <div className="flex flex-col items-center justify-center py-8">
+          <p className="text-muted-foreground">
+            You are not assigned to this program. Please contact your administrator.
+          </p>
+        </div>
+      </CustomPageLayout>
+    );
+  }
+
   return (
     <CustomPageLayout
       pageTitle="Monitoring Report"
       pageDescription="View all submitted reports for this project."
-      isLoading={isLoading}
+      isLoading={isLoading || isCheckingAccess}
       error={error}
       navItems={getUserProjectNavItems(programID as string, locationID as string)}
       role="user"

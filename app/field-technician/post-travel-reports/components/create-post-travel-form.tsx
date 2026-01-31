@@ -29,6 +29,8 @@ import { TravelDateDropdown } from "@/components/custom/dropdown/travel-date-dro
 import { toast } from "sonner";
 import { useParams } from "next/navigation";
 import ProgramDropdown from "@/components/custom/dropdown/program-dropdown";
+import { useRealtimeQuery } from "@/hooks/use-realtime";
+import { CheckUserAssignedToProgramAction } from "@/app/actions/AssignedProgramAction";
 const PrintPostTravelButton = dynamic(
   () => import("@/components/custom/print/print-post-travel-button"),
   { ssr: false }
@@ -57,6 +59,14 @@ export function CreatePostTravelForm({
     string | null
   >(values?.travel_order_id || null);
   const [programId, setProgramId] = useState<string | null>(values?.program_id || programID as string || null);
+
+  // Check if user is assigned to the program (when programId is available)
+  const { data: isAssignedToProgram } = useRealtimeQuery({
+    queryKey: ["user-program-assignment-post-travel", programId || "none"],
+    queryFn: () =>
+      programId ? CheckUserAssignedToProgramAction(programId) : Promise.resolve(false),
+    table: "assigned_fieldtechnicians",
+  });
 
   const form = useForm<PostTravelReportFormData>({
     resolver: zodResolver(postTravelReportSchema),
@@ -100,6 +110,12 @@ export function CreatePostTravelForm({
 
   const onSubmit = async (data: PostTravelReportFormData) => {
     try {
+      // Check if user is assigned to program (client-side validation)
+      if (isAddMode && programId && !isAssignedToProgram) {
+        toast.error("You are not assigned to this program. Please contact your administrator.");
+        return;
+      }
+
       const cleanedData = {
         ...data,
         issues_concern: (data.issues_concern || []).filter(
@@ -138,7 +154,8 @@ export function CreatePostTravelForm({
   const allowSubmit =
     !!form.watch("travel_date_id") &&
     !!form.watch("travel_order_id") &&
-    !!form.watch("program_id");
+    !!form.watch("program_id") &&
+    (isAddMode ? isAssignedToProgram !== false : true);
 
   return (
     <>

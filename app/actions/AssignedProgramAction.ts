@@ -195,6 +195,30 @@ export async function CheckUserAssignedToProgramByProjectLocationAction(
   return !!assignment;
 }
 
+export async function CheckUserAssignedToProgramAction(programID: string) {
+  const supabase = await createClient(cookies());
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !userData?.user) {
+    throw userError;
+  }
+
+  // Check if user is assigned to this program
+  const { data: assignment, error: assignError } = await supabase
+    .from("assigned_fieldtechnicians")
+    .select("id")
+    .eq("user_id", userData.user.id)
+    .eq("program_id", programID)
+    .single();
+
+  if (assignError && assignError.code !== "PGRST116") {
+    // PGRST116 is "no rows returned" which is expected if not assigned
+    throw assignError;
+  }
+
+  return !!assignment;
+}
+
 export async function SelectAllProgramsAssignedToCurrentUserAction() {
   const supabase = await createClient(cookies());
   const { data: userData, error: userError } = await supabase.auth.getUser();

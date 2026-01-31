@@ -107,6 +107,9 @@ export async function SelectAdminDashboardItemsAction() {
     .from("projects")
     .select("*", { count: "exact", head: true });
 
+  const { count: fcaCount } = await supabase
+    .from("farmers")
+    .select("*", { count: "exact", head: true });
 
   const { data: futureTravelOrders, error: futureTravelOrdersError } = await supabase
     .from("travel_order_itinerary_items")
@@ -140,6 +143,7 @@ export async function SelectAdminDashboardItemsAction() {
     totalUsers: userCount ?? 0,
     totalPrograms: programCount ?? 0,
     totalProjects: projectCount ?? 0,
+    totalFCAs: fcaCount ?? 0,
     recentActivityLogs: activityLogs ?? [],
     futureTravelOrders: futureTravelOrders ?? [],
   };
@@ -269,4 +273,136 @@ export async function SelectMonitoringReportsCountByDate(project_id: string) {
   });
 
   return counts;
+}
+
+export async function SelectTravelOrdersAnalyticsAction() {
+  const supabase = await createClient(cookies());
+
+  // Get all travel orders with user info
+  const { data: travelOrders, error: travelOrdersError } = await supabase
+    .from("travel_order")
+    .select(
+      `
+      *,
+      user:user_profile!travel_order_user_id_fkey (fullname),
+      program:programs!travel_order_program_id_fkey (program_name)
+    `
+    )
+    .order("created_at", { ascending: false });
+
+  if (travelOrdersError) {
+    throw travelOrdersError;
+  }
+
+  // Calculate statistics
+  const now = new Date();
+  const totalTravelOrders = travelOrders?.length || 0;
+  const activeTravelOrders = travelOrders?.filter(
+    (to) => to.is_active === 1 || to.is_active === true
+  ).length || 0;
+  
+  const upcomingTravelOrders = travelOrders?.filter((to) => {
+    if (!to.departure_date) return false;
+    return new Date(to.departure_date) > now;
+  }).length || 0;
+
+  const completedTravelOrders = travelOrders?.filter((to) => {
+    if (!to.return_date) return false;
+    return new Date(to.return_date) < now;
+  }).length || 0;
+
+  // Group by program
+  const travelOrdersByProgram = travelOrders?.reduce((acc: any, to: any) => {
+    const programName = to.program?.program_name || "Unassigned";
+    acc[programName] = (acc[programName] || 0) + 1;
+    return acc;
+  }, {}) || {};
+
+  // Group by month
+  const travelOrdersByMonth = travelOrders?.reduce((acc: any, to: any) => {
+    if (!to.created_at) return acc;
+    const date = new Date(to.created_at);
+    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    acc[monthKey] = (acc[monthKey] || 0) + 1;
+    return acc;
+  }, {}) || {};
+
+  return {
+    totalTravelOrders,
+    activeTravelOrders,
+    upcomingTravelOrders,
+    completedTravelOrders,
+    travelOrdersByProgram,
+    travelOrdersByMonth,
+    recentTravelOrders: travelOrders?.slice(0, 10) || [],
+  };
+}
+
+export async function SelectFCAAnalyticsAction() {
+  const supabase = await createClient(cookies());
+
+  // Get all FCAs
+  const { data: fcas, error: fcaError } = await supabase
+    .from("farmers")
+    .select("*");
+
+  if (fcaError) {
+    throw fcaError;
+  }
+
+  // Get all project locations with FCA assignments
+  const { data: projectLocations, error: projectError } = await supabase
+    .from("project_location")
+    .select("id, fca_ids, projects (project_name)");
+
+  if (projectError) {
+    throw projectError;
+  }
+
+  // Calculate statistics
+  const totalFCAs = fcas?.length || 0;
+  const activeFCAs = fcas?.filter((fca) => fca.active_status === 1).length || 0;
+  const inactiveFCAs = fcas?.filter((fca) => fca.active_status === 0).length || 0;
+
+  // Calculate total members
+  const totalMembers = fcas?.reduce((sum, fca) => sum + (fca.member_count || 0), 0) || 0;
+
+  // Calculate FCAs with projects
+  const fcasWithProjects = new Set<string>();
+  projectLocations?.forEach((project) => {
+    if (Array.isArray(project.fca_ids)) {
+      project.fca_ids.forEach((fcaId: string) => {
+        fcasWithProjects.add(fcaId);
+      });
+    }
+  });
+
+  // Group FCAs by status
+  const fcasByStatus = {
+    active: activeFCAs,
+    inactive: inactiveFCAs,
+  };
+
+  // Calculate projects per FCA
+  const projectsPerFCA = fcas?.map((fca) => {
+    const assignedProjects = projectLocations?.filter((project) => {
+      if (!Array.isArray(project.fca_ids)) return false;
+      return project.fca_ids.includes(fca.id!);
+    }).length || 0;
+    return {
+      fcaName: fca.description || "Unknown",
+      projectCount: assignedProjects,
+    };
+  }) || [];
+
+  return {
+    totalFCAs,
+    activeFCAs,
+    inactiveFCAs,
+    totalMembers,
+    fcasWithProjects: fcasWithProjects.size,
+    fcasByStatus,
+    projectsPerFCA,
+    recentFCAs: fcas?.slice(0, 10) || [],
+  };
 }

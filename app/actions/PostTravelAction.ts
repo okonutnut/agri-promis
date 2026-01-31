@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { PostTravelReportType } from "../../components/types";
+import { CheckUserAssignedToProgramAction } from "@/app/actions/AssignedProgramAction";
 
 // POST TRAVEL REPORT ACTIONS
 export async function SelectAllPostTravelReportsByTravelOrderIDAction(
@@ -169,6 +170,15 @@ export async function InsertPostTravelReportAction({
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("User not authenticated");
+
+  // Validate user is assigned to the program via assigned_fieldtechnicians
+  if (!program_id) {
+    throw new Error("Program ID is required.");
+  }
+  const isAssigned = await CheckUserAssignedToProgramAction(program_id);
+  if (!isAssigned) {
+    throw new Error("You are not assigned to this program. Please contact your administrator.");
+  }
 
   // Upload images to Supabase Storage only if images are provided
   let photo_paths: string[] = [];

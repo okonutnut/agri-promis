@@ -26,14 +26,14 @@ export default function ScheduledMonitoringTable({
   data,
 }: ScheduledMonitoringTableProps) {
   return (
-    <div className="w-full">
-      <Card className="shadow-xs rounded-md p-2 h-full">
-        <CardHeader className="items-center p-0">
+    <div className="w-full h-full flex flex-col">
+      <Card className="shadow-xs rounded-md p-2 h-full flex flex-col">
+        <CardHeader className="items-center p-0 flex-shrink-0">
           <CardTitle className="text-lg">
             Scheduled Monitoring (Upcoming)
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent className="p-0 flex-1 overflow-auto">
           <Table>
             <TableHeader>
               <TableRow>

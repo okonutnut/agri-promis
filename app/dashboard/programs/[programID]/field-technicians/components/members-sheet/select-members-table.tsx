@@ -29,19 +29,39 @@ export default function SelectMemberTable({
   const { programID } = useParams();
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
 
-  // GET
-  const { data, isLoading, isError } = useRealtimeQuery({
+  // GET - Fetch both admin (role 1) and field technician (role 2) users
+  const { data: fieldTechnicians, isLoading: isLoadingFT, isError: isErrorFT } = useRealtimeQuery({
     queryKey: ["field-technicians", programID as string],
     queryFn: () => SelectAllMembersByRoleAction(2),
     table: "user_profile",
   });
 
+  const { data: admins, isLoading: isLoadingAdmins, isError: isErrorAdmins } = useRealtimeQuery({
+    queryKey: ["admins", programID as string],
+    queryFn: () => SelectAllMembersByRoleAction(1),
+    table: "user_profile",
+  });
+
+  const isLoading = isLoadingFT || isLoadingAdmins;
+  const isError = isErrorFT || isErrorAdmins;
+
   const tableData = useMemo(() => {
-    return data?.filter((member) => {
+    // Combine both admin and field technician users
+    const allUsers = [
+      ...(fieldTechnicians ?? []),
+      ...(admins ?? [])
+    ];
+    
+    // Remove duplicates based on user ID
+    const uniqueUsers = Array.from(
+      new Map(allUsers.map(user => [user.id, user])).values()
+    );
+
+    return uniqueUsers.filter((member) => {
       if (!assignedMembers) return true;
       return !assignedMembers.includes(member.id as string);
     });
-  }, [assignedMembers, data]);
+  }, [assignedMembers, fieldTechnicians, admins]);
 
   // POST
   const { mutate, isPending } = useUniversalMutation({

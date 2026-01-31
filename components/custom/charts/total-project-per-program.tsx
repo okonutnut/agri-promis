@@ -43,59 +43,61 @@ export default function TotalProjectsPerProgram() {
   } satisfies ChartConfig;
 
   return (
-    <Card className="h-full w-full p-2 rounded-md shadow-xs">
-      <CardHeader className="p-0">
-        <CardTitle className="text-lg">Total Projects Per Program</CardTitle>
-      </CardHeader>
-      <CardContent className="flex-1 p-0">
-        <ChartContainer config={chartConfig}>
-          <BarChart
-            accessibilityLayer
-            data={chartData}
-            layout="vertical"
-            margin={{
-              right: 16,
-            }}
-          >
-            <CartesianGrid horizontal={false} />
-            <YAxis
-              dataKey="program"
-              type="category"
-              tickLine={false}
-              tickMargin={10}
-              axisLine={false}
-              tickFormatter={(value) => value.slice(0, 3)}
-              hide
-            />
-            <XAxis dataKey="projects" type="number" hide />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent indicator="line" />}
-            />
-            <Bar
-              dataKey="projects"
+    <div className="w-full h-full flex flex-col">
+      <Card className="h-full w-full p-2 rounded-md shadow-xs flex flex-col">
+        <CardHeader className="p-0 flex-shrink-0">
+          <CardTitle className="text-lg">Total Projects Per Program</CardTitle>
+        </CardHeader>
+        <CardContent className="flex-1 p-0 overflow-auto">
+          <ChartContainer config={chartConfig}>
+            <BarChart
+              accessibilityLayer
+              data={chartData}
               layout="vertical"
-              fill="var(--color-projects)"
-              radius={4}
+              margin={{
+                right: 16,
+              }}
             >
-              <LabelList
+              <CartesianGrid horizontal={false} />
+              <YAxis
                 dataKey="program"
-                position="insideLeft"
-                offset={8}
-                className="fill-(--color-label)"
-                fontSize={12}
+                type="category"
+                tickLine={false}
+                tickMargin={10}
+                axisLine={false}
+                tickFormatter={(value) => value.slice(0, 3)}
+                hide
               />
-              <LabelList
+              <XAxis dataKey="projects" type="number" hide />
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent indicator="line" />}
+              />
+              <Bar
                 dataKey="projects"
-                position="right"
-                offset={8}
-                className="fill-foreground"
-                fontSize={12}
-              />
-            </Bar>
-          </BarChart>
-        </ChartContainer>
-      </CardContent>
-    </Card>
+                layout="vertical"
+                fill="var(--color-projects)"
+                radius={4}
+              >
+                <LabelList
+                  dataKey="program"
+                  position="insideLeft"
+                  offset={8}
+                  className="fill-(--color-label)"
+                  fontSize={12}
+                />
+                <LabelList
+                  dataKey="projects"
+                  position="right"
+                  offset={8}
+                  className="fill-foreground"
+                  fontSize={12}
+                />
+              </Bar>
+            </BarChart>
+          </ChartContainer>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

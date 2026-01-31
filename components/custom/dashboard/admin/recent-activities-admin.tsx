@@ -23,50 +23,52 @@ type RecentActivitiesProps = {
 };
 export default function RecentActivities({ data }: RecentActivitiesProps) {
   return (
-    <Card className="w-full p-2 rounded-md shadow-xs">
-      <CardHeader className="flex justify-between items-center p-0">
-        <CardTitle className="text-lg">Activity Logs</CardTitle>
-        {data && data.length > 0 && (
-          <Link href="/dashboard/activity-logs">
-            <Button variant={"ghost"} size={"sm"}>
-              <ExternalLink />
-            </Button>
-          </Link>
-        )}
-      </CardHeader>
-      <CardContent className="flex-1 p-0">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="font-medium">Fullname</TableHead>
-              <TableHead>Activity</TableHead>
-              <TableHead className="text-right">Date Created</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data && data.length === 0 ? (
+    <div className="w-full h-full flex flex-col">
+      <Card className="w-full h-full p-2 rounded-md shadow-xs flex flex-col">
+        <CardHeader className="flex justify-between items-center p-0 flex-shrink-0">
+          <CardTitle className="text-lg">Activity Logs</CardTitle>
+          {data && data.length > 0 && (
+            <Link href="/dashboard/activity-logs">
+              <Button variant={"ghost"} size={"sm"}>
+                <ExternalLink />
+              </Button>
+            </Link>
+          )}
+        </CardHeader>
+        <CardContent className="flex-1 p-0 overflow-auto">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={5} className="text-center">
-                  No recent activities
-                </TableCell>
+                <TableHead className="font-medium">Fullname</TableHead>
+                <TableHead>Activity</TableHead>
+                <TableHead className="text-right">Date Created</TableHead>
               </TableRow>
-            ) : (
-              data &&
-              data.map((activity, index) => (
-                <TableRow key={index}>
-                  <TableCell className="font-medium">
-                    {activity.user.fullname}
-                  </TableCell>
-                  <TableCell>{activity.description}</TableCell>
-                  <TableCell className="text-right">
-                    {format(new Date(activity.created_at), "PPp")}
+            </TableHeader>
+            <TableBody>
+              {data && data.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center">
+                    No recent activities
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+              ) : (
+                data &&
+                data.map((activity, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="font-medium">
+                      {activity.user.fullname}
+                    </TableCell>
+                    <TableCell>{activity.description}</TableCell>
+                    <TableCell className="text-right">
+                      {format(new Date(activity.created_at), "PPp")}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

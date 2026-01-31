@@ -164,6 +164,10 @@ export async function SelectAllMembersAction() {
           *,
           projects (*)
         )
+      ),
+      assigned_fieldtechnicians:assigned_fieldtechnicians!assigned_fieldtechnicians_user_id_fkey (
+        *,
+        programs (*, projects(count))
       )
     `
     )
@@ -181,6 +185,11 @@ export async function SelectAllMembersAction() {
         // programs from assigned projects
         ...(user.assigned_projects
           ?.map((ap: any) => ap.project_location?.projects?.program_id)
+          .filter(Boolean) ?? []),
+
+        // programs from assigned_fieldtechnicians
+        ...(user.assigned_fieldtechnicians
+          ?.map((aft: any) => aft.programs?.id)
           .filter(Boolean) ?? []),
       ]),
     ],
