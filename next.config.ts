@@ -2,6 +2,7 @@
 // next.config.ts
 import type { NextConfig } from "next";
 import withBundleAnalyzer from "@next/bundle-analyzer";
+import path from "path";
 
 const withPWA = require("@ducanh2912/next-pwa").default({
   dest: "public",
@@ -81,6 +82,8 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: true,
   output: "standalone",
   reactStrictMode: true,
+  // Fix lockfile warning by explicitly setting the workspace root
+  outputFileTracingRoot: path.resolve(process.cwd()),
   images: {
     remotePatterns: [
       {

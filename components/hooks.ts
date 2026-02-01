@@ -346,7 +346,7 @@ export function useInsertMonitoringReportHook() {
       await InsertMonitoringReportAction(data),
     onSuccess: (_, variables) => {
       qc.invalidateQueries({
-        queryKey: ["allMonitoringReportsByProjectId", variables.project_id],
+        queryKey: ["allMonitoringReportsByProjectId", variables.project?.id as string],
       });
       qc.invalidateQueries({
         queryKey: ["allMonitoringReportsByUser"],
