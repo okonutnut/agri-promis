@@ -1,7 +1,7 @@
 "use client";
 
 import { FCAType } from "@/components/types";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   InsertFCAAction,
@@ -14,9 +14,12 @@ import {
 
 // FCA HOOKS
 export function useInsertFCAHook() {
+  const queryClient = useQueryClient();
+  
   return useMutation({
     mutationFn: async (data: FCAType) => await InsertFCAAction(data),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["farmers"] });
       toast("FCA created successfully!");
     },
     onError: () => {
@@ -27,26 +30,30 @@ export function useInsertFCAHook() {
 
 export function useSelectAllFCAHook() {
   return useQuery({
-    queryKey: ["farmers"],
+    queryKey: ["farmers", "all"],
     queryFn: async () => await SelectAllFCAAction(),
-    refetchInterval: 3000,
+    refetchInterval: 30000, // Reduced from 3s to 30s for better performance
     networkMode: "online",
   });
 }
 
 export function useSelectAllFCAByStatusHook(status: number) {
   return useQuery({
-    queryKey: ["farmers"],
+    queryKey: ["farmers", "byStatus", status],
     queryFn: async () => await SelectAllFCAByStatusAction(status),
-    refetchInterval: 3000,
+    enabled: status !== undefined,
+    refetchInterval: 30000, // Reduced from 3s to 30s for better performance
     networkMode: "online",
   });
 }
 
 export function useEditFCAHook() {
+  const queryClient = useQueryClient();
+  
   return useMutation({
     mutationFn: async (data: FCAType) => await EditFCAAction(data),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["farmers"] });
       toast("FCA updated successfully!");
     },
     onError: () => {
@@ -56,10 +63,13 @@ export function useEditFCAHook() {
 }
 
 export function useEditFCAActiveStatusHook() {
+  const queryClient = useQueryClient();
+  
   return useMutation({
     mutationFn: async ({ fcaID, status }: { fcaID: string; status: number }) =>
       await EditFCAActiveStatusAction(fcaID, status),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["farmers"] });
       toast("FCA updated successfully!");
     },
     onError: () => {
@@ -72,7 +82,8 @@ export function useSelectAllAssignedProjectsByFCAIDHook(fcaID: string) {
   return useQuery({
     queryKey: ["assignedProjectsByFCA", fcaID],
     queryFn: async () => await SelectAllAssignedProjectsByFCAIDAction(fcaID),
-    refetchInterval: 3000,
+    enabled: !!fcaID,
+    refetchInterval: 30000, // Reduced from 3s to 30s for better performance
     networkMode: "online",
   });
 }

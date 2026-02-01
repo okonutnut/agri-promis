@@ -8,18 +8,18 @@ import {
 // USER PROFILE HOOKS
 export function useSelectAllUserProfilesHook() {
   return useQuery({
-    queryKey: ["userProfiles"],
+    queryKey: ["userProfiles", "all"],
     queryFn: async () => await SelectAllUserProfilesAction(),
-    refetchInterval: 3000,
+    refetchInterval: 30000, // Reduced from 3s to 30s for better performance
     networkMode: "online",
   });
 }
 
 export function useSelectUserProfileHook() {
   return useQuery({
-    queryKey: ["userProfile"],
+    queryKey: ["userProfile", "current"],
     queryFn: async () => await SelectUserProfileAction(),
-    refetchInterval: 3000,
+    refetchInterval: 60000, // Reduced from 3s to 60s - user profile changes less frequently
     networkMode: "online",
   });
 }

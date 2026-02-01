@@ -41,6 +41,9 @@ export function useUniversalRealtime<T>({
     let channels: ReturnType<typeof supabase.channel>[] = [];
 
     function subscribe() {
+      // Don't subscribe if already subscribed
+      if (channels.length > 0) return;
+      
       channels = tables.map((table) =>
         supabase
           .channel(`realtime:${table}`)

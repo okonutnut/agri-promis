@@ -38,56 +38,73 @@ export function useRealtimeQuery<T>({
   });
 
   useEffect(() => {
-    // Only subscribe to realtime when online
-    if (!navigator.onLine) return;
+    if (typeof window === "undefined") return;
 
-    const channel = supabase
-      .channel(`${table}-changes`)
-      .on("postgres_changes", { event: "*", schema, table }, (payload) => {
-        queryClient.setQueryData<T | T[]>(queryKey, (old) => {
-          if (!old) return old;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
 
-          // If old is an array → patch snappily
-          if (Array.isArray(old)) {
-            switch (payload.eventType) {
-              case "INSERT":
-                return [...old, payload.new] as T[];
-              case "UPDATE":
-                return old.map((row: any) =>
-                  row.id === payload.new.id ? payload.new : row
-                ) as T[];
-              case "DELETE":
-                return old.filter(
-                  (row: any) => row.id === payload.old.id
-                ) as T[];
-              default:
-                return old;
+    function subscribe() {
+      if (!navigator.onLine || channel) return;
+
+      channel = supabase
+        .channel(`${table}-changes`)
+        .on("postgres_changes", { event: "*", schema, table }, (payload) => {
+          queryClient.setQueryData<T | T[]>(queryKey, (old) => {
+            if (!old) return old;
+
+            // If old is an array → patch snappily
+            if (Array.isArray(old)) {
+              switch (payload.eventType) {
+                case "INSERT":
+                  return [...old, payload.new] as T[];
+                case "UPDATE":
+                  return old.map((row: any) =>
+                    row.id === payload.new.id ? payload.new : row
+                  ) as T[];
+                case "DELETE":
+                  return old.filter(
+                    (row: any) => row.id !== payload.old.id
+                  ) as T[];
+                default:
+                  return old;
+              }
             }
-          }
 
-          // If old is a single object → safer to refetch
-          queryClient.invalidateQueries({ queryKey });
-          return old;
-        });
-      })
-      .subscribe();
+            // If old is a single object → safer to refetch
+            queryClient.invalidateQueries({ queryKey });
+            return old;
+          });
+        })
+        .subscribe();
+    }
+
+    function unsubscribe() {
+      if (channel) {
+        supabase.removeChannel(channel);
+        channel = null;
+      }
+    }
+
+    // Subscribe when online
+    if (navigator.onLine) {
+      subscribe();
+    }
 
     // Handle online/offline events
     const handleOnline = () => {
       // Refetch when coming back online
       queryClient.invalidateQueries({ queryKey });
+      subscribe();
     };
 
     const handleOffline = () => {
-      // Unsubscribe when going offline
-      supabase.removeChannel(channel);
+      unsubscribe();
     };
 
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
 
     return () => {
-      supabase.removeChannel(channel);
+      unsubscribe();
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
     };

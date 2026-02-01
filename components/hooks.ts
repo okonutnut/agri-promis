@@ -74,7 +74,7 @@ export function useSelectProgramByIDHook(programId: string) {
     queryKey: ["programById", programId],
     queryFn: async () => await SelectProgramByIdAction(programId),
     enabled: !!programId,
-    refetchInterval: 3000,
+    refetchInterval: 30000, // Reduced from 3s to 30s for better performance
     networkMode: "online",
   });
 }
@@ -83,7 +83,7 @@ export function useSelectAllProgramsByAgriculturistHook() {
   return useQuery({
     queryKey: ["allProgramsByAgriculturist"],
     queryFn: async () => await SelectAllProgramsByAgriculturistAction(),
-    refetchInterval: 3000,
+    refetchInterval: 30000, // Reduced from 3s to 30s for better performance
     networkMode: "online",
   });
 }
@@ -92,7 +92,8 @@ export function useSelectAllProgramsByUserIDHook(userID: string) {
   return useQuery({
     queryKey: ["allProgramsByUserId", userID],
     queryFn: async () => await SelectAllProgramsByUserIDAction(userID),
-    refetchInterval: 3000,
+    enabled: !!userID,
+    refetchInterval: 30000, // Reduced from 3s to 30s for better performance
     networkMode: "online",
   });
 }
@@ -116,13 +117,17 @@ export function useInsertProgramHook() {
 }
 
 export function useEditProgramNameHook() {
+  const qc = useQueryClient();
+  
   return useMutation({
     mutationFn: async (data: ProgramType) =>
       await EditProgramNameAction({
         program_id: data.id ?? "",
         program_name: data.program_name,
       }),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      qc.invalidateQueries({ queryKey: ["programById", variables.id] });
+      qc.invalidateQueries({ queryKey: ["allProgramsByAgriculturist"] });
       toast("Program name updated successfully!");
     },
     onError: () => {
@@ -151,9 +156,9 @@ export function useDeleteProgramHook(programId: string) {
 
 export function useSelectAllProgramsHook() {
   return useQuery({
-    queryKey: ["programs"],
+    queryKey: ["programs", "all"],
     queryFn: async () => await SelectAllProgramsAction(),
-    refetchInterval: 3000,
+    refetchInterval: 30000, // Reduced from 3s to 30s for better performance
     networkMode: "online",
   });
 }
@@ -169,10 +174,10 @@ export function useSelectUsersByProgramAssignedHook(programId?: string) {
 // PROJECT HOOKS
 export function useSelectAllProjectsByProgramIDHook(programId: string) {
   return useQuery({
-    queryKey: ["allProjectsByProgramId"],
+    queryKey: ["allProjectsByProgramId", programId],
     queryFn: async () => await SelectAllProjectsByProgramIDAction(programId),
     enabled: !!programId,
-    refetchInterval: 3000,
+    refetchInterval: 30000, // Reduced from 3s to 30s for better performance
     networkMode: "online",
   });
 }
@@ -189,11 +194,11 @@ export function useSelectProgramAndProjectDetailsByProgjectIDHook(
   projectId: string
 ) {
   return useQuery({
-    queryKey: ["programAndProjectDetailsByProjectId"],
+    queryKey: ["programAndProjectDetailsByProjectId", projectId],
     queryFn: async () =>
       await SelectProgramAndProjectDetailsByProjectIDAction(projectId),
     enabled: !!projectId,
-    refetchInterval: 3000,
+    refetchInterval: 30000, // Reduced from 3s to 30s for better performance
     networkMode: "online",
   });
 }
@@ -204,7 +209,7 @@ export function useSelectProjectDetailsHook(projectId: string) {
     queryFn: async () =>
       await SelectProjectDetailsByProjectLocationIDAction(projectId),
     enabled: !!projectId,
-    refetchInterval: 3000,
+    refetchInterval: 30000, // Reduced from 3s to 30s for better performance
     networkMode: "online",
   });
 }
@@ -250,9 +255,13 @@ export function useInsertProjectLocationHook() {
 }
 
 export function useEditProjectHook() {
+  const qc = useQueryClient();
+  
   return useMutation({
     mutationFn: async (data: ProjectType) => await EditProjectAction(data),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      qc.invalidateQueries({ queryKey: ["allProjectsByProgramId"] });
+      qc.invalidateQueries({ queryKey: ["projectDetails", variables.id] });
       toast("Project updated successfully!");
     },
     onError: () => {
@@ -262,10 +271,13 @@ export function useEditProjectHook() {
 }
 
 export function useDeleteProjectHook(projectId: string, programId: string) {
+  const qc = useQueryClient();
+  
   return useMutation({
     mutationFn: async () => await DeleteProjectAction(projectId),
     onSuccess: () => {
-      toast.error("Project deleted successfully!");
+      qc.invalidateQueries({ queryKey: ["allProjectsByProgramId", programId] });
+      toast.success("Project deleted successfully!");
       window.location.href = `/dashboard/programs/${programId}`;
     },
     onError: () => {
@@ -294,20 +306,21 @@ export function useInsertTravelOrderHook() {
 
 export function useSelectAllTravelOrdersByUserIDHook(user_id?: string) {
   return useQuery({
-    queryKey: ["travel_order"],
+    queryKey: ["travel_order", "byUser", user_id],
     queryFn: async () => await SelectAllTravelOrdersByUserIDAction(user_id),
-    refetchInterval: 3000,
+    enabled: !!user_id,
+    refetchInterval: 30000, // Reduced from 3s to 30s for better performance
     networkMode: "online",
   });
 }
 
 export function useSelectAllTravelOrdersByProgramIDHook(programID: string) {
   return useQuery({
-    queryKey: ["travel_order"],
+    queryKey: ["travel_order", "byProgram", programID],
     queryFn: async () =>
       await SelectAllTravelOrdersByProgramIDAction(programID),
     enabled: !!programID,
-    refetchInterval: 3000,
+    refetchInterval: 30000, // Reduced from 3s to 30s for better performance
     networkMode: "online",
   });
 }
@@ -317,10 +330,11 @@ export function useSelectAllMonitoringReportsByProjectIDHook(
   projectID: string
 ) {
   return useQuery({
-    queryKey: ["allMonitoringReportsByProjectId"],
+    queryKey: ["allMonitoringReportsByProjectId", projectID],
     queryFn: async () =>
       await SelectAllMonitoringReportsByProjectIDAction(projectID),
-    refetchInterval: 3000,
+    enabled: !!projectID,
+    refetchInterval: 30000, // Reduced from 3s to 30s for better performance
     networkMode: "online",
   });
 }
@@ -330,9 +344,12 @@ export function useInsertMonitoringReportHook() {
   return useMutation({
     mutationFn: async (data: MonitoringReportType) =>
       await InsertMonitoringReportAction(data),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       qc.invalidateQueries({
-        queryKey: ["monitoring-reports"],
+        queryKey: ["allMonitoringReportsByProjectId", variables.project_id],
+      });
+      qc.invalidateQueries({
+        queryKey: ["allMonitoringReportsByUser"],
       });
       toast("Monitoring report created successfully!");
     },
@@ -349,7 +366,10 @@ export function useInsertRemarksInMonitoringReportHook(reportId: string) {
       await InsertRemarksInMonitoringReportAction(reportId),
     onSuccess: () => {
       qc.invalidateQueries({
-        queryKey: ["monitoring-reports"],
+        queryKey: ["allMonitoringReportsByProjectId"],
+      });
+      qc.invalidateQueries({
+        queryKey: ["allMonitoringReportsByUser"],
       });
       toast("Remarks added successfully!");
     },
@@ -366,25 +386,29 @@ export function useSelectAllMonitoringReportsByProjectIDAndUserHook(
     queryKey: ["allMonitoringReportsByUser", projectID],
     queryFn: async () =>
       await SelectAllMonitoringReportsByProjectIDAndUserAction(projectID),
-    refetchInterval: 3000,
+    enabled: !!projectID,
+    refetchInterval: 30000, // Reduced from 3s to 30s for better performance
     networkMode: "online",
   });
 }
 
 export function useSelectAllMonitoringReportsByCurrentUserHook() {
   return useQuery({
-    queryKey: ["allMonitoringReportsByUser"],
+    queryKey: ["allMonitoringReportsByUser", "current"],
     queryFn: async () => await SelectAllMonitoringReportsByCurrentUserAction(),
-    refetchInterval: 3000,
+    refetchInterval: 30000, // Reduced from 3s to 30s for better performance
     networkMode: "online",
   });
 }
 
 // MEMBER HOOKS
 export function useInsertMemberHook() {
+  const qc = useQueryClient();
+  
   return useMutation({
     mutationFn: async (data: UserProfileType) => await InsertMemberAction(data),
     onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["members"] });
       toast("Member invited successfully!");
     },
     onError: () => {
@@ -395,10 +419,13 @@ export function useInsertMemberHook() {
 }
 
 export function useUpdateMemberHook() {
+  const qc = useQueryClient();
+  
   return useMutation({
     mutationFn: async (data: UserProfileType) =>
       await UpdateMemberAction(data.id as string, data),
     onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["members"] });
       toast("Member updated successfully!");
     },
     onError: () => {
@@ -432,9 +459,9 @@ export function useUpdateActiveStatusMemberHook() {
 
 export function useSelectAllMembersHook() {
   return useQuery({
-    queryKey: ["members"],
+    queryKey: ["members", "all"],
     queryFn: async () => await SelectAllMembersAction(),
-    refetchInterval: 3000,
+    refetchInterval: 30000, // Reduced from 3s to 30s for better performance
     networkMode: "online",
   });
 }
@@ -467,10 +494,13 @@ export function useInsertFieldTechniciansToProjectHook(project_id: string) {
 }
 
 export function useDeleteFieldTechnicianToProjectHook(projectID: string) {
+  const qc = useQueryClient();
+  
   return useMutation({
     mutationFn: async (userID: string) =>
       await DeleteFieldTechnicianFromProjectAction(userID, projectID),
     onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["fieldTechnicians", projectID] });
       toast("Field technician removed from project successfully!");
     },
     onError: () => {
@@ -486,17 +516,17 @@ export function useSelectFieldTechniciansByProjectIDHook(project_id: string) {
     queryFn: async () =>
       await SelectAllFieldTechniciansByProjectIDAction(project_id),
     enabled: !!project_id,
-    refetchInterval: 3000,
+    refetchInterval: 30000, // Reduced from 3s to 30s for better performance
     networkMode: "online",
   });
 }
 
 export function useSelectAssignedProjectsByFieldTechnicianHook() {
   return useQuery({
-    queryKey: ["assignedProjectsByFieldTechnician"],
+    queryKey: ["assignedProjectsByFieldTechnician", "current"],
     queryFn: async () =>
       await SelectAllAssignedProjectsByFieldTechnicianIDAction(),
-    refetchInterval: 3000,
+    refetchInterval: 30000, // Reduced from 3s to 30s for better performance
     networkMode: "online",
   });
 }
@@ -504,8 +534,9 @@ export function useSelectAssignedProjectsByFieldTechnicianHook() {
 // LOCATION HOOKS
 export function useSelectUserLocationHook(user_id: string) {
   return useQuery({
-    queryKey: ["userLocation"],
+    queryKey: ["userLocation", user_id],
     queryFn: async () => await SelectUserCurrentLocationAction(user_id),
+    enabled: !!user_id,
     networkMode: "online",
   });
 }
@@ -513,36 +544,38 @@ export function useSelectUserLocationHook(user_id: string) {
 // ACTIVITY LOG HOOKS
 export function useSelectActivityLogsByUserIDHook(user_id: string) {
   return useQuery({
-    queryKey: ["activity-logs"],
+    queryKey: ["activity-logs", "byUser", user_id],
     queryFn: async () => await SelectActivityLogsByUserIDAction(user_id),
-    refetchInterval: 3000,
+    enabled: !!user_id,
+    refetchInterval: 30000, // Reduced from 3s to 30s for better performance
     networkMode: "online",
   });
 }
 
 export function useSelectActivityLogsByProjectIDHook(project_id: string) {
   return useQuery({
-    queryKey: ["activity-logs", project_id],
+    queryKey: ["activity-logs", "byProject", project_id],
     queryFn: async () => await SelectActivityLogsByProjectIDAction(project_id),
-    refetchInterval: 3000,
+    enabled: !!project_id,
+    refetchInterval: 30000, // Reduced from 3s to 30s for better performance
     networkMode: "online",
   });
 }
 
 export function useSelectAllActivityLogsHook() {
   return useQuery({
-    queryKey: ["activity-logs"],
+    queryKey: ["activity-logs", "all"],
     queryFn: async () => await SelectAllActivityLogsAction(),
-    refetchInterval: 3000,
+    refetchInterval: 30000, // Reduced from 3s to 30s for better performance
     networkMode: "online",
   });
 }
 
 export function useSelectAllActivityLogsByCurrentUserHook() {
   return useQuery({
-    queryKey: ["activity-logs"],
+    queryKey: ["activity-logs", "currentUser"],
     queryFn: async () => await SelectAllActivityLogsByCurrentUserAction(),
-    refetchInterval: 3000,
+    refetchInterval: 30000, // Reduced from 3s to 30s for better performance
     networkMode: "online",
   });
 }
@@ -550,27 +583,28 @@ export function useSelectAllActivityLogsByCurrentUserHook() {
 // DASHBOARD HOOKS
 export function useSelectDashboardItemsHook(projectID: string) {
   return useQuery({
-    queryKey: ["dashboard_items"],
+    queryKey: ["dashboard_items", "byProject", projectID],
     queryFn: async () => await SelectDashboardItemsAction(projectID),
-    refetchInterval: 1000,
+    enabled: !!projectID,
+    refetchInterval: 30000, // Reduced from 1s to 30s - dashboard doesn't need 1s polling
     networkMode: "online",
   });
 }
 
 export function useSelectUserDashboardItemsHook() {
   return useQuery({
-    queryKey: ["dashboard_items"],
+    queryKey: ["dashboard_items", "user"],
     queryFn: async () => await SelectUserDashboardItemsAction(),
-    refetchInterval: 1000,
+    refetchInterval: 30000, // Reduced from 1s to 30s - dashboard doesn't need 1s polling
     networkMode: "online",
   });
 }
 
 export function useSelectAdminDashboardItemsHook() {
   return useQuery({
-    queryKey: ["dashboard_items"],
+    queryKey: ["dashboard_items", "admin"],
     queryFn: async () => await SelectAdminDashboardItemsAction(),
-    refetchInterval: 1000,
+    refetchInterval: 30000, // Reduced from 1s to 30s - dashboard doesn't need 1s polling
     networkMode: "online",
   });
 }
