@@ -7,56 +7,58 @@ import { PostTravelReportType } from "../../components/types";
 import { CheckUserAssignedToProgramAction } from "@/app/actions/AssignedProgramAction";
 
 // POST TRAVEL REPORT ACTIONS
-export async function SelectAllPostTravelReportsByTravelOrderIDAction(
-  travelOrderID: string
-) {
-  const supabase = await createClient(cookies());
+// UNUSED QUERY - Commented out
+// export async function SelectAllPostTravelReportsByTravelOrderIDAction(
+//   travelOrderID: string
+// ) {
+//   const supabase = await createClient(cookies());
 
-  // Fetch all post travel reports for the given travel order
-  const { data, error } = await supabase
-    .from("post_travel")
-    .select(
-      `
-      *,
-      travel_order:travel_order(travel_order_no, user_id, user:user_profile!travel_order_user_id_fkey(fullname)),
-      travel_date:travel_order_itinerary_items(date, end_date, destination)
-    `
-    )
-    .eq("travel_order_id", travelOrderID)
-    .order("created_at", { ascending: false });
+//   // Fetch all post travel reports for the given travel order
+//   const { data, error } = await supabase
+//     .from("post_travel")
+//     .select(
+//       `
+//       *,
+//       travel_order:travel_order(travel_order_no, user_id, user:user_profile!travel_order_user_id_fkey(fullname)),
+//       travel_date:travel_order_itinerary_items(date, end_date, destination)
+//     `
+//     )
+//     .eq("travel_order_id", travelOrderID)
+//     .order("created_at", { ascending: false });
 
-  if (error) throw error;
+//   if (error) throw error;
 
-  // Map signed URLs for photos
-  const reportsWithExtras = await Promise.all(
-    data.map(async (report) => {
-      const signedPhotoUrls = report.photo_url
-        ? await Promise.all(
-            report.photo_url.map(async (path: string) => {
-              const { data: signed } = await supabase.storage
-                .from("post-travel-reports")
-                .createSignedUrl(path, 60 * 60);
-              return signed?.signedUrl ?? null;
-            })
-          )
-        : [];
+//   // Map signed URLs for photos
+//   const reportsWithExtras = await Promise.all(
+//     data.map(async (report) => {
+//       const signedPhotoUrls = report.photo_url
+//         ? await Promise.all(
+//             report.photo_url.map(async (path: string) => {
+//               const { data: signed } = await supabase.storage
+//                 .from("post-travel-reports")
+//                 .createSignedUrl(path, 60 * 60);
+//               return signed?.signedUrl ?? null;
+//             })
+//           )
+//         : [];
 
-      return {
-        ...report,
-        photo_url: signedPhotoUrls.filter(Boolean),
-      };
-    })
-  );
+//       return {
+//         ...report,
+//         photo_url: signedPhotoUrls.filter(Boolean),
+//       };
+//     })
+//   );
 
-  return reportsWithExtras as PostTravelReportType[];
-}
+//   return reportsWithExtras as PostTravelReportType[];
+// }
 
 export async function SelectAllPostTravelReportsByProgramIDAction(
   programID: string
 ) {
   const supabase = await createClient(cookies());
 
-  // Fetch all post travel reports for travel orders in the program
+  // Fix: Filter directly on post_travel.program_id instead of through join
+  // This ensures proper isolation between programs
   const { data, error } = await supabase
     .from("post_travel")
     .select(
@@ -71,31 +73,39 @@ export async function SelectAllPostTravelReportsByProgramIDAction(
       travel_date:travel_order_itinerary_items(date, end_date, destination)
     `
     )
-    .eq("travel_order.program_id", programID)
+    .eq("program_id", programID)
     .order("created_at", { ascending: false });
 
   if (error) throw error;
 
-  // Map signed URLs for photos
-  const reportsWithExtras = await Promise.all(
-    data.map(async (report) => {
-      const signedPhotoUrls = report.photo_url
-        ? await Promise.all(
-            report.photo_url.map(async (path: string) => {
-              const { data: signed } = await supabase.storage
-                .from("post-travel-reports")
-                .createSignedUrl(path, 60 * 60);
-              return signed?.signedUrl ?? null;
-            })
-          )
-        : [];
+  // Optimize: Batch sign all photo URLs at once to avoid N+1
+  const allPhotoUrls = data
+    .flatMap((report) => report.photo_url || [])
+    .filter((url, index, self) => self.indexOf(url) === index); // Get unique URLs
 
-      return {
-        ...report,
-        photo_url: signedPhotoUrls.filter(Boolean),
-      };
+  const signedUrlMap = new Map<string, string | null>();
+  await Promise.all(
+    allPhotoUrls.map(async (path: string) => {
+      const { data: signed } = await supabase.storage
+        .from("post-travel-reports")
+        .createSignedUrl(path, 60 * 60);
+      signedUrlMap.set(path, signed?.signedUrl ?? null);
     })
   );
+
+  // Map signed URLs for photos
+  const reportsWithExtras = data.map((report) => {
+    const signedPhotoUrls = report.photo_url
+      ? report.photo_url
+          .map((path: string) => signedUrlMap.get(path))
+          .filter((url: string | null): url is string => url !== null)
+      : [];
+
+    return {
+      ...report,
+      photo_url: signedPhotoUrls,
+    };
+  });
 
   return reportsWithExtras as PostTravelReportType[];
 }
@@ -129,26 +139,34 @@ export async function SelectAllPostTravelReportsByCurrentUserAction() {
     throw error;
   }
 
-  // Resolve signed image URLs
-  const reportsWithExtras = await Promise.all(
-    data.map(async (report) => {
-      const signedPhotoUrls = report.photo_url
-        ? await Promise.all(
-            report.photo_url.map(async (path: string) => {
-              const { data: signed } = await supabase.storage
-                .from("post-travel-reports")
-                .createSignedUrl(path, 60 * 60);
-              return signed?.signedUrl ?? null;
-            })
-          )
-        : [];
+  // Optimize: Batch sign all photo URLs at once to avoid N+1
+  const allPhotoUrls = data
+    .flatMap((report) => report.photo_url || [])
+    .filter((url, index, self) => self.indexOf(url) === index); // Get unique URLs
 
-      return {
-        ...report,
-        photo_url: signedPhotoUrls.filter((url) => url !== null),
-      };
+  const signedUrlMap = new Map<string, string | null>();
+  await Promise.all(
+    allPhotoUrls.map(async (path: string) => {
+      const { data: signed } = await supabase.storage
+        .from("post-travel-reports")
+        .createSignedUrl(path, 60 * 60);
+      signedUrlMap.set(path, signed?.signedUrl ?? null);
     })
   );
+
+  // Resolve signed image URLs
+  const reportsWithExtras = data.map((report) => {
+    const signedPhotoUrls = report.photo_url
+      ? report.photo_url
+          .map((path: string) => signedUrlMap.get(path))
+          .filter((url: string | null): url is string => url !== null)
+      : [];
+
+    return {
+      ...report,
+      photo_url: signedPhotoUrls,
+    };
+  });
 
   return reportsWithExtras as PostTravelReportType[];
 }

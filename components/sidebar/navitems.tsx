@@ -77,7 +77,7 @@ export function getProgramNavItems(id: string) {
       icon: UserPen,
     },
     {
-      title: "Post-Travel Reports",
+      title: "Travel Reports",
       href: `/dashboard/programs/${id}/post-travel-reports`,
       icon: NotebookPen,
     },
@@ -133,7 +133,7 @@ export function getUserDashboardNavItems() {
       icon: House,
     },
     {
-      title: "Post-Travel Reports",
+      title: "Travel Reports",
       href: "/field-technician/post-travel-reports",
       icon: NotebookPen,
     },

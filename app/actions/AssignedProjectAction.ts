@@ -1,6 +1,5 @@
 "use server";
 
-import { SelectUserProfileByIDAction } from "@/app/actions/UserProfileAction";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
@@ -51,21 +50,35 @@ export async function InsertFieldTechniciansToProjectAction(
 
   if (insertError) throw insertError;
 
-  // Log and notify each new technician
-  for (const technicianID of newAssignees) {
-    const userProfile = await SelectUserProfileByIDAction(technicianID);
+  // Batch fetch all user profiles to avoid N+1 queries
+  const { data: userProfiles, error: userProfilesError } = await supabase
+    .from("user_profile")
+    .select("id, fullname")
+    .in("id", newAssignees);
 
-    await InsertActivityLogAction(
-      "Assigned Field Technician",
-      `Field technician ${userProfile?.fullname} assigned to ${projectName}.`,
-      projectLocationID
-    );
+  if (userProfilesError) throw userProfilesError;
 
-    await sendNotificationToUser(
-      `You have been assigned to the project: ${projectName}.`,
-      technicianID
-    );
-  }
+  const userProfileMap = new Map(
+    (userProfiles || []).map((user) => [user.id, user])
+  );
+
+  // Log and notify each new technician (using batched data)
+  await Promise.all(
+    newAssignees.map(async (technicianID) => {
+      const userProfile = userProfileMap.get(technicianID);
+
+      await InsertActivityLogAction(
+        "Assigned Field Technician",
+        `Field technician ${userProfile?.fullname || "Unknown"} assigned to ${projectName}.`,
+        projectLocationID
+      );
+
+      await sendNotificationToUser(
+        `You have been assigned to the project: ${projectName}.`,
+        technicianID
+      );
+    })
+  );
 
   return { success: true, assigned: newAssignees.length };
 }
@@ -98,12 +111,21 @@ export async function DeleteFieldTechnicianFromProjectAction(
     throw projectError;
   }
 
-  const existingUserData = await SelectUserProfileByIDAction(user_id);
+  // Fix N+1: Fetch user profile directly instead of calling separate action
+  const { data: existingUserData, error: userError } = await supabase
+    .from("user_profile")
+    .select("fullname")
+    .eq("id", user_id)
+    .single();
+
+  if (userError) {
+    throw userError;
+  }
 
   // Log the activity
   await InsertActivityLogAction(
     "Removed a Field Technician from Project",
-    `Field technician ${existingUserData.fullname} was removed from project ${projectData.project_name}.`,
+    `Field technician ${existingUserData?.fullname || "Unknown"} was removed from project ${projectData.project_name}.`,
     project_id
   );
 

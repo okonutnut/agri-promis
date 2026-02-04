@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
@@ -22,10 +22,14 @@ export default function ProgramsPage() {
 
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Filter programs based on the search query
-  const filteredPrograms = data?.filter((program) =>
-    program.program_name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Optimize: Use useMemo to prevent unnecessary filtering recalculations
+  const filteredPrograms = useMemo(() => {
+    if (!data) return [];
+    const lowerQuery = searchQuery.toLowerCase();
+    return data.filter((program) =>
+      program.program_name?.toLowerCase().includes(lowerQuery)
+    );
+  }, [data, searchQuery]);
 
   return (
     <CustomPageLayout
@@ -67,7 +71,7 @@ export default function ProgramsPage() {
                       {format(new Date(program.created_at!), "PPp")}
                     </small>
                     <Badge className="font-normal rounded-md">
-                      {program.project_count[0].count ?? 0} project/s
+                      {program.project_count?.[0]?.count ?? 0} project/s
                     </Badge>
                   </div>
                 </div>

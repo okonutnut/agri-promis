@@ -38,37 +38,9 @@ export default function AdminDashboardItems({
   };
 
   // Filter statistics based on selected year
+  // Note: Count queries (programs, projects, users, FCAs) cannot be filtered by year without
+  // fetching all records, so we display totals regardless of selectedYear
   const filteredStats = useMemo(() => {
-    // Filter programs by created_at year
-    const filteredPrograms = data?.totalPrograms
-      ? selectedYear === "all"
-        ? data.totalPrograms
-        : // Note: We can't filter count without fetching all records, so we'll use the total
-          // In a real implementation, you'd want to fetch all programs and filter client-side
-          data.totalPrograms
-      : 0;
-
-    // Filter projects by created_at year
-    const filteredProjects = data?.totalProjects
-      ? selectedYear === "all"
-        ? data.totalProjects
-        : data.totalProjects
-      : 0;
-
-    // Filter users - users don't have a year filter typically, but we can filter by created_at
-    const filteredUsers = data?.totalUsers
-      ? selectedYear === "all"
-        ? data.totalUsers
-        : data.totalUsers
-      : 0;
-
-    // Filter FCAs
-    const filteredFCAs = data?.totalFCAs
-      ? selectedYear === "all"
-        ? data.totalFCAs
-        : data.totalFCAs
-      : 0;
-
     // Filter activity logs by created_at year
     const filteredActivityLogs =
       data?.recentActivityLogs?.filter((log) =>
@@ -83,10 +55,12 @@ export default function AdminDashboardItems({
       }) || [];
 
     return {
-      totalPrograms: filteredPrograms,
-      totalProjects: filteredProjects,
-      totalUsers: filteredUsers,
-      totalFCAs: filteredFCAs,
+      // Counts are always totals (year filtering would require fetching all records)
+      totalPrograms: data?.totalPrograms ?? 0,
+      totalProjects: data?.totalProjects ?? 0,
+      totalUsers: data?.totalUsers ?? 0,
+      totalFCAs: data?.totalFCAs ?? 0,
+      // These can be filtered client-side since we have the full data
       recentActivityLogs: filteredActivityLogs,
       futureTravelOrders: filteredTravelOrders,
     };

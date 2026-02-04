@@ -44,15 +44,24 @@ export async function SelectAllFCAAction() {
 
   if (projectError) throw projectError;
 
-  // Map projects to each FCA
-  const result = fcaData.map((fca) => {
-    const assignedProjects = projectData.filter((project) => {
-      const ids = Array.isArray(project.fca_ids) ? project.fca_ids : [];
-      return ids.includes(fca.id);
+  // Optimize: Create a map of FCA ID -> projects to avoid O(n*m) nested loops
+  const fcaProjectsMap = new Map<string, typeof projectData>();
+  
+  projectData?.forEach((project) => {
+    const ids = Array.isArray(project.fca_ids) ? project.fca_ids : [];
+    ids.forEach((fcaId: string) => {
+      if (!fcaProjectsMap.has(fcaId)) {
+        fcaProjectsMap.set(fcaId, []);
+      }
+      fcaProjectsMap.get(fcaId)!.push(project);
     });
-
-    return { ...fca, assignedProjects };
   });
+
+  // Map projects to each FCA using the pre-built map (O(n) instead of O(n*m))
+  const result = fcaData.map((fca) => ({
+    ...fca,
+    assignedProjects: fcaProjectsMap.get(fca.id!) || [],
+  }));
 
   return result;
 }

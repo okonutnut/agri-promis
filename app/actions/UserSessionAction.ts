@@ -52,20 +52,21 @@ export async function UpdateUserCurrentLocationAction(lat: string, lng: string) 
   return;
 }
 
-export async function DeleteUserSessionAction() {
-  const supabase = await createClient(cookies());
-  const { data: session } = await supabase.auth.getSession();
-  const { error } = await supabase
-    .from("user_session")
-    .delete()
-    .eq(
-      "session_id",
-      decodeSupabaseJWT(session?.session?.access_token || "")?.session_id
-    );
+// UNUSED QUERY - Commented out
+// export async function DeleteUserSessionAction() {
+//   const supabase = await createClient(cookies());
+//   const { data: session } = await supabase.auth.getSession();
+//   const { error } = await supabase
+//     .from("user_session")
+//     .delete()
+//     .eq(
+//       "session_id",
+//       decodeSupabaseJWT(session?.session?.access_token || "")?.session_id
+//     );
 
-  if (error) {
-    return false;
-  }
+//   if (error) {
+//     return false;
+//   }
 
-  return true;
-}
+//   return true;
+// }

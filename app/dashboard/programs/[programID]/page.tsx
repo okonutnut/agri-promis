@@ -53,7 +53,7 @@ export default function ProgramOverviewPage() {
       table: "post_travel",
     });
 
-  // Calculate statistics
+  // Optimize: Calculate all statistics in a single pass to avoid multiple iterations
   const stats = useMemo(() => {
     if (!data)
       return {
@@ -67,61 +67,49 @@ export default function ProgramOverviewPage() {
 
     const totalProjects = data.length;
 
-    const filteredLocations = data.flatMap(
-      (project) => project.project_location || []
-    );
-
-    const totalLocations = filteredLocations.length;
-    const activeLocations = filteredLocations.filter(
-      (loc) => loc.status === 1
-    ).length;
-
-    // Calculate travel order statistics
-    const filteredTravelOrders = travelOrders || [];
-
-    // Filter active travel orders
-    const activeTravelOrders = filteredTravelOrders.filter((to) => {
-      const isActive = to.is_active;
-      return (
-        isActive === 1 ||
-        isActive === true ||
-        isActive === "1" ||
-        Boolean(isActive)
-      );
+    // Calculate locations in a single pass
+    let totalLocations = 0;
+    let activeLocations = 0;
+    data.forEach((project) => {
+      const locations = project.project_location || [];
+      totalLocations += locations.length;
+      activeLocations += locations.filter((loc) => loc.status === 1).length;
     });
 
-    const filteredPostTravelReports = postTravelReports || [];
-
-    const totalPostTravels = filteredPostTravelReports.length;
-
+    // Calculate travel order statistics in a single pass
+    const filteredTravelOrders = travelOrders || [];
     const now = new Date();
-    const upcomingPostTravels = activeTravelOrders.filter((to) => {
-      // Check if travel order has future dates (upcoming travel)
-      const hasFutureDeparture =
-        to.departure_date && new Date(to.departure_date) > now;
-      const hasFutureReturn = to.return_date && new Date(to.return_date) > now;
+    let totalTravelOrders = filteredTravelOrders.length;
+    let upcomingPostTravels = 0;
 
-      // Also check travel itinerary items for future dates
-      const hasFutureItinerary = to.travel_itinerary?.some(
-        (itinerary: { date?: string; end_date?: string }) => {
-          const itineraryDate = itinerary.date
-            ? new Date(itinerary.date)
-            : null;
-          const itineraryEndDate = itinerary.end_date
-            ? new Date(itinerary.end_date)
-            : null;
-          return (
-            (itineraryDate && itineraryDate > now) ||
-            (itineraryEndDate && itineraryEndDate > now)
-          );
+    filteredTravelOrders.forEach((to) => {
+      // Check if travel order is active and has upcoming dates
+      const isActive = to.is_active === 1 || to.is_active === true || to.is_active === "1" || Boolean(to.is_active);
+      
+      if (isActive) {
+        // Check if travel order has future dates (upcoming travel)
+        const hasFutureDeparture = to.departure_date && new Date(to.departure_date) > now;
+        const hasFutureReturn = to.return_date && new Date(to.return_date) > now;
+
+        // Also check travel itinerary items for future dates
+        const hasFutureItinerary = to.travel_itinerary?.some(
+          (itinerary: { date?: string; end_date?: string }) => {
+            const itineraryDate = itinerary.date ? new Date(itinerary.date) : null;
+            const itineraryEndDate = itinerary.end_date ? new Date(itinerary.end_date) : null;
+            return (
+              (itineraryDate && itineraryDate > now) ||
+              (itineraryEndDate && itineraryEndDate > now)
+            );
+          }
+        );
+
+        if (hasFutureDeparture || hasFutureReturn || hasFutureItinerary) {
+          upcomingPostTravels++;
         }
-      );
+      }
+    });
 
-      return hasFutureDeparture || hasFutureReturn || hasFutureItinerary;
-    }).length;
-
-    // Total travel orders issued - count filtered travel orders
-    const totalTravelOrders = filteredTravelOrders.length;
+    const totalPostTravels = postTravelReports?.length || 0;
 
     return {
       totalProjects,

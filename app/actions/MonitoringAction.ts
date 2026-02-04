@@ -46,36 +46,44 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
 
   if (fcaError) throw fcaError;
 
-  // Map FCA + signed URLs
-  const reportsWithExtras = await Promise.all(
-    data.map(async (report) => {
-      const signedPhotoUrls = report.photo_url
-        ? await Promise.all(
-            report.photo_url.map(async (path: string) => {
-              const { data: signed } = await supabase.storage
-                .from("monitoring-reports")
-                .createSignedUrl(path, 60 * 60);
-              return signed?.signedUrl ?? null;
-            })
-          )
-        : [];
+  // Optimize: Batch sign all photo URLs at once to avoid N+1
+  const allPhotoUrls = data
+    .flatMap((report) => report.photo_url || [])
+    .filter((url, index, self) => self.indexOf(url) === index); // Get unique URLs
 
-      const fcaDetails = report.project_location?.fca_ids
-        ? fcaData.filter((fca) =>
-            report.project_location?.fca_ids.includes(fca.id)
-          )
-        : [];
-
-      return {
-        ...report,
-        photo_url: signedPhotoUrls.filter(Boolean),
-        project_location: {
-          ...report.project_location,
-          fcaDetails,
-        },
-      };
+  const signedUrlMap = new Map<string, string | null>();
+  await Promise.all(
+    allPhotoUrls.map(async (path: string) => {
+      const { data: signed } = await supabase.storage
+        .from("monitoring-reports")
+        .createSignedUrl(path, 60 * 60);
+      signedUrlMap.set(path, signed?.signedUrl ?? null);
     })
   );
+
+  // Map FCA + signed URLs
+  const reportsWithExtras = data.map((report) => {
+    const signedPhotoUrls = report.photo_url
+      ? report.photo_url
+          .map((path: string) => signedUrlMap.get(path))
+          .filter((url: string | null): url is string => url !== null)
+      : [];
+
+    const fcaDetails = report.project_location?.fca_ids
+      ? fcaData.filter((fca) =>
+          report.project_location?.fca_ids.includes(fca.id)
+        )
+      : [];
+
+    return {
+      ...report,
+      photo_url: signedPhotoUrls,
+      project_location: {
+        ...report.project_location,
+        fcaDetails,
+      },
+    };
+  });
 
   return reportsWithExtras as MonitoringReportType[];
 }
@@ -124,36 +132,44 @@ export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
 
   if (fcaError) throw fcaError;
 
-  // Map FCA + signed URLs
-  const reportsWithExtras = await Promise.all(
-    data.map(async (report) => {
-      const signedPhotoUrls = report.photo_url
-        ? await Promise.all(
-            report.photo_url.map(async (path: string) => {
-              const { data: signed } = await supabase.storage
-                .from("monitoring-reports")
-                .createSignedUrl(path, 60 * 60);
-              return signed?.signedUrl ?? null;
-            })
-          )
-        : [];
+  // Optimize: Batch sign all photo URLs at once to avoid N+1
+  const allPhotoUrls = data
+    .flatMap((report) => report.photo_url || [])
+    .filter((url, index, self) => self.indexOf(url) === index); // Get unique URLs
 
-      const fcaDetails = report.project_location?.fca_ids
-        ? fcaData.filter((fca) =>
-            report.project_location?.fca_ids.includes(fca.id)
-          )
-        : [];
-
-      return {
-        ...report,
-        photo_url: signedPhotoUrls.filter(Boolean),
-        project_location: {
-          ...report.project_location,
-          fcaDetails,
-        },
-      };
+  const signedUrlMap = new Map<string, string | null>();
+  await Promise.all(
+    allPhotoUrls.map(async (path: string) => {
+      const { data: signed } = await supabase.storage
+        .from("monitoring-reports")
+        .createSignedUrl(path, 60 * 60);
+      signedUrlMap.set(path, signed?.signedUrl ?? null);
     })
   );
+
+  // Map FCA + signed URLs
+  const reportsWithExtras = data.map((report) => {
+    const signedPhotoUrls = report.photo_url
+      ? report.photo_url
+          .map((path: string) => signedUrlMap.get(path))
+          .filter((url: string | null): url is string => url !== null)
+      : [];
+
+    const fcaDetails = report.project_location?.fca_ids
+      ? fcaData.filter((fca) =>
+          report.project_location?.fca_ids.includes(fca.id)
+        )
+      : [];
+
+    return {
+      ...report,
+      photo_url: signedPhotoUrls,
+      project_location: {
+        ...report.project_location,
+        fcaDetails,
+      },
+    };
+  });
 
   return reportsWithExtras as MonitoringReportType[];
 }
@@ -202,31 +218,39 @@ export async function SelectAllMonitoringReportsByCurrentUserAction() {
     throw fcaError;
   }
 
-  // Resolve signed image URLs + map FCA details
-  const reportsWithExtras = await Promise.all(
-    data.map(async (report) => {
-      const signedPhotoUrls = report.photo_url
-        ? await Promise.all(
-            report.photo_url.map(async (path: string) => {
-              const { data: signed } = await supabase.storage
-                .from("monitoring-reports")
-                .createSignedUrl(path, 60 * 60);
-              return signed?.signedUrl ?? null;
-            })
-          )
-        : [];
+  // Optimize: Batch sign all photo URLs at once to avoid N+1
+  const allPhotoUrls = data
+    .flatMap((report) => report.photo_url || [])
+    .filter((url, index, self) => self.indexOf(url) === index); // Get unique URLs
 
-      const fcaDetails = report.project?.fca_ids
-        ? fcaData.filter((fca) => report.project?.fca_ids.includes(fca.id))
-        : [];
-
-      return {
-        ...report,
-        photo_url: signedPhotoUrls.filter((url) => url !== null),
-        project: { ...report.project, fcaDetails },
-      };
+  const signedUrlMap = new Map<string, string | null>();
+  await Promise.all(
+    allPhotoUrls.map(async (path: string) => {
+      const { data: signed } = await supabase.storage
+        .from("monitoring-reports")
+        .createSignedUrl(path, 60 * 60);
+      signedUrlMap.set(path, signed?.signedUrl ?? null);
     })
   );
+
+  // Resolve signed image URLs + map FCA details
+  const reportsWithExtras = data.map((report) => {
+    const signedPhotoUrls = report.photo_url
+      ? report.photo_url
+          .map((path: string) => signedUrlMap.get(path))
+          .filter((url: string | null): url is string => url !== null)
+      : [];
+
+    const fcaDetails = report.project?.fca_ids
+      ? fcaData.filter((fca) => report.project?.fca_ids.includes(fca.id))
+      : [];
+
+    return {
+      ...report,
+      photo_url: signedPhotoUrls,
+      project: { ...report.project, fcaDetails },
+    };
+  });
 
   // Sort by travel_order_no (your custom sort)
   const sortedReports = reportsWithExtras.sort((a, b) => {
@@ -332,6 +356,7 @@ export async function InsertRemarksInMonitoringReportAction(reportId: string) {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("User not authenticated");
 
+  // Fix N+1: Combine queries using a join to fetch travel_order_no in one query
   const { data, error } = await supabase
     .from("monitoring")
     .update({
@@ -339,27 +364,25 @@ export async function InsertRemarksInMonitoringReportAction(reportId: string) {
       reviewed_at: new Date(),
     })
     .eq("id", reportId)
-    .select("project_location_id, travel_order_no")
+    .select(
+      `
+      project_location_id,
+      travel_order_no,
+      travel_order:travel_order!monitoring_travel_order_no_fkey(travel_order_no)
+    `
+    )
     .single();
 
   if (error) {
     throw error;
   }
 
-  const { data: toData, error: toError } = await supabase
-    .from("travel_order")
-    .select("travel_order_no")
-    .eq("id", data.travel_order_no)
-    .single();
-
-  if (toError) {
-    throw toError;
-  }
+  const travelOrderNo = data?.travel_order_no || "Unknown";
 
   // Log the activity
   await InsertActivityLogAction(
     "Reviewed a Monitoring Report",
-    `Monitoring report with T.O no ${toData.travel_order_no} has been reviewed.`,
+    `Monitoring report with T.O no ${travelOrderNo} has been reviewed.`,
     data?.project_location_id
   );
 
