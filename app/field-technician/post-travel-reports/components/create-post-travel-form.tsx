@@ -151,12 +151,6 @@ export function CreatePostTravelForm({
     }
   };
 
-  const allowSubmit =
-    !!form.watch("travel_date_id") &&
-    !!form.watch("travel_order_id") &&
-    !!form.watch("program_id") &&
-    (isAddMode ? isAssignedToProgram !== false : true);
-
   return (
     <>
       <div className="flex-1 overflow-y-auto h-[calc(90vh)] pb-12">
@@ -285,7 +279,7 @@ export function CreatePostTravelForm({
                 );
               }}
               size="sm"
-              disabled={isPending || !allowSubmit}
+              disabled={isPending}
             >
               {isPending ? (
                 <Loader2 className="animate-spin" />
