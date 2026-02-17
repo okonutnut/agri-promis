@@ -7,14 +7,6 @@ import { cookies } from "next/headers";
 export async function SelectDashboardItemsAction(projectLocationID: string) {
   const supabase = await createClient(cookies());
 
-  // 1. total assigned ft
-  const { data: APData, error: APError } = await supabase
-    .from("assigned_projects")
-    .select("*")
-    .eq("project_location_id", projectLocationID);
-
-  if (APError) throw APError;
-
   // 2. total monitoring reports
   const { data: MData, error: MError } = await supabase
     .from("monitoring")
@@ -33,7 +25,6 @@ export async function SelectDashboardItemsAction(projectLocationID: string) {
   if (projectError) throw projectError;
 
   return {
-    ap: APData,
     m: MData,
     pi: PData.progress_indicator,
   };
@@ -54,17 +45,10 @@ export async function SelectUserDashboardItemsAction() {
     .eq("user_id", userData.user.id)
     .gte("return_date", new Date().toISOString())
     .order("created_at", { ascending: false });
-  if (TError) {
-    throw TError;
-  }
 
-  // Get assigned projects
-  const { data: APData, error: APError } = await supabase
-    .from("assigned_projects")
-    .select("*")
-    .eq("user_id", userData.user.id);
-  if (APError) {
-    throw APError;
+  if (TError) {
+    console.log(TError);
+    throw TError;
   }
 
   // Get monitoring reports
@@ -75,6 +59,14 @@ export async function SelectUserDashboardItemsAction() {
   if (MError) {
     throw MError;
   }
+
+  // Get assigned programs
+  const { data: APData, error: APError } = await supabase
+    .from("assigned_fieldtechnicians")
+    .select("*")
+    .eq("user_id", userData.user.id);
+
+  if (APError) throw APError;
 
   // Get activity logs
   const { data: ALData, error: ALError } = await supabase
@@ -92,9 +84,9 @@ export async function SelectUserDashboardItemsAction() {
 
 export async function SelectAdminDashboardItemsAction() {
   const supabase = await createClient(cookies());
-  
+
   const nowDate = new Date().toISOString().split("T")[0]; // e.g. "2025-09-18"
-  
+
   // Optimize: Run all independent queries in parallel for better performance
   const [
     { count: userCount },
@@ -120,7 +112,7 @@ export async function SelectAdminDashboardItemsAction() {
             fullname
           )
         )
-      `
+      `,
       )
       .gte("date", nowDate)
       .order("date", { ascending: true })
@@ -133,7 +125,10 @@ export async function SelectAdminDashboardItemsAction() {
   ]);
 
   if (futureTravelOrdersError) {
-    console.error("Error fetching future travel orders:", futureTravelOrdersError);
+    console.error(
+      "Error fetching future travel orders:",
+      futureTravelOrdersError,
+    );
   }
 
   return {
@@ -174,9 +169,7 @@ export async function SelectAdminDashboardItemsAction() {
 export async function SelectTotalProjectsPerProgramAction() {
   const supabase = await createClient(cookies());
 
-  const { data, error } = await supabase
-  .from("programs")
-  .select(`
+  const { data, error } = await supabase.from("programs").select(`
     id,
     program_name,
     projects:projects(count)
@@ -240,7 +233,7 @@ export async function SelectMonitoringReportsCountByDate(project_id: string) {
     end_date = project.end_date;
   } else {
     const today = new Date();
-    const dayOfWeek = today.getDay();            // Sunday = 0, Monday = 1 … Saturday = 6 :contentReference[oaicite:0]{index=0}
+    const dayOfWeek = today.getDay(); // Sunday = 0, Monday = 1 … Saturday = 6 :contentReference[oaicite:0]{index=0}
     const daysUntilSunday = (7 - dayOfWeek) % 7; // if today is Sunday, this gives 0
     const sunday = new Date(today);
     sunday.setDate(today.getDate() + daysUntilSunday);
@@ -266,7 +259,7 @@ export async function SelectMonitoringReportsCountByDate(project_id: string) {
   const counts = dateArray.map((date) => {
     const dateString = date.toISOString().split("T")[0];
     const count = reports.filter(
-      (r) => r.created_at.split("T")[0] === dateString
+      (r) => r.created_at.split("T")[0] === dateString,
     ).length;
     return { date: dateString, reports: count };
   });
@@ -285,7 +278,7 @@ export async function SelectTravelOrdersAnalyticsAction() {
       *,
       user:user_profile!travel_order_user_id_fkey (fullname),
       program:programs!travel_order_program_id_fkey (program_name)
-    `
+    `,
     )
     .order("created_at", { ascending: false });
 
@@ -304,26 +297,27 @@ export async function SelectTravelOrdersAnalyticsAction() {
 
   travelOrders?.forEach((to: any) => {
     totalTravelOrders++;
-    
+
     // Count active
     if (to.is_active === 1 || to.is_active === true) {
       activeTravelOrders++;
     }
-    
+
     // Count upcoming
     if (to.departure_date && new Date(to.departure_date) > now) {
       upcomingTravelOrders++;
     }
-    
+
     // Count completed
     if (to.return_date && new Date(to.return_date) < now) {
       completedTravelOrders++;
     }
-    
+
     // Group by program
     const programName = to.program?.program_name || "Unassigned";
-    travelOrdersByProgram[programName] = (travelOrdersByProgram[programName] || 0) + 1;
-    
+    travelOrdersByProgram[programName] =
+      (travelOrdersByProgram[programName] || 0) + 1;
+
     // Group by month
     if (to.created_at) {
       const date = new Date(to.created_at);
@@ -367,10 +361,12 @@ export async function SelectFCAAnalyticsAction() {
   // Calculate statistics
   const totalFCAs = fcas?.length || 0;
   const activeFCAs = fcas?.filter((fca) => fca.active_status === 1).length || 0;
-  const inactiveFCAs = fcas?.filter((fca) => fca.active_status === 0).length || 0;
+  const inactiveFCAs =
+    fcas?.filter((fca) => fca.active_status === 0).length || 0;
 
   // Calculate total members
-  const totalMembers = fcas?.reduce((sum, fca) => sum + (fca.member_count || 0), 0) || 0;
+  const totalMembers =
+    fcas?.reduce((sum, fca) => sum + (fca.member_count || 0), 0) || 0;
 
   // Calculate FCAs with projects
   const fcasWithProjects = new Set<string>();
@@ -390,7 +386,7 @@ export async function SelectFCAAnalyticsAction() {
 
   // Optimize: Create a map of FCA ID -> project count to avoid O(n*m) nested loops
   const fcaProjectCountMap = new Map<string, number>();
-  
+
   projectLocations?.forEach((project) => {
     const ids = Array.isArray(project.fca_ids) ? project.fca_ids : [];
     ids.forEach((fcaId: string) => {
@@ -399,10 +395,11 @@ export async function SelectFCAAnalyticsAction() {
   });
 
   // Calculate projects per FCA using the pre-built map (O(n) instead of O(n*m))
-  const projectsPerFCA = fcas?.map((fca) => ({
-    fcaName: fca.description || "Unknown",
-    projectCount: fcaProjectCountMap.get(fca.id!) || 0,
-  })) || [];
+  const projectsPerFCA =
+    fcas?.map((fca) => ({
+      fcaName: fca.description || "Unknown",
+      projectCount: fcaProjectCountMap.get(fca.id!) || 0,
+    })) || [];
 
   return {
     totalFCAs,

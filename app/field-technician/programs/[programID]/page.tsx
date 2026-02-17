@@ -15,12 +15,12 @@ import { SelectAllProgramsAssignedToCurrentUserAction } from "@/app/actions/Assi
 function useSearchFilter<T>(
   items: T[],
   searchQuery: string,
-  filterFn: (item: T, query: string) => boolean
+  filterFn: (item: T, query: string) => boolean,
 ): T[] {
   return useMemo(
     () => items.filter((item) => filterFn(item, searchQuery)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [items, searchQuery]
+    [items, searchQuery],
   );
 }
 
@@ -38,7 +38,8 @@ function FilteredProjects({
     projects,
     searchQuery,
     (project, query) =>
-      project.project_name?.toLowerCase().includes(query.toLowerCase()) ?? false
+      project.project_name?.toLowerCase().includes(query.toLowerCase()) ??
+      false,
   );
 
   return (
@@ -47,7 +48,7 @@ function FilteredProjects({
         <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredProjects.map((project: ProjectType) => (
             <CardLink
-              href={`/field-technician/projects/${programID}/projects/${project.id}`}
+              href={`/field-technician/programs/${programID}/projects/${project.id}`}
               key={project.id}
               className="min-w-sm group flex flex-col items-start p-4 space-y-2 gap-0 h-44 md:h-44 max-h-44"
             >
@@ -97,7 +98,7 @@ export default function ProjectsByProgramPage() {
   });
 
   const isAssigned = assignedPrograms?.some(
-    (program) => program.id === programID
+    (program) => program.id === programID,
   );
 
   const { data, isLoading, error } = useRealtimeQuery({
@@ -154,4 +155,3 @@ export default function ProjectsByProgramPage() {
     </CustomPageLayout>
   );
 }
-

@@ -1,12 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext",
-      "WebWorker"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext", "WebWorker"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -24,9 +19,7 @@
       }
     ],
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     }
   },
   "include": [
@@ -37,7 +30,7 @@
     "worker/**/*.ts",
     "types/**/*.ts",
     "app/field-technician/dashboard/layout.tsx",
-    "app/field-technician/projects/[projectUID]/monitoring-report/loading.tsx.bak",
+    "app/field-technician/programs/[projectUID]/monitoring-report/loading.tsx.bak",
     "app/dashboard/projects/[projectID]/monitoring-reports/loading.tsx.back",
     "app/dashboard/projects/[projectID]/field-technicians/loading.tsx.back",
     "app/field-technician/travel-order/components/travel-order-form.tsx.bak",
@@ -46,7 +39,5 @@
     "components/custom/print/print-post-travel-pdfmake.tsx.bak",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

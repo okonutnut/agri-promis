@@ -22,7 +22,7 @@ export default function AssignedProgramsPage() {
 
   // Filter programs based on the search query
   const filteredPrograms = data?.filter((program) =>
-    program.program_name.toLowerCase().includes(searchQuery.toLowerCase())
+    program.program_name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
@@ -46,7 +46,7 @@ export default function AssignedProgramsPage() {
         <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredPrograms.map((program) => (
             <CardLink
-              href={`/field-technician/projects/${program.id}`}
+              href={`/field-technician/programs/${program.id}`}
               key={program.id}
               className="flex flex-col items-start h-[120px] p-4 space-y-2 gap-0"
             >

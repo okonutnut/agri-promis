@@ -138,8 +138,8 @@ export function getUserDashboardNavItems() {
       icon: NotebookPen,
     },
     {
-      title: "Assigned Projects",
-      href: "/field-technician/projects",
+      title: "Assigned Programs",
+      href: "/field-technician/programs",
       icon: UserPen,
     },
     {
@@ -159,23 +159,23 @@ export function getUserProjectNavItems(programID: string, locationID: string) {
   return [
     {
       title: "Project Overview",
-      href: `/field-technician/projects/${programID}/location/${locationID}`,
+      href: `/field-technician/programs/${programID}/location/${locationID}`,
       icon: House,
     },
     {
       title: "Monitoring Report",
-      href: `/field-technician/projects/${programID}/location/${locationID}/monitoring-report`,
+      href: `/field-technician/programs/${programID}/location/${locationID}/monitoring-report`,
       icon: Cctv,
     },
     {
       title: "Activity Logs",
-      href: `/field-technician/projects/${programID}/location/${locationID}/activity-logs`,
+      href: `/field-technician/programs/${programID}/location/${locationID}/activity-logs`,
       icon: ChartLine,
     },
-    {
-      title: "Back to Projects",
-      href: `/field-technician/projects/${programID}`,
-      icon: ArrowLeft,
-    }
+    // {
+    //   title: "Back to Projects",
+    //   href: `/field-technician/projects/${programID}`,
+    //   icon: ArrowLeft,
+    // },
   ];
 }

@@ -147,7 +147,7 @@ const ProgramDropdown = memo(
         </PopoverContent>
       </Popover>
     );
-  }
+  },
 );
 
 // Component for project location pages (/dashboard/projects/[projectID])
@@ -163,10 +163,10 @@ const ProjectLocationDropdown = memo(
   }) => {
     const projects = program.projects ?? [];
     const currentProject = projects.find((p: ProjectType) =>
-      p.project_location?.some((location) => location.id === projectID)
+      p.project_location?.some((location) => location.id === projectID),
     );
     const currentProjectLocation = currentProject?.project_location?.find(
-      (location) => location.id === projectID
+      (location) => location.id === projectID,
     );
     const router = useRouter();
     const [open, setOpen] = useState(false);
@@ -187,7 +187,10 @@ const ProjectLocationDropdown = memo(
                   {currentProject?.project_name}
                 </span>
                 <PopoverTrigger asChild>
-                  <Button className="h-7 w-4 text-[#707070] p-0" variant="ghost">
+                  <Button
+                    className="h-7 w-4 text-[#707070] p-0"
+                    variant="ghost"
+                  >
                     <ChevronsUpDown className="h-3 w-3" />
                   </Button>
                 </PopoverTrigger>
@@ -206,7 +209,7 @@ const ProjectLocationDropdown = memo(
                               setValue(project.id);
                               setOpen(false);
                               router.push(
-                                `/dashboard/programs/${program.id}/projects/${project.id}`
+                                `/dashboard/programs/${program.id}/projects/${project.id}`,
                               );
                             }}
                           >
@@ -239,8 +242,15 @@ const ProjectLocationDropdown = memo(
                   {role === "admin" && (
                     <>
                       <Separator />
-                      <Link href={`/dashboard/new/${program.id}`} prefetch={true}>
-                        <Button variant="ghost" size="sm" className="w-full justify-start">
+                      <Link
+                        href={`/dashboard/new/${program.id}`}
+                        prefetch={true}
+                      >
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full justify-start"
+                        >
                           <Plus className="h-4 w-4 mr-1" /> New Project
                         </Button>
                       </Link>
@@ -263,7 +273,7 @@ const ProjectLocationDropdown = memo(
         </span>
       </div>
     );
-  }
+  },
 );
 
 // Component for project details page (/dashboard/programs/[programID]/projects/[projectID])
@@ -279,7 +289,7 @@ const ProjectDetailsBreadcrumb = memo(
   }) => {
     const projects = program.projects ?? [];
     const currentProject = projects.find(
-      (p: ProjectType) => p.id === projectID
+      (p: ProjectType) => p.id === projectID,
     );
     const router = useRouter();
     const [open, setOpen] = useState(false);
@@ -323,7 +333,7 @@ const ProjectDetailsBreadcrumb = memo(
                       setValue(project.id);
                       setOpen(false);
                       router.push(
-                        `/dashboard/programs/${program.id}/projects/${project.id}`
+                        `/dashboard/programs/${program.id}/projects/${project.id}`,
                       );
                     }}
                   >
@@ -357,7 +367,11 @@ const ProjectDetailsBreadcrumb = memo(
             <>
               <Separator />
               <Link href={`/dashboard/new/${program.id}`} prefetch={true}>
-                <Button variant="ghost" size="sm" className="w-full justify-start">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start"
+                >
                   <Plus className="h-4 w-4 mr-1" /> New Project
                 </Button>
               </Link>
@@ -366,7 +380,7 @@ const ProjectDetailsBreadcrumb = memo(
         </PopoverContent>
       </Popover>
     );
-  }
+  },
 );
 
 const UserProgramsDropdown = memo(function UserProgramsDropdown({
@@ -425,7 +439,7 @@ const UserProgramsDropdown = memo(function UserProgramsDropdown({
                   onSelect={(currentValue: string) => {
                     setValue(currentValue);
                     setOpen(false);
-                    router.push(`/field-technician/projects/${currentValue}`);
+                    router.push(`/field-technician/programs/${currentValue}`);
                   }}
                 >
                   <div className="flex items-center justify-between w-full">
@@ -466,7 +480,7 @@ const UserProjectsDropdown = memo(function UserProjectsDropdown() {
     if (!data || !locationID) return null;
     for (const project of data) {
       const location = project.project_location?.find(
-        (loc: ProjectLocationType) => loc.id === locationID
+        (loc: ProjectLocationType) => loc.id === locationID,
       );
       if (location) {
         return { project, location };
@@ -494,7 +508,7 @@ const UserProjectsDropdown = memo(function UserProjectsDropdown() {
     });
     return locations;
   }, [data, programID, currentProjectData]);
-  
+
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState<string | undefined>(locationID as string);
@@ -506,18 +520,14 @@ const UserProjectsDropdown = memo(function UserProjectsDropdown() {
   const projectLink = useMemo(() => {
     if (!programID) return "/field-technician/projects";
     if (currentProjectData?.project?.id) {
-      return `/field-technician/projects/${programID}/projects/${currentProjectData.project.id}`;
+      return `/field-technician/programs/${programID}/projects/${currentProjectData.project.id}`;
     }
-    return `/field-technician/projects/${programID}`;
+    return `/field-technician/programs/${programID}`;
   }, [programID, currentProjectData?.project?.id]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <Link
-        href={projectLink}
-        prefetch={true}
-        className="flex flex-1 gap-2"
-      >
+      <Link href={projectLink} prefetch={true} className="flex flex-1 gap-2">
         <Box className="h-4 w-4 text-[#707070]" />
         <div className="min-w-[150px] truncate">
           {currentProjectData ? (
@@ -544,32 +554,45 @@ const UserProjectsDropdown = memo(function UserProjectsDropdown() {
           <CommandList>
             <CommandEmpty>No project found.</CommandEmpty>
             <CommandGroup>
-              {(programProjects ?? []).map((location: ProjectLocationType & { project: ProjectType }) => (
-                <CommandItem
-                  key={location.id}
-                  value={location.id}
-                  onSelect={(currentValue: string) => {
-                    setValue(currentValue);
-                    setOpen(false);
-                    if (programID) {
-                      router.push(`/field-technician/projects/${programID}/location/${currentValue}`);
-                    }
-                  }}
-                >
-                  <div className="flex flex-col gap-1">
-                    <span className="flex items-center">
-                      <MapPin className="h-4 w-4 text-[#707070] mr-1" />{" "}
-                      {location.location}
-                    </span>
-                  </div>
-                  {location.id === value && <Check className="ml-2 h-4 w-4" />}
-                </CommandItem>
-              ))}
+              {(programProjects ?? []).map(
+                (location: ProjectLocationType & { project: ProjectType }) => (
+                  <CommandItem
+                    key={location.id}
+                    value={location.id}
+                    onSelect={(currentValue: string) => {
+                      setValue(currentValue);
+                      setOpen(false);
+                      if (programID) {
+                        router.push(
+                          `/field-technician/programs/${programID}/location/${currentValue}`,
+                        );
+                      }
+                    }}
+                  >
+                    <div className="flex flex-col gap-1">
+                      <span className="flex items-center">
+                        <MapPin className="h-4 w-4 text-[#707070] mr-1" />{" "}
+                        {location.location}
+                      </span>
+                    </div>
+                    {location.id === value && (
+                      <Check className="ml-2 h-4 w-4" />
+                    )}
+                  </CommandItem>
+                ),
+              )}
             </CommandGroup>
           </CommandList>
         </Command>
         <Separator />
-        <Link href={programID ? `/field-technician/projects/${programID}` : "/field-technician/projects"} prefetch={true}>
+        <Link
+          href={
+            programID
+              ? `/field-technician/programs/${programID}`
+              : "/field-technician/projects"
+          }
+          prefetch={true}
+        >
           <Button
             variant="ghost"
             size="sm"
@@ -593,13 +616,13 @@ interface CustomNavbarProps {
 
 function getProgramIDProjectLocationID(
   projectID: string,
-  programs?: ProgramType[]
+  programs?: ProgramType[],
 ): ProgramType | undefined {
   if (!projectID || !programs) return undefined;
   for (const program of programs) {
     if (
       program.projects?.some((project: ProjectType) =>
-        project.project_location?.some((location) => location.id === projectID)
+        project.project_location?.some((location) => location.id === projectID),
       )
     ) {
       return program;
@@ -636,12 +659,14 @@ export default function CustomNavbar({
       pathname?.includes("/projects/") &&
       projectID &&
       !pathname?.startsWith("/dashboard/projects/") &&
-      !pathname?.startsWith("/field-technician/projects/")
+      !pathname?.startsWith("/field-technician/programs/")
     );
   }, [pathname, projectID]);
 
   const isProjectLocationPage = useMemo(() => {
-    return pathname?.startsWith("/dashboard/projects/") && projectID && !programID;
+    return (
+      pathname?.startsWith("/dashboard/projects/") && projectID && !programID
+    );
   }, [pathname, projectID, programID]);
 
   const isProjectsListPage = useMemo(() => {
@@ -649,57 +674,65 @@ export default function CustomNavbar({
       pathname?.includes("/programs/") &&
       pathname?.endsWith("/projects") &&
       !projectID &&
-      !pathname?.startsWith("/field-technician/projects/")
+      !pathname?.startsWith("/field-technician/programs/")
     );
   }, [pathname, projectID]);
 
   // Field technician route detection
   const isFieldTechnicianProgramsPage = useMemo(() => {
     return (
-      pathname?.startsWith("/field-technician/projects") &&
+      pathname?.startsWith("/field-technician/programs") &&
       !programID &&
       !projectID &&
-      pathname === "/field-technician/projects"
+      pathname === "/field-technician/programs"
     );
   }, [pathname, programID, projectID]);
 
   const isFieldTechnicianProgramProjectsPage = useMemo(() => {
-    if (!pathname?.startsWith("/field-technician/projects/")) return false;
-    // Path should be like /field-technician/projects/[programID] (without /projects/ or /location/)
+    if (!pathname?.startsWith("/field-technician/programs/")) return false;
+    // Path should be like /field-technician/programs/[programID] (without /projects/ or /location/)
     // Check pathname structure first, then verify params match
     const hasProjectsInPath = pathname.includes("/projects/");
     const hasLocationInPath = pathname.includes("/location/");
     if (hasProjectsInPath || hasLocationInPath) return false;
-    // Path should match pattern: /field-technician/projects/[programID]
+    // Path should match pattern: /field-technician/programs/[programID]
     const pathParts = pathname.split("/").filter(Boolean);
-    return pathParts.length === 3 && pathParts[0] === "field-technician" && pathParts[1] === "projects";
+    return (
+      pathParts.length === 3 &&
+      pathParts[0] === "field-technician" &&
+      pathParts[1] === "programs"
+    );
   }, [pathname]);
 
   const isFieldTechnicianProjectLocationsPage = useMemo(() => {
-    if (!pathname?.startsWith("/field-technician/projects/")) return false;
-    // Path should be like /field-technician/projects/[programID]/projects/[projectID]
+    if (!pathname?.startsWith("/field-technician/programs/")) return false;
+    // Path should be like /field-technician/programs/[programID]/projects/[projectID]
     // Check pathname structure first
     const hasProjectsInPath = pathname.includes("/projects/");
     const hasLocationInPath = pathname.includes("/location/");
     if (!hasProjectsInPath || hasLocationInPath) return false;
-    // Path should match pattern: /field-technician/projects/[programID]/projects/[projectID]
+    // Path should match pattern: /field-technician/programs/[programID]/projects/[projectID]
     const pathParts = pathname.split("/").filter(Boolean);
-    return pathParts.length === 5 && 
-           pathParts[0] === "field-technician" && 
-           pathParts[1] === "projects" &&
-           pathParts[3] === "projects";
+    return (
+      pathParts.length === 5 &&
+      pathParts[0] === "field-technician" &&
+      pathParts[1] === "programs" &&
+      pathParts[3] === "projects"
+    );
   }, [pathname]);
 
   const isFieldTechnicianLocationPage = useMemo(() => {
-    if (!pathname?.startsWith("/field-technician/projects/")) return false;
-    // Path should match pattern: /field-technician/projects/[programID]/location/[locationID]
+    if (!pathname?.startsWith("/field-technician/programs/")) return false;
+    // Path should match pattern: /field-technician/programs/[programID]/location/[locationID]
     const hasLocationInPath = pathname.includes("/location/");
     if (!hasLocationInPath) return false;
     const pathParts = pathname.split("/").filter(Boolean);
-    return pathParts.length === 5 && 
-           pathParts[0] === "field-technician" && 
-           pathParts[1] === "projects" &&
-           pathParts[3] === "location";
+    return (
+      pathParts.length === 5 &&
+      pathParts[0] === "field-technician" &&
+      pathParts[1] === "programs" &&
+      pathParts[3] === "location"
+    );
   }, [pathname]);
 
   const currentProgram = useMemo(() => {
@@ -715,11 +748,19 @@ export default function CustomNavbar({
     if (projectID && programs && isProjectDetailsPage) {
       // Find program that contains this project
       return programs.find((p) =>
-        p.projects?.some((project: ProjectType) => project.id === projectID)
+        p.projects?.some((project: ProjectType) => project.id === projectID),
       );
     }
     return undefined;
-  }, [programID, projectID, programs, userPrograms, isProjectLocationPage, isProjectDetailsPage, role]);
+  }, [
+    programID,
+    projectID,
+    programs,
+    userPrograms,
+    isProjectLocationPage,
+    isProjectDetailsPage,
+    role,
+  ]);
 
   return (
     <>
@@ -835,7 +876,7 @@ export default function CustomNavbar({
                         <UserProgramsDropdown programID={programID as string} />
                         <BreadcrumbSeparator />
                         <Link
-                          href={`/field-technician/projects/${programID}`}
+                          href={`/field-technician/programs/${programID}`}
                           className="text-black whitespace-nowrap"
                         >
                           <span className="w-[150px] flex items-center gap-2">
@@ -866,6 +907,8 @@ export default function CustomNavbar({
                         <UserProjectsDropdown />
                       </>
                     )}
+
+                    {}
 
                     {/* Fallback for other field technician pages */}
                     {!isFieldTechnicianProgramsPage &&

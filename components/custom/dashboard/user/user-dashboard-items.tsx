@@ -11,11 +11,11 @@ import dynamic from "next/dynamic";
 const UserActivityLogs = dynamic(
   () =>
     import("@/app/field-technician/dashboard/components/user-activity-logs"),
-  { ssr: false }
+  { ssr: false },
 );
 const SummaryCard = dynamic(
   () => import("@/components/custom/card/summary-cards"),
-  { ssr: false }
+  { ssr: false },
 );
 
 type UserDashboardItemsProps = {
@@ -43,8 +43,8 @@ export default function UserDashboardItems({
           <strong className="text-3xl">{data?.m?.length || 0}</strong>
         </SummaryCard>
         <SummaryCard
-          title="Projects"
-          description="Total Assigned Projects"
+          title="Programs"
+          description="Total Assigned Programs"
           icon={FileStack}
           isLoading={isLoading}
         >

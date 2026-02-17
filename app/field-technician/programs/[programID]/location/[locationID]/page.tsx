@@ -71,7 +71,7 @@ function ProjectDashboardInfo(data: ProjectType) {
             Project Status
           </Badge>
           <Link
-            href={`/field-technician/projects/${data?.program_id}/projects/${data?.id}`}
+            href={`/field-technician/programs/${data?.program_id}/projects/${data?.id}`}
             prefetch={true}
           >
             <Button variant={"outline"} className="w-full" size="sm">
@@ -103,7 +103,10 @@ export default function ProjectDashboard() {
     <CustomPageLayout
       isLoading={isLoading}
       error={error}
-      navItems={getUserProjectNavItems(programID as string, locationID as string)}
+      navItems={getUserProjectNavItems(
+        programID as string,
+        locationID as string,
+      )}
       className="m-0 p-0 space-y-4"
       role="user"
     >

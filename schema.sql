@@ -13,6 +13,16 @@ CREATE TABLE public.activity_logs (
   CONSTRAINT activity_logs_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.user_profile(id),
   CONSTRAINT activity_logs_project_location_id_fkey FOREIGN KEY (project_location_id) REFERENCES public.project_location(id)
 );
+CREATE TABLE public.assigned_fieldtechnicians (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid,
+  program_id uuid,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT assigned_fieldtechnicians_pkey PRIMARY KEY (id),
+  CONSTRAINT assigned_fieldtechnicians_project_location_id_fkey FOREIGN KEY (program_id) REFERENCES public.project_location(id),
+  CONSTRAINT assigned_fieldtechnicians_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.user_profile(id),
+  CONSTRAINT assigned_fieldtechnicians_program_id_fkey FOREIGN KEY (program_id) REFERENCES public.programs(id)
+);
 CREATE TABLE public.assigned_projects (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id uuid,

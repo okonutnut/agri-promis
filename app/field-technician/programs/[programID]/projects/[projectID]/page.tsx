@@ -22,16 +22,17 @@ import { Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import growthStages from "@/data/growth-stages.json";
+import Link from "next/link";
 
 function useSearchFilter<T>(
   items: T[],
   searchQuery: string,
-  filterFn: (item: T, query: string) => boolean
+  filterFn: (item: T, query: string) => boolean,
 ): T[] {
   return useMemo(
     () => items.filter((item) => filterFn(item, searchQuery)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [items, searchQuery]
+    [items, searchQuery],
   );
 }
 
@@ -49,7 +50,7 @@ export default function ProjectLocationsPage() {
   });
 
   const isAssigned = assignedPrograms?.some(
-    (program) => program.id === programID
+    (program) => program.id === programID,
   );
 
   const { data, isLoading, error } = useRealtimeQuery({
@@ -111,15 +112,16 @@ export default function ProjectLocationsPage() {
     project?.project_location ?? [],
     searchQuery,
     (location, query) =>
-      location.location?.toLowerCase().includes(query.toLowerCase()) ?? false
+      location.location?.toLowerCase().includes(query.toLowerCase()) ?? false,
   )
     .filter((location) =>
       filter
-        ? location.location?.toLowerCase().includes(filter.toLowerCase()) ?? false
-        : true
+        ? (location.location?.toLowerCase().includes(filter.toLowerCase()) ??
+          false)
+        : true,
     )
     .filter((location) =>
-      statusFilter !== null ? location.status === statusFilter : true
+      statusFilter !== null ? location.status === statusFilter : true,
     );
 
   return (
@@ -131,13 +133,12 @@ export default function ProjectLocationsPage() {
       navItems={getUserDashboardNavItems()}
       role="user"
       topRightComponent={
-        <Button
-          variant={"outline"}
-          onClick={() => window.history.back()}
-        >
-          <ChevronLeft />
-          Back
-        </Button>
+        <Link href={`/field-technician/programs/${programID}/`} prefetch="auto">
+          <Button variant={"outline"}>
+            <ChevronLeft />
+            Back
+          </Button>
+        </Link>
       }
     >
       <div className="flex flex-wrap items-start gap-2 mb-4">
@@ -179,7 +180,7 @@ export default function ProjectLocationsPage() {
         <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           {filteredLocations.map((location) => (
             <CardLink
-              href={`/field-technician/projects/${programID}/location/${location.id}`}
+              href={`/field-technician/programs/${programID}/location/${location.id}`}
               key={location.id}
               className="h-auto min-w-sm group flex flex-col items-start p-4 space-y-2 gap-0"
             >
@@ -193,17 +194,17 @@ export default function ProjectLocationsPage() {
                     <small className="italic">
                       {location.description || "No Description"}
                     </small>
-                    <Badge className="font-semibold rounded-md">
+                    {/* <Badge className="font-semibold rounded-md">
                       {
                         growthStages.find(
                           (stage) =>
                             stage.value ===
-                            location.progress_indicator?.toString()
+                            location.progress_indicator?.toString(),
                         )?.label
                       }
                       &nbsp;
                       {location.progress_indicator === 1 ? "" : "Stages"}
-                    </Badge>
+                    </Badge> */}
                     {location.created_at && (
                       <small>
                         Date Created:&nbsp;
@@ -227,4 +228,3 @@ export default function ProjectLocationsPage() {
     </CustomPageLayout>
   );
 }
-
