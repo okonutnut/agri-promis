@@ -3,12 +3,12 @@
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
-import { MonitoringReportType } from "../../components/types";
+import { FCAType, MonitoringReportType } from "../../components/types";
 import { CheckUserAssignedToProgramByProjectLocationAction } from "@/app/actions/AssignedProgramAction";
 
 // MONITORING REPORT ACTIONS
 export async function SelectAllMonitoringReportsByProjectIDAction(
-  projectLocationID: string
+  projectLocationID: string,
 ) {
   const supabase = await createClient(cookies());
 
@@ -22,7 +22,7 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
       travel_order:travel_order(travel_order_no, travel_itinerary:travel_order_itinerary_items(*)),
       reporter:user_profile!monitoring_reporter_id_fkey(fullname),
       reviewedBy:user_profile!monitoring_reviewed_by_id_fkey(fullname)
-    `
+    `,
     )
     .eq("project_location_id", projectLocationID)
     .order("created_at", { ascending: false });
@@ -35,8 +35,8 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
       data
         .map((report) => report.project_location?.fca_ids || [])
         .flat()
-        .filter((id): id is string => !!id)
-    )
+        .filter((id): id is string => !!id),
+    ),
   );
 
   const { data: fcaData, error: fcaError } = await supabase
@@ -46,10 +46,12 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
 
   if (fcaError) throw fcaError;
 
+  const fcaMap = new Map(fcaData.map((fca) => [fca.id, fca]));
+
   // Optimize: Batch sign all photo URLs at once to avoid N+1
-  const allPhotoUrls = data
-    .flatMap((report) => report.photo_url || [])
-    .filter((url, index, self) => self.indexOf(url) === index); // Get unique URLs
+  const allPhotoUrls = Array.from(
+    new Set(data.flatMap((report) => report.photo_url || [])),
+  );
 
   const signedUrlMap = new Map<string, string | null>();
   await Promise.all(
@@ -58,7 +60,7 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
         .from("monitoring-reports")
         .createSignedUrl(path, 60 * 60);
       signedUrlMap.set(path, signed?.signedUrl ?? null);
-    })
+    }),
   );
 
   // Map FCA + signed URLs
@@ -70,9 +72,92 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
       : [];
 
     const fcaDetails = report.project_location?.fca_ids
-      ? fcaData.filter((fca) =>
-          report.project_location?.fca_ids.includes(fca.id)
-        )
+      ? report.project_location.fca_ids
+          .map((id: string) => fcaMap.get(id))
+          .filter((fca: FCAType): fca is (typeof fcaData)[number] =>
+            Boolean(fca),
+          )
+      : [];
+
+    return {
+      ...report,
+      photo_url: signedPhotoUrls,
+      project_location: {
+        ...report.project_location,
+        fcaDetails,
+      },
+    };
+  });
+
+  return reportsWithExtras as MonitoringReportType[];
+}
+
+export async function SelectAllMonitoringReportsByProgramIDAction(
+  programId: string,
+) {
+  const supabase = await createClient(cookies());
+
+  const { data, error } = await supabase
+    .from("monitoring")
+    .select(
+      `
+      *,
+      project_location:project_location(*, projects(*)),
+      travel_order:travel_order(travel_order_no, travel_itinerary:travel_order_itinerary_items(*)),
+      reporter:user_profile!monitoring_reporter_id_fkey(fullname),
+      reviewedBy:user_profile!monitoring_reviewed_by_id_fkey(fullname)
+    `,
+    )
+    .eq("project_location.projects.program_id", programId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  const projectFCAIds = Array.from(
+    new Set(
+      data
+        .map((report) => report.project_location?.fca_ids || [])
+        .flat()
+        .filter((id): id is string => !!id),
+    ),
+  );
+
+  const { data: fcaData, error: fcaError } = await supabase
+    .from("farmers")
+    .select("id, description")
+    .in("id", projectFCAIds);
+
+  if (fcaError) throw fcaError;
+
+  const fcaMap = new Map(fcaData.map((fca) => [fca.id, fca]));
+
+  const allPhotoUrls = Array.from(
+    new Set(data.flatMap((report) => report.photo_url || [])),
+  );
+
+  const signedUrlMap = new Map<string, string | null>();
+  await Promise.all(
+    allPhotoUrls.map(async (path: string) => {
+      const { data: signed } = await supabase.storage
+        .from("monitoring-reports")
+        .createSignedUrl(path, 60 * 60);
+      signedUrlMap.set(path, signed?.signedUrl ?? null);
+    }),
+  );
+
+  const reportsWithExtras = data.map((report) => {
+    const signedPhotoUrls = report.photo_url
+      ? report.photo_url
+          .map((path: string) => signedUrlMap.get(path))
+          .filter((url: string | null): url is string => url !== null)
+      : [];
+
+    const fcaDetails = report.project_location?.fca_ids
+      ? report.project_location.fca_ids
+          .map((id: string) => fcaMap.get(id))
+          .filter((fca: FCAType): fca is (typeof fcaData)[number] =>
+            Boolean(fca),
+          )
       : [];
 
     return {
@@ -89,7 +174,7 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
 }
 
 export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
-  projectLocationID: string
+  projectLocationID: string,
 ) {
   const supabase = await createClient(cookies());
 
@@ -107,7 +192,7 @@ export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
       travel_order:travel_order(travel_order_no, travel_itinerary:travel_order_itinerary_items(*)),
       reporter:user_profile!monitoring_reporter_id_fkey(fullname),
       reviewedBy:user_profile!monitoring_reviewed_by_id_fkey(fullname)
-    `
+    `,
     )
     .eq("reporter_id", userData.user.id)
     .eq("project_location_id", projectLocationID)
@@ -121,8 +206,8 @@ export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
       data
         .map((report) => report.project_location?.fca_ids || [])
         .flat()
-        .filter((id): id is string => !!id)
-    )
+        .filter((id): id is string => !!id),
+    ),
   );
 
   const { data: fcaData, error: fcaError } = await supabase
@@ -132,10 +217,12 @@ export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
 
   if (fcaError) throw fcaError;
 
+  const fcaMap = new Map(fcaData.map((fca) => [fca.id, fca]));
+
   // Optimize: Batch sign all photo URLs at once to avoid N+1
-  const allPhotoUrls = data
-    .flatMap((report) => report.photo_url || [])
-    .filter((url, index, self) => self.indexOf(url) === index); // Get unique URLs
+  const allPhotoUrls = Array.from(
+    new Set(data.flatMap((report) => report.photo_url || [])),
+  );
 
   const signedUrlMap = new Map<string, string | null>();
   await Promise.all(
@@ -144,7 +231,7 @@ export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
         .from("monitoring-reports")
         .createSignedUrl(path, 60 * 60);
       signedUrlMap.set(path, signed?.signedUrl ?? null);
-    })
+    }),
   );
 
   // Map FCA + signed URLs
@@ -156,9 +243,11 @@ export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
       : [];
 
     const fcaDetails = report.project_location?.fca_ids
-      ? fcaData.filter((fca) =>
-          report.project_location?.fca_ids.includes(fca.id)
-        )
+      ? report.project_location.fca_ids
+          .map((id: string) => fcaMap.get(id))
+          .filter((fca: FCAType): fca is (typeof fcaData)[number] =>
+            Boolean(fca),
+          )
       : [];
 
     return {
@@ -190,7 +279,7 @@ export async function SelectAllMonitoringReportsByCurrentUserAction() {
       project:projects(project_name, fca_ids),
       travel_order:travel_order(travel_order_no, purpose),
       reporter:user_profile!monitoring_reporter_id_fkey(fullname),
-      reviewedBy:user_profile!monitoring_reviewed_by_id_fkey(fullname)`
+      reviewedBy:user_profile!monitoring_reviewed_by_id_fkey(fullname)`,
     )
     .eq("reporter_id", userData.user.id)
     .order("created_at", { ascending: false });
@@ -205,8 +294,8 @@ export async function SelectAllMonitoringReportsByCurrentUserAction() {
       data
         .map((report) => report.project?.fca_ids || [])
         .flat()
-        .filter((id): id is string => !!id)
-    )
+        .filter((id): id is string => !!id),
+    ),
   );
 
   const { data: fcaData, error: fcaError } = await supabase
@@ -218,10 +307,12 @@ export async function SelectAllMonitoringReportsByCurrentUserAction() {
     throw fcaError;
   }
 
+  const fcaMap = new Map(fcaData.map((fca) => [fca.id, fca]));
+
   // Optimize: Batch sign all photo URLs at once to avoid N+1
-  const allPhotoUrls = data
-    .flatMap((report) => report.photo_url || [])
-    .filter((url, index, self) => self.indexOf(url) === index); // Get unique URLs
+  const allPhotoUrls = Array.from(
+    new Set(data.flatMap((report) => report.photo_url || [])),
+  );
 
   const signedUrlMap = new Map<string, string | null>();
   await Promise.all(
@@ -230,7 +321,7 @@ export async function SelectAllMonitoringReportsByCurrentUserAction() {
         .from("monitoring-reports")
         .createSignedUrl(path, 60 * 60);
       signedUrlMap.set(path, signed?.signedUrl ?? null);
-    })
+    }),
   );
 
   // Resolve signed image URLs + map FCA details
@@ -242,7 +333,11 @@ export async function SelectAllMonitoringReportsByCurrentUserAction() {
       : [];
 
     const fcaDetails = report.project?.fca_ids
-      ? fcaData.filter((fca) => report.project?.fca_ids.includes(fca.id))
+      ? report.project.fca_ids
+          .map((id: string) => fcaMap.get(id))
+          .filter((fca: FCAType): fca is (typeof fcaData)[number] =>
+            Boolean(fca),
+          )
       : [];
 
     return {
@@ -287,15 +382,17 @@ export async function InsertMonitoringReportAction({
 
   // Validate user is assigned to the program via assigned_fieldtechnicians
   const isAssigned = await CheckUserAssignedToProgramByProjectLocationAction(
-    project_location_id as string
+    project_location_id as string,
   );
   if (!isAssigned) {
-    throw new Error("You are not assigned to this program. Please contact your administrator.");
+    throw new Error(
+      "You are not assigned to this program. Please contact your administrator.",
+    );
   }
 
   // Upload images to Supabase Storage only if images are provided
   let photo_paths: string[] = [];
-  
+
   if (images && images.length > 0) {
     const imageFile = images.map((img) => {
       return img.file;
@@ -317,7 +414,7 @@ export async function InsertMonitoringReportAction({
         if (error) throw error;
 
         return filePath;
-      })
+      }),
     );
   }
 
@@ -341,7 +438,7 @@ export async function InsertMonitoringReportAction({
   await InsertActivityLogAction(
     "Submitted a Monitoring Report",
     `Monitoring report submitted for project ${project_location?.projects?.project_name}, ${project_location?.location}.`,
-    project_location_id
+    project_location_id,
   );
 
   return;
@@ -369,7 +466,7 @@ export async function InsertRemarksInMonitoringReportAction(reportId: string) {
       project_location_id,
       travel_order_no,
       travel_order:travel_order!monitoring_travel_order_no_fkey(travel_order_no)
-    `
+    `,
     )
     .single();
 
@@ -383,7 +480,7 @@ export async function InsertRemarksInMonitoringReportAction(reportId: string) {
   await InsertActivityLogAction(
     "Reviewed a Monitoring Report",
     `Monitoring report with T.O no ${travelOrderNo} has been reviewed.`,
-    data?.project_location_id
+    data?.project_location_id,
   );
 
   return;

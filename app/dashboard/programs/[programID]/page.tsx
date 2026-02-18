@@ -8,6 +8,7 @@ import {
   Plane,
   Calendar,
   FileText,
+  Cctv,
 } from "lucide-react";
 import { useParams, useSearchParams } from "next/navigation";
 import { getProgramNavItems } from "@/components/sidebar/navitems";
@@ -18,6 +19,10 @@ import { SelectAllTravelOrdersByProgramIDAction } from "@/app/actions/TravelOrde
 import { SelectAllPostTravelReportsByProgramIDAction } from "@/app/actions/PostTravelAction";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import SummaryCard from "@/components/custom/card/summary-cards";
+import {
+  SelectAllMonitoringReportsByProgramIDAction,
+  SelectAllMonitoringReportsByProjectIDAction,
+} from "@/app/actions/MonitoringAction";
 
 export default function ProgramOverviewPage() {
   const { programID } = useParams();
@@ -35,6 +40,18 @@ export default function ProgramOverviewPage() {
       return SelectAllProjectsByProgramIDAction(programID as string);
     },
     table: "projects",
+  });
+
+  const {
+    data: monitoringData,
+    isLoading: monitoringLoading,
+    error: monitoringError,
+  } = useRealtimeQuery({
+    queryKey: ["allMonitoringReports", programID as string],
+    queryFn: () => {
+      return SelectAllMonitoringReportsByProgramIDAction(programID as string);
+    },
+    table: "monitoring",
   });
 
   const { data: travelOrders, isLoading: travelOrdersLoading } =
@@ -84,23 +101,33 @@ export default function ProgramOverviewPage() {
 
     filteredTravelOrders.forEach((to) => {
       // Check if travel order is active and has upcoming dates
-      const isActive = to.is_active === 1 || to.is_active === true || to.is_active === "1" || Boolean(to.is_active);
-      
+      const isActive =
+        to.is_active === 1 ||
+        to.is_active === true ||
+        to.is_active === "1" ||
+        Boolean(to.is_active);
+
       if (isActive) {
         // Check if travel order has future dates (upcoming travel)
-        const hasFutureDeparture = to.departure_date && new Date(to.departure_date) > now;
-        const hasFutureReturn = to.return_date && new Date(to.return_date) > now;
+        const hasFutureDeparture =
+          to.departure_date && new Date(to.departure_date) > now;
+        const hasFutureReturn =
+          to.return_date && new Date(to.return_date) > now;
 
         // Also check travel itinerary items for future dates
         const hasFutureItinerary = to.travel_itinerary?.some(
           (itinerary: { date?: string; end_date?: string }) => {
-            const itineraryDate = itinerary.date ? new Date(itinerary.date) : null;
-            const itineraryEndDate = itinerary.end_date ? new Date(itinerary.end_date) : null;
+            const itineraryDate = itinerary.date
+              ? new Date(itinerary.date)
+              : null;
+            const itineraryEndDate = itinerary.end_date
+              ? new Date(itinerary.end_date)
+              : null;
             return (
               (itineraryDate && itineraryDate > now) ||
               (itineraryEndDate && itineraryEndDate > now)
             );
-          }
+          },
         );
 
         if (hasFutureDeparture || hasFutureReturn || hasFutureItinerary) {
@@ -110,6 +137,7 @@ export default function ProgramOverviewPage() {
     });
 
     const totalPostTravels = postTravelReports?.length || 0;
+    const totalMonitoringReports = monitoringData?.length || 0;
 
     return {
       totalProjects,
@@ -118,8 +146,9 @@ export default function ProgramOverviewPage() {
       totalPostTravels,
       upcomingPostTravels,
       totalTravelOrders,
+      totalMonitoringReports,
     };
-  }, [data, travelOrders, postTravelReports]);
+  }, [data, travelOrders, postTravelReports, monitoringData]);
 
   return (
     <CustomPageLayout
@@ -173,30 +202,30 @@ export default function ProgramOverviewPage() {
           title="Travel Orders"
           description="Total Travel Orders Issued"
           icon={FileText}
-          isLoading={isLoading || travelOrdersLoading}
+          isLoading={travelOrdersLoading}
         >
           <strong className="text-3xl sm:text-4xl">
             {stats.totalTravelOrders}
           </strong>
         </SummaryCard>
         <SummaryCard
-          title="Post Travels"
+          title="Travel Reports"
           description="Total Post Travel Reports"
           icon={Plane}
-          isLoading={isLoading || travelOrdersLoading || postTravelLoading}
+          isLoading={postTravelLoading}
         >
           <strong className="text-3xl sm:text-4xl">
             {stats.totalPostTravels}
           </strong>
         </SummaryCard>
         <SummaryCard
-          title="Upcoming"
-          description="Upcoming Post Travels"
-          icon={Calendar}
-          isLoading={isLoading || travelOrdersLoading || postTravelLoading}
+          title="Monitoring"
+          description="Total Monitoring Reports"
+          icon={Cctv}
+          isLoading={monitoringLoading}
         >
           <strong className="text-3xl sm:text-4xl">
-            {stats.upcomingPostTravels}
+            {stats.totalMonitoringReports}
           </strong>
         </SummaryCard>
       </section>

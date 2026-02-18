@@ -533,7 +533,7 @@ const UserProjectsDropdown = memo(function UserProjectsDropdown() {
           {currentProjectData ? (
             <span className="flex items-center gap-2">
               {currentProjectData.project?.project_name}
-              <ChevronRight className="mx-1 h-3 w-3 text-gray-400" />
+              <BreadcrumbSeparator />
               <MapPin className="h-4 w-4 text-[#707070] mr-1" />
               <span>{currentProjectData.location?.location}</span>
             </span>
@@ -727,8 +727,9 @@ export default function CustomNavbar({
     const hasLocationInPath = pathname.includes("/location/");
     if (!hasLocationInPath) return false;
     const pathParts = pathname.split("/").filter(Boolean);
+    console.log(pathParts);
     return (
-      pathParts.length === 5 &&
+      (pathParts.length === 5 || pathParts.length === 6) &&
       pathParts[0] === "field-technician" &&
       pathParts[1] === "programs" &&
       pathParts[3] === "location"
