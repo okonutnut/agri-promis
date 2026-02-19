@@ -9,7 +9,10 @@ import { Loader2, Send } from "lucide-react";
 import { useEditFCAHook, useInsertFCAHook } from "@/app/hooks/FCAHook";
 import { FCAType } from "@/components/types";
 import { Label } from "@/components/ui/label";
-import { useModal, useSheet } from "@/components/custom/layout/custom-page-layout";
+import {
+  useModal,
+  useSheet,
+} from "@/components/custom/layout/custom-page-layout";
 import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
 import FCAActiveStatusButton from "./active-status-button";
 import { useState } from "react";
@@ -116,7 +119,7 @@ export function FCAForm({ isAddMode, data }: FCAFormProps) {
                 }}
               >
                 Confirm
-              </Button>
+              </Button>,
             );
           }}
           disabled={isPending || pageState === "loading"}

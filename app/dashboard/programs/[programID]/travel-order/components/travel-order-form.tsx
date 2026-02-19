@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { UserComboBox } from "./user-combobox";
 import { TravelOrderProjectsType, TravelOrderType } from "@/components/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Send } from "lucide-react";
+import { Loader2, Send, Trash } from "lucide-react";
 import { useParams } from "next/navigation";
 import {
   useModal,
@@ -22,6 +22,7 @@ import { useUniversalMutation } from "@/hooks/use-universal-mutation";
 import { InsertTravelOrderAction } from "@/app/actions/TravelOrderAction";
 import { toast } from "sonner";
 import { CustomTabList } from "@/components/custom/layout/custom-tab-list";
+import { SoftDeleteAction } from "@/app/actions/DeleteAction";
 
 const formSchema = z
   .object({
@@ -52,7 +53,7 @@ const formSchema = z
           purpose: z.string().optional(),
           departure_time: z.string().optional(),
           arrival_time: z.string().optional(),
-        })
+        }),
       )
       .min(1, { message: "At least one itinerary is required" }),
   })
@@ -63,7 +64,7 @@ const formSchema = z
     {
       message: "Return date must be after departure date",
       path: ["return_date"],
-    }
+    },
   );
 
 type TravelOrderSchema = z.infer<typeof formSchema>;
@@ -115,13 +116,23 @@ export default function IssueTravelOrderForm({
     invalidateKeys: ["travel_order", programID as string],
   });
 
+  const { mutate: deleteTravelOrder, isPending: isDeletePending } =
+    useUniversalMutation({
+      mutationFn: async (data: { table: string; recordId: string }) =>
+        await SoftDeleteAction({
+          tableName: data.table,
+          recordId: data.recordId,
+        }),
+      invalidateKeys: ["travel_order", programID as string],
+    });
+
   const onSubmit = (data: TravelOrderSchema) => {
     // Ensure itinerary has at least one entry
     if (!data.travel_itinerary || data.travel_itinerary.length === 0) {
       toast.error("At least one itinerary entry is required.");
       return;
     }
-    
+
     mutate(data, {
       onSuccess: () => {
         toast.success("Travel order inserted successfully.");
@@ -133,8 +144,26 @@ export default function IssueTravelOrderForm({
     });
   };
 
+  const onDelete = () => {
+    deleteTravelOrder(
+      {
+        table: "travel_order",
+        recordId: values?.id || "",
+      },
+      {
+        onSuccess: () => {
+          toast.success("Travel order deleted successfully.");
+          closeSheet();
+        },
+        onError: () => {
+          toast.error("Failed to delete travel order. Please try again.");
+        },
+      },
+    );
+  };
+
   const [itinerary, setItinerary] = useState<TravelOrderProjectsType[]>(
-    values?.travel_itinerary || []
+    values?.travel_itinerary || [],
   );
 
   // Sync itinerary state with form value and trigger validation
@@ -244,8 +273,8 @@ export default function IssueTravelOrderForm({
           ]}
         />
       </div>
-      <CustomSheetFooter isPending={isPending}>
-        {isAddMode && (
+      <CustomSheetFooter isPending={isPending || isDeletePending}>
+        {isAddMode ? (
           <Button
             variant={isPending ? "ghost" : "default"}
             disabled={isPending || itinerary.length === 0}
@@ -258,13 +287,13 @@ export default function IssueTravelOrderForm({
                   toast.error("At least one itinerary entry is required.");
                   return;
                 }
-                
+
                 // Check itinerary length as well
                 if (itinerary.length === 0) {
                   toast.error("At least one itinerary entry is required.");
                   return;
                 }
-                
+
                 openModal(
                   "Attention",
                   "You confirm that all information provided is correct.",
@@ -276,7 +305,7 @@ export default function IssueTravelOrderForm({
                     }}
                   >
                     Confirm
-                  </Button>
+                  </Button>,
                 );
               });
             }}
@@ -286,6 +315,37 @@ export default function IssueTravelOrderForm({
             ) : (
               <>
                 <Send /> Submit
+              </>
+            )}
+          </Button>
+        ) : (
+          <Button
+            variant={isDeletePending ? "ghost" : "outline"}
+            disabled={isDeletePending || itinerary.length === 0}
+            size={"sm"}
+            type="button"
+            className="text-red-500"
+            onClick={() => {
+              openModal(
+                "Attention",
+                "Are you sure you want to delete this travel order? This action cannot be undone.",
+                <Button
+                  className="w-full"
+                  onClick={() => {
+                    onDelete();
+                    closeModal();
+                  }}
+                >
+                  Confirm
+                </Button>,
+              );
+            }}
+          >
+            {isDeletePending ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              <>
+                <Trash className="mr-2" /> Delete
               </>
             )}
           </Button>

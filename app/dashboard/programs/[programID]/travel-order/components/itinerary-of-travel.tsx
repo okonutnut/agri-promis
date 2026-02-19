@@ -44,7 +44,7 @@ export default function ItineraryOfTravel({
         departureDate={departureDate}
         returnDate={returnDate}
         isEditMode={false}
-      />
+      />,
     );
   };
 
@@ -68,7 +68,7 @@ export default function ItineraryOfTravel({
         initialValues={item}
         isEditMode={isAddMode}
         readOnly={!isAddMode}
-      />
+      />,
     );
   };
 
@@ -112,7 +112,7 @@ export default function ItineraryOfTravel({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[50px]">#</TableHead>
+                  <TableHead className="w-12.5">#</TableHead>
                   <TableHead>Date / Period</TableHead>
                   <TableHead className="text-end">Destination</TableHead>
                 </TableRow>

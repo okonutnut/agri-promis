@@ -61,7 +61,7 @@ export default function RemoveFTButton({ userID }: RemoveFTButtonProps) {
             }}
           >
             Confirm
-          </Button>
+          </Button>,
         )
       }
     >
@@ -70,10 +70,9 @@ export default function RemoveFTButton({ userID }: RemoveFTButtonProps) {
       ) : (
         <>
           <TriangleAlert className="text-red-500" />
-          Remove from program
+          Remove
         </>
       )}
     </Button>
   );
 }
-

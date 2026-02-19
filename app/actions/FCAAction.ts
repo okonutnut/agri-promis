@@ -19,7 +19,7 @@ export async function InsertFCAAction(data: FCAType) {
   // Log activity
   await InsertActivityLogAction(
     "Inserted new FCA record",
-    `Inserted FCA: ${data.description}`
+    `Inserted FCA: ${data.description}`,
   );
 
   // Send Notification
@@ -46,7 +46,7 @@ export async function SelectAllFCAAction() {
 
   // Optimize: Create a map of FCA ID -> projects to avoid O(n*m) nested loops
   const fcaProjectsMap = new Map<string, typeof projectData>();
-  
+
   projectData?.forEach((project) => {
     const ids = Array.isArray(project.fca_ids) ? project.fca_ids : [];
     ids.forEach((fcaId: string) => {
@@ -94,7 +94,7 @@ export async function EditFCAAction(data: FCAType) {
   // Log activity
   await InsertActivityLogAction(
     "Updated FCA record",
-    `Updated FCA: ${data.description}`
+    `Updated FCA: ${data.description}`,
   );
 
   // Send Notification
@@ -121,15 +121,22 @@ export async function EditFCAActiveStatusAction(fcaID: string, status: number) {
     "Updated FCA record",
     `Update ${data.description}'s active status to ${
       status == 0 ? "Inactive" : "Active"
-    }`
+    }`,
   );
 
   // Send Notification
-  await sendNotificationToAll(
-    `Update ${data.description}'s active status to ${
-      status == 0 ? "Inactive" : "Active"
-    }`
-  );
+  try {
+    await sendNotificationToAll(
+      `Update ${data.description}'s active status to ${
+        status == 0 ? "Inactive" : "Active"
+      }`,
+    );
+  } catch (notificationError) {
+    console.error(
+      "Failed to send FCA status update notification",
+      notificationError,
+    );
+  }
 
   return;
 }
