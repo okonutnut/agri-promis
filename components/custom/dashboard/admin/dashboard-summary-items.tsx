@@ -30,18 +30,10 @@ export default function ProjectDashboardItems() {
         <Suspense fallback={<Skeleton className="h-6 w-20" />}>
           <strong className="text-xl">
             {cornGrowthStages.find(
-              (stage) => stage.value === data?.pi?.toString()
+              (stage) => stage.value === data?.pi?.toString(),
             )?.label ?? "Not Set"}
           </strong>
         </Suspense>
-      </SummaryCard>
-      <SummaryCard
-        title="Operators"
-        description="Total Assigned Field Operators"
-        icon={Contact}
-        isLoading={isLoading || error ? true : false}
-      >
-        <strong className="text-4xl">{data?.ap?.length ?? 0}</strong>
       </SummaryCard>
       <SummaryCard
         title="Reports"
