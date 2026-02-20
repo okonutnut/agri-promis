@@ -6,7 +6,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import FormInput from "@/components/custom/input/form-input";
 import { Loader2, Send } from "lucide-react";
-import { useEditFCAHook, useInsertFCAHook } from "@/app/hooks/FCAHook";
 import { FCAType } from "@/components/types";
 import { Label } from "@/components/ui/label";
 import {
@@ -16,6 +15,13 @@ import {
 import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
 import FCAActiveStatusButton from "./active-status-button";
 import { useState } from "react";
+import { useUniversalMutation } from "@/hooks/use-universal-mutation";
+import { toast } from "sonner";
+import {
+  EditFCAAction,
+  EditFCAActiveStatusAction,
+  InsertFCAAction,
+} from "@/app/actions/FCAAction";
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -32,6 +38,7 @@ type FCAFormProps = {
 };
 export function FCAForm({ isAddMode, data }: FCAFormProps) {
   const [pageState, setPageState] = useState<"idle" | "loading">("idle");
+  console.log(pageState, "PAGE STATE");
   const { closeSheet } = useSheet();
   const { openModal, closeModal } = useModal();
 
@@ -47,27 +54,43 @@ export function FCAForm({ isAddMode, data }: FCAFormProps) {
 
   // INSERT
   const { mutate: insertMutate, isPending: isInsertPending } =
-    useInsertFCAHook();
+    useUniversalMutation({
+      mutationFn: async (data: FCAType) => await InsertFCAAction(data),
+      onSuccess: () => {
+        toast.success("FCA inserted successfully!");
+        setPageState("idle");
+        form.reset();
+        closeSheet();
+      },
+      onError: () => {
+        toast.error(`Something went wrong. Please try again.`);
+        setPageState("idle");
+      },
+    });
   // UPDATE
-  const { mutate: updateMutate, isPending: isUpdatePending } = useEditFCAHook();
+  const { mutate: updateMutate, isPending: isUpdatePending } =
+    useUniversalMutation({
+      mutationFn: async (data: FCAType) => await EditFCAAction(data),
+      onSuccess: () => {
+        toast.success("FCA updated successfully!");
+        setPageState("idle");
+        form.reset();
+        closeSheet();
+      },
+      onError: () => {
+        toast.error(`Something went wrong. Please try again.`);
+        setPageState("idle");
+      },
+    });
 
   const isPending = isInsertPending || isUpdatePending;
 
   const onSubmit = (data: FormType) => {
+    setPageState("loading");
     if (isAddMode) {
-      insertMutate(data, {
-        onSuccess: () => {
-          closeSheet();
-          form.reset();
-        },
-      });
+      insertMutate(data);
     } else {
-      updateMutate(data, {
-        onSuccess: () => {
-          closeSheet();
-          form.reset();
-        },
-      });
+      updateMutate(data);
     }
   };
 

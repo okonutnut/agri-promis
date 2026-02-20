@@ -19,18 +19,8 @@ CREATE TABLE public.assigned_fieldtechnicians (
   program_id uuid,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   CONSTRAINT assigned_fieldtechnicians_pkey PRIMARY KEY (id),
-  CONSTRAINT assigned_fieldtechnicians_project_location_id_fkey FOREIGN KEY (program_id) REFERENCES public.project_location(id),
   CONSTRAINT assigned_fieldtechnicians_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.user_profile(id),
   CONSTRAINT assigned_fieldtechnicians_program_id_fkey FOREIGN KEY (program_id) REFERENCES public.programs(id)
-);
-CREATE TABLE public.assigned_projects (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  user_id uuid,
-  project_location_id uuid,
-  created_at timestamp with time zone NOT NULL DEFAULT now(),
-  CONSTRAINT assigned_projects_pkey PRIMARY KEY (id),
-  CONSTRAINT assigned_projects_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.user_profile(id),
-  CONSTRAINT assigned_projects_project_location_id_fkey FOREIGN KEY (project_location_id) REFERENCES public.project_location(id)
 );
 CREATE TABLE public.farmers (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -41,6 +31,7 @@ CREATE TABLE public.farmers (
   created_at timestamp with time zone DEFAULT now(),
   president_name text,
   contact_number text,
+  is_deleted boolean NOT NULL DEFAULT false,
   CONSTRAINT farmers_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.monitoring (
@@ -90,6 +81,7 @@ CREATE TABLE public.programs (
   program_name text NOT NULL UNIQUE,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   description text,
+  is_deleted boolean NOT NULL DEFAULT false,
   CONSTRAINT programs_pkey PRIMARY KEY (id),
   CONSTRAINT programs_admin_id_fkey FOREIGN KEY (admin_id) REFERENCES public.user_profile(id)
 );
@@ -106,6 +98,7 @@ CREATE TABLE public.project_location (
   created_by uuid,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   id uuid NOT NULL DEFAULT gen_random_uuid(),
+  is_deleted boolean NOT NULL DEFAULT false,
   CONSTRAINT project_location_pkey PRIMARY KEY (id),
   CONSTRAINT project_location_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.user_profile(id),
   CONSTRAINT project_location_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id)
@@ -117,6 +110,7 @@ CREATE TABLE public.projects (
   created_by uuid,
   program_id uuid,
   created_at timestamp without time zone DEFAULT now(),
+  is_deleted boolean NOT NULL DEFAULT false,
   CONSTRAINT projects_pkey PRIMARY KEY (id),
   CONSTRAINT projects_program_id_fkey FOREIGN KEY (program_id) REFERENCES public.programs(id),
   CONSTRAINT projects_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.user_profile(id)
@@ -143,6 +137,7 @@ CREATE TABLE public.travel_order (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   is_active smallint,
   program_id uuid,
+  is_deleted boolean NOT NULL DEFAULT false,
   CONSTRAINT travel_order_pkey PRIMARY KEY (id),
   CONSTRAINT travel_order_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.user_profile(id),
   CONSTRAINT travel_order_program_id_fkey FOREIGN KEY (program_id) REFERENCES public.programs(id),
@@ -172,7 +167,7 @@ CREATE TABLE public.user_profile (
   CONSTRAINT user_profile_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
 );
 CREATE TABLE public.user_session (
-  user_id uuid DEFAULT gen_random_uuid() UNIQUE,
+  user_id uuid UNIQUE,
   ip_address text,
   longitude text,
   latitude text,

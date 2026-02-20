@@ -324,13 +324,13 @@ export default function IssueTravelOrderForm({
             disabled={isDeletePending || itinerary.length === 0}
             size={"sm"}
             type="button"
-            className="text-red-500"
             onClick={() => {
               openModal(
                 "Attention",
                 "Are you sure you want to delete this travel order? This action cannot be undone.",
                 <Button
                   className="w-full"
+                  variant={"destructive"}
                   onClick={() => {
                     onDelete();
                     closeModal();
@@ -345,7 +345,7 @@ export default function IssueTravelOrderForm({
               <Loader2 className="animate-spin" />
             ) : (
               <>
-                <Trash className="mr-2" /> Delete
+                <Trash className="text-red-500 mr-2" /> Delete
               </>
             )}
           </Button>

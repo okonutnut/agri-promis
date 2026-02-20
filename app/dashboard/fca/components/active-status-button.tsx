@@ -1,6 +1,4 @@
-import { SoftDeleteAction } from "@/app/actions/DeleteAction";
 import { EditFCAActiveStatusAction } from "@/app/actions/FCAAction";
-import { useEditFCAActiveStatusHook } from "@/app/hooks/FCAHook";
 import {
   useModal,
   useSheet,
@@ -36,40 +34,44 @@ export default function FCAActiveStatusButton({
     },
     onError: () => {
       toast.error(`Something went wrong. Please try again.`);
+      setPageState("idle");
     },
   });
 
   // DELETE MUTATION
-  const { mutate: deleteMutate, isPending: isDeletePending } =
-    useUniversalMutation({
-      mutationFn: async (data: { tableName: string; recordId: string }) =>
-        await SoftDeleteAction({
-          tableName: data.tableName,
-          recordId: data.recordId,
-        }),
-      onSuccess: () => {
-        toast.success("FCA deleted successfully!");
-        setPageState("idle");
-        closeSheet();
-      },
-      onError: () => {
-        toast.error(`Failed to delete FCA. Please try again.`);
-      },
-    });
+  // const { mutate: deleteMutate, isPending: isDeletePending } =
+  //   useUniversalMutation({
+  //     mutationFn: async (data: { tableName: string; recordId: string }) =>
+  //       await SoftDeleteAction({
+  //         tableName: data.tableName,
+  //         recordId: data.recordId,
+  //       }),
+  //     onSuccess: () => {
+  //       toast.success("FCA deleted successfully!");
+  //       setPageState("idle");
+  //       closeSheet();
+  //     },
+  //     onError: (error) => {
+  //       toast.error(`Failed to delete FCA. Please try again.`);
+  //       setPageState("idle");
+  //     },
+  //   });
 
   const onStatusChange = () => {
+    setPageState("loading");
     mutate({ fcaID, status: status === 1 ? 0 : 1 });
     closeModal();
   };
 
-  const onDelete = () => {
-    deleteMutate({ tableName: "farmers", recordId: fcaID });
-    closeModal();
-  };
+  // const onDelete = () => {
+  //   setPageState("loading");
+  //   deleteMutate({ tableName: "farmers", recordId: fcaID });
+  //   closeModal();
+  // };
 
   return (
     <>
-      <Button
+      {/* <Button
         variant={isDeletePending ? "ghost" : "outline"}
         size={"sm"}
         onClick={() => {
@@ -95,7 +97,7 @@ export default function FCAActiveStatusButton({
             Delete
           </>
         )}
-      </Button>
+      </Button> */}
 
       <Button
         variant={isPending ? "ghost" : "outline"}

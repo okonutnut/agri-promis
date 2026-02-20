@@ -9,13 +9,32 @@ import { Separator } from "@/components/ui/separator";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useModal } from "@/components/custom/layout/custom-page-layout";
+import { useUniversalMutation } from "@/hooks/use-universal-mutation";
+import { SoftDeleteAction } from "@/app/actions/DeleteAction";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 type DeleteProgramCardProps = {
   data: ProgramType;
 };
 export default function DeleteProgramCard({ data }: DeleteProgramCardProps) {
+  const router = useRouter();
   const { openModal, closeModal } = useModal();
-  const { mutate, isPending } = useDeleteProgramHook(data.id as string);
+  const { mutate, isPending } = useUniversalMutation({
+    mutationFn: async (data: { tableName: string; recordId: string }) =>
+      SoftDeleteAction({
+        tableName: data.tableName,
+        recordId: data.recordId,
+      }),
+    invalidateKeys: ["programs"],
+    onSuccess: () => {
+      toast.success("Program deleted successfully!");
+      router.replace("/dashboard/programs");
+    },
+    onError: () => {
+      toast.error("Failed to delete program. Please try again.");
+    },
+  });
 
   const DeleteModalContent = ({
     programName,
@@ -57,10 +76,10 @@ export default function DeleteProgramCard({ data }: DeleteProgramCardProps) {
       <DeleteModalContent
         programName={data.program_name}
         onConfirm={() => {
-          mutate();
+          mutate({ tableName: "programs", recordId: data.id as string });
           closeModal();
         }}
-      />
+      />,
     );
   };
 
@@ -78,7 +97,7 @@ export default function DeleteProgramCard({ data }: DeleteProgramCardProps) {
         variant={isPending ? "ghost" : "destructive"}
         size="sm"
         disabled={isPending}
-        className="w-[150px]"
+        className="w-37.5"
         onClick={handleOpenModal}
       >
         {isPending ? (

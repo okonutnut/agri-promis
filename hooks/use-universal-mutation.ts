@@ -23,6 +23,14 @@ export function useUniversalMutation<TBody, TResponse>({
       invalidateKeys.forEach((key) => {
         queryClient.invalidateQueries({ queryKey: [key] });
       });
+      if (onSuccess) {
+        onSuccess(data);
+      }
+    },
+    onError: (error) => {
+      if (onError) {
+        onError(error);
+      }
     },
   });
 
