@@ -1,6 +1,6 @@
 "use client";
 
-import { getProjectNavItems } from "@/components/sidebar/navitems";
+import { getProjectLocationNavItems } from "@/components/sidebar/navitems";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
@@ -26,38 +26,34 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 
 function ProjectDashboardInfo(data: ProjectType) {
+  const { openModal, closeModal } = useModal();
   const locationDetails = data?.project_location?.[0];
 
   const { mutate, isPending } = useUniversalMutation({
     mutationFn: async () =>
       await EndProjectLocationAction(locationDetails?.id as string),
     invalidateKeys: ["project-activity-logs", locationDetails?.id as string],
+    onSuccess: () => {
+      toast.success("Project ended successfully.");
+      window.location.href = `/dashboard/programs`;
+    },
+    onError: () => {
+      toast.error(`Error ending project. Please try again.`);
+    },
   });
 
-  const { openModal, closeModal } = useModal();
+  const onEndProject = () => {
+    mutate(locationDetails?.id as string, {});
+    closeModal();
+  };
 
   const handleEndProject = () => {
     openModal(
-      "Attention!!!",
+      "Attention",
       "Are you sure you want to end this project? This action cannot be undone.",
-      <Button
-        variant={"destructive"}
-        className="w-full"
-        onClick={() => {
-          mutate(locationDetails?.id as string, {
-            onSuccess: () => {
-              toast.success("Project ended successfully.");
-              window.location.href = `/dashboard/programs`;
-            },
-            onError: () => {
-              toast.error(`Error ending project. Please try again.`);
-            },
-          });
-          closeModal();
-        }}
-      >
+      <Button variant="destructive" className="w-full" onClick={onEndProject}>
         Confirm
-      </Button>
+      </Button>,
     );
   };
 
@@ -137,21 +133,21 @@ function ProjectDashboardInfo(data: ProjectType) {
 }
 
 export default function ProjectDashboard() {
-  const { projectID } = useParams();
+  const { locationID } = useParams();
 
   const { data, isLoading, error } = useUniversalRealtime({
-    queryKey: ["project-dashboard-items", projectID as string],
+    queryKey: ["project-dashboard-items", locationID as string],
     queryFn: () =>
-      SelectProgramAndProjectDetailsByProjectIDAction(projectID as string),
+      SelectProgramAndProjectDetailsByProjectIDAction(locationID as string),
     tables: ["projects", "farmers", "project_location"],
   });
 
   // Add to quick access
   useEffect(() => {
-    if (projectID) {
-      addProjectToQuickAccess(projectID as string);
+    if (locationID) {
+      addProjectToQuickAccess(locationID as string);
     }
-  }, [projectID]);
+  }, [locationID]);
 
   if (data === undefined && !isLoading) return <NotFoundPage />;
   if (data === undefined && isLoading) return <></>;
@@ -160,7 +156,7 @@ export default function ProjectDashboard() {
     <CustomPageLayout
       isLoading={isLoading}
       error={error}
-      navItems={getProjectNavItems(projectID as string)}
+      navItems={getProjectLocationNavItems(locationID as string)}
       className="m-0 p-0 space-y-4"
     >
       <ProjectDashboardInfo {...data} />

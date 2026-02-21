@@ -10,7 +10,6 @@ import {
   Plus,
   Boxes,
   MapPin,
-  ChevronRight,
   Archive,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -44,7 +43,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { SelectAllAssignedProjectsByFieldTechnicianIDAction } from "@/app/actions/AssignedProjectAction";
 import { SelectAllProgramsAssignedToCurrentUserAction } from "@/app/actions/AssignedProgramAction";
 import { SelectAllProjectsByProgramIDAction } from "@/app/actions/ProjectAction";
 
@@ -53,7 +51,7 @@ const PATHS = {
   NEW_PROGRAM: "/dashboard/new",
   NEW_PROJECT: "/dashboard/new/[programUID]",
   PROGRAMS: "/dashboard/programs",
-  PROJECTS: "/dashboard/projects/",
+  PROJECTS: "/dashboard/project-location/",
 } as const;
 
 const BreadcrumbSeparator = () => (
@@ -87,7 +85,7 @@ const ProgramDropdown = memo(
           className="flex flex-1 gap-2"
         >
           <Boxes className="h-4 w-4 text-[#707070]" />
-          <span className="min-w-[150px] truncate">
+          <span className="min-w-37.5 truncate">
             {currentProgram?.program_name ?? (
               <Skeleton className="w-full h-5" />
             )}
@@ -150,23 +148,23 @@ const ProgramDropdown = memo(
   },
 );
 
-// Component for project location pages (/dashboard/projects/[projectID])
+// Component for project location pages (/dashboard/project-location/[projectID])
 const ProjectLocationDropdown = memo(
   ({
     program,
-    projectID,
+    locationID,
     role,
   }: {
     program: ProgramType;
-    projectID?: string;
+    locationID?: string;
     role: "admin" | "user";
   }) => {
     const projects = program.projects ?? [];
     const currentProject = projects.find((p: ProjectType) =>
-      p.project_location?.some((location) => location.id === projectID),
+      p.project_location?.some((location) => location.id === locationID),
     );
     const currentProjectLocation = currentProject?.project_location?.find(
-      (location) => location.id === projectID,
+      (location) => location.id === locationID,
     );
     const router = useRouter();
     const [open, setOpen] = useState(false);
@@ -179,7 +177,7 @@ const ProjectLocationDropdown = memo(
     return (
       <div className="flex items-center gap-2 whitespace-nowrap">
         <Archive className="h-4 w-4 text-[#707070]" />
-        <span className="min-w-[150px] truncate">
+        <span className="min-w-37.5 truncate">
           {currentProject ? (
             <span className="flex items-center gap-2">
               <Popover open={open} onOpenChange={setOpen}>
@@ -307,7 +305,7 @@ const ProjectDetailsBreadcrumb = memo(
           className="flex flex-1 gap-2"
         >
           <Archive className="h-4 w-4 text-[#707070]" />
-          <span className="min-w-[150px] truncate">
+          <span className="min-w-37.5 truncate">
             {currentProject?.project_name ?? (
               <Skeleton className="w-full h-5" />
             )}
@@ -412,7 +410,7 @@ const UserProgramsDropdown = memo(function UserProgramsDropdown({
         className="flex flex-1 gap-2"
       >
         <Boxes className="h-4 w-4 text-[#707070]" />
-        <div className="min-w-[150px] truncate">
+        <div className="min-w-37.5 truncate">
           {currentProgram ? (
             <span>{currentProgram.program_name}</span>
           ) : (
@@ -529,7 +527,7 @@ const UserProjectsDropdown = memo(function UserProjectsDropdown() {
     <Popover open={open} onOpenChange={setOpen}>
       <Link href={projectLink} prefetch={true} className="flex flex-1 gap-2">
         <Box className="h-4 w-4 text-[#707070]" />
-        <div className="min-w-[150px] truncate">
+        <div className="min-w-37.5 truncate">
           {currentProjectData ? (
             <span className="flex items-center gap-2">
               {currentProjectData.project?.project_name}
@@ -637,7 +635,7 @@ export default function CustomNavbar({
   navItems,
   pageTitle,
 }: CustomNavbarProps) {
-  const { programID, projectID } = useParams();
+  const { programID, projectID, locationID } = useParams();
   const pathname = usePathname();
 
   const { data: programs } = useRealtimeQuery({
@@ -658,16 +656,20 @@ export default function CustomNavbar({
       pathname?.includes("/programs/") &&
       pathname?.includes("/projects/") &&
       projectID &&
-      !pathname?.startsWith("/dashboard/projects/") &&
+      !pathname?.startsWith("/dashboard/project-location/") &&
       !pathname?.startsWith("/field-technician/programs/")
     );
   }, [pathname, projectID]);
 
   const isProjectLocationPage = useMemo(() => {
     return (
-      pathname?.startsWith("/dashboard/projects/") && projectID && !programID
+      pathname?.startsWith("/dashboard/project-location/") &&
+      locationID &&
+      !programID &&
+      !projectID
     );
-  }, [pathname, projectID, programID]);
+  }, [pathname, projectID, programID, locationID]);
+  console.log("isProjectLocationPage:", isProjectLocationPage);
 
   const isProjectsListPage = useMemo(() => {
     return (
@@ -743,8 +745,8 @@ export default function CustomNavbar({
     if (programID && programs) {
       return programs.find((p) => p.id === programID);
     }
-    if (projectID && programs && isProjectLocationPage) {
-      return getProgramIDProjectLocationID(projectID as string, programs);
+    if (locationID && programs && isProjectLocationPage) {
+      return getProgramIDProjectLocationID(locationID as string, programs);
     }
     if (projectID && programs && isProjectDetailsPage) {
       // Find program that contains this project
@@ -757,6 +759,7 @@ export default function CustomNavbar({
     programID,
     projectID,
     programs,
+    locationID,
     userPrograms,
     isProjectLocationPage,
     isProjectDetailsPage,
@@ -786,9 +789,10 @@ export default function CustomNavbar({
 
             <BreadcrumbSeparator />
 
-            {!programID && !projectID ? (
+            {!programID && !projectID && !locationID ? (
               <span className="text-black whitespace-nowrap">{pageTitle}</span>
             ) : (
+              // ADMIN VIEW
               <>
                 {role === "admin" ? (
                   <>
@@ -807,7 +811,7 @@ export default function CustomNavbar({
                               href={`/dashboard/programs/${currentProgram.id}/projects`}
                               className="text-black whitespace-nowrap"
                             >
-                              <span className="w-[150px] flex items-center gap-2">
+                              <span className="w-37.5 flex items-center gap-2">
                                 <Box className="h-4 w-4 text-[#707070]" />
                                 Projects
                               </span>
@@ -823,7 +827,7 @@ export default function CustomNavbar({
                               href={`/dashboard/programs/${currentProgram.id}/projects`}
                               className="text-black whitespace-nowrap"
                             >
-                              <span className="w-[200px] flex items-center gap-2">
+                              <span className="w-50 flex items-center gap-2">
                                 <Box className="h-4 w-4 text-[#707070]" />
                                 Projects
                               </span>
@@ -838,14 +842,14 @@ export default function CustomNavbar({
                         )}
 
                         {/* Show project location when on project location page */}
-                        {isProjectLocationPage && projectID && (
+                        {isProjectLocationPage && locationID && (
                           <>
                             <BreadcrumbSeparator />
                             <Link
                               href={`/dashboard/programs/${currentProgram.id}/projects`}
                               className="text-black whitespace-nowrap"
                             >
-                              <span className="w-[150px] flex items-center gap-2">
+                              <span className="w-37.5 flex items-center gap-2">
                                 <Box className="h-4 w-4 text-[#707070]" />
                                 Projects
                               </span>
@@ -853,7 +857,7 @@ export default function CustomNavbar({
                             <BreadcrumbSeparator />
                             <ProjectLocationDropdown
                               program={currentProgram}
-                              projectID={projectID as string}
+                              locationID={locationID as string}
                               role={role}
                             />
                           </>
@@ -862,6 +866,7 @@ export default function CustomNavbar({
                     )}
                   </>
                 ) : (
+                  // USER VIEW (FIELD TECHNICIAN)
                   <>
                     {/* Field technician programs list page */}
                     {isFieldTechnicianProgramsPage && (
@@ -880,7 +885,7 @@ export default function CustomNavbar({
                           href={`/field-technician/programs/${programID}`}
                           className="text-black whitespace-nowrap"
                         >
-                          <span className="w-[150px] flex items-center gap-2">
+                          <span className="w-37.5 flex items-center gap-2">
                             <Archive className="h-4 w-4 text-[#707070]" />
                             Projects
                           </span>

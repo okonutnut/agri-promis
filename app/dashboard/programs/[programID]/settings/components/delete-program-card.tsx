@@ -94,17 +94,13 @@ export default function DeleteProgramCard({ data }: DeleteProgramCardProps) {
         data. This action cannot be undone.
       </span>
       <Button
-        variant={isPending ? "ghost" : "destructive"}
+        variant={"destructive"}
         size="sm"
         disabled={isPending}
         className="w-37.5"
         onClick={handleOpenModal}
       >
-        {isPending ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          "Delete Program"
-        )}
+        {isPending ? "Deleting..." : "Delete Program"}
       </Button>
     </Card>
   );

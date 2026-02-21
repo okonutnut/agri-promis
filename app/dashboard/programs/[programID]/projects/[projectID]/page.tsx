@@ -1,10 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ProjectType } from "@/components/types";
 import { Archive, ChevronLeft, ChevronRight, Funnel } from "lucide-react";
 import { useParams } from "next/navigation";
-import { getProgramNavItems } from "@/components/sidebar/navitems";
+import {
+  getProgramNavItems,
+  getProjectNavItems,
+} from "@/components/sidebar/navitems";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllProjectsByProgramIDAction } from "@/app/actions/ProjectAction";
 import { Button } from "@/components/ui/button";
@@ -27,11 +29,11 @@ import growthStages from "@/data/growth-stages.json";
 function useSearchFilter<T>(
   items: T[],
   searchQuery: string,
-  filterFn: (item: T, query: string) => boolean
+  filterFn: (item: T, query: string) => boolean,
 ): T[] {
   return useMemo(
     () => items.filter((item) => filterFn(item, searchQuery)),
-    [items, searchQuery, filterFn]
+    [items, searchQuery, filterFn],
   );
 }
 
@@ -59,7 +61,7 @@ export default function ProjectDetailsPage() {
         pageDescription="The requested project could not be found."
         isLoading={false}
         error={null}
-        navItems={getProgramNavItems(programID as string)}
+        navItems={getProjectNavItems(programID as string, projectID as string)}
       >
         <div className="flex flex-col items-center justify-center py-8">
           <p className="text-muted-foreground">Project not found</p>
@@ -78,15 +80,15 @@ export default function ProjectDetailsPage() {
     project?.project_location ?? [],
     searchQuery,
     (location, query) =>
-      location.location!.toLowerCase().includes(query.toLowerCase())
+      location.location!.toLowerCase().includes(query.toLowerCase()),
   )
     .filter((location) =>
       filter
         ? location.location!.toLowerCase().includes(filter.toLowerCase())
-        : true
+        : true,
     )
     .filter((location) =>
-      statusFilter !== null ? location.status === statusFilter : true
+      statusFilter !== null ? location.status === statusFilter : true,
     );
 
   return (
@@ -95,7 +97,7 @@ export default function ProjectDetailsPage() {
       pageDescription="Project locations and details."
       isLoading={isLoading}
       error={error}
-      navItems={getProgramNavItems(programID as string)}
+      navItems={getProjectNavItems(programID as string, projectID as string)}
       topRightComponent={
         <Link
           href={`/dashboard/programs/${programID}/projects`}
@@ -153,7 +155,7 @@ export default function ProjectDetailsPage() {
         <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           {filteredLocations.map((location, index: number) => (
             <CardLink
-              href={`/dashboard/projects/${location.id}`}
+              href={`/dashboard/project-location/${location.id}`}
               key={index}
               className="h-auto min-w-sm group flex flex-col items-start p-4 space-y-2 gap-0"
             >
@@ -172,7 +174,7 @@ export default function ProjectDetailsPage() {
                         growthStages.find(
                           (stage) =>
                             stage.value ===
-                            location.progress_indicator!.toString()
+                            location.progress_indicator!.toString(),
                         )?.label
                       }
                       &nbsp;
@@ -199,4 +201,3 @@ export default function ProjectDetailsPage() {
     </CustomPageLayout>
   );
 }
-

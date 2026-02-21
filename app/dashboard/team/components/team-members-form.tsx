@@ -23,10 +23,8 @@ import FormInput from "@/components/custom/input/form-input";
 import dynamic from "next/dynamic";
 const FTGPSCard = dynamic(
   () =>
-    import(
-      "../../projects/[projectID]/field-technicians/components/gps/gps-card"
-    ),
-  { ssr: false }
+    import("../../project-location/[locationID]/field-technicians/components/gps/gps-card"),
+  { ssr: false },
 );
 
 const formSchema = z.object({
@@ -113,9 +111,7 @@ export function TeamMemberForm({ isAddMode, data }: TeamMemberFormProps) {
 
   return (
     <>
-      {!isAddMode && (
-        <FTGPSCard user_id={data?.id || ""} />
-      )}
+      {!isAddMode && <FTGPSCard user_id={data?.id || ""} />}
       <Label className="px-3 my-2 text-xl">Account Info</Label>
       <form
         className="p-3 space-y-4 mb-4"
@@ -173,7 +169,7 @@ export function TeamMemberForm({ isAddMode, data }: TeamMemberFormProps) {
                 }}
               >
                 Confirm
-              </Button>
+              </Button>,
             )
           }
           variant={isPending ? "ghost" : "default"}

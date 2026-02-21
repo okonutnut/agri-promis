@@ -12,13 +12,24 @@ export async function SoftDeleteAction({
   recordId,
 }: SoftDeleteActionProps) {
   const supabase = await createClient(cookies());
+  const userID = (await supabase.auth.getUser()).data.user?.id;
 
-  const { error } = await supabase
-    .from(tableName)
-    .update({ is_deleted: true })
-    .eq("id", recordId);
+  console.log("Soft deleting record:", {
+    tableName,
+    recordId,
+    user: userID,
+  });
+
+  const { data, error } = await supabase
+    .from(tableName as string)
+    .update({
+      deleted_at: new Date().toISOString(),
+    })
+    .eq("id", recordId)
+    .select("*");
 
   if (error) {
+    console.error("Error soft deleting record:", error);
     throw error;
   }
 }

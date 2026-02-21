@@ -30,12 +30,12 @@ export async function InsertProgramAction({
   // Log the activity
   await InsertActivityLogAction(
     "Created a Program",
-    `Program ${program_name as string} has been created.`
+    `Program ${program_name as string} has been created.`,
   );
 
   // Send Notification
   await sendNotificationToAll(
-    `New program created: ${program_name as string}.`
+    `New program created: ${program_name as string}.`,
   );
 
   return data;
@@ -75,12 +75,12 @@ export async function EditProgramNameAction({
   // Log the activity
   await InsertActivityLogAction(
     "Updated Program Name",
-    `Program ${currentProgram.program_name} name updated to ${program_name}.`
+    `Program ${currentProgram.program_name} name updated to ${program_name}.`,
   );
 
   // Send Notification
   await sendNotificationToAll(
-    `Program name updated from ${currentProgram.program_name} to ${program_name}.`
+    `Program name updated from ${currentProgram.program_name} to ${program_name}.`,
   );
 
   return;
@@ -90,7 +90,7 @@ export async function SelectProgramByIdAction(programId: string) {
   const supabase = await createClient(cookies());
   const { data, error } = await supabase
     .from("programs")
-    .select("*, user_profile (fullname)")
+    .select("*")
     .eq("id", programId)
     .single();
 
@@ -113,7 +113,7 @@ export async function SelectAllProgramsByAgriculturistAction() {
       `
       *,
       project_count:projects(count)
-    `
+    `,
     )
     .order("created_at", { ascending: true });
 
@@ -172,7 +172,7 @@ export async function DeleteProgramAction(programID: string) {
   // Log the activity
   await InsertActivityLogAction(
     "Deleted a Program",
-    `Program ${programName} has been deleted.`
+    `Program ${programName} has been deleted.`,
   );
 
   // Send Notification
@@ -191,7 +191,7 @@ export async function SelectAllProgramsAction() {
       project_count:projects(count),
       projects(*),
       user_profile:admin_id(fullname)
-    `
+    `,
     )
     .order("created_at", { ascending: true });
 
@@ -229,7 +229,7 @@ export async function SelectUserByProgramAssignedAction(programId?: string) {
   if (validRows.length === 0) return [];
 
   const users = validRows.map(
-    (item) => item.user
+    (item) => item.user,
   ) as unknown as UserProfileType[];
   return users;
 }
@@ -245,7 +245,7 @@ export async function SelectAllProgramsWithProjectsAction() {
         *,
         project_location (*)
       )
-    `
+    `,
     )
     .order("created_at", { ascending: true });
 

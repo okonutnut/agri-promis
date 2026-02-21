@@ -1,5 +1,4 @@
 import {
-  ArrowLeft,
   BookOpen,
   Cctv,
   ChartLine,
@@ -94,32 +93,41 @@ export function getProgramNavItems(id: string) {
   ];
 }
 
-export function getProjectNavItems(id: string) {
+export function getProjectNavItems(programId: string, projectId: string) {
   return [
     {
       title: "Overview",
-      href: `/dashboard/projects/${id}`,
+      href: `/dashboard/programs/${programId}/projects/${projectId}`,
       icon: House,
     },
-    // Temporarily disabled
-    // {
-    //   title: "Field Technicians",
-    //   href: `/dashboard/projects/${id}/field-technicians`,
-    //   icon: UserPen,
-    // },
+    {
+      title: "Settings",
+      href: `/dashboard/programs/${programId}/projects/${projectId}/settings`,
+      icon: Settings,
+    },
+  ];
+}
+
+export function getProjectLocationNavItems(id: string) {
+  return [
+    {
+      title: "Overview",
+      href: `/dashboard/project-location/${id}`,
+      icon: House,
+    },
     {
       title: "Monitoring Reports",
-      href: `/dashboard/projects/${id}/monitoring-reports`,
+      href: `/dashboard/project-location/${id}/monitoring-reports`,
       icon: Cctv,
     },
     {
       title: "Activity Logs",
-      href: `/dashboard/projects/${id}/activity-logs`,
+      href: `/dashboard/project-location/${id}/activity-logs`,
       icon: ChartLine,
     },
     {
-      title: "Project Settings",
-      href: `/dashboard/projects/${id}/settings`,
+      title: "Settings",
+      href: `/dashboard/project-location/${id}/settings`,
       icon: Settings,
     },
   ];

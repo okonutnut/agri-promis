@@ -8,7 +8,7 @@ import CustomPageLayout, {
   useSheet,
 } from "@/components/custom/layout/custom-page-layout";
 import { useParams } from "next/navigation";
-import { getProjectNavItems } from "@/components/sidebar/navitems";
+import { getProjectLocationNavItems } from "@/components/sidebar/navitems";
 import { MonitoringReportType } from "@/components/types";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllMonitoringReportsByProjectIDAction } from "@/app/actions/MonitoringAction";
@@ -30,7 +30,7 @@ function MonitoringReportContent({
   const handleRowSelect = (row: MonitoringReportType) => {
     openSheet(
       "Monitoring Report Details",
-      <FieldReportsForm data={row} key={`view-${row.id}`} />
+      <FieldReportsForm data={row} key={`view-${row.id}`} />,
     );
   };
 
@@ -72,16 +72,15 @@ function MonitoringReportContent({
 }
 
 export default function MonitoringReportPage() {
-  const { projectID } = useParams();
-  // Initialize with current year to match YearsDropdown default
+  const { locationID } = useParams();
   const [yearFilter, setYearFilter] = useState(
-    new Date().getFullYear().toString()
+    new Date().getFullYear().toString(),
   );
 
   const { data, isLoading, error } = useRealtimeQuery({
-    queryKey: ["monitoring-reports"],
+    queryKey: ["monitoring-reports", locationID as string],
     queryFn: () =>
-      SelectAllMonitoringReportsByProjectIDAction(projectID as string),
+      SelectAllMonitoringReportsByProjectIDAction(locationID as string),
     table: "monitoring",
   });
 
@@ -89,7 +88,7 @@ export default function MonitoringReportPage() {
     <CustomPageLayout
       pageTitle="Monitoring Reports"
       pageDescription="View and manage monitoring reports for the project."
-      navItems={getProjectNavItems(projectID as string)}
+      navItems={getProjectLocationNavItems(locationID as string)}
       isLoading={isLoading}
       error={error}
     >
