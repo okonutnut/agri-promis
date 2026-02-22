@@ -6,6 +6,7 @@ import {
   CardDescription,
   CardTitle,
 } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
 import SkeletonLoading from "../layout/skeleton-loading";
 
@@ -15,6 +16,7 @@ type SummaryCardsProps = {
   icon?: LucideIcon;
   children?: React.ReactNode;
   isLoading?: boolean;
+  className?: string;
 };
 
 export default function SummaryCard({
@@ -23,9 +25,15 @@ export default function SummaryCard({
   icon: Icon,
   children,
   isLoading,
+  className,
 }: SummaryCardsProps) {
   return (
-    <Card className="p-3 sm:p-4 h-auto sm:h-50 w-full relative rounded-md shadow-xs flex flex-col">
+    <Card
+      className={cn(
+        "p-3 sm:p-4 h-auto sm:h-50 w-full relative rounded-md shadow-xs flex flex-col",
+        className,
+      )}
+    >
       {isLoading ? (
         <SkeletonLoading />
       ) : (

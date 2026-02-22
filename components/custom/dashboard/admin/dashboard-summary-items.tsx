@@ -37,6 +37,7 @@ export default function ProjectDashboardItems() {
         description="Total Reports Submitted"
         icon={FileStack}
         isLoading={isLoading || error ? true : false}
+        className="h-full"
       >
         <strong className="text-4xl">{data?.m?.length ?? 0}</strong>
       </SummaryCard>
