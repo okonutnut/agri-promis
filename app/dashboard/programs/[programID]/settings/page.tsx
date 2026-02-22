@@ -7,7 +7,6 @@ import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectProgramByIdAction } from "@/app/actions/ProgramAction";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import EditProgramNameForm from "./form/edit-program-name-form";
-import DeleteProgramCard from "./components/delete-program-card";
 
 export default function ProgramSettingsPage() {
   const { programID } = useParams();
@@ -27,7 +26,6 @@ export default function ProgramSettingsPage() {
       navItems={getProgramNavItems(programID as string)}
     >
       <EditProgramNameForm programData={data as ProgramType} />
-      <DeleteProgramCard data={data as ProgramType} />
     </CustomPageLayout>
   );
 }

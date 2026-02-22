@@ -97,6 +97,36 @@ export async function SelectAllMonitoringReportsByProgramIDAction(
 ) {
   const supabase = await createClient(cookies());
 
+  // First, fetch all projects for this program
+  const { data: projects, error: projectError } = await supabase
+    .from("projects")
+    .select("id")
+    .eq("program_id", programId);
+
+  if (projectError) throw projectError;
+
+  const projectIds = projects.map((p) => p.id);
+
+  // If no projects, return empty array
+  if (projectIds.length === 0) {
+    return [];
+  }
+
+  // Then, fetch all project locations for these projects
+  const { data: projectLocations, error: locError } = await supabase
+    .from("project_location")
+    .select("id")
+    .in("project_id", projectIds);
+
+  if (locError) throw locError;
+
+  const projectLocationIds = projectLocations.map((loc) => loc.id);
+
+  // If no locations, return empty array
+  if (projectLocationIds.length === 0) {
+    return [];
+  }
+
   const { data, error } = await supabase
     .from("monitoring")
     .select(
@@ -108,7 +138,7 @@ export async function SelectAllMonitoringReportsByProgramIDAction(
       reviewedBy:user_profile!monitoring_reviewed_by_id_fkey(fullname)
     `,
     )
-    .eq("project_location.projects.program_id", programId)
+    .in("project_location_id", projectLocationIds)
     .order("created_at", { ascending: false });
 
   if (error) throw error;

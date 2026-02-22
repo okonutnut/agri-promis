@@ -10,6 +10,8 @@ import { useModal } from "@/components/custom/layout/custom-page-layout";
 import { useUniversalMutation } from "@/hooks/use-universal-mutation";
 import { DeleteProjectAction } from "@/app/actions/ProjectAction";
 import { toast } from "sonner";
+import { SoftDeleteAction } from "@/app/actions/DeleteAction";
+import { useRouter } from "next/navigation";
 
 type DeleteProjectCardProps = {
   data: ProjectLocationType;
@@ -17,10 +19,18 @@ type DeleteProjectCardProps = {
 
 export default function DeleteProjectCard({ data }: DeleteProjectCardProps) {
   const { openModal, closeModal } = useModal();
+  const router = useRouter();
 
   const { mutate, isPending } = useUniversalMutation({
-    mutationFn: async () => await DeleteProjectAction(data.id as string),
-    invalidateKeys: [],
+    mutationFn: async (data: { tableName: string; recordId: string }) =>
+      await SoftDeleteAction(data),
+    onSuccess: () => {
+      toast.success("Project deleted successfully.");
+      router.replace(`/dashboard/programs/${data.projects?.program_id}`);
+    },
+    onError: () => {
+      toast.error(`Error deleting project. Please try again.`);
+    },
   });
 
   const DeleteModalContent = ({
@@ -50,11 +60,7 @@ export default function DeleteProjectCard({ data }: DeleteProjectCardProps) {
           onClick={onConfirm}
           disabled={!confirm || isPending}
         >
-          {isPending ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            "Confirm Delete"
-          )}
+          {isPending ? "Deleting..." : "Confirm Delete"}
         </Button>
       </>
     );
@@ -62,23 +68,18 @@ export default function DeleteProjectCard({ data }: DeleteProjectCardProps) {
 
   const handleOpenModal = () => {
     openModal(
-      "Delete Project",
+      "Attention",
       "Are you sure you want to delete this project? This action cannot be undone.",
       <DeleteModalContent
         projectName={`${data.projects?.project_name}`}
         onConfirm={() => {
-          mutate(data.id, {
-            onSuccess: () => {
-              toast.success("Project deleted successfully.");
-              window.location.href = `/dashboard/programs/${data.projects?.program_id}`;
-            },
-            onError: () => {
-              toast.error(`Error deleting project. Please try again.`);
-            },
+          mutate({
+            tableName: "project_location",
+            recordId: data.id as string,
           });
           closeModal();
         }}
-      />
+      />,
     );
   };
 
@@ -94,16 +95,12 @@ export default function DeleteProjectCard({ data }: DeleteProjectCardProps) {
           cannot be undone.
         </span>
         <Button
-          variant={isPending ? "ghost" : "destructive"}
+          variant="destructive"
           size="sm"
           disabled={isPending}
           onClick={handleOpenModal}
         >
-          {isPending ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            "Delete Project"
-          )}
+          {isPending ? "Deleting..." : "Delete Project"}
         </Button>
       </CardContent>
     </Card>

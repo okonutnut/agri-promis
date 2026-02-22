@@ -1,5 +1,6 @@
 "use server";
 
+import { MonitoringReportType } from "@/components/types";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 
@@ -141,31 +142,6 @@ export async function SelectAdminDashboardItemsAction() {
   };
 }
 
-// UNUSED QUERY - Commented out
-// export async function SelectTravelOrdersByDateAction() {
-//   const supabase = await createClient(cookies());
-//   const { data: userData, error: userError } = await supabase.auth.getUser();
-
-//   if (userError || !userData?.user) {
-//     throw userError;
-//   }
-
-//   const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
-//   const todayStart = `${today}T00:00:00`;
-//   // Fetch future travel orders based on departure_date or return_date
-//   const { data: futureOrders, error: futureError } = await supabase
-//     .from("travel_order")
-//     .select("*, user:user_profile!travel_order_user_id_fkey (fullname)")
-//     .or(`departure_date.gte.${todayStart},return_date.gte.${todayStart}`)
-//     .limit(10);
-
-//   if (futureError) {
-//     throw futureError;
-//   }
-
-//   return futureOrders;
-// }
-
 export async function SelectTotalProjectsPerProgramAction() {
   const supabase = await createClient(cookies());
 
@@ -181,38 +157,6 @@ export async function SelectTotalProjectsPerProgramAction() {
 
   return data;
 }
-
-// UNUSED QUERY - Commented out
-// export async function SelectUserCountPerTypeAction() {
-//   const supabase = await createClient(cookies());
-
-//   // Fetch all users and group them by `role`
-//   const { data, error } = await supabase
-//     .from("user_profile")
-//     .select("role");
-
-//   if (error) {
-//     console.error("Error fetching user count per type:", error);
-//     return [];
-//   }
-
-//   // Guard for nullable data (Supabase returns `data` as type T[] | null)
-//   const rows = data ?? [];
-
-//   // Group and count users per role with explicit typing
-//   const roleCounts = rows.reduce<Record<string, number>>((acc, user: any) => {
-//     const role = String(user?.role ?? "Unknown");
-//     acc[role] = (acc[role] ?? 0) + 1;
-//     return acc;
-//   }, {});
-
-//   // Convert to chart-friendly array with explicit types
-//   const formattedData: { role: string; count: number }[] = Object.entries(roleCounts).map(
-//     ([role, count]) => ({ role, count })
-//   );
-
-//   return formattedData;
-// }
 
 export async function SelectMonitoringReportsCountByDate(project_id: string) {
   const supabase = await createClient(cookies());
@@ -410,5 +354,64 @@ export async function SelectFCAAnalyticsAction() {
     fcasByStatus,
     projectsPerFCA,
     recentFCAs: fcas?.slice(0, 10) || [],
+  };
+}
+
+export async function SelectProjectDashboardItemsAction(projectID: string) {
+  const supabase = await createClient(cookies());
+
+  // Get Project Locations
+  const {
+    data: projectLocations,
+    error: projectLocationsError,
+    count: projectLocationsCount,
+  } = await supabase
+    .from("project_location")
+    .select("*", { count: "exact" })
+    .eq("project_id", projectID);
+  if (projectLocationsError) throw projectLocationsError;
+
+  // Get Monitoring Reports
+  const {
+    data: monitoringReports,
+    error: monitoringReportsError,
+    count: monitoringReportsCount,
+  } = await supabase
+    .from("monitoring")
+    .select(
+      "*, travel_order(travel_order_no), user_profile!monitoring_reporter_id_fkey(fullname)",
+      { count: "exact" },
+    )
+    .in("project_location_id", projectLocations?.map((pl) => pl.id) || []);
+  if (monitoringReportsError) throw monitoringReportsError;
+
+  console.log("monitoringReports:", monitoringReports);
+
+  // Get unreviewed monitoring reports
+  const unreviewedMonitoringReports =
+    monitoringReports
+      ?.filter((report: MonitoringReportType) => report.reviewed_by_id === null)
+      .map((report) => ({
+        id: report.id,
+        project_location_id: report.project_location_id,
+        travel_order_no: report.travel_order?.travel_order_no || "N/A",
+        fullname: report.user_profile?.fullname || "Unknown",
+        purpose: report.purpose || "No purpose provided",
+        created_at: report.created_at || "Unknown date",
+      })) || [];
+
+  console.log("Unreviewed Monitoring Reports:", unreviewedMonitoringReports);
+
+  // Get FCA Count
+  const fcaIds =
+    projectLocations
+      ?.flatMap((pl) => (Array.isArray(pl.fca_ids) ? pl.fca_ids : []))
+      .filter((id): id is string => typeof id === "string") || [];
+
+  return {
+    projectLocationsCount: projectLocationsCount || 0,
+    monitoringReportsCount: monitoringReportsCount || 0,
+    fcaCount: fcaIds.length,
+    unreviewedMonitoringReports,
   };
 }

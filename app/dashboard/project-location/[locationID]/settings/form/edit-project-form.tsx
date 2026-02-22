@@ -38,7 +38,7 @@ const formSchema = z.object({
     .number()
     .refine(
       (val) => [0, 1].includes(val),
-      "Status must be either 0 (inactive) or 1 (active)"
+      "Status must be either 0 (inactive) or 1 (active)",
     ),
 });
 type FormSchemaType = z.infer<typeof formSchema>;
@@ -49,13 +49,13 @@ type EditProjectNameFormProps = {
 export default function EditProjectNameForm({
   project,
 }: EditProjectNameFormProps) {
-  const { projectID } = useParams();
+  const { locationID } = useParams();
   const { openModal, closeModal } = useModal();
 
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      id: projectID as string,
+      id: locationID as string,
       description: project.description || "",
       progress_indicator: project.progress_indicator || 1,
       fca_ids: project.fca_ids || [],
@@ -122,7 +122,7 @@ export default function EditProjectNameForm({
             disabled={isPending}
           />
         </div>
-        <div className="w-full flex justify-between items-center">
+        {/* <div className="w-full flex justify-between items-center">
           <Label>Project&apos;s Progress</Label>
           <Select
             defaultValue={project.progress_indicator?.toString()}
@@ -131,7 +131,7 @@ export default function EditProjectNameForm({
             }
             disabled={isPending}
           >
-            <SelectTrigger className="w-[230px]">
+            <SelectTrigger className="w-57.5">
               <SelectValue placeholder="Progress" />
             </SelectTrigger>
             <SelectContent>
@@ -142,14 +142,14 @@ export default function EditProjectNameForm({
               ))}
             </SelectContent>
           </Select>
-        </div>
+        </div> */}
       </form>
       <CardFooter className="w-full justify-end border-t mt-4 p-2">
         <Button
           onClick={() =>
             openModal(
-              "Attention!!!",
-              "This action cannot be undone. Do you want to proceed?",
+              "Attention",
+              "Are you sure you want to save changes to this project?",
               <Button
                 onClick={() => {
                   form.handleSubmit(handleSubmit)();
@@ -158,7 +158,7 @@ export default function EditProjectNameForm({
                 className="w-full"
               >
                 Confirm
-              </Button>
+              </Button>,
             )
           }
           size={"sm"}

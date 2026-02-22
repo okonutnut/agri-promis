@@ -299,18 +299,14 @@ const ProjectDetailsBreadcrumb = memo(
 
     return (
       <Popover open={open} onOpenChange={setOpen}>
-        <Link
-          href={`/dashboard/programs/${program.id}/projects/${projectID}`}
-          prefetch={true}
-          className="flex flex-1 gap-2"
-        >
+        <span className="flex flex-1 gap-2">
           <Archive className="h-4 w-4 text-[#707070]" />
           <span className="min-w-37.5 truncate">
             {currentProject?.project_name ?? (
               <Skeleton className="w-full h-5" />
             )}
           </span>
-        </Link>
+        </span>
         <PopoverTrigger asChild>
           <Button className="ml-2 h-7 w-4 text-[#707070]" variant="ghost">
             <ChevronsUpDown />

@@ -42,17 +42,14 @@ export default function ProgramOverviewPage() {
     table: "projects",
   });
 
-  const {
-    data: monitoringData,
-    isLoading: monitoringLoading,
-    error: monitoringError,
-  } = useRealtimeQuery({
-    queryKey: ["allMonitoringReports", programID as string],
-    queryFn: () => {
-      return SelectAllMonitoringReportsByProgramIDAction(programID as string);
-    },
-    table: "monitoring",
-  });
+  const { data: monitoringData, isLoading: monitoringLoading } =
+    useRealtimeQuery({
+      queryKey: ["allMonitoringReports", programID as string],
+      queryFn: () => {
+        return SelectAllMonitoringReportsByProgramIDAction(programID as string);
+      },
+      table: "monitoring",
+    });
 
   const { data: travelOrders, isLoading: travelOrdersLoading } =
     useRealtimeQuery({

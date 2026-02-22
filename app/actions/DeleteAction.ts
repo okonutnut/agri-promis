@@ -20,13 +20,12 @@ export async function SoftDeleteAction({
     user: userID,
   });
 
-  const { data, error } = await supabase
-    .from(tableName as string)
+  const { error } = await supabase
+    .from(`${tableName}`)
     .update({
       deleted_at: new Date().toISOString(),
     })
-    .eq("id", recordId)
-    .select("*");
+    .eq("id", `${recordId}`);
 
   if (error) {
     console.error("Error soft deleting record:", error);

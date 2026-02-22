@@ -1,8 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { getProjectNavItems } from "@/components/sidebar/navitems";
-import { useMemo } from "react";
+import { getProjectLocationNavItems } from "@/components/sidebar/navitems";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectProjectDetailsByProjectLocationIDAction } from "@/app/actions/ProjectAction";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
@@ -11,14 +10,16 @@ import EditProjectForm from "./form/edit-project-form";
 import NotFoundPage from "@/app/not-found";
 
 export default function ProgramSettingsPage() {
-  const { projectID } = useParams();
+  const { locationID } = useParams();
 
   const { data, isLoading, error } = useRealtimeQuery({
-    queryKey: ["project_details", projectID as string],
+    queryKey: ["project_location_details", locationID as string],
     queryFn: () =>
-      SelectProjectDetailsByProjectLocationIDAction(projectID as string),
+      SelectProjectDetailsByProjectLocationIDAction(locationID as string),
     table: "projects",
   });
+
+  console.log("Project Location Details:", data);
 
   if (data === undefined && !isLoading) return <NotFoundPage />;
 
@@ -28,7 +29,7 @@ export default function ProgramSettingsPage() {
       pageDescription="Manage project details and settings."
       isLoading={isLoading}
       error={error}
-      navItems={getProjectNavItems(projectID as string)}
+      navItems={getProjectLocationNavItems(locationID as string)}
     >
       <EditProjectForm project={data} />
       <DeleteProjectCard data={data} />

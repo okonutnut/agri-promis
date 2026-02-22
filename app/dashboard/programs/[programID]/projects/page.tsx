@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { ProjectType } from "@/components/types";
-import { Archive,  ChevronRight } from "lucide-react";
+import { Archive, ChevronRight } from "lucide-react";
 import { useParams } from "next/navigation";
 import { getProgramNavItems } from "@/components/sidebar/navitems";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
@@ -16,14 +16,13 @@ import CardLink from "@/components/custom/link/card-link";
 function useSearchFilter<T>(
   items: T[],
   searchQuery: string,
-  filterFn: (item: T, query: string) => boolean
+  filterFn: (item: T, query: string) => boolean,
 ): T[] {
   return useMemo(
     () => items.filter((item) => filterFn(item, searchQuery)),
-    [items, searchQuery, filterFn]
+    [items, searchQuery, filterFn],
   );
 }
-
 
 type FilteredProjectsProps = {
   projects: ProjectType[];
@@ -35,7 +34,7 @@ function FilteredProjects({ projects, searchQuery }: FilteredProjectsProps) {
     projects,
     searchQuery,
     (project, query) =>
-      project.project_name!.toLowerCase().includes(query.toLowerCase())
+      project.project_name!.toLowerCase().includes(query.toLowerCase()),
   );
 
   return (
@@ -96,7 +95,7 @@ export default function ProjectsByProgramPage() {
 
   return (
     <CustomPageLayout
-      pageTitle="Project List"
+      pageTitle="Projects"
       pageDescription="List of projects under the program."
       isLoading={isLoading}
       error={error}
@@ -113,9 +112,7 @@ export default function ProjectsByProgramPage() {
           />
         </div>
       </div>
-      {data && (
-        <FilteredProjects projects={data} searchQuery={searchQuery} />
-      )}
+      {data && <FilteredProjects projects={data} searchQuery={searchQuery} />}
     </CustomPageLayout>
   );
 }

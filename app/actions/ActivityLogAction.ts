@@ -7,7 +7,7 @@ import { ActivityLogType } from "../../components/types";
 export async function InsertActivityLogAction(
   code: string,
   description: string,
-  project_id?: string
+  project_id?: string,
 ) {
   const supabase = await createClient(cookies());
   const { data: userData, error: userError } = await supabase.auth.getUser();

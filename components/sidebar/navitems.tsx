@@ -7,6 +7,7 @@ import {
   FolderKanban,
   House,
   LayoutDashboard,
+  Map,
   NotebookPen,
   Settings,
   UserPen,
@@ -66,7 +67,7 @@ export function getProgramNavItems(id: string) {
       icon: House,
     },
     {
-      title: "Project List",
+      title: "Projects",
       href: `/dashboard/programs/${id}/projects`,
       icon: FolderKanban,
     },
@@ -101,7 +102,12 @@ export function getProjectNavItems(programId: string, projectId: string) {
       icon: House,
     },
     {
-      title: "Settings",
+      title: "Project Locations",
+      href: `/dashboard/programs/${programId}/projects/${projectId}/locations`,
+      icon: Map,
+    },
+    {
+      title: "Project Settings",
       href: `/dashboard/programs/${programId}/projects/${projectId}/settings`,
       icon: Settings,
     },

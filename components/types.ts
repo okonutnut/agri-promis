@@ -41,8 +41,9 @@ export type ProgramType = {
   program_name: string;
   description?: string;
   user_profile?: UserProfileType;
-  project_count: { count: number }[];
+  project_count?: { count: number }[];
   created_at?: string;
+  deleted_at?: string;
 
   // relations
   projects?: ProjectType[];

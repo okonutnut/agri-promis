@@ -25,7 +25,7 @@ export default function SummaryCard({
   isLoading,
 }: SummaryCardsProps) {
   return (
-    <Card className="p-3 sm:p-4 h-auto sm:h-[200px] w-full relative rounded-md shadow-xs flex flex-col">
+    <Card className="p-3 sm:p-4 h-auto sm:h-50 w-full relative rounded-md shadow-xs flex flex-col">
       {isLoading ? (
         <SkeletonLoading />
       ) : (
@@ -41,7 +41,9 @@ export default function SummaryCard({
           <CardDescription className="text-foreground-500 font-medium text-xs sm:text-sm line-clamp-2">
             {description}
           </CardDescription>
-          <div className="mt-auto flex justify-start pt-2 sm:pt-0">{children}</div>
+          <div className="mt-auto flex justify-start pt-2 sm:pt-0">
+            {children}
+          </div>
         </CardContent>
       )}
     </Card>

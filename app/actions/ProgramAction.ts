@@ -3,7 +3,11 @@
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
-import { ProgramType, UserProfileType } from "../../components/types";
+import {
+  ProgramType,
+  ProjectType,
+  UserProfileType,
+} from "../../components/types";
 import { sendNotificationToAll } from "./NotificationAction";
 
 // PROGRAM ACTIONS
@@ -42,29 +46,17 @@ export async function InsertProgramAction({
 }
 
 export async function EditProgramNameAction({
-  program_id,
+  id,
   program_name,
-}: {
-  program_id: string;
-  program_name: string;
-}) {
+  description,
+  deleted_at,
+}: ProgramType) {
   const supabase = await createClient(cookies());
-  // Get the current program details for logging
-  const { data: currentProgram, error: currentError } = await supabase
-    .from("programs")
-    .select("program_name")
-    .eq("id", program_id)
-    .single();
 
-  if (currentError) {
-    throw currentError;
-  }
-
-  // Update the program name
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("programs")
-    .update({ program_name })
-    .eq("id", program_id)
+    .update({ program_name, description, deleted_at })
+    .eq("id", id)
     .select()
     .single();
 
@@ -74,14 +66,12 @@ export async function EditProgramNameAction({
 
   // Log the activity
   await InsertActivityLogAction(
-    "Updated Program Name",
-    `Program ${currentProgram.program_name} name updated to ${program_name}.`,
+    "Updated Program Details",
+    `Program ${data.program_name} details updated.`,
   );
 
   // Send Notification
-  await sendNotificationToAll(
-    `Program name updated from ${currentProgram.program_name} to ${program_name}.`,
-  );
+  await sendNotificationToAll(`Program ${data.program_name} has been updated.`);
 
   return;
 }

@@ -9,7 +9,7 @@ import { sendNotificationToUser } from "./NotificationAction";
 // ASSIGNED PROJECTS ACTIONS
 export async function InsertFieldTechniciansToProjectAction(
   technicianIDs: string[],
-  projectLocationID: string
+  projectLocationID: string,
 ) {
   const supabase = await createClient(cookies());
 
@@ -59,7 +59,7 @@ export async function InsertFieldTechniciansToProjectAction(
   if (userProfilesError) throw userProfilesError;
 
   const userProfileMap = new Map(
-    (userProfiles || []).map((user) => [user.id, user])
+    (userProfiles || []).map((user) => [user.id, user]),
   );
 
   // Log and notify each new technician (using batched data)
@@ -70,14 +70,14 @@ export async function InsertFieldTechniciansToProjectAction(
       await InsertActivityLogAction(
         "Assigned Field Technician",
         `Field technician ${userProfile?.fullname || "Unknown"} assigned to ${projectName}.`,
-        projectLocationID
+        projectLocationID,
       );
 
       await sendNotificationToUser(
         `You have been assigned to the project: ${projectName}.`,
-        technicianID
+        technicianID,
       );
-    })
+    }),
   );
 
   return { success: true, assigned: newAssignees.length };
@@ -85,7 +85,7 @@ export async function InsertFieldTechniciansToProjectAction(
 
 export async function DeleteFieldTechnicianFromProjectAction(
   user_id: string,
-  project_id: string
+  project_id: string,
 ) {
   const supabase = await createClient(cookies());
 
@@ -126,20 +126,20 @@ export async function DeleteFieldTechnicianFromProjectAction(
   await InsertActivityLogAction(
     "Removed a Field Technician from Project",
     `Field technician ${existingUserData?.fullname || "Unknown"} was removed from project ${projectData.project_name}.`,
-    project_id
+    project_id,
   );
 
   // Send Notification
   await sendNotificationToUser(
     `You have been removed from the project: ${projectData.project_name}.`,
-    user_id
+    user_id,
   );
 
   return;
 }
 
 export async function SelectAllFieldTechniciansByProjectIDAction(
-  projectID: string
+  projectID: string,
 ) {
   const supabase = await createClient(cookies());
   const { data, error } = await supabase
@@ -170,7 +170,7 @@ export async function SelectAllAssignedProjectsByFieldTechnicianIDAction() {
         *,
         projects (*)
       )
-    `
+    `,
     )
     .eq("user_id", userData.user.id);
 
