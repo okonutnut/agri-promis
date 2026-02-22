@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { CardFooter } from "@/components/ui/card";
 import { useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
@@ -17,6 +17,7 @@ import LocationSelector from "@/components/custom/dropdown/location-selector";
 import FCASelector from "../dropdown/fca-selector";
 import { toast } from "sonner";
 import { useModal } from "../layout/custom-page-layout";
+import Link from "next/link";
 
 const formSchema = z.object({
   project_id: z.string().min(1, "Project ID is required"),
@@ -42,7 +43,6 @@ type FormData = z.infer<typeof formSchema>;
 export default function CreateProjectLocationForm() {
   const { openModal, closeModal } = useModal();
   const { id: projectID, programUID } = useParams();
-  const router = useRouter();
 
   const [disabled, setIsDisabled] = useState(false);
 
@@ -82,7 +82,7 @@ export default function CreateProjectLocationForm() {
         onSettled: () => {
           setIsDisabled(true);
         },
-      }
+      },
     );
 
   return (
@@ -133,7 +133,7 @@ export default function CreateProjectLocationForm() {
                 }}
               >
                 Confirm
-              </Button>
+              </Button>,
             );
           }}
           className="w-full"
@@ -146,9 +146,11 @@ export default function CreateProjectLocationForm() {
           variant={"outline"}
           className="w-full"
           disabled={isPending || disabled}
-          onClick={() => router.push(`/dashboard/programs/${programUID}`)}
+          asChild
         >
-          Cancel
+          <Link href={`/dashboard/programs/${programUID}`} prefetch={true}>
+            Cancel
+          </Link>
         </Button>
       </CardFooter>
     </>

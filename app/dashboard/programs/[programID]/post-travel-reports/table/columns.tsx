@@ -1,55 +1,66 @@
 "use client";
 
-import { PostTravelReportType } from "@/components/types";
+import { PostTravelWithDetails } from "@/app/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { ArrowUpDown } from "lucide-react";
 
-export const columns: ColumnDef<PostTravelReportType>[] = [
+export const columns: ColumnDef<PostTravelWithDetails>[] = [
   {
     id: "count",
     header: "#",
     cell: ({ row }) => <span className="text-center">{row.index + 1}</span>,
   },
   {
-    accessorKey: "travel_order.travel_order_no",
+    accessorKey: "travel_order_no",
+    header: "Travel Order No",
+  },
+  {
+    accessorKey: "fullname",
+    header: "Reporter Name",
+  },
+  {
+    accessorKey: "reviewed_at",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Travel Order No
+          Status
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
-    cell: ({ getValue }) => <span>{getValue() as string}</span>,
-    enableSorting: true,
-  },
-  {
-    accessorKey: "travel_order.user.fullname",
-    header: "Reporter Name",
-  },
-  {
-    accessorKey: "reviewer_id",
-    header: "Status",
-    cell: ({ getValue }) => (
-      <Badge variant={getValue() === null ? "destructive" : "default"}>
-        {getValue() === null ? "Pending Review" : "Reviewed"}
-      </Badge>
-    ),
+    cell: (row) => {
+      const isReviewed = (row.getValue() as string | null) !== null;
+      return (
+        <Badge variant={isReviewed ? "default" : "destructive"}>
+          {isReviewed ? "Reviewed" : "Pending Review"}
+        </Badge>
+      );
+    },
   },
   {
     accessorKey: "created_at",
-    header: () => {
-      return <div className="text-end">Date Submitted</div>;
+    header: ({ column }) => {
+      return (
+        <div className="text-end">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Date Created
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+      );
     },
     cell: ({ getValue }) => (
       <div className="text-end">
-        {format(new Date(getValue() as string), "PPp")}
+        {getValue() ? format(new Date(getValue() as string), "PPp") : "N/A"}
       </div>
     ),
   },

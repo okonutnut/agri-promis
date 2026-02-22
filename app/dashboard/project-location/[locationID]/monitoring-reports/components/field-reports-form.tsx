@@ -14,12 +14,10 @@ import NonFormMultiInput from "@/components/custom/input/non-form-multi-input";
 import NonFormTextarea from "@/components/custom/input/non-form-textarea";
 import dynamic from "next/dynamic";
 import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
-import MonitoringReportDocument from "@/components/custom/pdf/monitoring-reports-document";
-import PrintDownloadDropdown from "@/components/custom/print/print-download-dropdown";
 import { format } from "date-fns";
 const ImageCarousel = dynamic(
   () => import("@/components/custom/images/image-carousel"),
-  { ssr: false }
+  { ssr: false },
 );
 
 type FieldReportsFormProps = {
@@ -40,7 +38,7 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
 
   // Get the travel date from travel_date_id
   const travelDate = data?.travel_order?.travel_itinerary?.find(
-    (item: any) => item.id === data?.travel_date_id
+    (item: any) => item.id === data?.travel_date_id,
   )?.date;
 
   return (
@@ -89,7 +87,7 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
         </div>
       </section>
       <CustomSheetFooter isPending={isPending}>
-        {!data?.reviewed_by_id  && (
+        {!data?.reviewed_by_id && (
           <Button
             size={"sm"}
             disabled={isPending}
@@ -105,7 +103,7 @@ export function FieldReportsForm({ data }: FieldReportsFormProps) {
                   }}
                 >
                   Confirm
-                </Button>
+                </Button>,
               );
             }}
           >

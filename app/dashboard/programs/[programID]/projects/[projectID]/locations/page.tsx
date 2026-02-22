@@ -3,10 +3,7 @@
 import { useMemo, useState } from "react";
 import { Archive, ChevronLeft, ChevronRight, Funnel } from "lucide-react";
 import { useParams } from "next/navigation";
-import {
-  getProgramNavItems,
-  getProjectNavItems,
-} from "@/components/sidebar/navitems";
+import { getProjectNavItems } from "@/components/sidebar/navitems";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllProjectsByProgramIDAction } from "@/app/actions/ProjectAction";
 import { Button } from "@/components/ui/button";

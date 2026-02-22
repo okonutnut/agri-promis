@@ -9,15 +9,7 @@ import { ProjectLocationType } from "@/components/types";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useModal } from "@/components/custom/layout/custom-page-layout";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import z from "zod";
-import cornGrowthStages from "@/data/growth-stages.json";
 import FormInput from "@/components/custom/input/form-input";
 import FormTextarea from "@/components/custom/input/form-textarea";
 import FCASelector from "@/components/custom/dropdown/fca-selector";

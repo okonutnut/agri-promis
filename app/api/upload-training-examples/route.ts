@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 
 export async function POST(req: Request) {
   try {
-    const supabase = await createClient(cookies());
+    const supabase = await createClient();
     const form = await req.formData();
 
     const files = form.getAll("files") as File[];
@@ -28,15 +28,20 @@ export async function POST(req: Request) {
     // store labelsMeta as metadata file for later reference
     if (labelsMeta) {
       const blob = new Blob([labelsMeta], { type: "application/json" });
-      await supabase.storage.from(bucket).upload(`${modelPath}/labels.json`, blob, {
-        contentType: "application/json",
-        upsert: true,
-      });
+      await supabase.storage
+        .from(bucket)
+        .upload(`${modelPath}/labels.json`, blob, {
+          contentType: "application/json",
+          upsert: true,
+        });
     }
 
     return NextResponse.json({ ok: true, path: modelPath });
   } catch (err: any) {
     console.error("upload-training-examples error", err.message);
-    return NextResponse.json({ ok: false, error: err.message }, { status: 500 });
+    return NextResponse.json(
+      { ok: false, error: err.message },
+      { status: 500 },
+    );
   }
 }

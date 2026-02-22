@@ -29,7 +29,6 @@ import {
 import { useMemo, useState, useEffect, memo } from "react";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllProgramsWithProjectsAction } from "@/app/actions/ProgramAction";
-import { useRouter } from "next/navigation";
 import {
   Command,
   CommandInput,
@@ -47,7 +46,7 @@ import { SelectAllProgramsAssignedToCurrentUserAction } from "@/app/actions/Assi
 import { SelectAllProjectsByProgramIDAction } from "@/app/actions/ProjectAction";
 
 const PATHS = {
-  FIELD_TECHNICIAN: "/field-technician/projects",
+  FIELD_TECHNICIAN: "/field-technician/programs",
   NEW_PROGRAM: "/dashboard/new",
   NEW_PROJECT: "/dashboard/new/[programUID]",
   PROGRAMS: "/dashboard/programs",
@@ -69,7 +68,6 @@ const ProgramDropdown = memo(
     allPrograms: ProgramType[];
   }) => {
     const currentProgram = allPrograms.find((p) => p.id === programID);
-    const router = useRouter();
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState<string | undefined>(programID);
 
@@ -110,15 +108,18 @@ const ProgramDropdown = memo(
                     onSelect={() => {
                       setValue(program.id);
                       setOpen(false);
-                      router.push(`/dashboard/programs/${program.id}`);
                     }}
                   >
-                    <div className="flex items-center justify-between w-full">
+                    <Link
+                      href={`/dashboard/programs/${program.id}`}
+                      prefetch={true}
+                      className="flex items-center justify-between w-full"
+                    >
                       <span>{program.program_name}</span>
                       {program.id === value && (
                         <Check className="ml-2 h-4 w-4" />
                       )}
-                    </div>
+                    </Link>
                   </CommandItem>
                 ))}
               </CommandGroup>
@@ -166,7 +167,6 @@ const ProjectLocationDropdown = memo(
     const currentProjectLocation = currentProject?.project_location?.find(
       (location) => location.id === locationID,
     );
-    const router = useRouter();
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState<string | undefined>(currentProject?.id);
 
@@ -206,17 +206,18 @@ const ProjectLocationDropdown = memo(
                             onSelect={() => {
                               setValue(project.id);
                               setOpen(false);
-                              router.push(
-                                `/dashboard/programs/${program.id}/projects/${project.id}`,
-                              );
                             }}
                           >
-                            <div className="flex items-center justify-between w-full">
+                            <Link
+                              href={`/dashboard/programs/${program.id}/projects/${project.id}`}
+                              prefetch={true}
+                              className="flex items-center justify-between w-full"
+                            >
                               <span>{project.project_name}</span>
                               {project.id === value && (
                                 <Check className="ml-2 h-4 w-4" />
                               )}
-                            </div>
+                            </Link>
                           </CommandItem>
                         ))}
                       </CommandGroup>
@@ -289,7 +290,6 @@ const ProjectDetailsBreadcrumb = memo(
     const currentProject = projects.find(
       (p: ProjectType) => p.id === projectID,
     );
-    const router = useRouter();
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState<string | undefined>(projectID);
 
@@ -326,17 +326,18 @@ const ProjectDetailsBreadcrumb = memo(
                     onSelect={() => {
                       setValue(project.id);
                       setOpen(false);
-                      router.push(
-                        `/dashboard/programs/${program.id}/projects/${project.id}`,
-                      );
                     }}
                   >
-                    <div className="flex items-center justify-between w-full">
+                    <Link
+                      href={`/dashboard/programs/${program.id}/projects/${project.id}`}
+                      prefetch={true}
+                      className="flex items-center justify-between w-full"
+                    >
                       <span>{project.project_name}</span>
                       {project.id === value && (
                         <Check className="ml-2 h-4 w-4" />
                       )}
-                    </div>
+                    </Link>
                   </CommandItem>
                 ))}
               </CommandGroup>
@@ -382,7 +383,6 @@ const UserProgramsDropdown = memo(function UserProgramsDropdown({
 }: {
   programID?: string;
 }) {
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState<string | undefined>(programID);
 
@@ -392,7 +392,7 @@ const UserProgramsDropdown = memo(function UserProgramsDropdown({
     table: "assigned_fieldtechnicians",
   });
 
-  const currentProgram = programs?.find((p) => p.id === programID);
+  const currentProgram = programs?.find((p: ProgramType) => p.id === programID);
 
   useEffect(() => {
     setValue(programID);
@@ -401,7 +401,7 @@ const UserProgramsDropdown = memo(function UserProgramsDropdown({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <Link
-        href="/field-technician/projects"
+        href="/field-technician/programs"
         prefetch={true}
         className="flex flex-1 gap-2"
       >
@@ -430,23 +430,26 @@ const UserProgramsDropdown = memo(function UserProgramsDropdown({
                 <CommandItem
                   key={program.id}
                   value={program.id}
-                  onSelect={(currentValue: string) => {
-                    setValue(currentValue);
+                  onSelect={() => {
+                    setValue(program.id);
                     setOpen(false);
-                    router.push(`/field-technician/programs/${currentValue}`);
                   }}
                 >
-                  <div className="flex items-center justify-between w-full">
+                  <Link
+                    href={`/field-technician/programs/${program.id}`}
+                    prefetch={true}
+                    className="flex items-center justify-between w-full"
+                  >
                     <span>{program.program_name}</span>
                     {program.id === value && <Check className="ml-2 h-4 w-4" />}
-                  </div>
+                  </Link>
                 </CommandItem>
               ))}
             </CommandGroup>
           </CommandList>
         </Command>
         <Separator />
-        <Link href="/field-technician/projects" prefetch={true}>
+        <Link href="/field-technician/programs" prefetch={true}>
           <Button
             variant="ghost"
             size="sm"
@@ -483,36 +486,29 @@ const UserProjectsDropdown = memo(function UserProjectsDropdown() {
     return null;
   }, [data, locationID]);
 
-  // Flatten all locations from all projects for the dropdown
-  // If currentProjectData exists, only show locations from the same project
-  const programProjects = useMemo(() => {
-    if (!data || !programID) return [];
-    const locations: Array<ProjectLocationType & { project: ProjectType }> = [];
-    data.forEach((project: ProjectType) => {
-      // If we have a current project, only include locations from that project
-      if (currentProjectData && project.id !== currentProjectData.project?.id) {
-        return;
-      }
-      project.project_location?.forEach((location: ProjectLocationType) => {
-        locations.push({
-          ...location,
-          project,
-        });
-      });
-    });
-    return locations;
-  }, [data, programID, currentProjectData]);
-
-  const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState<string | undefined>(locationID as string);
+  const [value, setValue] = useState<string | undefined>(
+    currentProjectData?.project?.id,
+  );
+  const [locationOpen, setLocationOpen] = useState(false);
+  const [locationValue, setLocationValue] = useState<string | undefined>(
+    locationID as string,
+  );
 
   useEffect(() => {
-    setValue(locationID as string);
+    setValue(currentProjectData?.project?.id);
+  }, [currentProjectData?.project?.id]);
+
+  useEffect(() => {
+    setLocationValue(locationID as string);
   }, [locationID]);
 
+  const currentProjectLocations = useMemo(() => {
+    return currentProjectData?.project?.project_location ?? [];
+  }, [currentProjectData?.project?.project_location]);
+
   const projectLink = useMemo(() => {
-    if (!programID) return "/field-technician/projects";
+    if (!programID) return "/field-technician/programs";
     if (currentProjectData?.project?.id) {
       return `/field-technician/programs/${programID}/projects/${currentProjectData.project.id}`;
     }
@@ -521,21 +517,176 @@ const UserProjectsDropdown = memo(function UserProjectsDropdown() {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <Link href={projectLink} prefetch={true} className="flex flex-1 gap-2">
+      <div className="flex flex-1 gap-2 items-center">
         <Box className="h-4 w-4 text-[#707070]" />
         <div className="min-w-37.5 truncate">
           {currentProjectData ? (
             <span className="flex items-center gap-2">
-              {currentProjectData.project?.project_name}
+              <span className="flex items-center gap-1">
+                <Link
+                  href={projectLink}
+                  prefetch={true}
+                  className="hover:underline"
+                >
+                  {currentProjectData.project?.project_name}
+                </Link>
+                <PopoverTrigger asChild>
+                  <Button
+                    className="h-7 w-4 text-[#707070] p-0"
+                    variant="ghost"
+                  >
+                    <ChevronsUpDown className="h-3 w-3" />
+                  </Button>
+                </PopoverTrigger>
+              </span>
               <BreadcrumbSeparator />
               <MapPin className="h-4 w-4 text-[#707070] mr-1" />
-              <span>{currentProjectData.location?.location}</span>
+              <span className="flex items-center gap-1">
+                <span>{currentProjectData.location?.location}</span>
+                <Popover open={locationOpen} onOpenChange={setLocationOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      className="h-7 w-4 text-[#707070] p-0"
+                      variant="ghost"
+                    >
+                      <ChevronsUpDown className="h-3 w-3" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="start" className="m-1 p-0 w-75">
+                    <Command>
+                      <CommandInput placeholder="Search locations..." />
+                      <CommandList>
+                        <CommandEmpty>No location found.</CommandEmpty>
+                        <CommandGroup>
+                          {currentProjectLocations.map(
+                            (location: ProjectLocationType) => (
+                              <CommandItem
+                                key={location.id}
+                                value={location.id}
+                                onSelect={() => {
+                                  setLocationValue(location.id);
+                                  setLocationOpen(false);
+                                }}
+                              >
+                                <Link
+                                  href={
+                                    programID
+                                      ? `/field-technician/programs/${programID}/location/${location.id}`
+                                      : "/field-technician/programs"
+                                  }
+                                  prefetch={true}
+                                  className="flex items-center justify-between w-full"
+                                >
+                                  <span>{location.location}</span>
+                                  {location.id === locationValue && (
+                                    <Check className="ml-2 h-4 w-4" />
+                                  )}
+                                </Link>
+                              </CommandItem>
+                            ),
+                          )}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </span>
             </span>
           ) : (
             <Skeleton className="w-full h-5" />
           )}
         </div>
-      </Link>
+      </div>
+
+      <PopoverContent align="start" className="m-1 p-0 w-75">
+        <Command>
+          <CommandInput placeholder="Search projects..." />
+          <CommandList>
+            <CommandEmpty>No project found.</CommandEmpty>
+            <CommandGroup>
+              {(data ?? []).map((project: ProjectType) => (
+                <CommandItem
+                  key={project.id}
+                  value={project.id}
+                  onSelect={() => {
+                    setValue(project.id);
+                    setOpen(false);
+                  }}
+                >
+                  <Link
+                    href={
+                      programID
+                        ? `/field-technician/programs/${programID}/projects/${project.id}`
+                        : "/field-technician/programs"
+                    }
+                    prefetch={true}
+                    className="flex items-center justify-between w-full"
+                  >
+                    <span>{project.project_name}</span>
+                    {project.id === value && <Check className="ml-2 h-4 w-4" />}
+                  </Link>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+        <Separator />
+        <Link
+          href={
+            programID
+              ? `/field-technician/programs/${programID}`
+              : "/field-technician/programs"
+          }
+          prefetch={true}
+        >
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start font-medium"
+          >
+            All Projects
+          </Button>
+        </Link>
+      </PopoverContent>
+    </Popover>
+  );
+});
+
+const UserProjectDetailsDropdown = memo(function UserProjectDetailsDropdown({
+  programID,
+  projectID,
+}: {
+  programID?: string;
+  projectID?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState<string | undefined>(projectID);
+
+  const { data } = useRealtimeQuery({
+    queryFn: () => SelectAllProjectsByProgramIDAction(programID as string),
+    queryKey: ["allProjectsByProgramId", programID as string],
+    table: "projects",
+  });
+
+  const currentProject = useMemo(() => {
+    if (!data || !projectID) return null;
+    return (
+      data.find((project: ProjectType) => project.id === projectID) ?? null
+    );
+  }, [data, projectID]);
+
+  useEffect(() => {
+    setValue(projectID);
+  }, [projectID]);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <span className="text-black whitespace-nowrap flex items-center gap-2">
+        <Archive className="h-4 w-4 text-[#707070]" />
+        <span className="min-w-37.5 truncate">
+          {currentProject?.project_name ?? <Skeleton className="w-full h-5" />}
+        </span>
+      </span>
       <PopoverTrigger asChild>
         <Button className="ml-2 h-7 w-4 text-[#707070]" variant="ghost">
           <ChevronsUpDown />
@@ -548,42 +699,39 @@ const UserProjectsDropdown = memo(function UserProjectsDropdown() {
           <CommandList>
             <CommandEmpty>No project found.</CommandEmpty>
             <CommandGroup>
-              {(programProjects ?? []).map(
-                (location: ProjectLocationType & { project: ProjectType }) => (
-                  <CommandItem
-                    key={location.id}
-                    value={location.id}
-                    onSelect={(currentValue: string) => {
-                      setValue(currentValue);
-                      setOpen(false);
-                      if (programID) {
-                        router.push(
-                          `/field-technician/programs/${programID}/location/${currentValue}`,
-                        );
-                      }
-                    }}
+              {(data ?? []).map((project: ProjectType) => (
+                <CommandItem
+                  key={project.id}
+                  value={project.id}
+                  onSelect={() => {
+                    setValue(project.id);
+                    setOpen(false);
+                  }}
+                >
+                  <Link
+                    href={
+                      programID
+                        ? `/field-technician/programs/${programID}/projects/${project.id}`
+                        : "/field-technician/programs"
+                    }
+                    prefetch={true}
+                    className="flex items-center justify-between w-full"
                   >
-                    <div className="flex flex-col gap-1">
-                      <span className="flex items-center">
-                        <MapPin className="h-4 w-4 text-[#707070] mr-1" />{" "}
-                        {location.location}
-                      </span>
-                    </div>
-                    {location.id === value && (
-                      <Check className="ml-2 h-4 w-4" />
-                    )}
-                  </CommandItem>
-                ),
-              )}
+                    <span>{project.project_name}</span>
+                    {project.id === value && <Check className="ml-2 h-4 w-4" />}
+                  </Link>
+                </CommandItem>
+              ))}
             </CommandGroup>
           </CommandList>
         </Command>
         <Separator />
+
         <Link
           href={
             programID
               ? `/field-technician/programs/${programID}`
-              : "/field-technician/projects"
+              : "/field-technician/programs"
           }
           prefetch={true}
         >
@@ -736,17 +884,17 @@ export default function CustomNavbar({
 
   const currentProgram = useMemo(() => {
     if (role === "user" && programID && userPrograms) {
-      return userPrograms.find((p) => p.id === programID);
+      return userPrograms.find((p: ProgramType) => p.id === programID);
     }
     if (programID && programs) {
-      return programs.find((p) => p.id === programID);
+      return programs.find((p: ProgramType) => p.id === programID);
     }
     if (locationID && programs && isProjectLocationPage) {
       return getProgramIDProjectLocationID(locationID as string, programs);
     }
     if (projectID && programs && isProjectDetailsPage) {
       // Find program that contains this project
-      return programs.find((p) =>
+      return programs.find((p: ProgramType) =>
         p.projects?.some((project: ProjectType) => project.id === projectID),
       );
     }
@@ -894,10 +1042,10 @@ export default function CustomNavbar({
                       <>
                         <UserProgramsDropdown programID={programID as string} />
                         <BreadcrumbSeparator />
-                        <span className="text-black whitespace-nowrap flex items-center gap-2">
-                          <Archive className="h-4 w-4 text-[#707070]" />
-                          {pageTitle || "Locations"}
-                        </span>
+                        <UserProjectDetailsDropdown
+                          programID={programID as string}
+                          projectID={projectID as string}
+                        />
                       </>
                     )}
 

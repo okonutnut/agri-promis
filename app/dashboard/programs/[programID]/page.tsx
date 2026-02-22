@@ -6,7 +6,6 @@ import {
   MapPin,
   CheckCircle,
   Plane,
-  Calendar,
   FileText,
   Cctv,
 } from "lucide-react";
@@ -19,10 +18,7 @@ import { SelectAllTravelOrdersByProgramIDAction } from "@/app/actions/TravelOrde
 import { SelectAllPostTravelReportsByProgramIDAction } from "@/app/actions/PostTravelAction";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import SummaryCard from "@/components/custom/card/summary-cards";
-import {
-  SelectAllMonitoringReportsByProgramIDAction,
-  SelectAllMonitoringReportsByProjectIDAction,
-} from "@/app/actions/MonitoringAction";
+import { SelectAllMonitoringReportsByProgramIDAction } from "@/app/actions/MonitoringAction";
 
 export default function ProgramOverviewPage() {
   const { programID } = useParams();
@@ -93,7 +89,7 @@ export default function ProgramOverviewPage() {
     // Calculate travel order statistics in a single pass
     const filteredTravelOrders = travelOrders || [];
     const now = new Date();
-    let totalTravelOrders = filteredTravelOrders.length;
+    const totalTravelOrders = filteredTravelOrders.length;
     let upcomingPostTravels = 0;
 
     filteredTravelOrders.forEach((to) => {

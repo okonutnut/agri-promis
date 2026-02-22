@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
 
 export async function GET(req: Request) {
   try {
@@ -10,11 +9,11 @@ export async function GET(req: Request) {
     if (!basePath) {
       return NextResponse.json(
         { error: "Missing basePath parameter" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const supabase = await createClient(cookies());
+    const supabase = await createClient();
 
     // Sign both files
     const { data: model, error: modelErr } = await supabase.storage
@@ -37,7 +36,7 @@ export async function GET(req: Request) {
       });
       return NextResponse.json(
         { error: "Error generating signed URLs" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 

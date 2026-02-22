@@ -1,12 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import LoginCard from "./components/login-card";
 
 export default function LoginPage() {
-  const router = useRouter();
   const supabase = createClient();
 
   useEffect(() => {
@@ -22,12 +20,12 @@ export default function LoginPage() {
 
       // Redirect if session exists
       if (session) {
-        router.push("/");
+        window.location.replace("/");
       }
     };
 
     checkSession();
-  }, [router, supabase]);
+  }, [supabase]);
 
   return (
     <div className="grid grid-cols-3 h-screen w-screen gap-2 overflow-hidden">

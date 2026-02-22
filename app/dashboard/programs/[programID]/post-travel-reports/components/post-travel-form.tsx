@@ -19,17 +19,18 @@ import { toast } from "sonner";
 import { useMemo } from "react";
 import { useSupabaseSession } from "@/hooks/use-session";
 import dynamic from "next/dynamic";
+import { PostTravelWithDetails } from "@/app/types";
 const PrintPostTravelButton = dynamic(
   () => import("@/components/custom/print/print-post-travel-button"),
-  { ssr: false }
+  { ssr: false },
 );
 const ImageCarousel = dynamic(
   () => import("@/components/custom/images/image-carousel"),
-  { ssr: false }
+  { ssr: false },
 );
 
 type PostTravelFormProps = {
-  data: PostTravelReportType;
+  data: PostTravelWithDetails;
 };
 export function PostTravelForm({ data }: PostTravelFormProps) {
   const { programID } = useParams();
@@ -43,15 +44,13 @@ export function PostTravelForm({ data }: PostTravelFormProps) {
     invalidateKeys: ["post_travel_reports", programID as string],
   });
 
-  const datesOfTravel = useMemo(() => {
-    if (!data.travel_date) return "N/A";
-    const start_date = format(new Date(data.travel_date.date!), "PP");
-    const end_date = data.travel_date.end_date
-      ? format(new Date(data.travel_date.end_date), "PP")
-      : null;
-
-    return `${start_date}${end_date ? ` - ${end_date}` : ""}`;
-  }, [data.travel_date]);
+  const inclusiveDates = () => {
+    if (!data?.date) return "N/A";
+    const startDate = format(new Date(data.date), "MMM d, yyyy");
+    if (!data.end_date) return startDate;
+    const endDate = format(new Date(data.end_date), "MMM d, yyyy");
+    return `${startDate} - ${endDate}`;
+  };
 
   // Use data directly for PDF printing (component will transform it)
   const printData = useMemo(() => data, [data]);
@@ -63,17 +62,17 @@ export function PostTravelForm({ data }: PostTravelFormProps) {
         <div className="p-2 space-y-4 border-t">
           <NonFormInput
             label="Reporter Name:"
-            defaultValue={data.travel_order?.user?.fullname}
+            defaultValue={data?.fullname}
             readOnly
           />
           <NonFormInput
             label="Travel Order No:"
-            defaultValue={data.travel_order?.travel_order_no}
+            defaultValue={data?.travel_order_no}
             readOnly
           />
           <NonFormInput
             label="Inclusive Date of Travel:"
-            defaultValue={datesOfTravel}
+            defaultValue={inclusiveDates()}
             readOnly
           />
           <NonFormInput
@@ -105,7 +104,7 @@ export function PostTravelForm({ data }: PostTravelFormProps) {
           {data?.reviewer_id && (
             <PrintPostTravelButton data={printData} btnName="Print" size="sm" />
           )}
-          {(!data?.reviewer_id && session?.user.id !== data?.user_id) && (
+          {!data?.reviewer_id && session?.user.id !== data?.user_id && (
             <Button
               size={"sm"}
               variant={isPending ? "ghost" : "default"}
@@ -119,13 +118,13 @@ export function PostTravelForm({ data }: PostTravelFormProps) {
                       mutate(data.id as string, {
                         onSuccess: () => {
                           toast.success(
-                            "Post-travel report submitted for review"
+                            "Post-travel report submitted for review",
                           );
                           closeSheet();
                         },
                         onError: () => {
                           toast.error(
-                            "Failed to submit post-travel report for review"
+                            "Failed to submit post-travel report for review",
                           );
                         },
                       });
@@ -133,7 +132,7 @@ export function PostTravelForm({ data }: PostTravelFormProps) {
                     }}
                   >
                     Confirm
-                  </Button>
+                  </Button>,
                 );
               }}
             >

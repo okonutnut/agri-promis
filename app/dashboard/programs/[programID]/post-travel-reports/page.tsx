@@ -6,35 +6,30 @@ import CustomPageLayout, {
   useSheet,
 } from "@/components/custom/layout/custom-page-layout";
 import { useParams } from "next/navigation";
-import { PostTravelReportType } from "@/components/types";
 import { getProgramNavItems } from "@/components/sidebar/navitems";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { PostTravelForm } from "./components/post-travel-form";
 import { SelectAllPostTravelReportsByProgramIDAction } from "@/app/actions/PostTravelAction";
 import { CreatePostTravelForm } from "@/app/field-technician/post-travel-reports/components/create-post-travel-form";
+import { PostTravelWithDetails } from "@/app/types";
 
 type PostTravelContentProps = {
-  values: PostTravelReportType[] | undefined;
-  programID: string;
+  values: PostTravelWithDetails[] | undefined;
 };
-function PostTravelContent({ values, programID }: PostTravelContentProps) {
+function PostTravelContent({ values }: PostTravelContentProps) {
   const { openSheet } = useSheet();
 
-  const handleRowSelect = (row: PostTravelReportType) => {
+  const handleRowSelect = (row: PostTravelWithDetails) => {
     openSheet(
       "View Post-Travel Report Details",
-      <PostTravelForm data={row} key={`view-${row.id}`} />
+      <PostTravelForm data={row} key={`view-${row.id}`} />,
     );
   };
 
   const handleAdd = () => {
     openSheet(
       "Issue Post-Travel Report",
-      <CreatePostTravelForm 
-        isAddMode={true} 
-        values={{ program_id: programID } as PostTravelReportType} 
-        key="add-mode" 
-      />
+      <CreatePostTravelForm isAddMode={true} key="add-mode" />,
     );
   };
 
@@ -52,6 +47,7 @@ function PostTravelContent({ values, programID }: PostTravelContentProps) {
 
 export default function PostTravelReportsPage() {
   const { programID } = useParams();
+
   const { data, isLoading, error } = useRealtimeQuery({
     queryKey: ["post_travel_reports", programID as string],
     queryFn: () =>
@@ -67,7 +63,7 @@ export default function PostTravelReportsPage() {
       error={error}
       navItems={getProgramNavItems(programID as string)}
     >
-      <PostTravelContent values={data ?? undefined} programID={programID as string} />
+      <PostTravelContent values={data ?? undefined} />
     </CustomPageLayout>
   );
 }

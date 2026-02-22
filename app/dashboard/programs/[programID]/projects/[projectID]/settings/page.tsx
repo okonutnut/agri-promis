@@ -6,7 +6,7 @@ import { getProjectNavItems } from "@/components/sidebar/navitems";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
-import { Card, CardFooter } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import FormInput from "@/components/custom/input/form-input";
 import z from "zod";
 import { useForm } from "react-hook-form";
@@ -46,16 +46,15 @@ export default function ProjectSettingsPage() {
   });
 
   // UPDATE PROJECT MUTATION
-  const { mutate, isPending } = useUniversalMutation({
-    mutationFn: async (data: z.infer<typeof formSchema>) =>
-      EditProjectAction({
-        project_id: data.project_id,
-        project_name: data.project_name,
-        project_description: data.project_description,
-      }),
-  });
-
-  const handleSubmit = (data: z.infer<typeof formSchema>) => mutate(data);
+  // const { mutate, isPending } = useUniversalMutation({
+  //   mutationFn: async (data: z.infer<typeof formSchema>) =>
+  //     EditProjectAction({
+  //       project_id: data.project_id,
+  //       project_name: data.project_name,
+  //       project_description: data.project_description,
+  //     }),
+  // });
+  // const handleSubmit = (data: z.infer<typeof formSchema>) => mutate(data);
 
   return (
     <CustomPageLayout
@@ -78,7 +77,10 @@ export default function ProjectSettingsPage() {
     >
       <Card className="p-2 rounded-md">
         <div className="text-lg font-bold">General Settings</div>
-        <form className="space-y-6" onSubmit={form.handleSubmit(handleSubmit)}>
+        <form
+          className="space-y-6"
+          // onSubmit={form.handleSubmit(handleSubmit)}
+        >
           <FormInput
             label="Project ID"
             name="project_id"
@@ -93,9 +95,10 @@ export default function ProjectSettingsPage() {
             form={form}
           />
           <div className="flex justify-end">
-            <Button size="sm" disabled={isPending}>
+            {/* <Button size="sm" disabled={isPending}>
               {isPending ? "Saving..." : "Save Changes"}
-            </Button>
+            </Button> */}
+            Not implemented yet
           </div>
         </form>
       </Card>

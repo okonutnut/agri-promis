@@ -6,12 +6,13 @@ import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import FormInput from "../input/form-input";
 import { useInsertProjectHook } from "@/components/hooks";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { CardFooter } from "@/components/ui/card";
 import FormTextarea from "../input/form-textarea";
 import { useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { useModal } from "../layout/custom-page-layout";
+import Link from "next/link";
 
 const formSchema = z.object({
   project_name: z
@@ -27,7 +28,6 @@ type FormData = z.infer<typeof formSchema>;
 export default function CreateProjectForm() {
   const { openModal, closeModal } = useModal();
   const { programUID } = useParams();
-  const router = useRouter();
 
   const [disabled, setIsDisabled] = useState(false);
 
@@ -51,7 +51,7 @@ export default function CreateProjectForm() {
         onSuccess: () => {
           setIsDisabled(true);
         },
-      }
+      },
     );
 
   return (
@@ -85,7 +85,7 @@ export default function CreateProjectForm() {
                 }}
               >
                 Confirm
-              </Button>
+              </Button>,
             );
           }}
           className="w-full"
@@ -98,9 +98,11 @@ export default function CreateProjectForm() {
           variant={"outline"}
           className="w-full"
           disabled={isPending || disabled}
-          onClick={() => router.push(`/dashboard/programs/${programUID}`)}
+          asChild
         >
-          Cancel
+          <Link href={`/dashboard/programs/${programUID}`} prefetch={true}>
+            Cancel
+          </Link>
         </Button>
       </CardFooter>
     </>

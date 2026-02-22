@@ -7,7 +7,7 @@ import CustomPageLayout, {
 } from "@/components/custom/layout/custom-page-layout";
 import { useParams } from "next/navigation";
 import { AssignedProjectsType } from "@/components/types";
-import { getProjectNavItems } from "@/components/sidebar/navitems";
+import { getProjectLocationNavItems } from "@/components/sidebar/navitems";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllFieldTechniciansByProjectIDAction } from "@/app/actions/AssignedProjectAction";
 import SelectMembersTable from "./components/members-sheet/select-members-table";
@@ -22,7 +22,7 @@ function FieldTechnicianContent({ data }: FieldTechnicianPageProps) {
   const handleRowSelect = (row: AssignedProjectsType) => {
     openSheet(
       "View Member Details",
-      <ViewFieldTechnicianPanel selectedRow={row} />
+      <ViewFieldTechnicianPanel selectedRow={row} />,
     );
   };
 
@@ -32,7 +32,7 @@ function FieldTechnicianContent({ data }: FieldTechnicianPageProps) {
       <SelectMembersTable
         assignedMembers={(data && data.map((d) => d.user_id as string)) ?? []}
         setPanelOpen={(open) => !open && closeSheet()}
-      />
+      />,
     );
   };
 
@@ -63,7 +63,7 @@ export default function FieldTechnicianPage() {
       pageDescription="View and manage assigned field technicians for the project."
       isLoading={isLoading}
       error={error}
-      navItems={getProjectNavItems(projectID as string)}
+      navItems={getProjectLocationNavItems(projectID as string)}
     >
       <FieldTechnicianContent data={data ?? undefined} />
     </CustomPageLayout>

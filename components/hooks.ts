@@ -118,11 +118,11 @@ export function useInsertProgramHook() {
 
 export function useEditProgramNameHook() {
   const qc = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (data: ProgramType) =>
       await EditProgramNameAction({
-        program_id: data.id ?? "",
+        id: data.id ?? "",
         program_name: data.program_name,
       }),
     onSuccess: (_, variables) => {
@@ -191,7 +191,7 @@ export function useSelectAllProjectsByUserIDHook(userID: string) {
 }
 
 export function useSelectProgramAndProjectDetailsByProgjectIDHook(
-  projectId: string
+  projectId: string,
 ) {
   return useQuery({
     queryKey: ["programAndProjectDetailsByProjectId", projectId],
@@ -256,7 +256,7 @@ export function useInsertProjectLocationHook() {
 
 export function useEditProjectHook() {
   const qc = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (data: ProjectType) => await EditProjectAction(data),
     onSuccess: (_, variables) => {
@@ -272,7 +272,7 @@ export function useEditProjectHook() {
 
 export function useDeleteProjectHook(projectId: string, programId: string) {
   const qc = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async () => await DeleteProjectAction(projectId),
     onSuccess: () => {
@@ -327,7 +327,7 @@ export function useSelectAllTravelOrdersByProgramIDHook(programID: string) {
 
 // MONITORING REPORT HOOKS
 export function useSelectAllMonitoringReportsByProjectIDHook(
-  projectID: string
+  projectID: string,
 ) {
   return useQuery({
     queryKey: ["allMonitoringReportsByProjectId", projectID],
@@ -346,7 +346,10 @@ export function useInsertMonitoringReportHook() {
       await InsertMonitoringReportAction(data),
     onSuccess: (_, variables) => {
       qc.invalidateQueries({
-        queryKey: ["allMonitoringReportsByProjectId", variables.project?.id as string],
+        queryKey: [
+          "allMonitoringReportsByProjectId",
+          variables.project?.id as string,
+        ],
       });
       qc.invalidateQueries({
         queryKey: ["allMonitoringReportsByUser"],
@@ -380,7 +383,7 @@ export function useInsertRemarksInMonitoringReportHook(reportId: string) {
 }
 
 export function useSelectAllMonitoringReportsByProjectIDAndUserHook(
-  projectID: string
+  projectID: string,
 ) {
   return useQuery({
     queryKey: ["allMonitoringReportsByUser", projectID],
@@ -404,7 +407,7 @@ export function useSelectAllMonitoringReportsByCurrentUserHook() {
 // MEMBER HOOKS
 export function useInsertMemberHook() {
   const qc = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (data: UserProfileType) => await InsertMemberAction(data),
     onSuccess: () => {
@@ -420,7 +423,7 @@ export function useInsertMemberHook() {
 
 export function useUpdateMemberHook() {
   const qc = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (data: UserProfileType) =>
       await UpdateMemberAction(data.id as string, data),
@@ -495,7 +498,7 @@ export function useInsertFieldTechniciansToProjectHook(project_id: string) {
 
 export function useDeleteFieldTechnicianToProjectHook(projectID: string) {
   const qc = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (userID: string) =>
       await DeleteFieldTechnicianFromProjectAction(userID, projectID),

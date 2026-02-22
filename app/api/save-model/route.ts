@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
 
 export async function POST(req: Request) {
   try {
-    const supabase = await createClient(cookies());
+    const supabase = await createClient();
     const formData = await req.formData();
 
     const modelJson = formData.get("modelJson") as File; // Blob with topology + manifest
@@ -43,7 +42,7 @@ export async function POST(req: Request) {
     console.error("Save model error:", err.message);
     return NextResponse.json(
       { ok: false, error: err.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

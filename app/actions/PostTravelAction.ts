@@ -14,19 +14,8 @@ export async function SelectAllPostTravelReportsByProgramIDAction(
   // Fix: Filter directly on post_travel.program_id instead of through join
   // This ensures proper isolation between programs
   const { data, error } = await supabase
-    .from("post_travel")
-    .select(
-      `
-      *,
-      travel_order:travel_order!post_travel_travel_order_id_fkey(
-        travel_order_no,
-        user_id,
-        program_id,
-        user:user_profile!travel_order_user_id_fkey(fullname, position)
-      ),
-      travel_date:travel_order_itinerary_items(date, end_date, destination)
-    `,
-    )
+    .from("post_travel_with_order")
+    .select(`*`)
     .eq("program_id", programID)
     .order("created_at", { ascending: false });
 
@@ -61,7 +50,7 @@ export async function SelectAllPostTravelReportsByProgramIDAction(
     };
   });
 
-  return reportsWithExtras as PostTravelReportType[];
+  return reportsWithExtras as PostTravelWithDetails[];
 }
 
 export async function SelectAllPostTravelReportsByCurrentUserAction() {

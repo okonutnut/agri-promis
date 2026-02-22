@@ -17,11 +17,7 @@ import FCAActiveStatusButton from "./active-status-button";
 import { useState } from "react";
 import { useUniversalMutation } from "@/hooks/use-universal-mutation";
 import { toast } from "sonner";
-import {
-  EditFCAAction,
-  EditFCAActiveStatusAction,
-  InsertFCAAction,
-} from "@/app/actions/FCAAction";
+import { EditFCAAction, InsertFCAAction } from "@/app/actions/FCAAction";
 
 const formSchema = z.object({
   id: z.string().optional(),

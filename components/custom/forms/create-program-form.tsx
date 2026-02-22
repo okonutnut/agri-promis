@@ -8,9 +8,9 @@ import { useInsertProgramHook } from "../../hooks";
 import FormInput from "../input/form-input";
 import FormTextarea from "../input/form-textarea";
 import { CardFooter } from "@/components/ui/card";
-import { useRouter } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import { useModal } from "../layout/custom-page-layout";
+import Link from "next/link";
 
 const formSchema = z.object({
   program_name: z
@@ -25,7 +25,6 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function CreateProgramForm() {
   const { openModal, closeModal } = useModal();
-  const router = useRouter();
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -69,7 +68,7 @@ export default function CreateProgramForm() {
                 }}
               >
                 Confirm
-              </Button>
+              </Button>,
             );
           }}
           className="w-full px-4 py-2"
@@ -83,9 +82,11 @@ export default function CreateProgramForm() {
           variant={"outline"}
           className="w-full"
           disabled={isPending}
-          onClick={() => router.push("/dashboard/programs")}
+          asChild
         >
-          Cancel
+          <Link href="/dashboard/programs" prefetch={true}>
+            Cancel
+          </Link>
         </Button>
       </CardFooter>
     </>

@@ -26,7 +26,7 @@ export async function InsertActivityLogAction(
     code,
     description,
     project_location_id: project_id || null,
-    ip_address: ip,
+    ip_address: ip === "::1" ? "127.0.0.1" : ip,
     user_id: userData.user.id,
   });
 

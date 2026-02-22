@@ -5,7 +5,7 @@ import {
 } from "@/components/custom/layout/custom-page-layout";
 import { Button } from "@/components/ui/button";
 import { useUniversalMutation } from "@/hooks/use-universal-mutation";
-import { AlertTriangle, Loader2, Trash } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 type FCAActiveStatusButtonProps = {

@@ -6,11 +6,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useParams } from "next/navigation";
 import { ImageData } from "@/components/interfaces";
-import { MonitoringReportType, TravelOrderProjectsType } from "@/components/types";
+import { MonitoringReportType } from "@/components/types";
 import { deleteDraft } from "@/hooks/use-draft";
 import { Button } from "@/components/ui/button";
 import { Loader2, Send } from "lucide-react";
-import FormInput from "@/components/custom/input/form-input";
 import FormTextarea from "@/components/custom/input/form-textarea";
 import FormMultiInput from "@/components/custom/input/form-multi-input";
 import NonFormInput from "@/components/custom/input/non-form-input";
@@ -22,8 +21,6 @@ import { useUniversalMutation } from "@/hooks/use-universal-mutation";
 import { InsertMonitoringReportAction } from "@/app/actions/MonitoringAction";
 import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
 import ImageCaptureForm from "@/components/custom/forms/image-report-form";
-import PrintDownloadDropdown from "@/components/custom/print/print-download-dropdown";
-import MonitoringReportDocument from "@/components/custom/pdf/monitoring-reports-document";
 import SaveDraftButton from "../components/save-draft-button";
 import DeleteDraftButton from "../components/delete-draft-button";
 import { TravelOrderDropdown } from "@/components/custom/dropdown/travel-order-dropdown";
@@ -88,8 +85,12 @@ export default function UploadFieldReportForm({
     resolver: zodResolver(fieldReportSchema),
     defaultValues: {
       project_location_id: locationID as string,
-      travel_order_id: values?.travel_order?.id || values?.travel_order_id || "",
-      travel_date_id: values?.travel_order?.travel_itinerary?.[0]?.id || values?.travel_date_id || "",
+      travel_order_id:
+        values?.travel_order?.id || values?.travel_order_id || "",
+      travel_date_id:
+        values?.travel_order?.travel_itinerary?.[0]?.id ||
+        values?.travel_date_id ||
+        "",
       travel_order_no: values?.travel_order_no || "",
       purpose: values?.purpose || "",
       findings: values?.findings ? [...values.findings] : [],
@@ -112,7 +113,9 @@ export default function UploadFieldReportForm({
     try {
       // Check if user is assigned to program
       if (!isAssignedToProgram) {
-        toast.error("You are not assigned to this program. Please contact your administrator.");
+        toast.error(
+          "You are not assigned to this program. Please contact your administrator.",
+        );
         return;
       }
 
@@ -124,15 +127,18 @@ export default function UploadFieldReportForm({
 
       // Get travel_order_no from selected ID
       const selectedTravelOrder = travelOrders?.find(
-        (order) => order.id === data.travel_order_id
+        (order) => order.id === data.travel_order_id,
       );
 
       const cleanedData = {
         ...data,
         findings: (data.findings || []).filter((item) => item !== ""),
-        issues_concern: (data.issues_concern || []).filter((item) => item !== ""),
+        issues_concern: (data.issues_concern || []).filter(
+          (item) => item !== "",
+        ),
         project_location_id: locationID as string,
-        travel_order_no: selectedTravelOrder?.travel_order_no || data.travel_order_no || "",
+        travel_order_no:
+          selectedTravelOrder?.travel_order_no || data.travel_order_no || "",
         travel_date_id: data.travel_date_id,
         images,
       };
@@ -149,14 +155,20 @@ export default function UploadFieldReportForm({
             closeSheet();
           },
           onError: (error: any) => {
-            const errorMessage = error?.message || error?.toString() || "Failed to submit monitoring report. Please try again.";
+            const errorMessage =
+              error?.message ||
+              error?.toString() ||
+              "Failed to submit monitoring report. Please try again.";
             toast.error(errorMessage);
             console.error("Error submitting monitoring report:", error);
           },
-        }
+        },
       );
     } catch (error: any) {
-      const errorMessage = error?.message || error?.toString() || "An unexpected error occurred. Please try again.";
+      const errorMessage =
+        error?.message ||
+        error?.toString() ||
+        "An unexpected error occurred. Please try again.";
       toast.error(errorMessage);
       console.error("Error in form submission:", error);
     }
@@ -165,7 +177,8 @@ export default function UploadFieldReportForm({
   // Check if submit should be disabled - properly handle empty strings, null, undefined
   const hasTravelOrder = travelOrderId && travelOrderId.trim() !== "";
   const hasTravelDate = travelDateId && travelDateId.trim() !== "";
-  const isSubmitDisabled = isPending || !hasTravelOrder || !hasTravelDate || !isAssignedToProgram;
+  const isSubmitDisabled =
+    isPending || !hasTravelOrder || !hasTravelDate || !isAssignedToProgram;
 
   return (
     <>
@@ -176,7 +189,9 @@ export default function UploadFieldReportForm({
           images={images}
           setImages={setImages}
           enableOverlay={true}
-          projectID={Array.isArray(locationID) ? locationID[0] : locationID as string}
+          projectID={
+            Array.isArray(locationID) ? locationID[0] : (locationID as string)
+          }
         />
         <form
           className="space-y-3 p-2 border-t pt-4 mb-4"
@@ -187,7 +202,9 @@ export default function UploadFieldReportForm({
             <>
               <TravelOrderDropdown
                 form={form as any}
-                onTravelOrderSelect={(id: string) => setSelectedTravelOrderId(id)}
+                onTravelOrderSelect={(id: string) =>
+                  setSelectedTravelOrderId(id)
+                }
               />
               <TravelDateDropdown
                 form={form as any}
@@ -203,12 +220,17 @@ export default function UploadFieldReportForm({
               />
               <NonFormInput
                 label="Inclusive Date of Travel:"
-                defaultValue={format(new Date(values?.travel_order?.travel_itinerary?.[0]?.date || ""), "MMM d, yyyy")}
+                defaultValue={format(
+                  new Date(
+                    values?.travel_order?.travel_itinerary?.[0]?.date || "",
+                  ),
+                  "MMM d, yyyy",
+                )}
                 readOnly
               />
             </>
           )}
-          <FormInput
+          <FormTextarea
             label="Purpose:"
             name="purpose"
             form={form}
@@ -268,7 +290,7 @@ export default function UploadFieldReportForm({
                     }}
                   >
                     Confirm
-                  </Button>
+                  </Button>,
                 );
               }}
               size="sm"

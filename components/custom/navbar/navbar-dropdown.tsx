@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Popover,
@@ -38,7 +37,6 @@ export default function ReusableProjectsDropdown({
   currentId,
   routePrefix,
 }: ReusableProjectsDropdownProps) {
-  const router = useRouter();
   const currentItem = data?.find((p) => p.id === currentId);
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState<string | undefined>(currentId);
@@ -51,7 +49,7 @@ export default function ReusableProjectsDropdown({
     <Popover open={open} onOpenChange={setOpen}>
       <div className="flex items-center gap-2 min-w-max">
         <Box className="h-4 w-4 text-[#707070]" />
-        <div className="min-w-[150px] truncate">
+        <div className="min-w-37.5 truncate">
           {currentItem ? (
             <span className="flex items-center gap-2">
               {currentItem.projects.project_name}
@@ -71,7 +69,7 @@ export default function ReusableProjectsDropdown({
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent align="start" className="m-1 p-0 w-[300px]">
+      <PopoverContent align="start" className="m-1 p-0 w-75">
         <Command>
           <CommandInput placeholder="Search projects..." />
           <CommandList>
@@ -81,22 +79,27 @@ export default function ReusableProjectsDropdown({
                 <CommandItem
                   key={item.id}
                   value={item.id}
-                  onSelect={(val) => {
-                    setValue(val);
+                  onSelect={() => {
+                    setValue(item.id);
                     setOpen(false);
-                    router.push(`${routePrefix}/${val}`);
                   }}
                 >
-                  <div className="flex flex-col gap-1">
-                    <span className="font-medium">
-                      {item.projects.project_name}
-                    </span>
-                    <small className="flex items-center">
-                      <MapPin className="h-4 w-4 text-[#707070] mr-1" />
-                      {item.location}
-                    </small>
-                  </div>
-                  {item.id === value && <Check className="ml-2 h-4 w-4" />}
+                  <Link
+                    href={`${routePrefix}/${item.id}`}
+                    prefetch={true}
+                    className="flex items-center justify-between w-full"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <span className="font-medium">
+                        {item.projects.project_name}
+                      </span>
+                      <small className="flex items-center">
+                        <MapPin className="h-4 w-4 text-[#707070] mr-1" />
+                        {item.location}
+                      </small>
+                    </div>
+                    {item.id === value && <Check className="ml-2 h-4 w-4" />}
+                  </Link>
                 </CommandItem>
               ))}
             </CommandGroup>
