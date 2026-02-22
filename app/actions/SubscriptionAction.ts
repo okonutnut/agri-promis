@@ -1,6 +1,5 @@
 "use server";
 import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
 import webpush from "web-push";
 
 const vapidKeys = {
@@ -10,7 +9,7 @@ const vapidKeys = {
 
 // PUSH SUBSCRIPTION ACTIONS
 export async function InsertSubscribeEndPoint(subscription: string) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   const { error } = await supabase.from("push_subscriptions").insert({
     user_id: await supabase.auth.getUser().then(({ data }) => data.user?.id),
@@ -25,14 +24,14 @@ export async function InsertSubscribeEndPoint(subscription: string) {
 }
 
 export async function DeleteSubscrptionEndpoint() {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   const { error } = await supabase
     .from("push_subscriptions")
     .delete()
     .eq(
       "user_id",
-      await supabase.auth.getUser().then(({ data }) => data.user?.id)!
+      await supabase.auth.getUser().then(({ data }) => data.user?.id)!,
     );
 
   if (error) {
@@ -50,7 +49,7 @@ export async function DeleteSubscrptionEndpoint() {
 //     vapidKeys.privateKey
 //   );
 
-//   const supabase = await createClient(cookies());
+//   const supabase = await createClient();
 //   const { data: subscriptions, error } = await supabase
 //     .from("push_subscriptions")
 //     .select("id, subscription");
@@ -111,7 +110,7 @@ export async function DeleteSubscrptionEndpoint() {
 //     vapidKeys.privateKey
 //   );
 
-//   const supabase = await createClient(cookies());
+//   const supabase = await createClient();
 //   const { data: subscription, error } = await supabase
 //     .from("push_subscriptions")
 //     .select("id, subscription")

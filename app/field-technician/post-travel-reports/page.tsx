@@ -5,35 +5,35 @@ import { columns } from "./table/columns";
 import CustomPageLayout, {
   useSheet,
 } from "@/components/custom/layout/custom-page-layout";
-import { PostTravelReportType } from "@/components/types";
 import { getUserDashboardNavItems } from "@/components/sidebar/navitems";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { CreatePostTravelForm } from "./components/create-post-travel-form";
 import { SelectAllPostTravelReportsByCurrentUserAction } from "@/app/actions/PostTravelAction";
+import { PostTravelWithDetails } from "@/app/types";
 
 type PostTravelContentProps = {
-  values: PostTravelReportType[] | undefined;
+  values: PostTravelWithDetails[] | undefined;
 };
 function PostTravelContent({ values }: PostTravelContentProps) {
   const { openSheet } = useSheet();
 
-  const handleRowSelect = (row: PostTravelReportType) => {
+  const handleRowSelect = (row: PostTravelWithDetails) => {
     const title = "View Post-Travel Report Details";
-    
+
     openSheet(
       title,
       <CreatePostTravelForm
         isAddMode={false}
         values={row}
         key={`view-${row.id}`}
-      />
+      />,
     );
   };
 
   const handleAdd = () => {
     openSheet(
       "Issue Post-Travel Report",
-      <CreatePostTravelForm isAddMode={true} key="add-mode" />
+      <CreatePostTravelForm isAddMode={true} key="add-mode" />,
     );
   };
 
@@ -56,9 +56,11 @@ export default function PostTravelReportsPage() {
     table: "post_travel",
   });
 
+  console.log("PostTravelReportsPage - data:", data);
+
   return (
     <CustomPageLayout
-      pageTitle="Post-Travel Reports"
+      pageTitle="Travel Reports"
       pageDescription="Create & View Post-Travel Reports."
       isLoading={isLoading}
       error={error}

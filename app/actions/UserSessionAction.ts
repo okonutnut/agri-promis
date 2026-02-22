@@ -1,12 +1,11 @@
 "use server";
 
-import { decodeSupabaseJWT } from "@/utils/helpers/decodeSupabaseJwt";
 import { createClient } from "@/utils/supabase/server";
-import { cookies, headers } from "next/headers";
+import { headers } from "next/headers";
 
 // USER SESSION ACTIONS
 export async function SelectUserCurrentLocationAction(user_id: string) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("user_session")
     .select("latitude, longitude, modified_at")
@@ -22,8 +21,11 @@ export async function SelectUserCurrentLocationAction(user_id: string) {
   return data;
 }
 
-export async function UpdateUserCurrentLocationAction(lat: string, lng: string) {
-  const supabase = await createClient(cookies());
+export async function UpdateUserCurrentLocationAction(
+  lat: string,
+  lng: string,
+) {
+  const supabase = await createClient();
   const { data: user } = await supabase.auth.getUser();
   if (!user?.user?.id) return;
 
@@ -42,7 +44,7 @@ export async function UpdateUserCurrentLocationAction(lat: string, lng: string) 
       latitude: lat || "0",
       modified_at: new Date(),
     },
-    { onConflict: "user_id" }
+    { onConflict: "user_id" },
   );
 
   if (error) {
@@ -54,7 +56,7 @@ export async function UpdateUserCurrentLocationAction(lat: string, lng: string) 
 
 // UNUSED QUERY - Commented out
 // export async function DeleteUserSessionAction() {
-//   const supabase = await createClient(cookies());
+//   const supabase = await createClient();
 //   const { data: session } = await supabase.auth.getSession();
 //   const { error } = await supabase
 //     .from("user_session")

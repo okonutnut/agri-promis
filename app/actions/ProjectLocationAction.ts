@@ -1,14 +1,13 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { ProjectLocationType } from "../../components/types";
 import { sendNotificationToAll } from "./NotificationAction";
 
 // PROJECT ACTIONS
 export async function InsertProjectLocationAction(values: ProjectLocationType) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const userId = (await supabase.auth.getUser()).data.user?.id;
 
   const { data, error } = await supabase
@@ -30,19 +29,19 @@ export async function InsertProjectLocationAction(values: ProjectLocationType) {
   await InsertActivityLogAction(
     "Added a Project Location",
     `${values.location} has been added to project ${data.projects.project_name}.`,
-    data.id
+    data.id,
   );
 
   // Send Notification
   await sendNotificationToAll(
-    `New project location created: ${data.projects.project_name}.`
+    `New project location created: ${data.projects.project_name}.`,
   );
 
   return data;
 }
 
 export async function EndProjectLocationAction(projectLocationID: string) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("project_location")
@@ -62,7 +61,7 @@ export async function EndProjectLocationAction(projectLocationID: string) {
   await InsertActivityLogAction(
     "Ended a Project",
     `Project ${data.projects.project_name}, ${data.location} has been ended.`,
-    data.id
+    data.id,
   );
 
   // Send Notification
@@ -72,9 +71,9 @@ export async function EndProjectLocationAction(projectLocationID: string) {
 }
 
 export default async function SelectProjectLocationDetailsByIDAction(
-  projectLocationID: string
+  projectLocationID: string,
 ) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("project_location")
     .select("*, projects(project_name, program_id)")

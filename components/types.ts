@@ -176,6 +176,9 @@ export type TravelOrderType = {
   is_active?: number;
   travel_itinerary: TravelOrderProjectsType[];
   created_at?: string;
+
+  // Relations
+  programs?: ProgramType;
 };
 
 export type TravelOrderProjectsType = {

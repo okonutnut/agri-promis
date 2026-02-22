@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
-import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 
 export default function GoogleSignInButton() {
   const supabase = createClient();
@@ -36,7 +35,7 @@ export default function GoogleSignInButton() {
 
   return (
     <Button
-      className="flex items-center gap-2 cursor-pointer my-3 min-w-[250px] mx-auto shadow-none rounded-pill"
+      className="flex items-center gap-2 cursor-pointer my-3 min-w-62.5 mx-auto shadow-none rounded-pill"
       type="submit"
       disabled={state !== "ready"}
       variant={state === "loading" ? "ghost" : "outline"}

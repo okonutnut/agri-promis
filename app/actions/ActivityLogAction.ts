@@ -1,7 +1,7 @@
 "use server";
 import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
 import { ActivityLogType } from "../../components/types";
+import { headers } from "next/headers";
 
 // ACTIVITY LOG ACTIONS
 export async function InsertActivityLogAction(
@@ -9,32 +9,34 @@ export async function InsertActivityLogAction(
   description: string,
   project_id?: string,
 ) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError) {
     throw userError;
   }
-  const response = await fetch("https://api.ipify.org?format=json");
-  const data = await response.json();
+  // ✅ Get the user's IP address
+  const hdrs = await headers();
+  const ip =
+    hdrs.get("x-forwarded-for")?.split(",")[0] ||
+    hdrs.get("x-real-ip") ||
+    "Unknown";
 
   const { error } = await supabase.from("activity_logs").insert({
     code,
     description,
     project_location_id: project_id || null,
-    ip_address: data.ip,
+    ip_address: ip,
     user_id: userData.user.id,
   });
 
-  if (error) {
-    throw error;
-  }
+  if (error) throw error;
 
   return;
 }
 
 export async function SelectActivityLogsByUserIDAction(user_id: string) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("activity_logs")
@@ -50,7 +52,7 @@ export async function SelectActivityLogsByUserIDAction(user_id: string) {
 }
 
 export async function SelectActivityLogsByProjectIDAction(project_id: string) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("activity_logs")
@@ -66,7 +68,7 @@ export async function SelectActivityLogsByProjectIDAction(project_id: string) {
 }
 
 export async function SelectAllActivityLogsAction() {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("activity_logs")
@@ -80,7 +82,7 @@ export async function SelectAllActivityLogsAction() {
 }
 
 export async function SelectAllActivityLogsByCurrentUserAction() {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError || !userData?.user) {
     throw userError;

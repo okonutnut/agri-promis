@@ -1,7 +1,6 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { FCAType, MonitoringReportType } from "../../components/types";
 import { CheckUserAssignedToProgramByProjectLocationAction } from "@/app/actions/AssignedProgramAction";
@@ -10,7 +9,7 @@ import { CheckUserAssignedToProgramByProjectLocationAction } from "@/app/actions
 export async function SelectAllMonitoringReportsByProjectIDAction(
   projectLocationID: string,
 ) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   // Fetch all reports for the given project location
   const { data, error } = await supabase
@@ -95,7 +94,7 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
 export async function SelectAllMonitoringReportsByProgramIDAction(
   programId: string,
 ) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   // First, fetch all projects for this program
   const { data: projects, error: projectError } = await supabase
@@ -206,7 +205,7 @@ export async function SelectAllMonitoringReportsByProgramIDAction(
 export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
   projectLocationID: string,
 ) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   // Get logged-in user
   const { data: userData, error: userError } = await supabase.auth.getUser();
@@ -294,7 +293,7 @@ export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
 }
 
 export async function SelectAllMonitoringReportsByCurrentUserAction() {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user) {
@@ -402,7 +401,7 @@ export async function InsertMonitoringReportAction({
   // Remove the image requirement check
   // if (!images?.length) throw new Error("No images provided");
 
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   // Auth check
   const {
@@ -475,7 +474,7 @@ export async function InsertMonitoringReportAction({
 }
 
 export async function InsertRemarksInMonitoringReportAction(reportId: string) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   // auth check
   const {

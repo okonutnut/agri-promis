@@ -1,14 +1,13 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { ProjectType, ProjectLocationType } from "../../components/types";
 import { sendNotificationToAll } from "./NotificationAction";
 
 // PROJECT ACTIONS
 export async function InsertProjectAction(values: ProjectType) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const userId = (await supabase.auth.getUser()).data.user?.id;
 
   const { data, error } = await supabase
@@ -27,7 +26,7 @@ export async function InsertProjectAction(values: ProjectType) {
   // Log the activity
   await InsertActivityLogAction(
     "Created a Project",
-    `Project ${values.project_name as string} has been created.`
+    `Project ${values.project_name as string} has been created.`,
   );
 
   // Send Notification
@@ -37,7 +36,7 @@ export async function InsertProjectAction(values: ProjectType) {
 }
 
 export async function SelectAllProjectsByProgramIDAction(programID: string) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("projects")
@@ -45,7 +44,7 @@ export async function SelectAllProjectsByProgramIDAction(programID: string) {
       `
       *,
       project_location (*)
-    `
+    `,
     )
     .eq("program_id", programID);
 
@@ -55,7 +54,7 @@ export async function SelectAllProjectsByProgramIDAction(programID: string) {
 }
 
 export async function SelectAllProjectsByUserIDAction(userID: string) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   // Fetch assigned projects for the user
   const { data: assignedProjects, error: assignedError } = await supabase
@@ -73,7 +72,7 @@ export async function SelectAllProjectsByUserIDAction(userID: string) {
     .select("*")
     .in(
       "id",
-      assignedProjects.map((project) => project.project_id)
+      assignedProjects.map((project) => project.project_id),
     )
     .order("created_at", { ascending: true });
 
@@ -85,9 +84,9 @@ export async function SelectAllProjectsByUserIDAction(userID: string) {
 }
 
 export async function SelectProgramAndProjectDetailsByProjectIDAction(
-  projectLocationID: string
+  projectLocationID: string,
 ) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("projects")
@@ -95,7 +94,7 @@ export async function SelectProgramAndProjectDetailsByProjectIDAction(
       `
       *,
       project_location!inner (*)
-    `
+    `,
     )
     .eq("project_location.id", projectLocationID)
     .single();
@@ -117,9 +116,9 @@ export async function SelectProgramAndProjectDetailsByProjectIDAction(
 }
 
 export async function SelectProjectDetailsByIDAction(
-  projectLocationID: string
+  projectLocationID: string,
 ) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("projects")
@@ -128,7 +127,7 @@ export async function SelectProjectDetailsByIDAction(
       *,
       programs (*),
       user_profile:created_by (fullname)
-    `
+    `,
     )
     .eq("id", projectLocationID)
     .single();
@@ -139,9 +138,9 @@ export async function SelectProjectDetailsByIDAction(
 }
 
 export async function SelectProjectDetailsByProjectLocationIDAction(
-  projectLocationID: string
+  projectLocationID: string,
 ) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("project_location")
@@ -150,7 +149,7 @@ export async function SelectProjectDetailsByProjectLocationIDAction(
       *,
       projects (*, programs (*)),
       user_profile:created_by (fullname)
-    `
+    `,
     )
     .eq("id", projectLocationID)
     .single();
@@ -161,7 +160,7 @@ export async function SelectProjectDetailsByProjectLocationIDAction(
 }
 
 export async function EditProjectAction(data: ProjectLocationType) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   // Step 1: Get project_location details first
   const { data: projectLocation, error: plError } = await supabase
@@ -199,19 +198,19 @@ export async function EditProjectAction(data: ProjectLocationType) {
   await InsertActivityLogAction(
     "Updated Project",
     `Project ${project.project_name} details have been updated successfully.`,
-    data.id
+    data.id,
   );
 
   // Step 5: Notify all
   await sendNotificationToAll(
-    `Project ${project.project_name} details have been updated successfully.`
+    `Project ${project.project_name} details have been updated successfully.`,
   );
 
   return;
 }
 
 export async function DeleteProjectAction(projectLocationID: string) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   // get project name for logs
   const { data: projectData, error: projectError } = await supabase
@@ -241,7 +240,7 @@ export async function DeleteProjectAction(projectLocationID: string) {
 
   await InsertActivityLogAction(
     "Deleted a Project",
-    `Project ${projectName} has been deleted.`
+    `Project ${projectName} has been deleted.`,
   );
   await sendNotificationToAll(`Project deleted: ${projectName}.`);
 

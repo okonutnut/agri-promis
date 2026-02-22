@@ -95,7 +95,7 @@ export default function ProjectsByProgramPage() {
 
   return (
     <CustomPageLayout
-      pageTitle="Projects"
+      pageTitle="Project List"
       pageDescription="List of projects under the program."
       isLoading={isLoading}
       error={error}

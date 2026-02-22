@@ -2,11 +2,10 @@
 
 import { UserProfileType } from "@/components/types";
 import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
 
 // USER PROFILE ACTIONS
 export async function SelectAllUserProfilesAction() {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("user_profile")
     .select("*")
@@ -18,7 +17,7 @@ export async function SelectAllUserProfilesAction() {
 }
 
 export async function SelectUserProfileByIDAction(userID: string) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("user_profile")
     .select("*")
@@ -33,7 +32,7 @@ export async function SelectUserProfileByIDAction(userID: string) {
 }
 
 export async function SelectUserProfileAction() {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const user = (await (await supabase.auth).getUser()).data.user?.id;
 
   const { data, error } = await supabase

@@ -1,36 +1,28 @@
 "use client";
 
-import { PostTravelReportType } from "@/components/types";
+import { PostTravelWithDetails } from "@/app/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { ArrowUpDown } from "lucide-react";
 
-export const columns: ColumnDef<PostTravelReportType>[] = [
+export const columns: ColumnDef<PostTravelWithDetails>[] = [
   {
     id: "count",
     header: "#",
     cell: ({ row }) => <span className="text-center">{row.index + 1}</span>,
   },
   {
-    accessorKey: "travel_order.travel_order_no",
+    accessorKey: "travel_order_no",
     header: "Travel Order No",
   },
   {
-    id: "reporter_name",
+    accessorKey: "fullname",
     header: "Reporter Name",
-    cell: ({ row }) => {
-      const user = row.original.travel_order?.user;
-      // Handle array or object format
-      const fullname = Array.isArray(user) 
-        ? user[0]?.fullname 
-        : user?.fullname;
-      return <span>{fullname || "N/A"}</span>;
-    },
   },
   {
-    id: "status",
+    accessorKey: "reviewed_at",
     header: ({ column }) => {
       return (
         <Button
@@ -42,8 +34,8 @@ export const columns: ColumnDef<PostTravelReportType>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => {
-      const isReviewed = !!row.original.reviewer_id;
+    cell: (row) => {
+      const isReviewed = (row.getValue() as string | null) !== null;
       return (
         <Badge variant={isReviewed ? "default" : "destructive"}>
           {isReviewed ? "Reviewed" : "Pending Review"}

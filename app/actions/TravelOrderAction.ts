@@ -1,14 +1,13 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { TravelOrderType } from "../../components/types";
 import { sendNotificationToUser } from "./NotificationAction";
 
 // TRAVEL ORDER ACTIONS
 export async function InsertTravelOrderAction(data: TravelOrderType) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -36,7 +35,7 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
       travel_itinerary.map((item) => ({
         ...item,
         travel_order_id: TOData.id,
-      }))
+      })),
     );
 
   if (itineraryError) {
@@ -51,7 +50,7 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
       .select("fullname")
       .eq("id", data.user_id)
       .single();
-    
+
     if (userProfile?.fullname) {
       userProfileFullname = userProfile.fullname;
     }
@@ -64,7 +63,7 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
   try {
     await InsertActivityLogAction(
       "Created a Travel Order",
-      `Travel order for ${userProfileFullname} has been created.`
+      `Travel order for ${userProfileFullname} has been created.`,
     );
   } catch (error) {
     // Log error but don't fail the operation
@@ -75,7 +74,7 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
   try {
     await sendNotificationToUser(
       `Your travel order has been created successfully.`,
-      user!.id
+      user!.id,
     );
   } catch (error) {
     // Log error but don't fail the operation
@@ -86,7 +85,7 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
 }
 
 export async function SelectAllTravelOrdersByUserIDAction(user_id?: string) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   if (!user_id) {
     const { data: userData, error: userError } = await supabase.auth.getUser();
@@ -101,8 +100,9 @@ export async function SelectAllTravelOrdersByUserIDAction(user_id?: string) {
       *,
       user:user_profile!travel_order_user_id_fkey(fullname),
       created_by:user_profile!travel_order_created_by_fkey(fullname),
-      travel_itinerary:travel_order_itinerary_items(*)
-    `
+      travel_itinerary:travel_order_itinerary_items(*),
+      programs:programs!travel_order_program_id_fkey(program_name)
+    `,
     )
     .eq("user_id", user_id)
     .eq("is_active", 1)
@@ -114,9 +114,9 @@ export async function SelectAllTravelOrdersByUserIDAction(user_id?: string) {
 }
 
 export async function SelectAllTravelOrdersByProgramIDAction(
-  programID: string
+  programID: string,
 ) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("travel_order")
@@ -126,7 +126,7 @@ export async function SelectAllTravelOrdersByProgramIDAction(
       user:user_profile!travel_order_user_id_fkey(fullname),
       created_by:user_profile!travel_order_created_by_fkey(fullname),
       travel_itinerary:travel_order_itinerary_items(*)
-    `
+    `,
     )
     .eq("program_id", programID)
     .order("created_at", { ascending: false });

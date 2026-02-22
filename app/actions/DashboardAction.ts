@@ -2,11 +2,10 @@
 
 import { MonitoringReportType } from "@/components/types";
 import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
 
 // DASHBOARD ACTIONS
 export async function SelectDashboardItemsAction(projectLocationID: string) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   // 2. total monitoring reports
   const { data: MData, error: MError } = await supabase
@@ -32,7 +31,7 @@ export async function SelectDashboardItemsAction(projectLocationID: string) {
 }
 
 export async function SelectUserDashboardItemsAction() {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user) {
@@ -84,7 +83,7 @@ export async function SelectUserDashboardItemsAction() {
 }
 
 export async function SelectAdminDashboardItemsAction() {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   const nowDate = new Date().toISOString().split("T")[0]; // e.g. "2025-09-18"
 
@@ -143,7 +142,7 @@ export async function SelectAdminDashboardItemsAction() {
 }
 
 export async function SelectTotalProjectsPerProgramAction() {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   const { data, error } = await supabase.from("programs").select(`
     id,
@@ -159,7 +158,7 @@ export async function SelectTotalProjectsPerProgramAction() {
 }
 
 export async function SelectMonitoringReportsCountByDate(project_id: string) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   const { data: project, error: projectError } = await supabase
     .from("project_location")
@@ -212,7 +211,7 @@ export async function SelectMonitoringReportsCountByDate(project_id: string) {
 }
 
 export async function SelectTravelOrdersAnalyticsAction() {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   // Get all travel orders with user info
   const { data: travelOrders, error: travelOrdersError } = await supabase
@@ -282,7 +281,7 @@ export async function SelectTravelOrdersAnalyticsAction() {
 }
 
 export async function SelectFCAAnalyticsAction() {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   // Get all FCAs
   const { data: fcas, error: fcaError } = await supabase
@@ -358,7 +357,7 @@ export async function SelectFCAAnalyticsAction() {
 }
 
 export async function SelectProjectDashboardItemsAction(projectID: string) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   // Get Project Locations
   const {

@@ -25,6 +25,7 @@ import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllAssignedProjectsByFieldTechnicianIDAction } from "@/app/actions/AssignedProjectAction";
 import { SelectAllProgramsAction } from "@/app/actions/ProgramAction";
 import { useSelectUserProfileHook } from "@/app/hooks/UserProfileHook";
+import AssignedProgramDropdown from "@/components/custom/dropdown/assigned-program-dropdown";
 
 const formSchema = z
   .object({
@@ -48,7 +49,7 @@ const formSchema = z
           purpose: z.string().optional(),
           departure_time: z.string().optional(),
           arrival_time: z.string().optional(),
-        })
+        }),
       )
       .min(1, { message: "At least one itinerary is required" }),
   })
@@ -59,7 +60,7 @@ const formSchema = z
     {
       message: "Return date must be after departure date",
       path: ["return_date"],
-    }
+    },
   );
 
 type TravelOrderSchema = z.infer<typeof formSchema>;
@@ -78,32 +79,11 @@ export default function IssueTravelOrderForm({
   const { data: userData } = useSupabaseSession();
   const { data: userProfile } = useSelectUserProfileHook();
 
-  // Get assigned projects to extract program_ids
-  const { data: assignedProjects } = useRealtimeQuery({
-    queryKey: ["assigned-projects-for-travel-order"],
-    queryFn: SelectAllAssignedProjectsByFieldTechnicianIDAction,
-    table: "assigned_projects",
-  });
-
-  // Get all programs to match with program_ids
-  const { data: allPrograms, isLoading: isLoadingAllPrograms } = useRealtimeQuery({
-    queryKey: ["all-programs-for-travel-order"],
-    queryFn: SelectAllProgramsAction,
-    table: "programs",
-  });
-
-  const programOptions = useMemo(() => {
-    return allPrograms?.map((program) => ({
-      value: program.id,
-      label: program.program_name,
-    }));
-  }, [allPrograms]);
-
   const form = useForm<TravelOrderSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       travel_order_no: values?.travel_order_no || "",
-      program_id: values?.program_id || programOptions?.[0]?.value || "",
+      program_id: values?.program_id || "",
       user_id: values?.user_id || userData?.user.id || "",
       departure_date: values?.departure_date || "",
       return_date: values?.return_date || "",
@@ -124,13 +104,6 @@ export default function IssueTravelOrderForm({
     }
   }, [userData, isAddMode, form]);
 
-  // Set default program_id when program options are loaded
-  useEffect(() => {
-    if (isAddMode && programOptions?.length && !form.getValues("program_id")) {
-      form.setValue("program_id", programOptions[0].value);
-    }
-  }, [programOptions, isAddMode, form]);
-
   const modeOfTransportOptions = [
     { value: "da_rfo_02_mv", label: "DA RFO 02 MV" },
     { value: "puv", label: "PUV" },
@@ -142,6 +115,13 @@ export default function IssueTravelOrderForm({
     mutationFn: async (data: TravelOrderSchema) =>
       await InsertTravelOrderAction(data),
     invalidateKeys: ["travel_order"],
+    onSuccess: () => {
+      toast.success("Travel order created successfully.");
+      closeSheet();
+    },
+    onError: () => {
+      toast.error("Failed to create travel order. Please try again.");
+    },
   });
 
   const onSubmit = (data: TravelOrderSchema) => {
@@ -150,20 +130,12 @@ export default function IssueTravelOrderForm({
       toast.error("At least one itinerary entry is required.");
       return;
     }
-    
-    mutate(data, {
-      onSuccess: () => {
-        toast.success("Travel order created successfully.");
-        closeSheet();
-      },
-      onError: () => {
-        toast.error("Failed to create travel order. Please try again.");
-      },
-    });
+
+    mutate(data);
   };
 
   const [itinerary, setItinerary] = useState<TravelOrderProjectsType[]>(
-    values?.travel_itinerary || []
+    values?.travel_itinerary || [],
   );
 
   // Sync itinerary state with form value and trigger validation
@@ -197,12 +169,10 @@ export default function IssueTravelOrderForm({
                         defaultValue={userProfile?.fullname || "You"}
                         readOnly
                       />
-                      <FormSelect
-                        options={programOptions || []}
-                        label="Program:"
-                        name="program_id"
-                        form={form}
-                        isLoading={isLoadingAllPrograms}
+                      <AssignedProgramDropdown
+                        onChange={(program) =>
+                          form.setValue("program_id", program)
+                        }
                       />
                     </>
                   ) : (
@@ -215,7 +185,7 @@ export default function IssueTravelOrderForm({
                       {values?.program_id && (
                         <NonFormInput
                           label="Program:"
-                          defaultValue={values?.program_id}
+                          defaultValue={values?.programs?.program_name}
                           readOnly
                         />
                       )}
@@ -289,13 +259,13 @@ export default function IssueTravelOrderForm({
                   toast.error("At least one itinerary entry is required.");
                   return;
                 }
-                
+
                 // Check itinerary length as well
                 if (itinerary.length === 0) {
                   toast.error("At least one itinerary entry is required.");
                   return;
                 }
-                
+
                 openModal(
                   "Attention",
                   "You confirm that all information provided is correct.",
@@ -307,7 +277,7 @@ export default function IssueTravelOrderForm({
                     }}
                   >
                     Confirm
-                  </Button>
+                  </Button>,
                 );
               });
             }}
@@ -325,4 +295,3 @@ export default function IssueTravelOrderForm({
     </form>
   );
 }
-

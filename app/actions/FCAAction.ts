@@ -1,14 +1,13 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
 import { FCAType } from "../../components/types";
 import { InsertActivityLogAction } from "./ActivityLogAction";
 import { sendNotificationToAll } from "./NotificationAction";
 
 // FCA ACTIONS
 export async function InsertFCAAction(data: FCAType) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const { id, ...rest } = data;
   const { error } = await supabase
     .from("farmers")
@@ -29,7 +28,7 @@ export async function InsertFCAAction(data: FCAType) {
 }
 
 export async function SelectAllFCAAction() {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   const { data: fcaData, error: fcaError } = await supabase
     .from("farmers")
@@ -67,7 +66,7 @@ export async function SelectAllFCAAction() {
 }
 
 export async function SelectAllFCAByStatusAction(status: number) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("farmers")
     .select("*")
@@ -81,7 +80,7 @@ export async function SelectAllFCAByStatusAction(status: number) {
 }
 
 export async function EditFCAAction(data: FCAType) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const { error } = await supabase
     .from("farmers")
     .update(data)
@@ -104,7 +103,7 @@ export async function EditFCAAction(data: FCAType) {
 }
 
 export async function EditFCAActiveStatusAction(fcaID: string, status: number) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("farmers")
     .update({ active_status: status })
@@ -142,7 +141,7 @@ export async function EditFCAActiveStatusAction(fcaID: string, status: number) {
 }
 
 export async function SelectAllAssignedProjectsByFCAIDAction(fcaID: string) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("project_location")
     .select("projects (project_name), created_at")

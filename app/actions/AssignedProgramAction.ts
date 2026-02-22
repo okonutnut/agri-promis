@@ -1,7 +1,6 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { AssignedProjectsType } from "../../components/types";
 import { sendNotificationToUser } from "./NotificationAction";
@@ -9,9 +8,9 @@ import { sendNotificationToUser } from "./NotificationAction";
 // ASSIGNED PROGRAM ACTIONS
 export async function InsertFieldTechniciansToProgramAction(
   technicianIDs: string[],
-  programID: string
+  programID: string,
 ) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   // Validate inputs
   if (!programID || !technicianIDs || technicianIDs.length === 0) {
@@ -42,7 +41,9 @@ export async function InsertFieldTechniciansToProgramAction(
     .eq("program_id", programID);
 
   if (existError) {
-    throw new Error(`Failed to check existing assignments: ${existError.message}`);
+    throw new Error(
+      `Failed to check existing assignments: ${existError.message}`,
+    );
   }
 
   const existingIDs = new Set(existing?.map((row) => row.user_id));
@@ -50,7 +51,11 @@ export async function InsertFieldTechniciansToProgramAction(
   const newAssignees = technicianIDs.filter((id) => !existingIDs.has(id));
 
   if (newAssignees.length === 0) {
-    return { success: true, assigned: 0, message: "All selected technicians are already assigned to this program" };
+    return {
+      success: true,
+      assigned: 0,
+      message: "All selected technicians are already assigned to this program",
+    };
   }
 
   // Insert all new assignees
@@ -64,7 +69,9 @@ export async function InsertFieldTechniciansToProgramAction(
     .insert(insertPayload);
 
   if (insertError) {
-    throw new Error(`Failed to assign field technicians: ${insertError.message}`);
+    throw new Error(
+      `Failed to assign field technicians: ${insertError.message}`,
+    );
   }
 
   // Fix N+1: Batch fetch all user profiles to avoid N+1 queries
@@ -76,7 +83,7 @@ export async function InsertFieldTechniciansToProgramAction(
   if (userProfilesError) throw userProfilesError;
 
   const userProfileMap = new Map(
-    (userProfiles || []).map((user) => [user.id, user])
+    (userProfiles || []).map((user) => [user.id, user]),
   );
 
   // Log and notify each new technician (using batched data)
@@ -87,14 +94,14 @@ export async function InsertFieldTechniciansToProgramAction(
       await InsertActivityLogAction(
         "Assigned Field Technician",
         `Field technician ${userProfile?.fullname || "Unknown"} assigned to ${programName}.`,
-        undefined
+        undefined,
       );
 
       await sendNotificationToUser(
         `You have been assigned to the program: ${programName}.`,
-        technicianID
+        technicianID,
       );
-    })
+    }),
   );
 
   return { success: true, assigned: newAssignees.length };
@@ -102,9 +109,9 @@ export async function InsertFieldTechniciansToProgramAction(
 
 export async function DeleteFieldTechnicianFromProgramAction(
   user_id: string,
-  program_id: string
+  program_id: string,
 ) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   // Delete the specific assignment
   const { error: deleteError } = await supabase
@@ -143,22 +150,22 @@ export async function DeleteFieldTechnicianFromProgramAction(
   await InsertActivityLogAction(
     "Removed a Field Technician from Program",
     `Field technician ${existingUserData?.fullname || "Unknown"} was removed from program ${programData.program_name}.`,
-    undefined
+    undefined,
   );
 
   // Send Notification
   await sendNotificationToUser(
     `You have been removed from the program: ${programData.program_name}.`,
-    user_id
+    user_id,
   );
 
   return;
 }
 
 export async function SelectAllFieldTechniciansByProgramIDAction(
-  programID: string
+  programID: string,
 ) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("assigned_fieldtechnicians")
     .select("*, programs (*), user_profile (fullname, position)")
@@ -173,9 +180,9 @@ export async function SelectAllFieldTechniciansByProgramIDAction(
 }
 
 export async function CheckUserAssignedToProgramByProjectLocationAction(
-  projectLocationID: string
+  projectLocationID: string,
 ) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user) {
@@ -193,8 +200,8 @@ export async function CheckUserAssignedToProgramByProjectLocationAction(
 
   // Handle both array and single object responses
   const projects = (projectLocation as any)?.projects;
-  const programID = Array.isArray(projects) 
-    ? projects[0]?.program_id 
+  const programID = Array.isArray(projects)
+    ? projects[0]?.program_id
     : projects?.program_id;
 
   if (!programID) {
@@ -218,7 +225,7 @@ export async function CheckUserAssignedToProgramByProjectLocationAction(
 }
 
 export async function CheckUserAssignedToProgramAction(programID: string) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user) {
@@ -242,7 +249,7 @@ export async function CheckUserAssignedToProgramAction(programID: string) {
 }
 
 export async function SelectAllProgramsAssignedToCurrentUserAction() {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user) {
@@ -266,4 +273,3 @@ export async function SelectAllProgramsAssignedToCurrentUserAction() {
 
   return programs;
 }
-

@@ -19,14 +19,14 @@ function TravelOrderContent({ data }: { data: TravelOrderType[] | undefined }) {
   const handleRowSelect = (row: TravelOrderType) => {
     openSheet(
       "View Travel Order Details",
-      <IssueTravelOrderForm isAddMode={false} values={row} key={row.id} />
+      <IssueTravelOrderForm isAddMode={false} values={row} key={row.id} />,
     );
   };
 
   const handleAdd = () => {
     openSheet(
       "Create Travel Order",
-      <IssueTravelOrderForm isAddMode={true} values={null} key="add-mode" />
+      <IssueTravelOrderForm isAddMode={true} values={null} key="add-mode" />,
     );
   };
 
@@ -49,6 +49,8 @@ export default function FieldTechnicianPage() {
     queryFn: () => SelectAllTravelOrdersByUserIDAction(userData?.user.id),
     table: "travel_order",
   });
+
+  console.log("FieldTechnicianPage - data:", data);
 
   return (
     <CustomPageLayout

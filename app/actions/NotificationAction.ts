@@ -1,7 +1,6 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
 import webpush from "web-push";
 
 export const sendNotificationToUser = async (
@@ -20,7 +19,7 @@ export const sendNotificationToUser = async (
     vapidKeys.privateKey,
   );
 
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("push_subscriptions")
@@ -71,7 +70,7 @@ export const sendNotificationToAll = async (message: string) => {
     vapidKeys.privateKey,
   );
 
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("push_subscriptions")
@@ -121,7 +120,7 @@ export const sendNotificationToAll = async (message: string) => {
 };
 
 export async function SelectCurrentUserSubscription() {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("push_subscriptions")

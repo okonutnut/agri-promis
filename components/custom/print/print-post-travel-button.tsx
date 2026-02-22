@@ -5,12 +5,18 @@ import { pdf } from "@react-pdf/renderer";
 import { Download, Printer, Loader2 } from "lucide-react";
 import { useState } from "react";
 import PostTravelReactPDF from "./post-travel-react-pdf";
-import type { PostTravelReportType } from "@/components/types";
+import { PostTravelWithDetails } from "@/app/types";
 
 type PrintPostTravelButtonProps = {
-  data: PostTravelReportType;
+  data: PostTravelWithDetails;
   btnName?: string;
-  variant?: "default" | "outline" | "ghost" | "link" | "destructive" | "secondary";
+  variant?:
+    | "default"
+    | "outline"
+    | "ghost"
+    | "link"
+    | "destructive"
+    | "secondary";
   size?: "default" | "sm" | "lg" | "icon";
 };
 
@@ -28,11 +34,15 @@ export default function PrintPostTravelButton({
     try {
       const blob = await pdf(<PostTravelReactPDF data={data} />).toBlob();
       const url = URL.createObjectURL(blob);
-      
+
       // Try to open in new window
       const newWindow = window.open(url, "_blank");
-      
-      if (!newWindow || newWindow.closed || typeof newWindow.closed === "undefined") {
+
+      if (
+        !newWindow ||
+        newWindow.closed ||
+        typeof newWindow.closed === "undefined"
+      ) {
         // Popup blocked - fallback to download
         const link = document.createElement("a");
         link.href = url;
@@ -41,7 +51,7 @@ export default function PrintPostTravelButton({
         link.click();
         document.body.removeChild(link);
       }
-      
+
       // Clean up blob URL after a delay
       setTimeout(() => {
         URL.revokeObjectURL(url);
@@ -65,7 +75,7 @@ export default function PrintPostTravelButton({
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       // Clean up blob URL after a delay
       setTimeout(() => {
         URL.revokeObjectURL(url);
@@ -119,4 +129,3 @@ export default function PrintPostTravelButton({
     </div>
   );
 }
-

@@ -67,7 +67,7 @@ export function getProgramNavItems(id: string) {
       icon: House,
     },
     {
-      title: "Projects",
+      title: "Project List",
       href: `/dashboard/programs/${id}/projects`,
       icon: FolderKanban,
     },
@@ -147,14 +147,14 @@ export function getUserDashboardNavItems() {
       icon: House,
     },
     {
-      title: "Travel Reports",
-      href: "/field-technician/post-travel-reports",
-      icon: NotebookPen,
-    },
-    {
       title: "Assigned Programs",
       href: "/field-technician/programs",
       icon: UserPen,
+    },
+    {
+      title: "Travel Reports",
+      href: "/field-technician/post-travel-reports",
+      icon: NotebookPen,
     },
     {
       title: "Travel Orders",

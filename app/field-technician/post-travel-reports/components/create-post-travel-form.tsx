@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PostTravelReportType } from "@/components/types";
 import { ImageData } from "@/components/interfaces";
 import {
   useModal,
@@ -12,7 +11,6 @@ import {
 } from "@/components/custom/layout/custom-page-layout";
 import { Button } from "@/components/ui/button";
 import { Loader2, Send } from "lucide-react";
-import FormInput from "@/components/custom/input/form-input";
 import FormTextarea from "@/components/custom/input/form-textarea";
 import FormMultiInput from "@/components/custom/input/form-multi-input";
 import NonFormInput from "@/components/custom/input/non-form-input";
@@ -28,21 +26,23 @@ import { TravelOrderDropdown } from "@/components/custom/dropdown/travel-order-d
 import { TravelDateDropdown } from "@/components/custom/dropdown/travel-date-dropdown";
 import { toast } from "sonner";
 import { useParams } from "next/navigation";
-import ProgramDropdown from "@/components/custom/dropdown/program-dropdown";
+import AssignedProgramDropdown from "@/components/custom/dropdown/assigned-program-dropdown";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { CheckUserAssignedToProgramAction } from "@/app/actions/AssignedProgramAction";
+import { PostTravelWithDetails } from "@/app/types";
+import { format } from "date-fns";
 const PrintPostTravelButton = dynamic(
   () => import("@/components/custom/print/print-post-travel-button"),
-  { ssr: false }
+  { ssr: false },
 );
 const ImageCaptureForm = dynamic(
   () => import("@/components/custom/forms/image-report-form"),
-  { ssr: false }
+  { ssr: false },
 );
 
 type CreatePostTravelFormProps = {
   isAddMode?: boolean;
-  values?: PostTravelReportType | null;
+  values?: PostTravelWithDetails;
 };
 
 export function CreatePostTravelForm({
@@ -52,19 +52,22 @@ export function CreatePostTravelForm({
   const { programID } = useParams();
   const { closeSheet } = useSheet();
   const { openModal, closeModal } = useModal();
-  const { data: userData } = useSupabaseSession();
 
   const [images, setImages] = useState<ImageData[]>([]);
   const [selectedTravelOrderId, setSelectedTravelOrderId] = useState<
     string | null
   >(values?.travel_order_id || null);
-  const [programId, setProgramId] = useState<string | null>(values?.program_id || programID as string || null);
+  const [programId, setProgramId] = useState<string | null>(
+    values?.program_id || (programID as string) || null,
+  );
 
   // Check if user is assigned to the program (when programId is available)
   const { data: isAssignedToProgram } = useRealtimeQuery({
     queryKey: ["user-program-assignment-post-travel", programId || "none"],
     queryFn: () =>
-      programId ? CheckUserAssignedToProgramAction(programId) : Promise.resolve(false),
+      programId
+        ? CheckUserAssignedToProgramAction(programId)
+        : Promise.resolve(false),
     table: "assigned_fieldtechnicians",
   });
 
@@ -93,7 +96,7 @@ export function CreatePostTravelForm({
 
   const { mutate, isPending } = useUniversalMutation({
     mutationFn: async (
-      data: PostTravelReportFormData & { images: ImageData[] }
+      data: PostTravelReportFormData & { images: ImageData[] },
     ) =>
       await InsertPostTravelReportAction({
         program_id: data.program_id,
@@ -112,14 +115,16 @@ export function CreatePostTravelForm({
     try {
       // Check if user is assigned to program (client-side validation)
       if (isAddMode && programId && !isAssignedToProgram) {
-        toast.error("You are not assigned to this program. Please contact your administrator.");
+        toast.error(
+          "You are not assigned to this program. Please contact your administrator.",
+        );
         return;
       }
 
       const cleanedData = {
         ...data,
         issues_concern: (data.issues_concern || []).filter(
-          (item) => item !== ""
+          (item) => item !== "",
         ),
         images,
       };
@@ -151,6 +156,18 @@ export function CreatePostTravelForm({
     }
   };
 
+  const onInvalidSubmit = () => {
+    toast.error("Please fill in all required fields before submitting.");
+  };
+
+  const inclusiveDates = () => {
+    if (!values?.date) return "N/A";
+    const startDate = format(new Date(values.date), "MMM d, yyyy");
+    if (!values.end_date) return startDate;
+    const endDate = format(new Date(values.end_date), "MMM d, yyyy");
+    return `${startDate} - ${endDate}`;
+  };
+
   return (
     <>
       <div className="flex-1 overflow-y-auto h-[calc(90vh)] pb-12">
@@ -165,12 +182,12 @@ export function CreatePostTravelForm({
         <form
           className="space-y-3 p-2 border-t pt-4 mb-4"
           id="post-travel-report-form"
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit(onSubmit, onInvalidSubmit)}
         >
           {isAddMode ? (
             <>
               {!programID && (
-                <ProgramDropdown
+                <AssignedProgramDropdown
                   onChange={(program) => form.setValue("program_id", program)}
                 />
               )}
@@ -187,9 +204,7 @@ export function CreatePostTravelForm({
                       .map((item) => item.destination)
                       .filter((dest) => dest && dest.trim() !== "")
                       .join(", ");
-                    if (destinations) {
-                      form.setValue("projects_places_visited", destinations);
-                    }
+                    form.setValue("projects_places_visited", destinations);
                   }
                 }}
               />
@@ -202,23 +217,17 @@ export function CreatePostTravelForm({
             <>
               <NonFormInput
                 label="Reporter Name:"
-                defaultValue={
-                  values?.travel_order?.user
-                    ? Array.isArray(values.travel_order.user)
-                      ? values.travel_order.user[0]?.fullname
-                      : values.travel_order.user?.fullname
-                    : userData?.user?.email
-                }
+                defaultValue={values?.fullname}
                 readOnly
               />
               <NonFormInput
                 label="Travel Order No:"
-                defaultValue={values?.travel_order?.travel_order_no}
+                defaultValue={values?.travel_order_no}
                 readOnly
               />
               <NonFormInput
                 label="Inclusive Date of Travel:"
-                defaultValue={values?.travel_date?.date}
+                defaultValue={inclusiveDates()}
                 readOnly
               />
             </>
@@ -229,7 +238,7 @@ export function CreatePostTravelForm({
             form={form}
             readOnly={!isAddMode}
           />
-          <FormInput
+          <FormTextarea
             label="Activities Undertaken:"
             name="activities_undertaken"
             form={form}
@@ -248,7 +257,9 @@ export function CreatePostTravelForm({
             label="Remarks:"
             name="remarks"
             form={form}
-            {...(values?.remarks ? { defaultValue: values?.remarks } : { noPlaceholder: true })}
+            {...(values?.remarks
+              ? { defaultValue: values?.remarks }
+              : { noPlaceholder: true })}
             readOnly={!isAddMode}
             noPlaceholder={!isAddMode}
           />
@@ -270,12 +281,12 @@ export function CreatePostTravelForm({
                   <Button
                     className="w-full"
                     onClick={() => {
-                      form.handleSubmit(onSubmit)();
+                      form.handleSubmit(onSubmit, onInvalidSubmit)();
                       closeModal();
                     }}
                   >
                     Confirm
-                  </Button>
+                  </Button>,
                 );
               }}
               size="sm"
@@ -300,7 +311,7 @@ export function CreatePostTravelForm({
 export function PostTravelForm({
   data,
 }: {
-  data: PostTravelReportType | null;
+  data: PostTravelWithDetails | null;
 }) {
-  return <CreatePostTravelForm isAddMode={false} values={data} />;
+  return <CreatePostTravelForm isAddMode={false} values={data ?? undefined} />;
 }

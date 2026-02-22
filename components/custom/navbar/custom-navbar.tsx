@@ -97,7 +97,7 @@ const ProgramDropdown = memo(
           </Button>
         </PopoverTrigger>
 
-        <PopoverContent align="start" className="m-1 p-0 w-[300px]">
+        <PopoverContent align="start" className="m-1 p-0 w-75">
           <Command>
             <CommandInput placeholder="Search programs..." />
             <CommandList>
@@ -193,7 +193,7 @@ const ProjectLocationDropdown = memo(
                   </Button>
                 </PopoverTrigger>
 
-                <PopoverContent align="start" className="m-1 p-0 w-[300px]">
+                <PopoverContent align="start" className="m-1 p-0 w-75">
                   <Command>
                     <CommandInput placeholder="Search projects..." />
                     <CommandList>
@@ -313,7 +313,7 @@ const ProjectDetailsBreadcrumb = memo(
           </Button>
         </PopoverTrigger>
 
-        <PopoverContent align="start" className="m-1 p-0 w-[300px]">
+        <PopoverContent align="start" className="m-1 p-0 w-75">
           <Command>
             <CommandInput placeholder="Search projects..." />
             <CommandList>
@@ -420,7 +420,7 @@ const UserProgramsDropdown = memo(function UserProgramsDropdown({
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent align="start" className="m-1 p-0 w-[300px]">
+      <PopoverContent align="start" className="m-1 p-0 w-75">
         <Command>
           <CommandInput placeholder="Search programs..." />
           <CommandList>
@@ -542,7 +542,7 @@ const UserProjectsDropdown = memo(function UserProjectsDropdown() {
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent align="start" className="m-1 p-0 w-[300px]">
+      <PopoverContent align="start" className="m-1 p-0 w-75">
         <Command>
           <CommandInput placeholder="Search projects..." />
           <CommandList>
@@ -667,14 +667,14 @@ export default function CustomNavbar({
   }, [pathname, projectID, programID, locationID]);
   console.log("isProjectLocationPage:", isProjectLocationPage);
 
-  const isProjectsListPage = useMemo(() => {
-    return (
-      pathname?.includes("/programs/") &&
-      pathname?.endsWith("/projects") &&
-      !projectID &&
-      !pathname?.startsWith("/field-technician/programs/")
-    );
-  }, [pathname, projectID]);
+  // const isProjectsListPage = useMemo(() => {
+  //   return (
+  //     pathname?.includes("/programs/") &&
+  //     pathname?.endsWith("/projects") &&
+  //     !projectID &&
+  //     !pathname?.startsWith("/field-technician/programs/")
+  //   );
+  // }, [pathname, projectID]);
 
   // Field technician route detection
   const isFieldTechnicianProgramsPage = useMemo(() => {
@@ -767,7 +767,7 @@ export default function CustomNavbar({
       <MobileNavbar />
       <nav className="bg-primary text-black w-screen flex items-center justify-between h-12 px-2 border-b z-50">
         <div className="flex items-center gap-4 overflow-x-auto">
-          <div className="flex items-center gap-2 min-w-max">
+          <div className="flex items-center justify-between gap-2 min-w-max">
             <Link href="/" className="hidden sm:inline cursor-pointer">
               <Image src="/logo.png" alt="app-logo" width={32} height={32} />
             </Link>
@@ -800,7 +800,7 @@ export default function CustomNavbar({
                     {currentProgram && (
                       <>
                         {/* Show "Projects" link when on projects list page */}
-                        {isProjectsListPage && (
+                        {/* {isProjectsListPage && (
                           <>
                             <BreadcrumbSeparator />
                             <Link
@@ -813,7 +813,7 @@ export default function CustomNavbar({
                               </span>
                             </Link>
                           </>
-                        )}
+                        )} */}
 
                         {/* Show project name when on project details page */}
                         {isProjectDetailsPage && projectID && (
@@ -825,7 +825,7 @@ export default function CustomNavbar({
                             >
                               <span className="w-50 flex items-center gap-2">
                                 <Box className="h-4 w-4 text-[#707070]" />
-                                Projects
+                                Project List
                               </span>
                             </Link>
                             <BreadcrumbSeparator />
@@ -847,7 +847,7 @@ export default function CustomNavbar({
                             >
                               <span className="w-37.5 flex items-center gap-2">
                                 <Box className="h-4 w-4 text-[#707070]" />
-                                Projects
+                                Project List
                               </span>
                             </Link>
                             <BreadcrumbSeparator />
@@ -883,7 +883,7 @@ export default function CustomNavbar({
                         >
                           <span className="w-37.5 flex items-center gap-2">
                             <Archive className="h-4 w-4 text-[#707070]" />
-                            Projects
+                            Project List
                           </span>
                         </Link>
                       </>

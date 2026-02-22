@@ -1,61 +1,15 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { PostTravelReportType } from "../../components/types";
 import { CheckUserAssignedToProgramAction } from "@/app/actions/AssignedProgramAction";
-
-// POST TRAVEL REPORT ACTIONS
-// UNUSED QUERY - Commented out
-// export async function SelectAllPostTravelReportsByTravelOrderIDAction(
-//   travelOrderID: string
-// ) {
-//   const supabase = await createClient(cookies());
-
-//   // Fetch all post travel reports for the given travel order
-//   const { data, error } = await supabase
-//     .from("post_travel")
-//     .select(
-//       `
-//       *,
-//       travel_order:travel_order(travel_order_no, user_id, user:user_profile!travel_order_user_id_fkey(fullname)),
-//       travel_date:travel_order_itinerary_items(date, end_date, destination)
-//     `
-//     )
-//     .eq("travel_order_id", travelOrderID)
-//     .order("created_at", { ascending: false });
-
-//   if (error) throw error;
-
-//   // Map signed URLs for photos
-//   const reportsWithExtras = await Promise.all(
-//     data.map(async (report) => {
-//       const signedPhotoUrls = report.photo_url
-//         ? await Promise.all(
-//             report.photo_url.map(async (path: string) => {
-//               const { data: signed } = await supabase.storage
-//                 .from("post-travel-reports")
-//                 .createSignedUrl(path, 60 * 60);
-//               return signed?.signedUrl ?? null;
-//             })
-//           )
-//         : [];
-
-//       return {
-//         ...report,
-//         photo_url: signedPhotoUrls.filter(Boolean),
-//       };
-//     })
-//   );
-
-//   return reportsWithExtras as PostTravelReportType[];
-// }
+import { PostTravelWithDetails } from "../types";
 
 export async function SelectAllPostTravelReportsByProgramIDAction(
-  programID: string
+  programID: string,
 ) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   // Fix: Filter directly on post_travel.program_id instead of through join
   // This ensures proper isolation between programs
@@ -71,7 +25,7 @@ export async function SelectAllPostTravelReportsByProgramIDAction(
         user:user_profile!travel_order_user_id_fkey(fullname, position)
       ),
       travel_date:travel_order_itinerary_items(date, end_date, destination)
-    `
+    `,
     )
     .eq("program_id", programID)
     .order("created_at", { ascending: false });
@@ -90,7 +44,7 @@ export async function SelectAllPostTravelReportsByProgramIDAction(
         .from("post-travel-reports")
         .createSignedUrl(path, 60 * 60);
       signedUrlMap.set(path, signed?.signedUrl ?? null);
-    })
+    }),
   );
 
   // Map signed URLs for photos
@@ -111,7 +65,7 @@ export async function SelectAllPostTravelReportsByProgramIDAction(
 }
 
 export async function SelectAllPostTravelReportsByCurrentUserAction() {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user) {
@@ -120,24 +74,16 @@ export async function SelectAllPostTravelReportsByCurrentUserAction() {
 
   // Fetch post travel reports for travel orders assigned to this user
   const { data, error } = await supabase
-    .from("post_travel")
-    .select(
-      `
-      *,
-      travel_order:travel_order!post_travel_travel_order_id_fkey(
-        travel_order_no,
-        user_id,
-        user:user_profile!travel_order_user_id_fkey(fullname)
-      ),
-      travel_date:travel_order_itinerary_items(date, end_date, destination)
-    `
-    )
-    .eq("travel_order.user_id", userData.user.id)
+    .from("post_travel_with_order")
+    .select(`*`)
+    .eq("user_id", userData.user.id)
     .order("created_at", { ascending: false });
 
   if (error) {
     throw error;
   }
+
+  console.log("Fetched post travel reports for current user:", data);
 
   // Optimize: Batch sign all photo URLs at once to avoid N+1
   const allPhotoUrls = data
@@ -151,7 +97,7 @@ export async function SelectAllPostTravelReportsByCurrentUserAction() {
         .from("post-travel-reports")
         .createSignedUrl(path, 60 * 60);
       signedUrlMap.set(path, signed?.signedUrl ?? null);
-    })
+    }),
   );
 
   // Resolve signed image URLs
@@ -168,7 +114,7 @@ export async function SelectAllPostTravelReportsByCurrentUserAction() {
     };
   });
 
-  return reportsWithExtras as PostTravelReportType[];
+  return reportsWithExtras as PostTravelWithDetails[];
 }
 
 export async function InsertPostTravelReportAction({
@@ -181,7 +127,7 @@ export async function InsertPostTravelReportAction({
   remarks,
   images,
 }: PostTravelReportType & { images?: { file: File }[] }) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   // Auth check
   const {
@@ -195,7 +141,9 @@ export async function InsertPostTravelReportAction({
   }
   const isAssigned = await CheckUserAssignedToProgramAction(program_id);
   if (!isAssigned) {
-    throw new Error("You are not assigned to this program. Please contact your administrator.");
+    throw new Error(
+      "You are not assigned to this program. Please contact your administrator.",
+    );
   }
 
   // Upload images to Supabase Storage only if images are provided
@@ -222,7 +170,7 @@ export async function InsertPostTravelReportAction({
         if (error) throw error;
 
         return filePath;
-      })
+      }),
     );
   }
 
@@ -248,14 +196,14 @@ export async function InsertPostTravelReportAction({
   // Log the activity
   await InsertActivityLogAction(
     "Submitted a Post Travel Report",
-    `Post travel report submitted for travel order ${data.travel_order.travel_order_no}.`
+    `Post travel report submitted for travel order ${data.travel_order.travel_order_no}.`,
   );
 
   return;
 }
 
 export async function ReviewPostTravelAction(postTravelID: string) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   // Get the current user
   const { data: userData, error: userError } = await supabase.auth.getUser();
@@ -275,7 +223,7 @@ export async function ReviewPostTravelAction(postTravelID: string) {
       `
       *,
       travel_order(travel_order_no)
-    `
+    `,
     )
     .single();
 
@@ -287,7 +235,7 @@ export async function ReviewPostTravelAction(postTravelID: string) {
   // Log the activity
   await InsertActivityLogAction(
     "Reviewed a Post Travel Report",
-    `Reviewed a Post travel report submitted for travel order ${travelOrderNo}.`
+    `Reviewed a Post travel report submitted for travel order ${travelOrderNo}.`,
   );
 
   return;

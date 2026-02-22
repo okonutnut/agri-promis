@@ -18,21 +18,23 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
-import { SelectAllProgramsAction } from "@/app/actions/ProgramAction";
 import { ProgramType } from "@/components/types";
 import { Label } from "@/components/ui/label";
+import { SelectAllProgramsAssignedToCurrentUserAction } from "@/app/actions/AssignedProgramAction";
 
-interface ProgramDropdownProps {
+interface AssignedProgramDropdownProps {
   onChange?: (program: string) => void;
 }
 
-export default function ProgramDropdown({ onChange }: ProgramDropdownProps) {
+export default function AssignedProgramDropdown({
+  onChange,
+}: AssignedProgramDropdownProps) {
   const [program, setProgram] = useState<string>("");
   const [openProgram, setOpenProgram] = useState(false);
 
   const { data, isLoading, error } = useRealtimeQuery({
-    queryKey: ["programs"],
-    queryFn: async () => SelectAllProgramsAction(),
+    queryKey: ["programs_assigned"],
+    queryFn: async () => SelectAllProgramsAssignedToCurrentUserAction(),
     table: "programs",
   });
 
@@ -46,7 +48,7 @@ export default function ProgramDropdown({ onChange }: ProgramDropdownProps) {
   return (
     <>
       <Label className="capitalize mb-1 block text-sm font-semibold">
-        Banner Program:
+        Program:
       </Label>
       <Popover open={openProgram} onOpenChange={setOpenProgram}>
         <PopoverTrigger asChild>
@@ -78,7 +80,9 @@ export default function ProgramDropdown({ onChange }: ProgramDropdownProps) {
                     <Check
                       className={cn(
                         "mr-2 h-4 w-4",
-                        program === p.program_name ? "opacity-100" : "opacity-0"
+                        program === p.program_name
+                          ? "opacity-100"
+                          : "opacity-0",
                       )}
                     />
                     {p.program_name}

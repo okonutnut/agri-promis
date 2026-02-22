@@ -1,7 +1,6 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { AssignedProjectsType } from "../../components/types";
 import { sendNotificationToUser } from "./NotificationAction";
@@ -11,7 +10,7 @@ export async function InsertFieldTechniciansToProjectAction(
   technicianIDs: string[],
   projectLocationID: string,
 ) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   // Get project & project name
   const { data: projectLoc, error: locError } = await supabase
@@ -87,7 +86,7 @@ export async function DeleteFieldTechnicianFromProjectAction(
   user_id: string,
   project_id: string,
 ) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   // Delete the specific assignment
   const { error: deleteError } = await supabase
@@ -141,7 +140,7 @@ export async function DeleteFieldTechnicianFromProjectAction(
 export async function SelectAllFieldTechniciansByProjectIDAction(
   projectID: string,
 ) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("assigned_projects")
     .select("*, project_location (*), user_profile (fullname, position)")
@@ -156,7 +155,7 @@ export async function SelectAllFieldTechniciansByProjectIDAction(
 }
 
 export async function SelectAllAssignedProjectsByFieldTechnicianIDAction() {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError) throw userError;
 

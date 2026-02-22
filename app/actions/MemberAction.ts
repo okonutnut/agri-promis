@@ -1,15 +1,17 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { UserProfileType } from "../../components/types";
-import { sendNotificationToAll, sendNotificationToUser } from "./NotificationAction";
+import {
+  sendNotificationToAll,
+  sendNotificationToUser,
+} from "./NotificationAction";
 
 // MEMBERS ACTIONS
 
 export async function InsertMemberAction(data: UserProfileType) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   const { data: authData, error: authError } =
     await supabase.auth.admin.createUser({
@@ -41,7 +43,7 @@ export async function InsertMemberAction(data: UserProfileType) {
   // Log the activity
   await InsertActivityLogAction(
     "Added a Member",
-    `New member added: ${data.fullname}.`
+    `New member added: ${data.fullname}.`,
   );
 
   // Send Notification
@@ -52,9 +54,9 @@ export async function InsertMemberAction(data: UserProfileType) {
 
 export async function UpdateMemberAction(
   userId: string,
-  data: Partial<UserProfileType>
+  data: Partial<UserProfileType>,
 ) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   const { error: userError } = await supabase
     .from("user_profile")
@@ -76,7 +78,7 @@ export async function UpdateMemberAction(
           name: data.fullname,
           role: data.role,
         },
-      }
+      },
     );
 
     if (authError) {
@@ -87,23 +89,20 @@ export async function UpdateMemberAction(
   // Log the activity
   await InsertActivityLogAction(
     "Updated a Member",
-    `Member ${data.fullname?.toString()} updated.`
+    `Member ${data.fullname?.toString()} updated.`,
   );
 
   // Send Notification
-  await sendNotificationToUser(
-    `Your member profile has been updated.`,
-    userId
-  );
+  await sendNotificationToUser(`Your member profile has been updated.`, userId);
 
   return;
 }
 
 export async function UpdateActiveStatusMemberAction(
   userId: string,
-  status: number
+  status: number,
 ) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   const { data, error: userError } = await supabase
     .from("user_profile")
@@ -123,7 +122,7 @@ export async function UpdateActiveStatusMemberAction(
       user_metadata: {
         active_status: status,
       },
-    }
+    },
   );
 
   if (authError) {
@@ -135,7 +134,7 @@ export async function UpdateActiveStatusMemberAction(
     "Updated Member Status",
     `Member ${data.fullname?.toString()} status updated to ${
       status === 0 ? "Inactive" : "Active"
-    }.`
+    }.`,
   );
 
   // Send NOtification
@@ -143,14 +142,14 @@ export async function UpdateActiveStatusMemberAction(
     `Your member profile status has been updated to ${
       status === 0 ? "Inactive" : "Active"
     }.`,
-    userId
+    userId,
   );
 
   return;
 }
 
 export async function SelectAllMembersAction() {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("user_profile")
@@ -162,7 +161,7 @@ export async function SelectAllMembersAction() {
         *,
         programs (*, projects(count))
       )
-    `
+    `,
     )
     .order("created_at", { ascending: false });
 
@@ -184,9 +183,8 @@ export async function SelectAllMembersAction() {
   })) as (UserProfileType & { program_ids: string[] })[];
 }
 
-
 export async function SelectAllMembersByRoleAction(role: number) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("user_profile")
@@ -207,7 +205,7 @@ export async function SelectAllMembersByRoleAction(role: number) {
   const emailMap = new Map(
     (userData?.users ?? [])
       .filter((user) => userIds.includes(user.id))
-      .map((user) => [user.id, user.email])
+      .map((user) => [user.id, user.email]),
   );
 
   const result = data?.map((item) => ({

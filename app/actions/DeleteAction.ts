@@ -1,7 +1,6 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
 
 type SoftDeleteActionProps = {
   tableName: string;
@@ -11,7 +10,7 @@ export async function SoftDeleteAction({
   tableName,
   recordId,
 }: SoftDeleteActionProps) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const userID = (await supabase.auth.getUser()).data.user?.id;
 
   console.log("Soft deleting record:", {

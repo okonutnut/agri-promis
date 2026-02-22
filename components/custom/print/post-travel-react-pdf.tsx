@@ -1,6 +1,6 @@
 import { Document, Page, Text, View, Font, Image } from "@react-pdf/renderer";
-import { PostTravelReportType } from "@/components/types";
 import { format } from "date-fns";
+import { PostTravelWithDetails } from "@/app/types";
 
 // Constants
 const DEFAULT_DOCUMENT_CODE = "DARFO2.FOD.271";
@@ -576,7 +576,14 @@ type PhotoDocumentPageProps = {
   preparedByRole?: string;
   photoUrls?: string[];
 };
-const PhotoDocumentPage = ({ projectTitle, location, iccFcaLguName, preparedBy, preparedByRole, photoUrls }: PhotoDocumentPageProps) => (
+const PhotoDocumentPage = ({
+  projectTitle,
+  location,
+  iccFcaLguName,
+  preparedBy,
+  preparedByRole,
+  photoUrls,
+}: PhotoDocumentPageProps) => (
   <Page
     size="FOLIO"
     orientation="landscape"
@@ -619,11 +626,26 @@ const PhotoDocumentPage = ({ projectTitle, location, iccFcaLguName, preparedBy, 
           flexDirection: "row",
         }}
       >
-        {photoUrls && photoUrls.map((url, index) => (
-          <View key={index} style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", borderRightWidth: "1", padding: 5 }}>
-            <Image src={url} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
-          </View>
-        ))}
+        {photoUrls &&
+          photoUrls.map((url, index) => (
+            <View
+              key={index}
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                borderRightWidth: "1",
+                padding: 5,
+              }}
+            >
+              <Image
+                src={url}
+                style={{ width: "100%", height: "100%", objectFit: "contain" }}
+              />
+            </View>
+          ))}
       </View>
     </View>
 
@@ -643,7 +665,9 @@ const PhotoDocumentPage = ({ projectTitle, location, iccFcaLguName, preparedBy, 
       <Text style={{ width: 394, borderRightWidth: 1, padding: 1 }}>
         Location: {location?.toUpperCase() || ""}
       </Text>
-      <Text style={{ flex: 1, padding: 1 }}>ICC/FCA/LGU Name: {iccFcaLguName?.toUpperCase() || ""}</Text>
+      <Text style={{ flex: 1, padding: 1 }}>
+        ICC/FCA/LGU Name: {iccFcaLguName?.toUpperCase() || ""}
+      </Text>
     </View>
 
     {/* EMPTY LINE */}
@@ -787,22 +811,16 @@ const PhotoDocumentPage = ({ projectTitle, location, iccFcaLguName, preparedBy, 
 
 // Main component
 type PostTravelReactPDFProps = {
-  data: PostTravelReportType;
+  data: PostTravelWithDetails;
 };
 export default function PostTravelReactPDF({ data }: PostTravelReactPDFProps) {
-  // Format travel dates
-  const formatTravelDates = (): string => {
-    if (!data.travel_date?.date) return "";
-
-    const startDate = format(new Date(data.travel_date.date), "PP");
-    const endDate = data.travel_date.end_date
-      ? format(new Date(data.travel_date.end_date), "PP")
-      : null;
-
-    return endDate ? `${startDate} - ${endDate}` : startDate;
+  const inclusiveDates = () => {
+    if (!data?.date) return "N/A";
+    const startDate = format(new Date(data.date), "MMM d, yyyy");
+    if (!data.end_date) return startDate;
+    const endDate = format(new Date(data.end_date), "MMM d, yyyy");
+    return `${startDate} - ${endDate}`;
   };
-
-  const inclusiveDates = formatTravelDates();
   const issuesConcerns = Array.isArray(data.issues_concern)
     ? data.issues_concern.join("\n")
     : data.issues_concern || "";
@@ -837,29 +855,27 @@ export default function PostTravelReactPDF({ data }: PostTravelReactPDFProps) {
           POST TRAVEL REPORT
         </Text>
         <MainTable
-          travelOrderNo={data.travel_order?.travel_order_no || ""}
-          inclusiveDates={inclusiveDates}
+          travelOrderNo={data?.travel_order_no || ""}
+          inclusiveDates={inclusiveDates()}
           projectPlacesVisited={data.projects_places_visited || ""}
           activitiesUndertaken={data.activities_undertaken || ""}
           issuesConcerns={issuesConcerns}
           remarksRecommendation={data.remarks || ""}
         />
         <SignatureSection
-          preparedBy={
-            data.travel_order?.user?.fullname || data.user?.fullname || ""
-          }
-          preparedByRole={data.travel_order?.user?.position || ""}
+          preparedBy={data.fullname || data.fullname || ""}
+          preparedByRole={data?.position || ""}
         />
       </Page>
 
       {/* Photo Document Page */}
-      {(data.photo_url && data.photo_url.length > 0) && (
-        <PhotoDocumentPage 
-          projectTitle={""} 
-          location={data.travel_date?.destination || ""} 
-          iccFcaLguName={""} 
-          preparedBy={data.travel_order?.user?.fullname || data.user?.fullname || ""} 
-          preparedByRole={data.travel_order?.user?.position || ""}
+      {data.photo_url && data.photo_url.length > 0 && (
+        <PhotoDocumentPage
+          projectTitle={""}
+          location={data?.destination || ""}
+          iccFcaLguName={""}
+          preparedBy={data.fullname || data.fullname || ""}
+          preparedByRole={data?.position || ""}
           photoUrls={data.photo_url || []}
         />
       )}

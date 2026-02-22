@@ -1,13 +1,8 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
-import {
-  ProgramType,
-  ProjectType,
-  UserProfileType,
-} from "../../components/types";
+import { ProgramType, UserProfileType } from "../../components/types";
 import { sendNotificationToAll } from "./NotificationAction";
 
 // PROGRAM ACTIONS
@@ -15,7 +10,7 @@ export async function InsertProgramAction({
   program_name,
   description,
 }: ProgramType) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const userId = (await supabase.auth.getUser()).data.user?.id;
   const { data, error } = await supabase
     .from("programs")
@@ -51,7 +46,7 @@ export async function EditProgramNameAction({
   description,
   deleted_at,
 }: ProgramType) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("programs")
@@ -77,7 +72,7 @@ export async function EditProgramNameAction({
 }
 
 export async function SelectProgramByIdAction(programId: string) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("programs")
     .select("*")
@@ -92,7 +87,7 @@ export async function SelectProgramByIdAction(programId: string) {
 }
 
 export async function SelectAllProgramsByAgriculturistAction() {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user?.id) throw userError;
@@ -113,7 +108,7 @@ export async function SelectAllProgramsByAgriculturistAction() {
 }
 
 export async function SelectAllProgramsByUserIDAction(userID: string) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user?.id) {
@@ -134,7 +129,7 @@ export async function SelectAllProgramsByUserIDAction(userID: string) {
 }
 
 export async function DeleteProgramAction(programID: string) {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
 
   // Get program details for logging
   const { data: programData, error: programError } = await supabase
@@ -172,7 +167,7 @@ export async function DeleteProgramAction(programID: string) {
 }
 
 export async function SelectAllProgramsAction() {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("programs")
     .select(
@@ -195,7 +190,7 @@ export async function SelectAllProgramsAction() {
 export async function SelectUserByProgramAssignedAction(programId?: string) {
   if (programId === "all") return [];
 
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData?.user?.id) {
@@ -225,7 +220,7 @@ export async function SelectUserByProgramAssignedAction(programId?: string) {
 }
 
 export async function SelectAllProgramsWithProjectsAction() {
-  const supabase = await createClient(cookies());
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("programs")
     .select(
