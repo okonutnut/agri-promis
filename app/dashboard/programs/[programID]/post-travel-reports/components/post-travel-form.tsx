@@ -75,14 +75,14 @@ export function PostTravelForm({ data }: PostTravelFormProps) {
             defaultValue={inclusiveDates()}
             readOnly
           />
-          <NonFormInput
+          <NonFormTextarea
             label="Projects Places Visited:"
-            defaultValue={data.projects_places_visited}
+            value={data?.projects_places_visited}
             readOnly
           />
-          <NonFormInput
+          <NonFormTextarea
             label="Activities Undertaken:"
-            defaultValue={data.activities_undertaken}
+            value={data?.activities_undertaken}
             readOnly
           />
           <NonFormMultiInput
@@ -94,7 +94,7 @@ export function PostTravelForm({ data }: PostTravelFormProps) {
           <NonFormTextarea
             label="Remarks:"
             noPlaceholder={!!data}
-            props={{ defaultValue: data?.remarks }}
+            value={data?.remarks}
             readOnly
           />
         </div>

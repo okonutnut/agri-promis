@@ -15,8 +15,9 @@ import FormTextarea from "@/components/custom/input/form-textarea";
 import FCASelector from "@/components/custom/dropdown/fca-selector";
 import { useParams } from "next/navigation";
 import { useUniversalMutation } from "@/hooks/use-universal-mutation";
-import { EditProjectAction } from "@/app/actions/ProjectAction";
 import { toast } from "sonner";
+import { EditProjectLocationAction } from "@/app/actions/ProjectLocationAction";
+import { Spinner } from "@/components/ui/spinner";
 
 const formSchema = z.object({
   id: z.string().min(1, "Project ID is required"),
@@ -56,10 +57,9 @@ export default function EditProjectNameForm({
     },
   });
 
-  // const { mutate, isPending } = useEditProjectHook();
   const { mutate, isPending } = useUniversalMutation({
     mutationFn: async (data: FormSchemaType) =>
-      await EditProjectAction({
+      await EditProjectLocationAction({
         id: data.id,
         description: data.description,
         progress_indicator: data.progress_indicator,
@@ -67,16 +67,14 @@ export default function EditProjectNameForm({
         total_alloted_area: data.total_alloted_area,
         status: data.status,
       }),
+    onSuccess: () => {
+      toast.success("Project updated successfully");
+    },
+    onError: () => {
+      toast.error("Error updating project");
+    },
   });
-  const handleSubmit = (data: FormSchemaType) =>
-    mutate(data, {
-      onSuccess: () => {
-        toast.success("Project updated successfully");
-      },
-      onError: () => {
-        toast.error("Error updating project");
-      },
-    });
+  const handleSubmit = (data: FormSchemaType) => mutate(data);
 
   return (
     <Card className="rounded-md shadow-xs mb-4">
@@ -138,26 +136,20 @@ export default function EditProjectNameForm({
       </form>
       <CardFooter className="w-full justify-end border-t mt-4 p-2">
         <Button
-          onClick={() =>
-            openModal(
-              "Attention",
-              "Are you sure you want to save changes to this project?",
-              <Button
-                onClick={() => {
-                  form.handleSubmit(handleSubmit)();
-                  closeModal();
-                }}
-                className="w-full"
-              >
-                Confirm
-              </Button>,
-            )
-          }
+          onClick={() => {
+            form.handleSubmit(handleSubmit)();
+          }}
           size={"sm"}
           variant={isPending ? "ghost" : "default"}
           disabled={isPending}
         >
-          {isPending ? <Loader2 className="animate-spin" /> : "Save Changes"}
+          {isPending ? (
+            <>
+              <Spinner /> Saving...
+            </>
+          ) : (
+            "Save Changes"
+          )}
         </Button>
       </CardFooter>
     </Card>

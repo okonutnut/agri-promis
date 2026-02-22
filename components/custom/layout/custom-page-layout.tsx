@@ -46,7 +46,7 @@ interface SheetContextType {
   openSheet: (
     title: string,
     content: ReactNode,
-    footer?: () => ReactNode
+    footer?: () => ReactNode,
   ) => void;
   closeSheet: () => void;
 
@@ -82,7 +82,7 @@ interface DisabledContextType {
 }
 
 const DisabledContext = createContext<DisabledContextType | undefined>(
-  undefined
+  undefined,
 );
 
 // -------------------- Custom Hooks --------------------
@@ -167,7 +167,7 @@ export default function CustomPageLayout({
       if (location) {
         await UpdateUserCurrentLocationAction(
           location.lat.toString(),
-          location.lng.toString()
+          location.lng.toString(),
         );
       }
     }
@@ -198,7 +198,7 @@ export default function CustomPageLayout({
   const openSheet = (
     title: string,
     content: ReactNode,
-    footer?: () => ReactNode
+    footer?: () => ReactNode,
   ) => {
     setFooterRenderer(footer ?? null);
     setSheetState({
@@ -245,7 +245,7 @@ export default function CustomPageLayout({
     (title: string, description: string, content: ReactNode) => {
       setModalState({ isOpen: true, title, description, content });
     },
-    []
+    [],
   );
 
   const closeModal = useCallback(() => {
@@ -300,7 +300,7 @@ export default function CustomPageLayout({
             <section className="w-full h-screen flex flex-col relative text-sm overflow-hidden">
               {error &&
                 toast.error(
-                  `Error: ${error.message || "An unexpected error occurred"}`
+                  `Error: ${error.message || "An unexpected error occurred"}`,
                 )}
               <CustomNavbar
                 navItems={navItems || []}
@@ -314,7 +314,7 @@ export default function CustomPageLayout({
                   <div
                     className={cn(
                       "px-2 h-full flex flex-col overflow-y-auto",
-                      className
+                      className,
                     )}
                   >
                     <div className="flex-1 py-4">
@@ -346,7 +346,7 @@ export default function CustomPageLayout({
               {/* Global Sheet */}
               <Sheet open={sheetState.isOpen} onOpenChange={closeSheet}>
                 <SheetContent
-                  className="md:min-w-[700px] w-screen flex flex-col gap-0 h-full"
+                  className="md:min-w-125 w-screen flex flex-col gap-0 h-full"
                   onInteractOutside={(e) => e.preventDefault()}
                 >
                   <SheetHeader className="border-b p-2">

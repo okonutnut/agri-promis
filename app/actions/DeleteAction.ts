@@ -11,13 +11,6 @@ export async function SoftDeleteAction({
   recordId,
 }: SoftDeleteActionProps) {
   const supabase = await createClient();
-  const userID = (await supabase.auth.getUser()).data.user?.id;
-
-  console.log("Soft deleting record:", {
-    tableName,
-    recordId,
-    user: userID,
-  });
 
   const { error } = await supabase
     .from(`${tableName}`)

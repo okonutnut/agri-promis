@@ -23,6 +23,7 @@ import { InsertTravelOrderAction } from "@/app/actions/TravelOrderAction";
 import { toast } from "sonner";
 import { CustomTabList } from "@/components/custom/layout/custom-tab-list";
 import { SoftDeleteAction } from "@/app/actions/DeleteAction";
+import { Spinner } from "@/components/ui/spinner";
 
 const formSchema = z
   .object({
@@ -124,10 +125,16 @@ export default function IssueTravelOrderForm({
           recordId: data.recordId,
         }),
       invalidateKeys: ["travel_order", programID as string],
+      onSuccess: () => {
+        toast.success("Travel order deleted successfully.");
+        closeSheet();
+      },
+      onError: () => {
+        toast.error("Failed to delete travel order. Please try again.");
+      },
     });
 
   const onSubmit = (data: TravelOrderSchema) => {
-    // Ensure itinerary has at least one entry
     if (!data.travel_itinerary || data.travel_itinerary.length === 0) {
       toast.error("At least one itinerary entry is required.");
       return;
@@ -145,21 +152,10 @@ export default function IssueTravelOrderForm({
   };
 
   const onDelete = () => {
-    deleteTravelOrder(
-      {
-        table: "travel_order",
-        recordId: values?.id || "",
-      },
-      {
-        onSuccess: () => {
-          toast.success("Travel order deleted successfully.");
-          closeSheet();
-        },
-        onError: () => {
-          toast.error("Failed to delete travel order. Please try again.");
-        },
-      },
-    );
+    deleteTravelOrder({
+      table: "travel_order",
+      recordId: values?.id || "",
+    });
   };
 
   const [itinerary, setItinerary] = useState<TravelOrderProjectsType[]>(
@@ -342,7 +338,9 @@ export default function IssueTravelOrderForm({
             }}
           >
             {isDeletePending ? (
-              <Loader2 className="animate-spin" />
+              <>
+                <Spinner /> Deleting...
+              </>
             ) : (
               <>
                 <Trash className="text-red-500 mr-2" /> Delete

@@ -86,3 +86,53 @@ export default async function SelectProjectLocationDetailsByIDAction(
 
   return data;
 }
+
+export async function EditProjectLocationAction(data: ProjectLocationType) {
+  const supabase = await createClient();
+
+  // Step 1: Get project_location details first
+  const { data: projectLocation, error: plError } = await supabase
+    .from("project_location")
+    .select("project_id")
+    .eq("id", data.id)
+    .single();
+
+  if (plError) throw plError;
+
+  // Step 2: Get parent project info
+  const { data: project, error: projectError } = await supabase
+    .from("projects")
+    .select("project_name")
+    .eq("id", projectLocation.project_id)
+    .single();
+
+  if (projectError) throw projectError;
+
+  // Step 3: Update project_location
+  const { error } = await supabase
+    .from("project_location")
+    .update({
+      description: data.description,
+      progress_indicator: data.progress_indicator,
+      status: data.status,
+      fca_ids: data.fca_ids,
+      total_alloted_area: data.total_alloted_area,
+    })
+    .eq("id", data.id);
+
+  if (error) throw error;
+
+  // Step 4: Log activity
+  await InsertActivityLogAction(
+    "Updated Project",
+    `Project ${project.project_name} details have been updated successfully.`,
+    data.id,
+  );
+
+  // Step 5: Notify all
+  await sendNotificationToAll(
+    `Project ${project.project_name} details have been updated successfully.`,
+  );
+
+  return;
+}

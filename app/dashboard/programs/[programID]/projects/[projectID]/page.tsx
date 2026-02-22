@@ -18,7 +18,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { format } from "date-fns";
 
 export default function ProjectDetailsPage() {
   const { programID, projectID } = useParams();
@@ -29,8 +28,6 @@ export default function ProjectDetailsPage() {
     queryKey: ["project-dashboard-items", projectID as string],
     tables: ["projects", "monitoring", "farmers"],
   });
-
-  console.log("Project Dashboard Data:", data);
 
   return (
     <CustomPageLayout
@@ -66,7 +63,7 @@ export default function ProjectDetailsPage() {
           <strong className="text-4xl">{data?.fcaCount || 0}</strong>
         </SummaryCard>
       </div>
-      <div className="grid grid-cols-2 gap-4 min-h-[60vh]">
+      <div className="grid grid-cols-2 gap-4 min-h-[50vh]">
         {/* UNREVIEWED MONITORING REPORTS */}
         <Card className="col-span-full p-0 rounded-md gap-0">
           <span className="p-2 text-lg font-semibold">
@@ -75,10 +72,10 @@ export default function ProjectDetailsPage() {
           <Table className="table-fixed">
             <TableHeader>
               <TableRow>
-                <TableHead className="w-30">Travel Order No</TableHead>
+                <TableHead className="w-12 font-medium">#</TableHead>
+                <TableHead className="w-35">Travel Order No</TableHead>
                 <TableHead className="flex-1">Fullname</TableHead>
                 <TableHead className="flex-1">Purpose</TableHead>
-                <TableHead className="flex-1">Date Created</TableHead>
                 <TableHead className="w-28 text-end">Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -92,6 +89,7 @@ export default function ProjectDetailsPage() {
               ) : (
                 data?.unreviewedMonitoringReports.map((report, index) => (
                   <TableRow key={index}>
+                    <TableCell className="font-medium">{index + 1}</TableCell>
                     <TableCell className="font-medium">
                       {report.travel_order_no}
                     </TableCell>
@@ -100,9 +98,6 @@ export default function ProjectDetailsPage() {
                     </TableCell>
                     <TableCell className="truncate">
                       {report.purpose || "No purpose provided"}
-                    </TableCell>
-                    <TableCell>
-                      {format(new Date(report.created_at), "PP")}
                     </TableCell>
                     <TableCell className="text-right">
                       <Link
@@ -117,36 +112,6 @@ export default function ProjectDetailsPage() {
                   </TableRow>
                 ))
               )}
-            </TableBody>
-          </Table>
-        </Card>
-
-        {/* ACTIVITY LOGS */}
-        <Card className="col-span-full p-0 rounded-md gap-0">
-          <span className="p-2 text-lg font-semibold">Activity Logs</span>
-          <Table className="table-fixed">
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-10">#</TableHead>
-                <TableHead className="w-50">Fullname</TableHead>
-                <TableHead className="flex-1">Activity</TableHead>
-                <TableHead className="w-24 text-end">Date</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow>
-                <TableCell className="font-medium">1</TableCell>
-                <TableCell>Darlito Dela Cruz Cabalse Jr</TableCell>
-                <TableCell className="truncate">
-                  Lorem ipsum dolor sit amet consectetur, adipisicing elit. Esse
-                  vel eius excepturi corporis, sapiente eligendi vero omnis
-                  accusamus laboriosam earum sed alias ex sunt dolor quae odio
-                  animi! Natus, et?
-                </TableCell>
-                <TableCell className="text-right">
-                  {format(new Date(), "PP")}
-                </TableCell>
-              </TableRow>
             </TableBody>
           </Table>
         </Card>

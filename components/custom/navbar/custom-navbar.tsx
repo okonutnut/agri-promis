@@ -813,7 +813,6 @@ export default function CustomNavbar({
       !projectID
     );
   }, [pathname, projectID, programID, locationID]);
-  console.log("isProjectLocationPage:", isProjectLocationPage);
 
   // const isProjectsListPage = useMemo(() => {
   //   return (
@@ -873,7 +872,6 @@ export default function CustomNavbar({
     const hasLocationInPath = pathname.includes("/location/");
     if (!hasLocationInPath) return false;
     const pathParts = pathname.split("/").filter(Boolean);
-    console.log(pathParts);
     return (
       (pathParts.length === 5 || pathParts.length === 6) &&
       pathParts[0] === "field-technician" &&
@@ -967,16 +965,6 @@ export default function CustomNavbar({
                         {isProjectDetailsPage && projectID && (
                           <>
                             <BreadcrumbSeparator />
-                            <Link
-                              href={`/dashboard/programs/${currentProgram.id}/projects`}
-                              className="text-black whitespace-nowrap"
-                            >
-                              <span className="w-50 flex items-center gap-2">
-                                <Box className="h-4 w-4 text-[#707070]" />
-                                Project List
-                              </span>
-                            </Link>
-                            <BreadcrumbSeparator />
                             <ProjectDetailsBreadcrumb
                               program={currentProgram}
                               projectID={projectID as string}
@@ -988,16 +976,6 @@ export default function CustomNavbar({
                         {/* Show project location when on project location page */}
                         {isProjectLocationPage && locationID && (
                           <>
-                            <BreadcrumbSeparator />
-                            <Link
-                              href={`/dashboard/programs/${currentProgram.id}/projects`}
-                              className="text-black whitespace-nowrap"
-                            >
-                              <span className="w-37.5 flex items-center gap-2">
-                                <Box className="h-4 w-4 text-[#707070]" />
-                                Project List
-                              </span>
-                            </Link>
                             <BreadcrumbSeparator />
                             <ProjectLocationDropdown
                               program={currentProgram}

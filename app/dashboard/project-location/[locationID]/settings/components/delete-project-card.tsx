@@ -12,11 +12,13 @@ import { toast } from "sonner";
 import { SoftDeleteAction } from "@/app/actions/DeleteAction";
 import { useRouter } from "next/navigation";
 
-type DeleteProjectCardProps = {
+type DeleteProjectLocationCardProps = {
   data: ProjectLocationType;
 };
 
-export default function DeleteProjectCard({ data }: DeleteProjectCardProps) {
+export default function DeleteProjectLocationCard({
+  data,
+}: DeleteProjectLocationCardProps) {
   const { openModal, closeModal } = useModal();
   const router = useRouter();
 
@@ -24,11 +26,13 @@ export default function DeleteProjectCard({ data }: DeleteProjectCardProps) {
     mutationFn: async (data: { tableName: string; recordId: string }) =>
       await SoftDeleteAction(data),
     onSuccess: () => {
-      toast.success("Project deleted successfully.");
-      router.replace(`/dashboard/programs/${data.projects?.program_id}`);
+      toast.success("Location deleted successfully.");
+      router.replace(
+        `/dashboard/programs/${data.projects?.program_id}/projects/${data.project_id}/locations`,
+      );
     },
     onError: () => {
-      toast.error(`Error deleting project. Please try again.`);
+      toast.error(`Error deleting location. Please try again.`);
     },
   });
 
@@ -55,6 +59,7 @@ export default function DeleteProjectCard({ data }: DeleteProjectCardProps) {
         />
         <Button
           className="w-full"
+          size="sm"
           variant={"destructive"}
           onClick={onConfirm}
           disabled={!confirm || isPending}
@@ -70,7 +75,7 @@ export default function DeleteProjectCard({ data }: DeleteProjectCardProps) {
       "Attention",
       "Are you sure you want to delete this project? This action cannot be undone.",
       <DeleteModalContent
-        projectName={`${data.projects?.project_name}`}
+        projectName={`${data.location}`}
         onConfirm={() => {
           mutate({
             tableName: "project_location",

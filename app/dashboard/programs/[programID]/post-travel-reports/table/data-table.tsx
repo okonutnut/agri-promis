@@ -64,7 +64,6 @@ export function DataTable<TData, TValue>({
           className="w-full max-w-md"
         />
         <Button onClick={onAdd} size="sm">
-          <Plus className="mr-2 h-4 w-4" />
           Create New
         </Button>
       </div>
@@ -82,7 +81,7 @@ export function DataTable<TData, TValue>({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );
@@ -103,7 +102,7 @@ export function DataTable<TData, TValue>({
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}

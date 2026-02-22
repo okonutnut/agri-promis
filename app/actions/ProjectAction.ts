@@ -2,7 +2,7 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
-import { ProjectType, ProjectLocationType } from "../../components/types";
+import { ProjectType } from "../../components/types";
 import { sendNotificationToAll } from "./NotificationAction";
 
 // PROJECT ACTIONS
@@ -159,51 +159,37 @@ export async function SelectProjectDetailsByProjectLocationIDAction(
   return data;
 }
 
-export async function EditProjectAction(data: ProjectLocationType) {
+export async function EditProjectAction(data: ProjectType) {
   const supabase = await createClient();
 
-  // Step 1: Get project_location details first
-  const { data: projectLocation, error: plError } = await supabase
-    .from("project_location")
-    .select("project_id")
-    .eq("id", data.id)
-    .single();
-
-  if (plError) throw plError;
-
-  // Step 2: Get parent project info
+  // Step 1: Get parent project info
   const { data: project, error: projectError } = await supabase
     .from("projects")
     .select("project_name")
-    .eq("id", projectLocation.project_id)
+    .eq("id", data.id)
     .single();
-
   if (projectError) throw projectError;
 
-  // Step 3: Update project_location
+  // Step 2: Update project details
   const { error } = await supabase
-    .from("project_location")
+    .from("projects")
     .update({
+      project_name: data.project_name,
       description: data.description,
-      progress_indicator: data.progress_indicator,
-      status: data.status,
-      fca_ids: data.fca_ids,
-      total_alloted_area: data.total_alloted_area,
     })
     .eq("id", data.id);
-
   if (error) throw error;
 
-  // Step 4: Log activity
+  // Step 3: Log activity
   await InsertActivityLogAction(
     "Updated Project",
-    `Project ${project.project_name} details have been updated successfully.`,
+    `Project ${data.project_name} has been updated to ${project.project_name}.`,
     data.id,
   );
 
   // Step 5: Notify all
   await sendNotificationToAll(
-    `Project ${project.project_name} details have been updated successfully.`,
+    `Project ${data.project_name} has been updated to ${project.project_name}.`,
   );
 
   return;

@@ -9,6 +9,7 @@ type NonFormTextareaType = {
   className?: string;
   rows?: number;
   noPlaceholder?: boolean;
+  value?: string;
   readOnly?: boolean; // Added readOnly property
   props?: React.TextareaHTMLAttributes<HTMLTextAreaElement>;
 };
@@ -18,6 +19,7 @@ export default function NonFormTextarea({
   className,
   rows = 5,
   noPlaceholder = false,
+  value,
   ...props
 }: NonFormTextareaType) {
   return (
@@ -28,6 +30,7 @@ export default function NonFormTextarea({
       <Textarea
         rows={rows || 7}
         tabIndex={-1}
+        value={value}
         placeholder={noPlaceholder ? undefined : `Enter ${label.toLowerCase()}`}
         {...props}
       />

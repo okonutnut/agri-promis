@@ -6,14 +6,13 @@ import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { ProgramType } from "@/components/types";
 import { useModal } from "@/components/custom/layout/custom-page-layout";
 import { useUniversalMutation } from "@/hooks/use-universal-mutation";
 import { toast } from "sonner";
 import { EditProgramNameAction } from "@/app/actions/ProgramAction";
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 
 const FormInput = dynamic(
@@ -38,7 +37,6 @@ export default function EditProgramNameForm({
 }: EditProgramNameFormProps) {
   const router = useRouter();
   const { openModal, closeModal } = useModal();
-  const [isDelete, setIsDelete] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -55,56 +53,14 @@ export default function EditProgramNameForm({
     mutationFn: async (data: z.infer<typeof formSchema>) =>
       await EditProgramNameAction(data),
     onSuccess: () => {
-      if (isDelete) {
-        toast.success("Program deleted successfully!");
-        router.replace("/dashboard/programs");
-      } else {
-        toast.success("Program details updated successfully!");
-      }
-      setIsDelete(false);
+      toast.success("Program details updated successfully!");
     },
     onError: () => {
-      if (isDelete) {
-        toast.error("Failed to delete program. Please try again.");
-      } else {
-        toast.error("Failed to update program details. Please try again.");
-      }
+      toast.error("Failed to update program details. Please try again.");
     },
     invalidateKeys: ["programs", `"programById", ${programData.id}`],
   });
   const handleSubmit = (data: z.infer<typeof formSchema>) => mutate(data);
-
-  const DeleteModalContent = () => {
-    const [deleteConfirmText, setDeleteConfirmText] = useState("");
-    const isEnableDelete =
-      deleteConfirmText.toLowerCase().trim() ===
-      programData?.program_name.toLowerCase().trim();
-    return (
-      <>
-        <center className="text-sm mb-2">
-          Type <strong>{programData?.program_name}</strong> to <br />
-          continue.
-        </center>
-        <Input
-          className="mb-3"
-          onChange={(e) => setDeleteConfirmText(e.target.value)}
-        />
-        <Button
-          className="w-full"
-          variant="destructive"
-          disabled={!isEnableDelete}
-          onClick={() => {
-            setIsDelete(true);
-            form.setValue("deleted_at", new Date().toISOString());
-            mutate(form.getValues());
-            closeModal();
-          }}
-        >
-          Delete
-        </Button>
-      </>
-    );
-  };
 
   return (
     <>
@@ -147,39 +103,15 @@ export default function EditProgramNameForm({
               disabled={isPending}
             >
               {isPending ? (
-                <Loader2 className="animate-spin" />
+                <>
+                  <Loader2 className="animate-spin" /> Saving...
+                </>
               ) : (
                 "Save Changes"
               )}
             </Button>
           </CardFooter>
         </form>
-      </Card>
-
-      {/* DELETE CARD */}
-      <Card className="rounded-md shadow-xs bg-red-50 border-red-200 p-2">
-        <div className="flex gap-2 items-center font-semibold w-full mb-4 text-red-600">
-          <AlertCircle />
-          Danger Zone
-        </div>
-        <span>
-          To remove this program, please delete all the associated projects and
-          data. This action cannot be undone.
-        </span>
-        <Button
-          variant="destructive"
-          size="sm"
-          className="w-37.5"
-          onClick={() =>
-            openModal(
-              "Delete Program",
-              "Are you sure you want to delete this program? This action cannot be undone.",
-              <DeleteModalContent />,
-            )
-          }
-        >
-          {isPending ? "Deleting..." : "Delete Program"}
-        </Button>
       </Card>
     </>
   );

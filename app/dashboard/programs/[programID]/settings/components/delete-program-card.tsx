@@ -1,18 +1,18 @@
 "use client";
 
-import { useDeleteProgramHook } from "@/components/hooks";
 import { ProgramType } from "@/components/types";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { useModal } from "@/components/custom/layout/custom-page-layout";
 import { useUniversalMutation } from "@/hooks/use-universal-mutation";
 import { SoftDeleteAction } from "@/app/actions/DeleteAction";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { Spinner } from "@/components/ui/spinner";
 
 type DeleteProgramCardProps = {
   data: ProgramType;
@@ -20,6 +20,7 @@ type DeleteProgramCardProps = {
 export default function DeleteProgramCard({ data }: DeleteProgramCardProps) {
   const router = useRouter();
   const { openModal, closeModal } = useModal();
+
   const { mutate, isPending } = useUniversalMutation({
     mutationFn: async (data: { tableName: string; recordId: string }) =>
       SoftDeleteAction({
@@ -94,13 +95,19 @@ export default function DeleteProgramCard({ data }: DeleteProgramCardProps) {
         data. This action cannot be undone.
       </span>
       <Button
-        variant={"destructive"}
+        variant={isPending ? "ghost" : "destructive"}
         size="sm"
         disabled={isPending}
         className="w-37.5"
         onClick={handleOpenModal}
       >
-        {isPending ? "Deleting..." : "Delete Program"}
+        {isPending ? (
+          <>
+            <Spinner className="mr-2" /> Deleting...
+          </>
+        ) : (
+          "Delete Program"
+        )}
       </Button>
     </Card>
   );

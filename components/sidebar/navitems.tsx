@@ -107,7 +107,7 @@ export function getProjectNavItems(programId: string, projectId: string) {
       icon: Map,
     },
     {
-      title: "Project Settings",
+      title: "Settings",
       href: `/dashboard/programs/${programId}/projects/${projectId}/settings`,
       icon: Settings,
     },
