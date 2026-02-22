@@ -112,7 +112,7 @@ export default function ProjectDashboard() {
     >
       <ProjectDashboardInfo {...data} />
       <Separator />
-      <section className="p-4 space-y-4">
+      <section className="p-4 grid grid-cols-3 gap-4">
         <ProjectDashboardItems />
         <MonitoringReportsChart />
         <ProjectActivityLogTable />

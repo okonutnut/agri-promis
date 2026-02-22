@@ -1,9 +1,6 @@
 "use client";
 
-import { ChartLine, Contact, FileStack } from "lucide-react";
-import cornGrowthStages from "@/data/growth-stages.json";
-import { Suspense } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { FileStack } from "lucide-react";
 import SummaryCard from "@/components/custom/card/summary-cards";
 import { useParams } from "next/navigation";
 import { SelectDashboardItemsAction } from "@/app/actions/DashboardAction";
@@ -20,8 +17,8 @@ export default function ProjectDashboardItems() {
   });
 
   return (
-    <section className="flex flex-wrap md:flex-nowrap justify-between gap-5">
-      <SummaryCard
+    <>
+      {/* <SummaryCard
         title="Progress"
         description="Current Project Stage"
         icon={ChartLine}
@@ -34,7 +31,7 @@ export default function ProjectDashboardItems() {
             )?.label ?? "Not Set"}
           </strong>
         </Suspense>
-      </SummaryCard>
+      </SummaryCard> */}
       <SummaryCard
         title="Reports"
         description="Total Reports Submitted"
@@ -43,6 +40,6 @@ export default function ProjectDashboardItems() {
       >
         <strong className="text-4xl">{data?.m?.length ?? 0}</strong>
       </SummaryCard>
-    </section>
+    </>
   );
 }
