@@ -160,6 +160,7 @@ const ProjectLocationDropdown = memo(
     locationID?: string;
     role: "admin" | "user";
   }) => {
+    const pathname = usePathname();
     const projects = program.projects ?? [];
     const currentProject = projects.find((p: ProjectType) =>
       p.project_location?.some((location) => location.id === locationID),
@@ -169,10 +170,40 @@ const ProjectLocationDropdown = memo(
     );
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState<string | undefined>(currentProject?.id);
+    const [locationOpen, setLocationOpen] = useState(false);
+    const [locationValue, setLocationValue] = useState<string | undefined>(
+      locationID,
+    );
+
+    const currentProjectLocations = currentProject?.project_location ?? [];
+
+    const locationPathSuffix = useMemo(() => {
+      if (!pathname) return "";
+
+      const segments = pathname.split("/").filter(Boolean);
+      const locationSegmentIndex = segments.findIndex(
+        (segment, index) =>
+          segment === "project-location" && index + 1 < segments.length,
+      );
+
+      if (
+        locationSegmentIndex === -1 ||
+        locationSegmentIndex + 2 >= segments.length
+      ) {
+        return "";
+      }
+
+      const suffix = segments.slice(locationSegmentIndex + 2).join("/");
+      return suffix ? `/${suffix}` : "";
+    }, [pathname]);
 
     useEffect(() => {
       setValue(currentProject?.id);
     }, [currentProject?.id]);
+
+    useEffect(() => {
+      setLocationValue(locationID);
+    }, [locationID]);
 
     return (
       <div className="flex items-center gap-2 whitespace-nowrap">
@@ -181,9 +212,13 @@ const ProjectLocationDropdown = memo(
           {currentProject ? (
             <span className="flex items-center gap-2">
               <Popover open={open} onOpenChange={setOpen}>
-                <span className="flex items-center gap-1">
+                <Link
+                  href={`/dashboard/programs/${program.id}/projects`}
+                  prefetch={true}
+                  className="flex items-center gap-1 hover:underline"
+                >
                   {currentProject?.project_name}
-                </span>
+                </Link>
                 <PopoverTrigger asChild>
                   <Button
                     className="h-7 w-4 text-[#707070] p-0"
@@ -265,6 +300,50 @@ const ProjectLocationDropdown = memo(
                 <MapPin className="h-4 w-4 text-[#707070]" />
                 <span>{currentProjectLocation?.location}</span>
               </Link>
+              <Popover open={locationOpen} onOpenChange={setLocationOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    className="h-7 w-4 text-[#707070] p-0"
+                    variant="ghost"
+                  >
+                    <ChevronsUpDown className="h-3 w-3" />
+                  </Button>
+                </PopoverTrigger>
+
+                <PopoverContent align="start" className="m-1 p-0 w-75">
+                  <Command>
+                    <CommandInput placeholder="Search locations..." />
+                    <CommandList>
+                      <CommandEmpty>No location found.</CommandEmpty>
+                      <CommandGroup>
+                        {currentProjectLocations.map(
+                          (location: ProjectLocationType) => (
+                            <CommandItem
+                              key={location.id}
+                              value={location.id}
+                              onSelect={() => {
+                                setLocationValue(location.id);
+                                setLocationOpen(false);
+                              }}
+                            >
+                              <Link
+                                href={`/dashboard/project-location/${location.id}${locationPathSuffix}`}
+                                prefetch={true}
+                                className="flex items-center justify-between w-full"
+                              >
+                                <span>{location.location}</span>
+                                {location.id === locationValue && (
+                                  <Check className="ml-2 h-4 w-4" />
+                                )}
+                              </Link>
+                            </CommandItem>
+                          ),
+                        )}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </span>
           ) : (
             <Skeleton className="w-full h-5" />

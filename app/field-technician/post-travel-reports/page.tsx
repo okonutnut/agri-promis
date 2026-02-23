@@ -56,8 +56,6 @@ export default function PostTravelReportsPage() {
     table: "post_travel",
   });
 
-  console.log("PostTravelReportsPage - data:", data);
-
   return (
     <CustomPageLayout
       pageTitle="Travel Reports"

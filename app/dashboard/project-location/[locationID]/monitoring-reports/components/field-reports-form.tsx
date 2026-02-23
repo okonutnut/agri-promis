@@ -1,123 +1,49 @@
 "use client";
 
 import { MonitoringReportType } from "@/components/types";
-import { useInsertRemarksInMonitoringReportHook } from "@/components/hooks";
-import { Button } from "@/components/ui/button";
-import { Loader2, Send } from "lucide-react";
-import {
-  useModal,
-  useSheet,
-} from "@/components/custom/layout/custom-page-layout";
-import { useEffect } from "react";
-import NonFormInput from "@/components/custom/input/non-form-input";
-import NonFormMultiInput from "@/components/custom/input/non-form-multi-input";
-import NonFormTextarea from "@/components/custom/input/non-form-textarea";
-import dynamic from "next/dynamic";
-import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
-import { format } from "date-fns";
-const ImageCarousel = dynamic(
-  () => import("@/components/custom/images/image-carousel"),
-  { ssr: false },
-);
+import { useSheet } from "@/components/custom/layout/custom-page-layout";
+import { GenericReportForm } from "@/components/custom/forms/generic-report-form";
+import { useUniversalMutation } from "@/hooks/use-universal-mutation";
+import { InsertRemarksInMonitoringReportAction } from "@/app/actions/MonitoringAction";
+import { toast } from "sonner";
 
 type FieldReportsFormProps = {
   data: MonitoringReportType | null;
 };
+
 export function FieldReportsForm({ data }: FieldReportsFormProps) {
-  const { openModal, closeModal } = useModal();
   const { closeSheet } = useSheet();
 
-  const { mutate, isPending, isSuccess } =
-    useInsertRemarksInMonitoringReportHook(data?.id as string);
-
-  useEffect(() => {
-    if (isSuccess) {
+  const { mutate, isPending } = useUniversalMutation({
+    mutationFn: async (reportID: string) =>
+      InsertRemarksInMonitoringReportAction(reportID),
+    invalidateKeys: [
+      "allMonitoringReportsByProjectId",
+      "allMonitoringReportsByUser",
+      "monitoring-reports",
+      data?.project_location_id as string,
+    ],
+    onSuccess: () => {
+      toast.success("Monitoring report reviewed successfully");
       closeSheet();
-    }
-  }, [isSuccess]);
-
-  // Get the travel date from travel_date_id
-  const travelDate = data?.travel_order?.travel_itinerary?.find(
-    (item: any) => item.id === data?.travel_date_id,
-  )?.date;
+    },
+    onError: () => {
+      toast.error("Failed to review monitoring report");
+    },
+  });
 
   return (
-    <>
-      <section className="space-y-4 h-[calc(90vh)] overflow-y-auto overflow-x-hidden">
-        <ImageCarousel images={data?.photo_url || []} />
-        <div className="p-2 space-y-4 border-t">
-          <NonFormInput
-            label="Reporter Name:"
-            defaultValue={data?.reporter?.fullname}
-            readOnly
-          />
-          <NonFormInput
-            label="Travel Order No:"
-            defaultValue={data?.travel_order?.travel_order_no}
-            readOnly
-          />
-          <NonFormInput
-            label="Inclusive Date of Travel:"
-            defaultValue={
-              travelDate ? format(new Date(travelDate), "MMM d, yyyy") : "N/A"
-            }
-            readOnly
-          />
-          <NonFormInput
-            label="Purpose:"
-            defaultValue={data?.purpose}
-            readOnly
-          />
-          <NonFormMultiInput label="Findings" values={data?.findings} />
-          <NonFormTextarea
-            label="Observation"
-            readOnly
-            props={{ defaultValue: data?.observation ?? "N/A" }}
-          />
-          <NonFormMultiInput
-            label="Issues / Concerns:"
-            values={data?.issues_concern}
-          />
-          <NonFormTextarea
-            label="Remarks"
-            props={{ defaultValue: data?.remarks ?? "" }}
-            noPlaceholder={!!data}
-            readOnly
-          />
-        </div>
-      </section>
-      <CustomSheetFooter isPending={isPending}>
-        {!data?.reviewed_by_id && (
-          <Button
-            size={"sm"}
-            disabled={isPending}
-            onClick={() => {
-              openModal(
-                "Confirm Action",
-                "Are you sure you want to submit for review?",
-                <Button
-                  className="w-full"
-                  onClick={() => {
-                    mutate();
-                    closeModal();
-                  }}
-                >
-                  Confirm
-                </Button>,
-              );
-            }}
-          >
-            {isPending ? (
-              <Loader2 className="animate-spin" />
-            ) : (
-              <>
-                <Send />
-                Review
-              </>
-            )}
-          </Button>
-        )}
-      </CustomSheetFooter>
-    </>
+    <GenericReportForm
+      type="monitoring"
+      isAddMode={false}
+      isDraft={false}
+      values={data}
+      mutationFn={async () => {}}
+      invalidateKeys={["monitoring_reports"]}
+      onSuccess={async () => closeSheet()}
+      onRemarkReview={() => data?.id && mutate(data.id)}
+      remarkReviewIsPending={isPending}
+      showRemarkReviewButton={!data?.reviewed_by_id}
+    />
   );
 }

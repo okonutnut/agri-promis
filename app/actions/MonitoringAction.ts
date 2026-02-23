@@ -463,10 +463,18 @@ export async function InsertMonitoringReportAction({
 
   if (error) throw error;
 
+  // Get project location details for activity log
+  const { data: project_location_data, error: locError } = await supabase
+    .from("project_location")
+    .select("id, location, projects(project_name)")
+    .eq("id", project_location_id)
+    .single();
+  if (locError) throw locError;
+
   // Log the activity
   await InsertActivityLogAction(
     "Submitted a Monitoring Report",
-    `Monitoring report submitted for project ${project_location?.projects?.project_name}, ${project_location?.location}.`,
+    `Monitoring report submitted for project ${project_location_data?.projects[0]?.project_name}, ${project_location_data?.location}.`,
     project_location_id,
   );
 
@@ -503,7 +511,19 @@ export async function InsertRemarksInMonitoringReportAction(reportId: string) {
     throw error;
   }
 
-  const travelOrderNo = data?.travel_order_no || "Unknown";
+  // If travel_order_no is not directly on the monitoring table, try to get it from the joined travel_order relationship
+  const { data: travelOrderData, error: travelOrderError } = await supabase
+    .from("travel_order")
+    .select("travel_order_no")
+    .eq("id", data?.travel_order_no)
+    .single();
+
+  if (travelOrderError) {
+    throw travelOrderError;
+  }
+
+  // Extract travel_order_no from the nested travel_order relationship
+  const travelOrderNo = travelOrderData?.travel_order_no || "Unknown";
 
   // Log the activity
   await InsertActivityLogAction(

@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
 export const metadata: Metadata = {
-  title: "Agri-ProMIS | User Profile",
-  description: "User profile page for Agri-ProMIS",
+  title: "Agri-ProMIS | Settings",
+  description: "Settings for Agri-ProMIS",
 };
 
-export default function UserProfileLayout({
+export default function AdminDashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;

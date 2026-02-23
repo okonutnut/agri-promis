@@ -72,8 +72,6 @@ export async function SelectAllPostTravelReportsByCurrentUserAction() {
     throw error;
   }
 
-  console.log("Fetched post travel reports for current user:", data);
-
   // Optimize: Batch sign all photo URLs at once to avoid N+1
   const allPhotoUrls = data
     .flatMap((report) => report.photo_url || [])

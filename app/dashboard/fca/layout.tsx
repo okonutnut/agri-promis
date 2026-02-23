@@ -3,10 +3,10 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 
 export const metadata: Metadata = {
   title: "Agri-ProMIS | Farmers",
-  description: "Dashboard page for Agri-ProMIS",
+  description: "Farmers page for Agri-ProMIS",
 };
 
-export default function AdminDashboardLayout({
+export default function FarmersLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;

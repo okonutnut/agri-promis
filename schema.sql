@@ -123,6 +123,13 @@ CREATE TABLE public.push_subscriptions (
   CONSTRAINT push_subscriptions_pkey PRIMARY KEY (id),
   CONSTRAINT push_subscriptions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.user_profile(id)
 );
+CREATE TABLE public.settings (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  settings_name text NOT NULL UNIQUE,
+  form_schema jsonb,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT settings_pkey PRIMARY KEY (id)
+);
 CREATE TABLE public.travel_order (
   created_by uuid,
   user_id uuid,

@@ -6,6 +6,10 @@ import { Download, Printer, Loader2 } from "lucide-react";
 import { useState } from "react";
 import PostTravelReactPDF from "./post-travel-react-pdf";
 import { PostTravelWithDetails } from "@/app/types";
+import { useRealtimeQuery } from "@/hooks/use-realtime";
+import { useQuery } from "@tanstack/react-query";
+import { SelectSettings } from "@/app/actions/SystemSettingsAction";
+import { PostTravelPrintSettingsType } from "@/app/dashboard/settings/components/postTravelPrint";
 
 type PrintPostTravelButtonProps = {
   data: PostTravelWithDetails;
@@ -29,10 +33,22 @@ export default function PrintPostTravelButton({
   const [isPrinting, setIsPrinting] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
+  // GET PRINT SETTINGS
+  const {
+    data: printSettings,
+    isLoading,
+    error,
+  } = useQuery<PostTravelPrintSettingsType>({
+    queryFn: async () => await SelectSettings("travel_report_print_settings"),
+    queryKey: ["travel_report_print_settings"],
+  });
+
   const handlePrint = async () => {
     setIsPrinting(true);
     try {
-      const blob = await pdf(<PostTravelReactPDF data={data} />).toBlob();
+      const blob = await pdf(
+        <PostTravelReactPDF data={data} printSettings={printSettings} />,
+      ).toBlob();
       const url = URL.createObjectURL(blob);
 
       // Try to open in new window
@@ -67,7 +83,9 @@ export default function PrintPostTravelButton({
   const handleDownload = async () => {
     setIsDownloading(true);
     try {
-      const blob = await pdf(<PostTravelReactPDF data={data} />).toBlob();
+      const blob = await pdf(
+        <PostTravelReactPDF data={data} printSettings={printSettings} />,
+      ).toBlob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -88,6 +106,8 @@ export default function PrintPostTravelButton({
     }
   };
 
+  const disabled = isPrinting || isDownloading || isLoading || !!error;
+
   return (
     <div className="flex items-center gap-2">
       <Button
@@ -95,7 +115,7 @@ export default function PrintPostTravelButton({
         size={size}
         className="flex items-center gap-2"
         onClick={handlePrint}
-        disabled={isPrinting || isDownloading}
+        disabled={disabled}
       >
         {isPrinting ? (
           <>
@@ -113,7 +133,7 @@ export default function PrintPostTravelButton({
         size={size}
         className="flex items-center gap-2"
         onClick={handleDownload}
-        disabled={isPrinting || isDownloading}
+        disabled={disabled}
       >
         {isDownloading ? (
           <>

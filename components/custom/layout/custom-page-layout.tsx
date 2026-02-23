@@ -317,27 +317,31 @@ export default function CustomPageLayout({
                       className,
                     )}
                   >
-                    <div className="flex-1 py-4">
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="flex flex-col space-y-2">
-                          {pageTitle && (
-                            <h1 className="text-2xl font-black">{pageTitle}</h1>
-                          )}
-                          {pageDescription && (
-                            <p className="text-md text-muted-foreground">
-                              {pageDescription}
-                            </p>
-                          )}
+                    <div className="flex-1 pt-7">
+                      <div className="mx-auto px-2 xl:px-5 max-w-300">
+                        <div className="flex justify-between items-start mb-4">
+                          <div className="flex flex-col space-y-2">
+                            {pageTitle && (
+                              <h1 className="text-2xl font-black">
+                                {pageTitle}
+                              </h1>
+                            )}
+                            {pageDescription && (
+                              <p className="text-md text-muted-foreground">
+                                {pageDescription}
+                              </p>
+                            )}
+                          </div>
+                          {(!loadingState || error) && topRightComponent}
                         </div>
-                        {(!loadingState || error) && topRightComponent}
+                        {loadingState || pageLoading || error ? (
+                          <SkeletonLoading className="m-2" />
+                        ) : (
+                          <Suspense fallback={<SkeletonLoading />}>
+                            {children}
+                          </Suspense>
+                        )}
                       </div>
-                      {loadingState || pageLoading || error ? (
-                        <SkeletonLoading className="m-2" />
-                      ) : (
-                        <Suspense fallback={<SkeletonLoading />}>
-                          {children}
-                        </Suspense>
-                      )}
                     </div>
                   </div>
                 </div>

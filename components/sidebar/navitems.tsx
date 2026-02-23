@@ -41,6 +41,11 @@ export function getDashboardNavItems() {
       href: "/dashboard/activity-logs",
       icon: ChartLine,
     },
+    {
+      title: "System Settings",
+      href: "/dashboard/settings",
+      icon: Settings,
+    },
   ];
 }
 
@@ -107,7 +112,7 @@ export function getProjectNavItems(programId: string, projectId: string) {
       icon: Map,
     },
     {
-      title: "Settings",
+      title: "Project Settings",
       href: `/dashboard/programs/${programId}/projects/${projectId}/settings`,
       icon: Settings,
     },

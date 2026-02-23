@@ -1,18 +1,12 @@
 import { Document, Page, Text, View, Font, Image } from "@react-pdf/renderer";
 import { format } from "date-fns";
 import { PostTravelWithDetails } from "@/app/types";
+import { PostTravelPrintSettingsType } from "@/app/dashboard/settings/components/postTravelPrint";
 
 // Constants
 const DEFAULT_DOCUMENT_CODE = "DARFO2.FOD.271";
 const DEFAULT_EFFECTIVITY_DATE = "7/1/2025";
 const DEFAULT_REV_NO = "0";
-const DEFAULT_REVIEWED_BY_NAME = "JONATHAN L. ARGONIA";
-const DEFAULT_REVIEWED_BY_TITLE = "Agri II/APCO";
-const DEFAULT_RECOMMENDING_APPROVAL_NAME = "MARVIN B. LUIS, DPA";
-const DEFAULT_RECOMMENDING_APPROVAL_TITLE =
-  "OIC-Chief, Field Operations Division";
-const DEFAULT_APPROVED_BY_NAME = "ROBERTO C. BUSANIA, DVM";
-const DEFAULT_APPROVED_BY_TITLE = "RTD for Operations and Extension";
 
 // Register Font
 Font.register({
@@ -167,6 +161,7 @@ const MainTable = ({
         borderWidth: "1",
       }}
     >
+      {/* HEADER */}
       <View
         style={{
           height: 51,
@@ -364,7 +359,7 @@ const MainTable = ({
         </View>
       </View>
 
-      {/* ENTRY */}
+      {/* BODY */}
       <View
         style={{
           flex: "1",
@@ -459,10 +454,12 @@ const MainTable = ({
 type SignatureSectionProps = {
   preparedBy: string;
   preparedByRole: string;
+  printSettings: PostTravelPrintSettingsType | undefined;
 };
 const SignatureSection = ({
   preparedBy,
   preparedByRole,
+  printSettings,
 }: SignatureSectionProps) => (
   <>
     <View
@@ -521,9 +518,9 @@ const SignatureSection = ({
             marginBottom: 3,
           }}
         >
-          {DEFAULT_REVIEWED_BY_NAME}
+          {printSettings?.reviewer?.toUpperCase()}
         </Text>
-        <Text>{DEFAULT_REVIEWED_BY_TITLE}</Text>
+        <Text>{printSettings?.reviewerPosition as string}</Text>
       </View>
       <View
         style={{
@@ -540,9 +537,9 @@ const SignatureSection = ({
             marginBottom: 3,
           }}
         >
-          {DEFAULT_RECOMMENDING_APPROVAL_NAME}
+          {printSettings?.recommendationApproval?.toUpperCase()}
         </Text>
-        <Text>{DEFAULT_RECOMMENDING_APPROVAL_TITLE}</Text>
+        <Text>{printSettings?.recommendationApprovalPosition as string}</Text>
       </View>
       <View
         style={{
@@ -559,9 +556,9 @@ const SignatureSection = ({
             marginBottom: 3,
           }}
         >
-          {DEFAULT_APPROVED_BY_NAME}
+          {printSettings?.approver?.toUpperCase()}
         </Text>
-        <Text>{DEFAULT_APPROVED_BY_TITLE}</Text>
+        <Text>{printSettings?.approverPosition as string}</Text>
       </View>
     </View>
   </>
@@ -812,8 +809,12 @@ const PhotoDocumentPage = ({
 // Main component
 type PostTravelReactPDFProps = {
   data: PostTravelWithDetails;
+  printSettings: PostTravelPrintSettingsType | undefined;
 };
-export default function PostTravelReactPDF({ data }: PostTravelReactPDFProps) {
+export default function PostTravelReactPDF({
+  data,
+  printSettings,
+}: PostTravelReactPDFProps) {
   const inclusiveDates = () => {
     if (!data?.date) return "N/A";
     const startDate = format(new Date(data.date), "MMM d, yyyy");
@@ -865,6 +866,7 @@ export default function PostTravelReactPDF({ data }: PostTravelReactPDFProps) {
         <SignatureSection
           preparedBy={data.fullname || data.fullname || ""}
           preparedByRole={data?.position || ""}
+          printSettings={printSettings}
         />
       </Page>
 

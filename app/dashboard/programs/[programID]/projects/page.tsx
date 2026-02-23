@@ -54,7 +54,7 @@ function FilteredProjects({ projects, searchQuery }: FilteredProjectsProps) {
                   </span>
                   <div className="flex flex-col gap-2 w-full">
                     <span
-                      className="font-semibold break-words line-clamp-3 w-full"
+                      className="font-semibold wrap-break-words line-clamp-3 w-full"
                       style={{
                         wordBreak: "break-word",
                         overflowWrap: "break-word",

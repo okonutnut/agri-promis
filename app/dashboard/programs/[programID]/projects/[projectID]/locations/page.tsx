@@ -20,8 +20,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Check } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import growthStages from "@/data/growth-stages.json";
 
 function useSearchFilter<T>(
   items: T[],
@@ -166,17 +164,6 @@ export default function ProjectDetailsPage() {
                     <small className="italic">
                       {location.description || "No Description"}
                     </small>
-                    <Badge className="font-semibold rounded-md">
-                      {
-                        growthStages.find(
-                          (stage) =>
-                            stage.value ===
-                            location.progress_indicator!.toString(),
-                        )?.label
-                      }
-                      &nbsp;
-                      {location.progress_indicator == 1 ? "" : "Stages"}
-                    </Badge>
                     <small>
                       Date Created:&nbsp;
                       {format(new Date(location.created_at!), "PP")}

@@ -34,7 +34,6 @@ type FCAFormProps = {
 };
 export function FCAForm({ isAddMode, data }: FCAFormProps) {
   const [pageState, setPageState] = useState<"idle" | "loading">("idle");
-  console.log(pageState, "PAGE STATE");
   const { closeSheet } = useSheet();
   const { openModal, closeModal } = useModal();
 

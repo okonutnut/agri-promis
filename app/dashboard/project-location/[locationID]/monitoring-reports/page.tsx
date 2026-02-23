@@ -84,6 +84,8 @@ export default function MonitoringReportPage() {
     table: "monitoring",
   });
 
+  console.log("Monitoring reports data:", data);
+
   return (
     <CustomPageLayout
       pageTitle="Monitoring Reports"

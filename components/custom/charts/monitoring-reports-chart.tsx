@@ -39,7 +39,7 @@ export default function MonitoringReportsChart() {
         <CardContent className="flex-1 p-0">
           <ChartContainer
             config={chartConfig}
-            className="aspect-auto h-62.5 w-full"
+            className="aspect-auto min-h-full w-full"
           >
             <LineChart
               data={chartData}
@@ -71,7 +71,7 @@ export default function MonitoringReportsChart() {
               <ChartTooltip
                 content={
                   <ChartTooltipContent
-                    className="w-[150px]"
+                    className="w-37.5"
                     nameKey="reports"
                     labelFormatter={(value) =>
                       new Date(value).toLocaleDateString("en-US", {

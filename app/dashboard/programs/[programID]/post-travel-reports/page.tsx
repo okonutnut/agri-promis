@@ -57,7 +57,7 @@ export default function PostTravelReportsPage() {
 
   return (
     <CustomPageLayout
-      pageTitle="Post-Travel Reports"
+      pageTitle="Travel Reports"
       pageDescription="View & Manage Post-Travel Reports for Field Operators."
       isLoading={isLoading}
       error={error}

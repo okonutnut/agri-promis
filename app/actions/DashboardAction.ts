@@ -47,7 +47,6 @@ export async function SelectUserDashboardItemsAction() {
     .order("created_at", { ascending: false });
 
   if (TError) {
-    console.log(TError);
     throw TError;
   }
 
@@ -384,8 +383,6 @@ export async function SelectProjectDashboardItemsAction(projectID: string) {
     .in("project_location_id", projectLocations?.map((pl) => pl.id) || []);
   if (monitoringReportsError) throw monitoringReportsError;
 
-  console.log("monitoringReports:", monitoringReports);
-
   // Get unreviewed monitoring reports
   const unreviewedMonitoringReports =
     monitoringReports
@@ -398,8 +395,6 @@ export async function SelectProjectDashboardItemsAction(projectID: string) {
         purpose: report.purpose || "No purpose provided",
         created_at: report.created_at || "Unknown date",
       })) || [];
-
-  console.log("Unreviewed Monitoring Reports:", unreviewedMonitoringReports);
 
   // Get FCA Count
   const fcaIds =
