@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useQuery, useQueryClient, NetworkMode } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
 
@@ -19,22 +19,27 @@ export function useRealtimeQuery<T>({
   table,
   queryFn,
   schema = "public",
-  staleTime = 0, // Changed: Always consider data stale to fetch fresh
+  staleTime = 30_000,
   refetchInterval,
-  networkMode = "online", // Only fetch when online
+  networkMode = "online",
 }: UseRealtimeQueryProps<T>) {
   const queryClient = useQueryClient();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
+  const queryKeySerialized = useMemo(
+    () => JSON.stringify(queryKey),
+    [queryKey],
+  );
+  const stableQueryKey = useMemo(() => queryKey, [queryKeySerialized]);
 
   const query = useQuery<T>({
-    queryKey,
+    queryKey: stableQueryKey,
     queryFn,
     staleTime,
     refetchInterval,
     networkMode,
-    refetchOnMount: true, // Always refetch on mount when online
-    refetchOnWindowFocus: true, // Refetch when window regains focus
-    refetchOnReconnect: true, // Refetch when network reconnects
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: true,
   });
 
   useEffect(() => {
@@ -58,11 +63,11 @@ export function useRealtimeQuery<T>({
                   return [...old, payload.new] as T[];
                 case "UPDATE":
                   return old.map((row: any) =>
-                    row.id === payload.new.id ? payload.new : row
+                    row.id === payload.new.id ? payload.new : row,
                   ) as T[];
                 case "DELETE":
                   return old.filter(
-                    (row: any) => row.id !== payload.old.id
+                    (row: any) => row.id !== payload.old.id,
                   ) as T[];
                 default:
                   return old;
@@ -70,7 +75,7 @@ export function useRealtimeQuery<T>({
             }
 
             // If old is a single object → safer to refetch
-            queryClient.invalidateQueries({ queryKey });
+            queryClient.invalidateQueries({ queryKey: stableQueryKey });
             return old;
           });
         })
@@ -92,7 +97,7 @@ export function useRealtimeQuery<T>({
     // Handle online/offline events
     const handleOnline = () => {
       // Refetch when coming back online
-      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: stableQueryKey });
       subscribe();
     };
 
@@ -108,7 +113,7 @@ export function useRealtimeQuery<T>({
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
     };
-  }, [queryClient, queryKey, table, schema, supabase]);
+  }, [queryClient, stableQueryKey, table, schema, supabase]);
 
   return query;
 }

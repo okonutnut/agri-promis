@@ -19,7 +19,7 @@ export default function UserActivityLogs({ data }: UserActivityLogsProps) {
   return (
     <>
       <h2 className="text-lg font-semibold mb-2">Recent Activity Logs</h2>
-      <Card className="p-0 shadow-xs rounded-md max-h-[500px] overflow-auto">
+      <Card className="p-0 shadow-xs rounded-md max-h-125 overflow-auto">
         {data && data.length === 0 ? (
           <div className="p-4 text-center text-gray-500">
             No activity logs found.

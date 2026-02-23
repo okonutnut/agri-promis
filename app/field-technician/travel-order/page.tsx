@@ -7,10 +7,8 @@ import { getUserDashboardNavItems } from "@/components/sidebar/navitems";
 import CustomPageLayout, {
   useSheet,
 } from "@/components/custom/layout/custom-page-layout";
-import { dataTagErrorSymbol } from "@tanstack/react-query";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllTravelOrdersByUserIDAction } from "@/app/actions/TravelOrderAction";
-import { useSupabaseSession } from "@/hooks/use-session";
 import IssueTravelOrderForm from "./components/travel-order-form";
 
 function TravelOrderContent({ data }: { data: TravelOrderType[] | undefined }) {
@@ -30,8 +28,6 @@ function TravelOrderContent({ data }: { data: TravelOrderType[] | undefined }) {
     );
   };
 
-  if (!dataTagErrorSymbol) return null;
-
   return (
     <DataTable
       columns={columns}
@@ -43,14 +39,11 @@ function TravelOrderContent({ data }: { data: TravelOrderType[] | undefined }) {
 }
 
 export default function FieldTechnicianPage() {
-  const { data: userData } = useSupabaseSession();
   const { data, isLoading, error } = useRealtimeQuery({
-    queryKey: ["travel_order"],
-    queryFn: () => SelectAllTravelOrdersByUserIDAction(userData?.user.id),
+    queryKey: ["travel_order", "current_user"],
+    queryFn: SelectAllTravelOrdersByUserIDAction,
     table: "travel_order",
   });
-
-  console.log("FieldTechnicianPage - data:", data);
 
   return (
     <CustomPageLayout

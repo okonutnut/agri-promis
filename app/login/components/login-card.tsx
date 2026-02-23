@@ -4,7 +4,7 @@ import GoogleSignInButton from "./google-login";
 
 export default function LoginCard() {
   return (
-    <section className="col-span-full md:col-span-1 h-screen flex items-center justify-center">
+    <section className="col-span-1 min-h-screen md:col-span-3 flex items-center justify-center">
       <Card className="p-8 w-full gap-2 mx-4 border-none shadow-none">
         <CardHeader>
           <Image

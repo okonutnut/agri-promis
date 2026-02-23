@@ -3,14 +3,14 @@ import LoginCard from "./components/login-card";
 
 export default function LoginPage() {
   return (
-    <div className="grid min-h-screen grid-cols-3 gap-2 overflow-hidden">
-      <section className="relative col-span-2 hidden overflow-hidden md:block">
+    <div className="grid min-h-screen grid-cols-1 overflow-hidden md:grid-cols-10">
+      <section className="relative hidden overflow-hidden md:col-span-7 md:block">
         <Image
           src="/login-bg.jpg"
           alt=""
           fill
           className="object-cover"
-          sizes="(min-width: 768px) 66vw, 0vw"
+          sizes="(min-width: 768px) 70vw, 0vw"
           priority
         />
         <div className="absolute top-0 left-0 w-full h-full bg-black/50 flex flex-col items-center justify-center gap-2">

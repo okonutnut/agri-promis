@@ -99,8 +99,16 @@ export async function SelectAllTravelOrdersByUserIDAction(user_id?: string) {
       `
       *,
       user:user_profile!travel_order_user_id_fkey(fullname),
-      created_by:user_profile!travel_order_created_by_fkey(fullname),
-      travel_itinerary:travel_order_itinerary_items(*),
+      travel_itinerary:travel_order_itinerary_items(
+        id,
+        date,
+        end_date,
+        destination,
+        purpose,
+        departure_time,
+        arrival_time,
+        created_at
+      ),
       programs:programs!travel_order_program_id_fkey(program_name)
     `,
     )
