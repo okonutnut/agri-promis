@@ -3,45 +3,39 @@
 import { createClient } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Loader2 } from "lucide-react";
 
 export default function GoogleSignInButton() {
   const supabase = createClient();
-  const [state, setState] = useState<"ready" | "loading" | "disabled">("ready");
+  const [isLoading, setIsLoading] = useState(false);
 
   const login = async () => {
-    await supabase.auth.signInWithOAuth({
+    if (isLoading) return;
+
+    setIsLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
       },
     });
-  };
 
-  useEffect(() => {
-    async function checkUser() {
-      setState("loading");
-      const user = (await supabase.auth.getUser()).data.user;
-
-      if (user !== null) {
-        setState("disabled");
-      } else {
-        setState("ready");
-      }
+    if (error) {
+      console.error("Error during Google sign-in:", error);
+      setIsLoading(false);
     }
-    checkUser();
-  }, [supabase.auth]);
+  };
 
   return (
     <Button
       className="flex items-center gap-2 cursor-pointer my-3 min-w-62.5 mx-auto shadow-none rounded-pill"
-      type="submit"
-      disabled={state !== "ready"}
-      variant={state === "loading" ? "ghost" : "outline"}
+      type="button"
+      disabled={isLoading}
+      variant={isLoading ? "ghost" : "outline"}
       onClick={login}
     >
-      {state === "loading" ? (
+      {isLoading ? (
         <Loader2 className="animate-spin" size={20} />
       ) : (
         <>

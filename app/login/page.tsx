@@ -1,35 +1,18 @@
-"use client";
-
-import { useEffect } from "react";
-import { createClient } from "@/utils/supabase/client";
+import Image from "next/image";
 import LoginCard from "./components/login-card";
 
 export default function LoginPage() {
-  const supabase = createClient();
-
-  useEffect(() => {
-    const checkSession = async () => {
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession();
-
-      if (error) {
-        console.error("Error fetching session:", error);
-      }
-
-      // Redirect if session exists
-      if (session) {
-        window.location.replace("/");
-      }
-    };
-
-    checkSession();
-  }, [supabase]);
-
   return (
-    <div className="grid grid-cols-3 h-screen w-screen gap-2 overflow-hidden">
-      <section className="hidden md:block col-span-2 bg-[url('/login-bg.jpg')] bg-cover bg-center relative">
+    <div className="grid min-h-screen grid-cols-3 gap-2 overflow-hidden">
+      <section className="relative col-span-2 hidden overflow-hidden md:block">
+        <Image
+          src="/login-bg.jpg"
+          alt=""
+          fill
+          className="object-cover"
+          sizes="(min-width: 768px) 66vw, 0vw"
+          priority
+        />
         <div className="absolute top-0 left-0 w-full h-full bg-black/50 flex flex-col items-center justify-center gap-2">
           <h1 className="text-white text-4xl font-bold text-center max-w-[80%] mb-4">
             Agricultural Project Monitoring and Implementation System

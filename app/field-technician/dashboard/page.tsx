@@ -1,20 +1,23 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { getUserDashboardNavItems } from "@/components/sidebar/navitems";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import { useUniversalRealtime } from "@/hooks/use-universal-realtime";
 import { SelectUserDashboardItemsAction } from "@/app/actions/DashboardAction";
-const UserDashboardItems = dynamic(
-  () => import("@/components/custom/dashboard/user/user-dashboard-items"),
-  { ssr: false }
-);
+import UserDashboardItems from "@/components/custom/dashboard/user/user-dashboard-items";
+
+const USER_DASHBOARD_QUERY_KEY = ["user-dashboard-items"];
+const USER_DASHBOARD_TABLES = [
+  "travel_order",
+  "assigned_projects",
+  "monitoring",
+];
 
 export default function Dashboard() {
   const { data, isLoading, error } = useUniversalRealtime({
-    queryKey: ["user-dashboard-items"],
+    queryKey: USER_DASHBOARD_QUERY_KEY,
     queryFn: SelectUserDashboardItemsAction,
-    tables: ["travel_order", "assigned_projects", "monitoring"],
+    tables: USER_DASHBOARD_TABLES,
   });
 
   return (

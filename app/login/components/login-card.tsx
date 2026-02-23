@@ -1,9 +1,5 @@
-"use client";
-
 import Image from "next/image";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Suspense } from "react";
-import { Loader2 } from "lucide-react";
 import GoogleSignInButton from "./google-login";
 
 export default function LoginCard() {
@@ -31,15 +27,7 @@ export default function LoginCard() {
           <h1 className="text-sm font-medium text-center mb-2">
             Sign in to your account
           </h1>
-          <Suspense
-            fallback={
-              <center>
-                <Loader2 className="animate-spin" />
-              </center>
-            }
-          >
-            <GoogleSignInButton />
-          </Suspense>
+          <GoogleSignInButton />
         </CardContent>
         <p className="text-center text-xs text-gray-500">version 1.0-dev</p>
       </Card>

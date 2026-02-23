@@ -2,7 +2,7 @@
 
 import { createClient } from "@/utils/supabase/client";
 import { NetworkMode, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 type UseUniversalRealtimeOptions<T> = {
   queryKey: (string | number)[];
@@ -22,8 +22,15 @@ export function useUniversalRealtime<T>({
   staleTime = 30_000,
   networkMode = "online",
 }: UseUniversalRealtimeOptions<T>) {
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const queryClient = useQueryClient();
+  const realtimeTablesKey = useMemo(() => tables.join("|"), [tables]);
+  const queryKeySerialized = useMemo(
+    () => JSON.stringify(queryKey),
+    [queryKey],
+  );
+  const stableTables = useMemo(() => tables, [realtimeTablesKey]);
+  const stableQueryKey = useMemo(() => queryKey, [queryKeySerialized]);
 
   // Main query
   const query = useQuery<T>({
@@ -43,18 +50,18 @@ export function useUniversalRealtime<T>({
     function subscribe() {
       // Don't subscribe if already subscribed
       if (channels.length > 0) return;
-      
-      channels = tables.map((table) =>
+
+      channels = stableTables.map((table) =>
         supabase
           .channel(`realtime:${table}`)
           .on(
             "postgres_changes",
             { event: "*", schema: "public", table },
             () => {
-              queryClient.invalidateQueries({ queryKey });
-            }
+              queryClient.invalidateQueries({ queryKey: stableQueryKey });
+            },
           )
-          .subscribe()
+          .subscribe(),
       );
     }
 
@@ -70,7 +77,7 @@ export function useUniversalRealtime<T>({
 
     // Handle network changes
     const handleOnline = () => {
-      queryClient.invalidateQueries({ queryKey }); // refresh on reconnect
+      queryClient.invalidateQueries({ queryKey: stableQueryKey }); // refresh on reconnect
       subscribe();
     };
 
@@ -86,7 +93,14 @@ export function useUniversalRealtime<T>({
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
     };
-  }, [supabase, queryClient, queryKey, tables]);
+  }, [
+    supabase,
+    queryClient,
+    stableQueryKey,
+    stableTables,
+    queryKeySerialized,
+    realtimeTablesKey,
+  ]);
 
   return query;
 }

@@ -7,16 +7,8 @@ import {
   TravelOrderType,
 } from "@/components/types";
 import { Activity, CheckCircle, FileStack } from "lucide-react";
-import dynamic from "next/dynamic";
-const UserActivityLogs = dynamic(
-  () =>
-    import("@/app/field-technician/dashboard/components/user-activity-logs"),
-  { ssr: false },
-);
-const SummaryCard = dynamic(
-  () => import("@/components/custom/card/summary-cards"),
-  { ssr: false },
-);
+import UserActivityLogs from "@/app/field-technician/dashboard/components/user-activity-logs";
+import SummaryCard from "@/components/custom/card/summary-cards";
 
 type UserDashboardItemsProps = {
   data?: {
