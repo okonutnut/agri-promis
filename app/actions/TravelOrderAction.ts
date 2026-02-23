@@ -84,10 +84,10 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
   return TOData;
 }
 
-export async function SelectAllTravelOrdersByUserIDAction() {
+export async function SelectAllTravelOrdersByUserIDAction(userID?: string) {
   const supabase = await createClient();
   const user = (await supabase.auth.getUser()).data.user;
-  let user_id = user?.id;
+  let user_id = userID ? userID : user?.id;
 
   if (!user_id) {
     const { data: userData, error: userError } = await supabase.auth.getUser();
