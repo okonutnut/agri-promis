@@ -128,7 +128,7 @@ export default function ItineraryOfTravel({
                     <TableCell>
                       {formatDate(item.date, item.end_date)}
                     </TableCell>
-                    <TableCell className="max-w-[200px] truncate text-end">
+                    <TableCell className="max-w-50 truncate text-end">
                       {item.destination || "-"}
                     </TableCell>
                   </TableRow>

@@ -1,6 +1,3 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import AdminDashboardItems from "@/components/custom/dashboard/admin/admin-dashboard-items";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import { getDashboardNavItems } from "@/components/sidebar/navitems";
@@ -10,15 +7,7 @@ import TravelOrdersAnalytics from "@/components/custom/dashboard/admin/travel-or
 import FCAAnalytics from "@/components/custom/dashboard/admin/fca-analytics";
 
 export default function DashboardPage() {
-  const [now, setNow] = useState(new Date());
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setNow(new Date());
-    }, 1000);
-
-    return () => clearInterval(intervalId);
-  }, []);
+  const now = new Date();
 
   return (
     <CustomPageLayout

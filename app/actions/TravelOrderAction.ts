@@ -84,8 +84,10 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
   return TOData;
 }
 
-export async function SelectAllTravelOrdersByUserIDAction(user_id?: string) {
+export async function SelectAllTravelOrdersByUserIDAction() {
   const supabase = await createClient();
+  const user = (await supabase.auth.getUser()).data.user;
+  let user_id = user?.id;
 
   if (!user_id) {
     const { data: userData, error: userError } = await supabase.auth.getUser();
@@ -106,8 +108,7 @@ export async function SelectAllTravelOrdersByUserIDAction(user_id?: string) {
         destination,
         purpose,
         departure_time,
-        arrival_time,
-        created_at
+        arrival_time
       ),
       programs:programs!travel_order_program_id_fkey(program_name)
     `,

@@ -3,8 +3,8 @@ import LoginCard from "./components/login-card";
 
 export default function LoginPage() {
   return (
-    <div className="grid min-h-screen grid-cols-1 overflow-hidden md:grid-cols-10">
-      <section className="relative hidden overflow-hidden md:col-span-7 md:block">
+    <div className="flex min-h-screen overflow-hidden w-screen">
+      <section className="relative hidden overflow-hidden md:block md:w-[70%]">
         <Image
           src="/login-bg.jpg"
           alt=""

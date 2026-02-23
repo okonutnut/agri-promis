@@ -33,7 +33,7 @@ export async function SelectUserProfileByIDAction(userID: string) {
 
 export async function SelectUserProfileAction() {
   const supabase = await createClient();
-  const user = (await (await supabase.auth).getUser()).data.user?.id;
+  const user = (await supabase.auth.getUser()).data.user?.id;
 
   const { data, error } = await supabase
     .from("user_profile")

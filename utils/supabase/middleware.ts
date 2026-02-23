@@ -44,11 +44,12 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
   const pathname = request.nextUrl.pathname;
+  const isAuthCallback = pathname.startsWith("/auth/callback");
 
   // If user is not authenticated
   if (!user) {
-    // Allow access to login page
-    if (pathname === "/login") {
+    // Allow access to login and OAuth callback pages
+    if (pathname === "/login" || isAuthCallback) {
       return supabaseResponse;
     }
     // Redirect to login for all other pages
@@ -57,19 +58,13 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // User is authenticated
-  // Redirect from login page to root
-  if (user && pathname === "/login") {
-    const url = request.nextUrl.clone();
-    url.pathname = "/";
-    return NextResponse.redirect(url);
-  }
-
   // User is authenticated - get user role from database or metadata
-  let userRole = user.user_metadata?.role;
+  const rawUserRole = user.user_metadata?.role;
+  const userRole =
+    typeof rawUserRole === "string" ? Number(rawUserRole) : rawUserRole;
 
   // Handle missing role - redirect to access denied
-  if (!userRole) {
+  if (!userRole || Number.isNaN(userRole)) {
     if (pathname !== "/access-denied") {
       const url = request.nextUrl.clone();
       url.pathname = "/access-denied";

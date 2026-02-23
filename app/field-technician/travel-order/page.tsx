@@ -41,7 +41,7 @@ function TravelOrderContent({ data }: { data: TravelOrderType[] | undefined }) {
 export default function FieldTechnicianPage() {
   const { data, isLoading, error } = useRealtimeQuery({
     queryKey: ["travel_order", "current_user"],
-    queryFn: SelectAllTravelOrdersByUserIDAction,
+    queryFn: async () => await SelectAllTravelOrdersByUserIDAction(),
     table: "travel_order",
   });
 
