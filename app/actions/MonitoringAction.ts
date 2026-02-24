@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { FCAType, MonitoringReportType } from "../../components/types";
 import { CheckUserAssignedToProgramByProjectLocationAction } from "@/app/actions/AssignedProgramAction";
+import { sendNotificationToUser } from "./NotificationAction";
 
 // MONITORING REPORT ACTIONS
 export async function SelectAllMonitoringReportsByProjectIDAction(
@@ -478,6 +479,44 @@ export async function InsertMonitoringReportAction({
     project_location_id,
   );
 
+  try {
+    const { data: projectData, error: projectError } = await supabase
+      .from("project_location")
+      .select("project_id")
+      .eq("id", project_location_id)
+      .single();
+
+    if (projectError) throw projectError;
+
+    const { data: programData, error: programError } = await supabase
+      .from("projects")
+      .select("program_id")
+      .eq("id", projectData.project_id)
+      .single();
+
+    if (programError) throw programError;
+
+    const { data: adminData, error: adminError } = await supabase
+      .from("programs")
+      .select("admin_id")
+      .eq("id", programData.program_id)
+      .single();
+
+    if (adminError) throw adminError;
+
+    if (adminData?.admin_id) {
+      await sendNotificationToUser(
+        `New monitoring report submitted for ${project_location_data?.projects[0]?.project_name ?? "a project"}, ${project_location_data?.location ?? "location"}.`,
+        adminData.admin_id,
+      );
+    }
+  } catch (notificationError) {
+    console.error(
+      "Failed to send monitoring submission notification:",
+      notificationError,
+    );
+  }
+
   return;
 }
 
@@ -531,6 +570,29 @@ export async function InsertRemarksInMonitoringReportAction(reportId: string) {
     `Monitoring report with T.O no ${travelOrderNo} has been reviewed.`,
     data?.project_location_id,
   );
+
+  try {
+    const { data: reportOwner, error: reportOwnerError } = await supabase
+      .from("monitoring")
+      .select(`reporter_id`)
+      .eq("id", reportId)
+      .single();
+    if (reportOwnerError) throw reportOwnerError;
+
+    const reportOwnerId = reportOwner?.reporter_id;
+
+    if (reportOwnerId) {
+      await sendNotificationToUser(
+        `Your monitoring report for T.O no ${travelOrderNo} has been reviewed.`,
+        reportOwnerId,
+      );
+    }
+  } catch (notificationError) {
+    console.error(
+      "Failed to send monitoring review notification:",
+      notificationError,
+    );
+  }
 
   return;
 }

@@ -12,9 +12,10 @@ import { toast } from "sonner";
 
 export default function NotificationRequest() {
   const qc = useQueryClient();
+
   const { data: subscription, isFetching } = useRealtimeQuery({
     queryKey: ["notification"],
-    queryFn: SelectCurrentUserSubscription,
+    queryFn: async () => await SelectCurrentUserSubscription(),
     table: "push_subscriptions",
   });
 
@@ -66,16 +67,31 @@ export default function NotificationRequest() {
       return;
     }
 
+    if (!window.isSecureContext) {
+      toast.error(
+        "Service workers require a secure context (HTTPS or localhost).",
+      );
+      return;
+    }
+
     try {
+      const swCheck = await fetch("/sw.js", { cache: "no-store" });
+      if (!swCheck.ok) {
+        toast.error(
+          "Service worker file not found. In development, set NEXT_PUBLIC_ENABLE_PWA_DEV=true and restart the server.",
+        );
+        return;
+      }
+
       // Check if service worker is already registered
       let registration = await navigator.serviceWorker.getRegistration();
-      
+
       if (!registration) {
         // Register the service worker
         registration = await navigator.serviceWorker.register("/sw.js", {
           scope: "/",
         });
-        
+
         // Wait for the service worker to be ready
         await navigator.serviceWorker.ready;
       }
@@ -92,7 +108,9 @@ export default function NotificationRequest() {
 
       // Ensure registration is available
       if (!registration) {
-        toast.error("Service worker registration failed. Please refresh the page and try again.");
+        toast.error(
+          "Service worker registration failed. Please refresh the page and try again.",
+        );
         return;
       }
 
@@ -124,36 +142,41 @@ export default function NotificationRequest() {
       console.error("Error during service worker registration:", error);
       const errorMessage = error?.message || "Unknown error";
       toast.error(
-        `Error during service worker registration: ${errorMessage}. Please check the console for details.`
+        `Error during service worker registration: ${errorMessage}. Please check the console for details.`,
       );
     }
   }
 
   const generateSubscribeEndPoint = async (
-    newRegistration: ServiceWorkerRegistration
+    newRegistration: ServiceWorkerRegistration,
   ) => {
     try {
       // Check if VAPID key is available
       if (!process.env.NEXT_PUBLIC_VAPID_KEY) {
         console.error("VAPID key is not configured");
-        toast.error("Push notification configuration error. Please contact support.");
+        toast.error(
+          "Push notification configuration error. Please contact support.",
+        );
         return;
       }
 
       // Check if pushManager is available
       if (!newRegistration.pushManager) {
         console.error("PushManager is not available");
-        toast.error("Push Manager is not available. Please refresh the page and try again.");
+        toast.error(
+          "Push Manager is not available. Please refresh the page and try again.",
+        );
         return;
       }
 
       // Check if already subscribed
-      const existingPushSubscription = await newRegistration.pushManager.getSubscription();
+      const existingPushSubscription =
+        await newRegistration.pushManager.getSubscription();
       let subscription = existingPushSubscription;
 
       if (!subscription) {
         const applicationServerKey = urlBase64ToUint8Array(
-          process.env.NEXT_PUBLIC_VAPID_KEY
+          process.env.NEXT_PUBLIC_VAPID_KEY,
         );
         const options = {
           applicationServerKey,
@@ -164,31 +187,48 @@ export default function NotificationRequest() {
 
       const supabase = createClient();
       const { data: userData } = await supabase.auth.getUser();
-      
+
       if (!userData?.user?.id) {
         toast.error("User not authenticated.");
         return;
       }
 
-      // Check if subscription already exists in database
-      const { data: existingSubscription } = await supabase
-        .from("push_subscriptions")
-        .select("id")
-        .eq("user_id", userData.user.id)
-        .maybeSingle();
+      const { data: existingSubscriptions, error: existingSubscriptionsError } =
+        await supabase
+          .from("push_subscriptions")
+          .select("id")
+          .eq("user_id", userData.user.id)
+          .order("created_at", { ascending: false });
 
-      if (existingSubscription) {
-        // Update existing subscription
+      if (existingSubscriptionsError) {
+        toast.error(existingSubscriptionsError.message);
+        return;
+      }
+
+      const primarySubscriptionId = existingSubscriptions?.[0]?.id;
+
+      if (primarySubscriptionId) {
         const { error } = await supabase
           .from("push_subscriptions")
           .update({
             subscription: JSON.stringify(subscription),
           })
-          .eq("user_id", userData.user.id);
+          .eq("id", primarySubscriptionId);
 
         if (error) {
           toast.error(error.message);
         } else {
+          if ((existingSubscriptions?.length ?? 0) > 1) {
+            const duplicateIds = existingSubscriptions!
+              .slice(1)
+              .map((row) => row.id);
+
+            await supabase
+              .from("push_subscriptions")
+              .delete()
+              .in("id", duplicateIds);
+          }
+
           toast.success("Notification subscription updated successfully!");
           qc.invalidateQueries({
             queryKey: ["notification"],
@@ -212,16 +252,22 @@ export default function NotificationRequest() {
       }
     } catch (error: any) {
       console.error("Error generating subscription:", error);
-      
+
       // Provide more specific error messages
       if (error.name === "NotAllowedError") {
-        toast.error("Notification permission was denied. Please enable notifications in your browser settings.");
+        toast.error(
+          "Notification permission was denied. Please enable notifications in your browser settings.",
+        );
       } else if (error.name === "AbortError") {
         toast.error("Subscription was aborted. Please try again.");
       } else if (error.message?.includes("VAPID")) {
-        toast.error("Push notification configuration error. Please contact support.");
+        toast.error(
+          "Push notification configuration error. Please contact support.",
+        );
       } else {
-        toast.error(`Failed to subscribe to notifications: ${error.message || "Unknown error"}. Please try again.`);
+        toast.error(
+          `Failed to subscribe to notifications: ${error.message || "Unknown error"}. Please try again.`,
+        );
       }
     }
   };

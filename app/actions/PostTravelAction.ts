@@ -5,6 +5,7 @@ import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { PostTravelReportType } from "../../components/types";
 import { CheckUserAssignedToProgramAction } from "@/app/actions/AssignedProgramAction";
 import { PostTravelWithDetails } from "../types";
+import { sendNotificationToUser } from "./NotificationAction";
 
 export async function SelectAllPostTravelReportsByProgramIDAction(
   programID: string,
@@ -186,6 +187,28 @@ export async function InsertPostTravelReportAction({
     `Post travel report submitted for travel order ${data.travel_order.travel_order_no}.`,
   );
 
+  try {
+    const { data: programData, error: programError } = await supabase
+      .from("programs")
+      .select("admin_id")
+      .eq("id", program_id)
+      .single();
+
+    if (programError) throw programError;
+
+    if (programData?.admin_id) {
+      await sendNotificationToUser(
+        `New post-travel report submitted for travel order ${data.travel_order.travel_order_no}.`,
+        programData.admin_id,
+      );
+    }
+  } catch (notificationError) {
+    console.error(
+      "Failed to send post-travel submission notification:",
+      notificationError,
+    );
+  }
+
   return;
 }
 
@@ -224,6 +247,31 @@ export async function ReviewPostTravelAction(postTravelID: string) {
     "Reviewed a Post Travel Report",
     `Reviewed a Post travel report submitted for travel order ${travelOrderNo}.`,
   );
+
+  try {
+    const { data: postTravelOwner, error: postTravelOwnerError } =
+      await supabase
+        .from("post_travel_owner")
+        .select(`*`)
+        .eq("id", postTravelID)
+        .single();
+
+    if (postTravelOwnerError) throw postTravelOwnerError;
+
+    const reportOwnerId = postTravelOwner?.user_id;
+
+    if (reportOwnerId) {
+      await sendNotificationToUser(
+        `Your post-travel report for travel order ${travelOrderNo} has been reviewed.`,
+        reportOwnerId,
+      );
+    }
+  } catch (notificationError) {
+    console.error(
+      "Failed to send post-travel review notification:",
+      notificationError,
+    );
+  }
 
   return;
 }
