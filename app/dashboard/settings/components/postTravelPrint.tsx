@@ -103,7 +103,7 @@ export default function PostTravelPrintCard() {
       >
         <span className="font-bold mb-4">Travel Report Print Settings</span>
         {/* REVIEWER */}
-        <div className="flex items-start justify-between">
+        <div className="flex flex-wrap items-start justify-between">
           <div>
             <Label>Reviewer</Label>
             <span className="text-sm text-muted-foreground">
@@ -117,7 +117,7 @@ export default function PostTravelPrintCard() {
           />
         </div>
         {/* REVIEWER POSITION */}
-        <div className="flex items-start justify-between">
+        <div className="flex flex-wrap items-start justify-between">
           <div>
             <Label>Reviewer Position</Label>
             <span className="text-sm text-muted-foreground">
@@ -134,7 +134,7 @@ export default function PostTravelPrintCard() {
         <Separator />
 
         {/* RECOMMENDING APPROVAL */}
-        <div className="flex items-start justify-between">
+        <div className="flex flex-wrap items-start justify-between">
           <div>
             <Label>Recommendation Approval</Label>
             <span className="text-sm text-muted-foreground">
@@ -149,7 +149,7 @@ export default function PostTravelPrintCard() {
           />
         </div>
         {/* RECOMMENDING APPROVAL POSITION */}
-        <div className="flex items-start justify-between">
+        <div className="flex flex-wrap items-start justify-between">
           <div>
             <Label>Recommendation Approval Position</Label>
             <span className="text-sm text-muted-foreground">
@@ -167,7 +167,7 @@ export default function PostTravelPrintCard() {
         <Separator />
 
         {/* APPROVER */}
-        <div className="flex items-start justify-between">
+        <div className="flex flex-wrap items-start justify-between">
           <div>
             <Label>Approver</Label>
             <span className="text-sm text-muted-foreground">
@@ -182,7 +182,7 @@ export default function PostTravelPrintCard() {
         </div>
 
         {/* APPROVER POSITION */}
-        <div className="flex items-start justify-between">
+        <div className="flex flex-wrap items-start justify-between">
           <div>
             <Label>Approver Position</Label>
             <span className="text-sm text-muted-foreground">
