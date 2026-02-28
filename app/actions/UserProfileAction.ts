@@ -42,6 +42,7 @@ export async function SelectUserProfileAction() {
     .single();
 
   if (error) {
+    console.error("Error fetching user profile:", error);
     throw error;
   }
 

@@ -178,7 +178,6 @@ export async function SelectAllProgramsAction() {
       user_profile:admin_id(fullname)
     `,
     )
-    .eq("deleted_at", null)
     .order("created_at", { ascending: true });
 
   if (error) {

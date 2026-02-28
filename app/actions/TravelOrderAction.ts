@@ -115,7 +115,6 @@ export async function SelectAllTravelOrdersByUserIDAction(userID?: string) {
     )
     .eq("user_id", user_id)
     .eq("is_active", 1)
-    .eq("deleted_at", null)
     .order("created_at", { ascending: false });
 
   if (error) throw error;
@@ -139,7 +138,6 @@ export async function SelectAllTravelOrdersByProgramIDAction(
     `,
     )
     .eq("program_id", programID)
-    .eq("deleted_at", null)
     .order("created_at", { ascending: false });
 
   if (error) throw error;

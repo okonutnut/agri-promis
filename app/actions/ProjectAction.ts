@@ -46,7 +46,6 @@ export async function SelectAllProjectsByProgramIDAction(programID: string) {
       project_location (*)
     `,
     )
-    .eq("deleted_at", null)
     .eq("program_id", programID);
 
   if (error) throw error;

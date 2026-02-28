@@ -15,18 +15,11 @@ export async function InsertActivityLogAction(
   if (userError) {
     throw userError;
   }
-  // ✅ Get the user's IP address
-  const hdrs = await headers();
-  const ip =
-    hdrs.get("x-forwarded-for")?.split(",")[0] ||
-    hdrs.get("x-real-ip") ||
-    "Unknown";
 
   const { error } = await supabase.from("activity_logs").insert({
     code,
     description,
     project_location_id: project_id || null,
-    ip_address: ip === "::1" ? "127.0.0.1" : ip,
     user_id: userData.user.id,
   });
 

@@ -20,6 +20,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Check } from "lucide-react";
+import { SelectAllMonitoringReportsByProjectIDAction } from "@/app/actions/MonitoringAction";
+import { Badge } from "@/components/ui/badge";
 
 function useSearchFilter<T>(
   items: T[],
@@ -45,6 +47,21 @@ export default function ProjectDetailsPage() {
     },
     table: "projects",
   });
+
+  const {
+    data: monitoring,
+    isLoading: monitoringLoading,
+    error: monitoringError,
+  } = useRealtimeQuery({
+    queryKey: ["monitoring_reports", projectID as string],
+    queryFn: async () => {
+      return SelectAllMonitoringReportsByProjectIDAction(projectID as string);
+    },
+    table: "monitoring",
+  });
+
+  console.log("Fetched projects for program:", data);
+  console.log("Fetched monitoring reports:", monitoring);
 
   // Find the project by ID
   const project = data?.find((p) => p.id === projectID);

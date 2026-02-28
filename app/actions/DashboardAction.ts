@@ -366,7 +366,6 @@ export async function SelectProjectDashboardItemsAction(projectID: string) {
   } = await supabase
     .from("project_location")
     .select("*", { count: "exact" })
-    .eq("deleted_at", null)
     .eq("project_id", projectID);
   if (projectLocationsError) throw projectLocationsError;
 

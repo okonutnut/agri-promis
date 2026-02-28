@@ -12,6 +12,7 @@ import { SelectAllTravelOrdersByUserIDAction } from "@/app/actions/TravelOrderAc
 import { useSupabaseSession } from "@/hooks/use-session";
 import { Card } from "@/components/ui/card";
 import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
+import { toast } from "sonner";
 
 type CreatePostTravelFormProps = {
   isAddMode?: boolean;
@@ -87,8 +88,10 @@ export function CreatePostTravelForm({
           images: data.images?.map((img: any) => ({ file: img.file })) || [],
         })
       }
-      invalidateKeys={["post_travel_reports"]}
-      onSuccess={async () => {}}
+      invalidateKeys={["post_travel_reports", "travel_orders"]}
+      onSuccess={async () => {
+        toast.success("Post-Travel Report submitted successfully!");
+      }}
       showDrafts={false}
       enableImageCapture={true}
       programID={programId || undefined}
