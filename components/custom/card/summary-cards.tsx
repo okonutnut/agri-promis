@@ -30,7 +30,7 @@ export default function SummaryCard({
   return (
     <Card
       className={cn(
-        "p-3 sm:p-4 h-auto sm:h-50 w-full relative rounded-md shadow-xs flex flex-col",
+        "p-3 sm:p-4 h-auto sm:h-auto w-full relative rounded-md shadow-xs flex flex-col",
         className,
       )}
     >

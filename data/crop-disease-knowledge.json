@@ -1,0 +1,273 @@
+{
+  "crops": [
+    {
+      "crop": "corn",
+      "pests": [
+        {
+          "name": "Asian Corn Borer",
+          "scientific_name": "Ostrinia furnacalis",
+          "type": "insect",
+          "symptoms": [
+            "holes in corn stalk",
+            "larvae inside stalk",
+            "damaged tassels",
+            "damaged ears"
+          ],
+          "control": [
+            "synchronous planting",
+            "manual removal of egg masses",
+            "release trichogramma parasitoids",
+            "crop rotation",
+            "apply insecticide if infestation is severe"
+          ]
+        },
+        {
+          "name": "White Grub",
+          "scientific_name": "Phyllophaga spp., Cyclocephala spp., Popillia japonica",
+          "type": "insect",
+          "symptoms": [
+            "damaged roots",
+            "wilting seedlings",
+            "reduced plant growth"
+          ],
+          "control": [
+            "deep plowing",
+            "crop rotation",
+            "chemical treatment during severe infestation"
+          ]
+        },
+        {
+          "name": "Corn Seedling Maggot",
+          "scientific_name": "Delia platura",
+          "type": "insect",
+          "symptoms": [
+            "damaged seeds",
+            "seedlings fail to emerge",
+            "rotting seed"
+          ],
+          "control": [
+            "early planting",
+            "seed treatment",
+            "use decomposed organic matter"
+          ]
+        },
+        {
+          "name": "Common Cutworm",
+          "type": "insect",
+          "symptoms": [
+            "cut seedlings at ground level",
+            "chewed leaves",
+            "plants fall over"
+          ],
+          "control": [
+            "remove weeds",
+            "manual collection of larvae",
+            "pyrethroid insecticides if severe"
+          ]
+        },
+        {
+          "name": "Armyworm",
+          "scientific_name": "Spodoptera spp.",
+          "type": "insect",
+          "symptoms": [
+            "large areas of chewed leaves",
+            "rapid crop destruction",
+            "presence of caterpillars"
+          ],
+          "control": ["destroy egg masses", "apply insecticide during outbreak"]
+        },
+        {
+          "name": "Corn Earworm",
+          "scientific_name": "Helicoverpa zea",
+          "type": "insect",
+          "symptoms": [
+            "worms inside corn ears",
+            "damaged kernels",
+            "holes in husks"
+          ],
+          "control": [
+            "plant resistant varieties",
+            "use pheromone traps",
+            "trap crops"
+          ]
+        },
+        {
+          "name": "Aphids",
+          "scientific_name": "Rhopalosiphum maidis",
+          "type": "insect",
+          "symptoms": [
+            "clusters of small insects on leaves",
+            "sticky honeydew",
+            "leaf curling"
+          ],
+          "control": [
+            "encourage lady beetles",
+            "spray soap solution or pepper spray"
+          ]
+        },
+        {
+          "name": "Corn Thrips",
+          "scientific_name": "Frankliniella williamsi",
+          "type": "insect",
+          "symptoms": ["silver streaks on leaves", "leaf distortion"],
+          "control": ["synchronous planting", "remove alternate host plants"]
+        }
+      ],
+      "diseases": [
+        {
+          "name": "Downy Mildew",
+          "type": "fungus",
+          "causal_agent": "Peronosclerospora philippinensis",
+          "symptoms": [
+            "white fungal growth",
+            "yellow streaks on leaves",
+            "stunted plants"
+          ],
+          "control": [
+            "resistant varieties",
+            "destroy infected plants",
+            "fungicide treatment"
+          ]
+        },
+        {
+          "name": "Leaf Rust",
+          "type": "fungus",
+          "causal_agent": "Puccinia polysora",
+          "symptoms": ["brown or orange pustules on leaves"],
+          "control": ["resistant varieties", "apply fungicide early"]
+        },
+        {
+          "name": "Banded Leaf and Sheath Blight",
+          "type": "fungus",
+          "causal_agent": "Rhizoctonia solani",
+          "symptoms": [
+            "banded lesions on leaves",
+            "leaf blight",
+            "rotting sheath"
+          ],
+          "control": [
+            "bury infected plant debris",
+            "avoid dense planting",
+            "deep plowing"
+          ]
+        },
+        {
+          "name": "Bacterial Stalk Rot",
+          "type": "bacteria",
+          "causal_agent": "Erwinia carotovora",
+          "symptoms": ["soft rotting stalk", "foul smell", "plant collapse"],
+          "control": [
+            "balanced fertilizer",
+            "good drainage",
+            "avoid plant injury"
+          ]
+        },
+        {
+          "name": "Corn Mosaic Virus",
+          "type": "virus",
+          "symptoms": ["mosaic yellow patterns on leaves", "stunted growth"],
+          "control": [
+            "remove infected plants",
+            "control aphids",
+            "plant resistant varieties"
+          ]
+        }
+      ]
+    },
+    {
+      "crop": "cassava",
+      "pests": [
+        {
+          "name": "Termites",
+          "type": "insect",
+          "symptoms": ["nibbled stems", "dead plants", "damaged roots"],
+          "control": [
+            "destroy termite mounds",
+            "apply insecticide",
+            "maintain soil moisture"
+          ]
+        },
+        {
+          "name": "Cassava Mealybug",
+          "scientific_name": "Phenacoccus spp.",
+          "type": "insect",
+          "symptoms": [
+            "white waxy insects on stems",
+            "leaf curling",
+            "sooty mold"
+          ],
+          "control": [
+            "remove infected plants",
+            "hot water treatment of cuttings",
+            "introduce predator wasps"
+          ]
+        },
+        {
+          "name": "Cassava Green Mite",
+          "type": "mite",
+          "symptoms": [
+            "yellow spots on leaves",
+            "leaf curling",
+            "stunted growth"
+          ],
+          "control": ["remove infected leaves", "soap spray solution"]
+        },
+        {
+          "name": "Cassava Red Mite",
+          "type": "mite",
+          "symptoms": ["reddish leaves", "protective webbing"],
+          "control": ["natural predators", "remove infected leaves"]
+        },
+        {
+          "name": "Variegated Grasshopper",
+          "scientific_name": "Zonocerus variegatus",
+          "type": "insect",
+          "symptoms": ["defoliated cassava leaves", "chewed stems"],
+          "control": ["destroy egg sites", "manual collection"]
+        }
+      ],
+      "diseases": [
+        {
+          "name": "African Cassava Mosaic Virus",
+          "type": "virus",
+          "symptoms": [
+            "yellow patches on leaves",
+            "wrinkled leaves",
+            "stunted growth"
+          ],
+          "control": [
+            "disease free cuttings",
+            "remove infected plants",
+            "control whiteflies"
+          ]
+        },
+        {
+          "name": "Cassava Brown Streak Disease",
+          "type": "virus",
+          "symptoms": [
+            "yellowing leaves",
+            "brown streaks in roots",
+            "root rot"
+          ],
+          "control": ["use resistant varieties", "remove infected plants"]
+        },
+        {
+          "name": "Cassava Bacterial Blight",
+          "type": "bacteria",
+          "symptoms": ["angular leaf spots", "leaf blight", "stem dieback"],
+          "control": [
+            "use clean cuttings",
+            "avoid infected tools",
+            "remove infected plants"
+          ]
+        },
+        {
+          "name": "Cassava Anthracnose Disease",
+          "type": "fungus",
+          "symptoms": ["dark lesions on stems", "cankers", "branch dieback"],
+          "control": ["destroy infected plants", "use resistant varieties"]
+        }
+      ]
+    }
+  ]
+}

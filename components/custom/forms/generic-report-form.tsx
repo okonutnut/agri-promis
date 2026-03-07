@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Send } from "lucide-react";
 import FormTextarea from "@/components/custom/input/form-textarea";
 import FormMultiInput from "@/components/custom/input/form-multi-input";
+import FormInput from "@/components/custom/input/form-input";
 import NonFormInput from "@/components/custom/input/non-form-input";
 import NonFormTextarea from "@/components/custom/input/non-form-textarea";
 import NonFormMultiInput from "@/components/custom/input/non-form-multi-input";
@@ -50,6 +51,8 @@ const unifiedReportSchema = z.object({
   observation: z.string().optional(),
 
   // Post-travel-specific fields
+  project_title_activity: z.string().optional(),
+  icc_fca_lgu_name: z.string().optional(),
   projects_places_visited: z.string().optional(),
   activities_undertaken: z.string().optional(),
 
@@ -151,6 +154,8 @@ export function GenericReportForm({
       purpose: (values as any)?.purpose || "",
       findings: (values as any)?.findings ? [...(values as any).findings] : [],
       observation: (values as any)?.observation || "",
+      project_title_activity: (values as any)?.project_title_activity || "",
+      icc_fca_lgu_name: (values as any)?.icc_fca_lgu_name || "",
       projects_places_visited: (values as any)?.projects_places_visited || "",
       activities_undertaken: (values as any)?.activities_undertaken || "",
       issues_concern: (values as any)?.issues_concern
@@ -337,6 +342,38 @@ export function GenericReportForm({
               />
             </>
           )}
+
+          {/* Post-travel print metadata */}
+          {type === "post-travel" &&
+            (isAddMode || isDraft ? (
+              <>
+                <FormInput
+                  label="Project Title / Activity:"
+                  name="project_title_activity"
+                  form={form}
+                  readOnly={!(isAddMode || isDraft)}
+                />
+                <FormInput
+                  label="ICC / FCA / LGU Name:"
+                  name="icc_fca_lgu_name"
+                  form={form}
+                  readOnly={!(isAddMode || isDraft)}
+                />
+              </>
+            ) : (
+              <>
+                <NonFormInput
+                  label="Project Title / Activity:"
+                  defaultValue={(values as any)?.project_title_activity || ""}
+                  readOnly
+                />
+                <NonFormInput
+                  label="ICC / FCA / LGU Name:"
+                  defaultValue={(values as any)?.icc_fca_lgu_name || ""}
+                  readOnly
+                />
+              </>
+            ))}
 
           {/* Monitoring-specific fields */}
           {type === "monitoring" && (

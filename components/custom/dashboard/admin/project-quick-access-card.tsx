@@ -55,14 +55,18 @@ export default function ProjectQuickAccessCard() {
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener("quickAccessUpdated", handleCustomStorageChange);
+      window.removeEventListener(
+        "quickAccessUpdated",
+        handleCustomStorageChange,
+      );
       clearInterval(interval);
     };
   }, []);
 
   const { data } = useRealtimeQuery({
     queryKey: ["quick-access-projects", ...projectIDs],
-    queryFn: () => SelectProjectByIDsAction(projectIDs.length > 0 ? projectIDs : []),
+    queryFn: () =>
+      SelectProjectByIDsAction(projectIDs.length > 0 ? projectIDs : []),
     table: "projects",
   });
 
@@ -76,7 +80,7 @@ export default function ProjectQuickAccessCard() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[100px]">Project Name</TableHead>
+                <TableHead className="w-25">Project Name</TableHead>
                 <TableHead className="text-right"></TableHead>
               </TableRow>
             </TableHeader>

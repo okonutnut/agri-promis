@@ -39,13 +39,11 @@ export default function MonitoringReportsChart() {
         <CardContent className="flex-1 p-0">
           <ChartContainer
             config={chartConfig}
-            className="aspect-auto min-h-full w-full"
+            className="aspect-auto h-50 w-full"
           >
             <LineChart
               data={chartData}
               margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
-              width={undefined}
-              height={undefined}
             >
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis

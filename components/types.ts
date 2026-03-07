@@ -125,6 +125,8 @@ export type PostTravelReportType = {
   reviewer_id?: string;
   travel_order_id?: string;
   travel_date_id?: string;
+  project_title_activity?: string;
+  icc_fca_lgu_name?: string;
   projects_places_visited?: string;
   activities_undertaken?: string;
   issues_concern?: string[];

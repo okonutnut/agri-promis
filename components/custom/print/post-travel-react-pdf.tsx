@@ -810,10 +810,14 @@ const PhotoDocumentPage = ({
 type PostTravelReactPDFProps = {
   data: PostTravelWithDetails;
   printSettings: PostTravelPrintSettingsType | undefined;
+  projectTitle?: string;
+  iccFcaLguName?: string;
 };
 export default function PostTravelReactPDF({
   data,
   printSettings,
+  projectTitle,
+  iccFcaLguName,
 }: PostTravelReactPDFProps) {
   const inclusiveDates = () => {
     if (!data?.date) return "N/A";
@@ -873,9 +877,9 @@ export default function PostTravelReactPDF({
       {/* Photo Document Page */}
       {data.photo_url && data.photo_url.length > 0 && (
         <PhotoDocumentPage
-          projectTitle={""}
+          projectTitle={projectTitle || ""}
           location={data?.destination || ""}
-          iccFcaLguName={""}
+          iccFcaLguName={iccFcaLguName || ""}
           preparedBy={data.fullname || data.fullname || ""}
           preparedByRole={data?.position || ""}
           photoUrls={data.photo_url || []}

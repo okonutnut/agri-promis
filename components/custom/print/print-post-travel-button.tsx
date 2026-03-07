@@ -6,7 +6,6 @@ import { Download, Printer, Loader2 } from "lucide-react";
 import { useState } from "react";
 import PostTravelReactPDF from "./post-travel-react-pdf";
 import { PostTravelWithDetails } from "@/app/types";
-import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { useQuery } from "@tanstack/react-query";
 import { SelectSettings } from "@/app/actions/SystemSettingsAction";
 import { PostTravelPrintSettingsType } from "@/app/dashboard/settings/components/postTravelPrint";
@@ -33,6 +32,9 @@ export default function PrintPostTravelButton({
   const [isPrinting, setIsPrinting] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
+  const projectTitle = data.project_title_activity || "";
+  const iccFcaLguName = data.icc_fca_lgu_name || "";
+
   // GET PRINT SETTINGS
   const {
     data: printSettings,
@@ -47,7 +49,12 @@ export default function PrintPostTravelButton({
     setIsPrinting(true);
     try {
       const blob = await pdf(
-        <PostTravelReactPDF data={data} printSettings={printSettings} />,
+        <PostTravelReactPDF
+          data={data}
+          printSettings={printSettings}
+          projectTitle={projectTitle}
+          iccFcaLguName={iccFcaLguName}
+        />,
       ).toBlob();
       const url = URL.createObjectURL(blob);
 
@@ -84,7 +91,12 @@ export default function PrintPostTravelButton({
     setIsDownloading(true);
     try {
       const blob = await pdf(
-        <PostTravelReactPDF data={data} printSettings={printSettings} />,
+        <PostTravelReactPDF
+          data={data}
+          printSettings={printSettings}
+          projectTitle={projectTitle}
+          iccFcaLguName={iccFcaLguName}
+        />,
       ).toBlob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
