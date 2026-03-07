@@ -35,7 +35,12 @@ const formSchema = z.object({
     .refine((val) => /^[A-Za-z\s.]+$/.test(val), {
       message: "Fullname must only contain letters, spaces, and periods",
     }),
-  email: z.string().email("Invalid email address"),
+  email: z
+    .string()
+    .email("Invalid email address")
+    .refine((val) => val === val.toLowerCase(), {
+      message: "Email must be in lowercase",
+    }),
   position: z.string().min(1, "Position is required"),
   role: z.coerce.number().min(1, "Role is required"),
 });

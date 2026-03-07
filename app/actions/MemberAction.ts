@@ -195,23 +195,5 @@ export async function SelectAllMembersByRoleAction(role: number) {
     throw error;
   }
 
-  // Get user email from auth
-  const userIds = data?.map((item) => item.id).filter(Boolean) || [];
-  const { data: userData, error: emailError } =
-    await supabase.auth.admin.listUsers();
-  if (emailError) {
-    throw emailError;
-  }
-  const emailMap = new Map(
-    (userData?.users ?? [])
-      .filter((user) => userIds.includes(user.id))
-      .map((user) => [user.id, user.email]),
-  );
-
-  const result = data?.map((item) => ({
-    ...item,
-    email: emailMap.get(item.id) || "",
-  }));
-
-  return result as UserProfileType[];
+  return data as UserProfileType[];
 }

@@ -38,6 +38,11 @@ const PrintPostTravelButton = dynamic(
   { ssr: false },
 );
 
+const PrintMonitoringReportButton = dynamic(
+  () => import("@/components/custom/print/print-monitoring-report-button"),
+  { ssr: false },
+);
+
 // Unified schema for both report types
 const unifiedReportSchema = z.object({
   project_location_id: z.string().optional(),
@@ -364,12 +369,12 @@ export function GenericReportForm({
               <>
                 <NonFormInput
                   label="Project Title / Activity:"
-                  defaultValue={(values as any)?.project_title_activity || ""}
+                  defaultValue={(values as any)?.project_title_activity || "N/A"}
                   readOnly
                 />
                 <NonFormInput
                   label="ICC / FCA / LGU Name:"
-                  defaultValue={(values as any)?.icc_fca_lgu_name || ""}
+                  defaultValue={(values as any)?.icc_fca_lgu_name || "N/A"}
                   readOnly
                 />
               </>
@@ -518,6 +523,17 @@ export function GenericReportForm({
             (values as PostTravelWithDetails)?.reviewer_id && (
               <PrintPostTravelButton
                 data={values as PostTravelWithDetails}
+                btnName="Print"
+                size="sm"
+              />
+            )}
+
+          {/* Print button for monitoring report in view mode */}
+          {!isAddMode &&
+            type === "monitoring" &&
+            (values as MonitoringReportType)?.reviewed_by_id && (
+              <PrintMonitoringReportButton
+                data={values as MonitoringReportType}
                 btnName="Print"
                 size="sm"
               />
