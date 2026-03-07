@@ -45,6 +45,7 @@ function FieldTechnicianContent({ data }: FieldTechnicianPageProps) {
       data={data ?? []}
       onRowSelect={handleRowSelect}
       onAdd={handleAdd}
+      addButtonLabel="Assign New"
     />
   );
 }

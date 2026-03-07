@@ -34,6 +34,7 @@ function TravelOrderContent({ data }: { data: TravelOrderType[] | undefined }) {
       data={data || []}
       onRowSelect={handleRowSelect}
       onAdd={handleAdd}
+      addButtonLabel="New Travel Order"
     />
   );
 }

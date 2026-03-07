@@ -113,6 +113,12 @@ export default function SelectMemberTable({
           isPending={isPending}
           onAdd={onSubmit}
           onRowSelectionChange={handleRowSelectionChange}
+          addButtonLabel="Assign"
+          confirmOnAdd
+          confirmTitle="Attention!!!"
+          confirmMessage="Are you sure you want to add this user?"
+          confirmButtonLabel="Proceed"
+          className="m-2"
         />
       )}
       <CustomSheetFooter isPending={loadingState} />

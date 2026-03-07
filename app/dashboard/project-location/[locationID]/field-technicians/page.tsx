@@ -10,6 +10,7 @@ import { AssignedProjectsType } from "@/components/types";
 import { getProjectLocationNavItems } from "@/components/sidebar/navitems";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllFieldTechniciansByProjectIDAction } from "@/app/actions/AssignedProjectAction";
+import SelectProjectLocationDetailsByIDAction from "@/app/actions/ProjectLocationAction";
 import SelectMembersTable from "./components/members-sheet/select-members-table";
 import ViewFieldTechnicianPanel from "./components/view-field-technician-panel";
 
@@ -18,6 +19,14 @@ type FieldTechnicianPageProps = {
 };
 function FieldTechnicianContent({ data }: FieldTechnicianPageProps) {
   const { openSheet, closeSheet } = useSheet();
+  const { projectID } = useParams();
+
+  const { data: projectStatus } = useRealtimeQuery({
+    queryKey: ["project-status-check"],
+    queryFn: () =>
+      SelectProjectLocationDetailsByIDAction(projectID as string),
+    table: "project_location",
+  });
 
   const handleRowSelect = (row: AssignedProjectsType) => {
     openSheet(
@@ -43,7 +52,8 @@ function FieldTechnicianContent({ data }: FieldTechnicianPageProps) {
       columns={columns}
       data={data ?? []}
       onRowSelect={handleRowSelect}
-      onAdd={handleAdd}
+      onAdd={projectStatus?.status != 0 ? handleAdd : undefined}
+      addButtonLabel="Assign New"
     />
   );
 }

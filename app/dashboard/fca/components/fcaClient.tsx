@@ -53,6 +53,7 @@ function FCAContent({ values }: FCAContentProps) {
       data={values || []}
       onRowSelect={handleRowSelect}
       onAdd={handleAdd}
+      addButtonLabel="New Entry"
     />
   );
 }

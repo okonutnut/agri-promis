@@ -7,11 +7,12 @@ import { UserProfileType } from "@/components/types";
 import CustomPageLayout, {
   useSheet,
 } from "@/components/custom/layout/custom-page-layout";
+import { CustomTabList } from "@/components/custom/layout/custom-tab-list";
 import { getDashboardNavItems } from "@/components/sidebar/navitems";
 import { useMemo, useState } from "react";
 import { useUniversalRealtime } from "@/hooks/use-universal-realtime";
 import { SelectAllMembersAction } from "@/app/actions/MemberAction";
-import { CustomTabList } from "@/components/custom/layout/custom-tab-list";
+import { FilterByProgram } from "./filter-by-program";
 import TeamMemberPanel from "./team-member-panel";
 
 type TeamMembersContentProps = {
@@ -63,7 +64,8 @@ function TeamMembersContent({ values }: TeamMembersContentProps) {
       data={filteredValues || []}
       onRowSelect={handleRowSelect}
       onAdd={handleAdd}
-      programID={setProgramID}
+      addButtonLabel="Invite member"
+      toolbarContent={<FilterByProgram programID={setProgramID} />}
     />
   );
 }

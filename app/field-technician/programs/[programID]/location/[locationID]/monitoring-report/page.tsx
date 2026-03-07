@@ -102,9 +102,13 @@ function MonitoringReportContent({
       columns={columns}
       data={data || []}
       onRowSelect={handleRowSelect}
-      onAdd={handleAdd}
-      enableUpload={isEnabledReports}
-      topLeftComponent={<ViewDraftsSheet handleModify={handleModify} />}
+      onAdd={isEnabledReports ? handleAdd : undefined}
+      addButtonLabel="New Report"
+      toolbarContent={
+        isEnabledReports ? (
+          <ViewDraftsSheet handleModify={handleModify} />
+        ) : undefined
+      }
     />
   );
 }
