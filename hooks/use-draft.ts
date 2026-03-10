@@ -1,6 +1,8 @@
 import { MonitoringReportType } from "@/components/types";
 import localforage from "localforage";
 
+export type DraftType = "monitoring" | "post-travel" | "travel-order";
+
 // Save draft to IndexedDB
 export const saveDraft = async (key: string, draftData: object) => {
   await localforage.setItem(key, { ...draftData, key: key });
@@ -34,15 +36,24 @@ export const upsertDraft = async (key: string, draftData: object) => {
   }
 };
 
-// Load all drafts
-export const loadDrafts = async (userId: string) => {
+// Load all drafts, optionally filtered by draft_type
+export const loadDrafts = async (
+  userId: string,
+  draftType?: DraftType,
+) => {
   const keys = await localforage.keys();
   const draftKeys = keys.filter((key) => key.startsWith(`draft_${userId}_`));
-  return Promise.all(
+  const drafts = await Promise.all(
     draftKeys.map(
-      async (key) => (await localforage.getItem(key)) as MonitoringReportType
+      async (key) => (await localforage.getItem(key)) as MonitoringReportType & { draft_type?: DraftType }
     )
   );
+
+  if (draftType) {
+    return drafts.filter((d) => d.draft_type === draftType);
+  }
+
+  return drafts;
 };
 
 // Delete a draft

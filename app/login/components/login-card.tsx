@@ -29,7 +29,7 @@ export default function LoginCard() {
           </h1>
           <GoogleSignInButton />
         </CardContent>
-        <p className="text-center text-xs text-gray-500">version 1.0-dev</p>
+        <p className="text-center text-xs text-gray-500">version 1.0</p>
       </Card>
     </section>
   );

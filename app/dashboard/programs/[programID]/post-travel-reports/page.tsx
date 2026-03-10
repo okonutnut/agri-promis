@@ -12,6 +12,7 @@ import { PostTravelForm } from "./components/post-travel-form";
 import { SelectAllPostTravelReportsByProgramIDAction } from "@/app/actions/PostTravelAction";
 import { CreatePostTravelForm } from "@/app/field-technician/post-travel-reports/components/create-post-travel-form";
 import { PostTravelWithDetails } from "@/app/types";
+import ViewDraftsSheet from "@/app/field-technician/post-travel-reports/components/view-drafts-sheet";
 
 type PostTravelContentProps = {
   values: PostTravelWithDetails[] | undefined;
@@ -33,6 +34,18 @@ function PostTravelContent({ values }: PostTravelContentProps) {
     );
   };
 
+  const handleModify = (row: any) => {
+    openSheet(
+      "Modify Post-Travel Draft",
+      <CreatePostTravelForm
+        isAddMode={true}
+        isDraft={true}
+        values={row}
+        key={`draft-${row?.key}`}
+      />,
+    );
+  };
+
   if (!values) return null;
 
   return (
@@ -41,6 +54,7 @@ function PostTravelContent({ values }: PostTravelContentProps) {
       data={values || []}
       onRowSelect={handleRowSelect}
       onAdd={handleAdd}
+      toolbarContent={<ViewDraftsSheet handleModify={handleModify} />}
     />
   );
 }

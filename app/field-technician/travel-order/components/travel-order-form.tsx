@@ -26,6 +26,9 @@ import { SelectAllAssignedProjectsByFieldTechnicianIDAction } from "@/app/action
 import { SelectAllProgramsAction } from "@/app/actions/ProgramAction";
 import { useSelectUserProfileHook } from "@/app/hooks/UserProfileHook";
 import AssignedProgramDropdown from "@/components/custom/dropdown/assigned-program-dropdown";
+import { deleteDraft } from "@/hooks/use-draft";
+import SaveDraftButton from "./save-draft-button";
+import DeleteDraftButton from "./delete-draft-button";
 
 const formSchema = z
   .object({
@@ -67,17 +70,21 @@ type TravelOrderSchema = z.infer<typeof formSchema>;
 
 type IssueTravelOrderFormProps = {
   isAddMode?: boolean;
+  isDraft?: boolean;
   values?: TravelOrderType | null;
 };
 
 export default function IssueTravelOrderForm({
   isAddMode,
+  isDraft,
   values,
 }: IssueTravelOrderFormProps) {
   const { openModal, closeModal } = useModal();
   const { closeSheet } = useSheet();
   const { data: userData } = useSupabaseSession();
   const { data: userProfile } = useSelectUserProfileHook();
+
+  const draftKey = (values as any)?.key as string | undefined;
 
   const form = useForm<TravelOrderSchema>({
     resolver: zodResolver(formSchema),
@@ -115,7 +122,10 @@ export default function IssueTravelOrderForm({
     mutationFn: async (data: TravelOrderSchema) =>
       await InsertTravelOrderAction(data),
     invalidateKeys: ["travel_order"],
-    onSuccess: () => {
+    onSuccess: async () => {
+      if (isDraft && draftKey) {
+        await deleteDraft(draftKey);
+      }
       toast.success("Travel order created successfully.");
       closeSheet();
     },
@@ -160,9 +170,9 @@ export default function IssueTravelOrderForm({
                     label="Travel Order No:"
                     name="travel_order_no"
                     form={form}
-                    readOnly={!isAddMode}
+                    readOnly={!isAddMode && !isDraft}
                   />
-                  {isAddMode ? (
+                  {isAddMode || isDraft ? (
                     <>
                       <NonFormInput
                         label="Issued To:"
@@ -196,16 +206,16 @@ export default function IssueTravelOrderForm({
                     type="datetime-local"
                     name="departure_date"
                     form={form}
-                    readOnly={!isAddMode}
+                    readOnly={!isAddMode && !isDraft}
                   />
                   <FormInput
                     label="Date of Return:"
                     type="datetime-local"
                     name="return_date"
                     form={form}
-                    readOnly={!isAddMode}
+                    readOnly={!isAddMode && !isDraft}
                   />
-                  {isAddMode ? (
+                  {isAddMode || isDraft ? (
                     <FormSelect
                       options={modeOfTransportOptions}
                       label="Mode of Transportation:"
@@ -227,7 +237,7 @@ export default function IssueTravelOrderForm({
               content: (
                 <div className="h-full p-4">
                   <ItineraryOfTravel
-                    isAddMode={isAddMode}
+                    isAddMode={isAddMode || isDraft}
                     itinerary={itinerary}
                     setItinerary={setItinerary}
                     isPending={isPending}
@@ -246,50 +256,65 @@ export default function IssueTravelOrderForm({
         />
       </div>
       <CustomSheetFooter isPending={isPending}>
-        {isAddMode && (
-          <Button
-            variant={isPending ? "ghost" : "default"}
-            disabled={isPending || itinerary.length === 0}
-            size={"sm"}
-            type="button"
-            onClick={() => {
-              // Validate form before opening modal
-              form.trigger("travel_itinerary").then((isValid) => {
-                if (!isValid) {
-                  toast.error("At least one itinerary entry is required.");
-                  return;
-                }
-
-                // Check itinerary length as well
-                if (itinerary.length === 0) {
-                  toast.error("At least one itinerary entry is required.");
-                  return;
-                }
-
-                openModal(
-                  "Attention",
-                  "You confirm that all information provided is correct.",
-                  <Button
-                    className="w-full"
-                    onClick={() => {
-                      form.handleSubmit(onSubmit)();
-                      closeModal();
-                    }}
-                  >
-                    Confirm
-                  </Button>,
-                );
-              });
-            }}
-          >
-            {isPending ? (
-              <Loader2 className="animate-spin" />
-            ) : (
-              <>
-                <Send /> Submit
-              </>
+        {(isAddMode || isDraft) && (
+          <>
+            {/* Delete draft button */}
+            {isDraft && draftKey && (
+              <DeleteDraftButton draftKey={draftKey} />
             )}
-          </Button>
+
+            {/* Save draft button */}
+            <SaveDraftButton
+              draftKey={draftKey}
+              form={form}
+              itinerary={itinerary}
+              isPending={isPending}
+            />
+
+            <Button
+              variant={isPending ? "ghost" : "default"}
+              disabled={isPending || itinerary.length === 0}
+              size={"sm"}
+              type="button"
+              onClick={() => {
+                // Validate form before opening modal
+                form.trigger("travel_itinerary").then((isValid) => {
+                  if (!isValid) {
+                    toast.error("At least one itinerary entry is required.");
+                    return;
+                  }
+
+                  // Check itinerary length as well
+                  if (itinerary.length === 0) {
+                    toast.error("At least one itinerary entry is required.");
+                    return;
+                  }
+
+                  openModal(
+                    "Attention",
+                    "You confirm that all information provided is correct.",
+                    <Button
+                      className="w-full"
+                      onClick={() => {
+                        form.handleSubmit(onSubmit)();
+                        closeModal();
+                      }}
+                    >
+                      Confirm
+                    </Button>,
+                  );
+                });
+              }}
+            >
+              {isPending ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <>
+                  <Send /> Submit
+                </>
+              )}
+            </Button>
+          </>
         )}
       </CustomSheetFooter>
     </form>

@@ -10,6 +10,7 @@ import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { CreatePostTravelForm } from "./components/create-post-travel-form";
 import { SelectAllPostTravelReportsByCurrentUserAction } from "@/app/actions/PostTravelAction";
 import { PostTravelWithDetails } from "@/app/types";
+import ViewDraftsSheet from "./components/view-drafts-sheet";
 
 type PostTravelContentProps = {
   values: PostTravelWithDetails[] | undefined;
@@ -37,6 +38,18 @@ function PostTravelContent({ values }: PostTravelContentProps) {
     );
   };
 
+  const handleModify = (row: any) => {
+    openSheet(
+      "Modify Post-Travel Draft",
+      <CreatePostTravelForm
+        isAddMode={true}
+        isDraft={true}
+        values={row}
+        key={`draft-${row?.key}`}
+      />,
+    );
+  };
+
   if (!values) return null;
 
   return (
@@ -45,6 +58,7 @@ function PostTravelContent({ values }: PostTravelContentProps) {
       data={values || []}
       onRowSelect={handleRowSelect}
       onAdd={handleAdd}
+      toolbarContent={<ViewDraftsSheet handleModify={handleModify} />}
     />
   );
 }

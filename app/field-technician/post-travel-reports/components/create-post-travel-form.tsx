@@ -10,17 +10,21 @@ import { InsertPostTravelReportAction } from "@/app/actions/PostTravelAction";
 import AssignedProgramDropdown from "@/components/custom/dropdown/assigned-program-dropdown";
 import { SelectAllTravelOrdersByUserIDAction } from "@/app/actions/TravelOrderAction";
 import { useSupabaseSession } from "@/hooks/use-session";
-import { Card } from "@/components/ui/card";
 import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
 import { toast } from "sonner";
+import { deleteDraft } from "@/hooks/use-draft";
+import SaveDraftButton from "./save-draft-button";
+import DeleteDraftButton from "./delete-draft-button";
 
 type CreatePostTravelFormProps = {
   isAddMode?: boolean;
+  isDraft?: boolean;
   values?: PostTravelWithDetails;
 };
 
 export function CreatePostTravelForm({
   isAddMode = true,
+  isDraft,
   values,
 }: CreatePostTravelFormProps) {
   const { programID } = useParams();
@@ -75,6 +79,7 @@ export function CreatePostTravelForm({
     <GenericReportForm
       type="post-travel"
       isAddMode={isAddMode}
+      isDraft={isDraft}
       values={values}
       mutationFn={async (data: any) =>
         InsertPostTravelReportAction({
@@ -90,9 +95,15 @@ export function CreatePostTravelForm({
       }
       invalidateKeys={["post_travel_reports", "travel_orders"]}
       onSuccess={async () => {
+        if (isDraft && (values as any)?.key) {
+          await deleteDraft((values as any).key as string);
+        }
         toast.success("Post-Travel Report submitted successfully!");
       }}
-      showDrafts={false}
+      showDrafts={true}
+      draftKey={(values as any)?.key}
+      SaveDraftComponent={SaveDraftButton}
+      DeleteDraftComponent={DeleteDraftButton}
       enableImageCapture={true}
       programID={programId || undefined}
       travelOrdersData={travelOrders || []}

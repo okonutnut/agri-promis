@@ -11,6 +11,7 @@ import { getProgramNavItems } from "@/components/sidebar/navitems";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllTravelOrdersByProgramIDAction } from "@/app/actions/TravelOrderAction";
 import IssueTravelOrderForm from "./components/travel-order-form";
+import ViewDraftsSheet from "@/app/field-technician/travel-order/components/view-drafts-sheet";
 
 type TravelOrderContentProps = {
   values: TravelOrderType[] | undefined;
@@ -36,6 +37,18 @@ function TravelOrderContent({ values }: TravelOrderContentProps) {
     );
   };
 
+  const handleModify = (row: any) => {
+    openSheet(
+      "Modify Travel Order Draft",
+      <IssueTravelOrderForm
+        isAddMode={true}
+        isDraft={true}
+        values={row}
+        key={`draft-${row?.key}`}
+      />
+    );
+  };
+
   if (!values) return null;
 
   return (
@@ -45,6 +58,7 @@ function TravelOrderContent({ values }: TravelOrderContentProps) {
       onRowSelect={handleRowSelect}
       onAdd={handleAdd}
       addButtonLabel="New Travel Order"
+      toolbarContent={<ViewDraftsSheet handleModify={handleModify} />}
     />
   );
 }
