@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { SidebarProvider } from "@/components/ui/sidebar";
 
 export const metadata: Metadata = {
   title: "Agri-ProMIS | Field Technicians",
@@ -11,6 +10,6 @@ export default function FieldTechnicianLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <SidebarProvider>{children}</SidebarProvider>;
+  return <>{children}</>;
 }
 

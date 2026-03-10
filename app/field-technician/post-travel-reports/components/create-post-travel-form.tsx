@@ -10,7 +10,6 @@ import { InsertPostTravelReportAction } from "@/app/actions/PostTravelAction";
 import AssignedProgramDropdown from "@/components/custom/dropdown/assigned-program-dropdown";
 import { SelectAllTravelOrdersByUserIDAction } from "@/app/actions/TravelOrderAction";
 import { useSupabaseSession } from "@/hooks/use-session";
-import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
 import { toast } from "sonner";
 import { deleteDraft } from "@/hooks/use-draft";
 import SaveDraftButton from "./save-draft-button";
@@ -61,19 +60,8 @@ export function CreatePostTravelForm({
     }
   }, [programID, values?.program_id]);
 
-  // Show program selector if not in programID context
-  if (isAddMode && !programId) {
-    return (
-      <>
-        <div className="p-2">
-          <AssignedProgramDropdown
-            onChange={(program) => setProgramId(program)}
-          />
-        </div>
-        <CustomSheetFooter />
-      </>
-    );
-  }
+  // Show inline program selector when not in a programID route context
+  const showProgramSelector = (isAddMode || isDraft) && !programID;
 
   return (
     <GenericReportForm
@@ -108,6 +96,13 @@ export function CreatePostTravelForm({
       programID={programId || undefined}
       travelOrdersData={travelOrders || []}
       isAssignedToProgram={isAssignedToProgram}
+      renderBeforeFields={
+        showProgramSelector ? (
+          <AssignedProgramDropdown
+            onChange={(program) => setProgramId(program)}
+          />
+        ) : undefined
+      }
     />
   );
 }

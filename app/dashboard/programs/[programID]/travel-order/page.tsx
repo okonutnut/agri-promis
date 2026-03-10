@@ -11,7 +11,7 @@ import { getProgramNavItems } from "@/components/sidebar/navitems";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllTravelOrdersByProgramIDAction } from "@/app/actions/TravelOrderAction";
 import IssueTravelOrderForm from "./components/travel-order-form";
-import ViewDraftsSheet from "@/app/field-technician/travel-order/components/view-drafts-sheet";
+import ViewDraftsSheet from "@/components/custom/drafts/view-drafts-sheet";
 
 type TravelOrderContentProps = {
   values: TravelOrderType[] | undefined;
@@ -58,7 +58,19 @@ function TravelOrderContent({ values }: TravelOrderContentProps) {
       onRowSelect={handleRowSelect}
       onAdd={handleAdd}
       addButtonLabel="New Travel Order"
-      toolbarContent={<ViewDraftsSheet handleModify={handleModify} />}
+      toolbarContent={
+        <ViewDraftsSheet
+          handleModify={handleModify}
+          draftType="travel-order"
+          getTitle={(d) => d.travel_order_no || "Untitled"}
+          getSearchTerms={(d) => [
+            d.travel_order_no ?? "",
+            d.departure_date ?? "",
+            d.return_date ?? "",
+            d.mode_of_transport ?? "",
+          ]}
+        />
+      }
     />
   );
 }

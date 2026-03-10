@@ -10,7 +10,7 @@ import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { CreatePostTravelForm } from "./components/create-post-travel-form";
 import { SelectAllPostTravelReportsByCurrentUserAction } from "@/app/actions/PostTravelAction";
 import { PostTravelWithDetails } from "@/app/types";
-import ViewDraftsSheet from "./components/view-drafts-sheet";
+import ViewDraftsSheet from "@/components/custom/drafts/view-drafts-sheet";
 
 type PostTravelContentProps = {
   values: PostTravelWithDetails[] | undefined;
@@ -58,7 +58,20 @@ function PostTravelContent({ values }: PostTravelContentProps) {
       data={values || []}
       onRowSelect={handleRowSelect}
       onAdd={handleAdd}
-      toolbarContent={<ViewDraftsSheet handleModify={handleModify} />}
+      toolbarContent={
+        <ViewDraftsSheet
+          handleModify={handleModify}
+          draftType="post-travel"
+          getTitle={(d) =>
+            d.projects_places_visited || d.activities_undertaken || "Untitled"
+          }
+          getSearchTerms={(d) => [
+            d.projects_places_visited ?? "",
+            d.activities_undertaken ?? "",
+            d.travel_order_no ?? "",
+          ]}
+        />
+      }
     />
   );
 }

@@ -1,4 +1,3 @@
-import { SidebarProvider } from "@/components/ui/sidebar";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -13,7 +12,7 @@ export default function ProgramLayout({
 }>) {
   return (
     <main className="w-full h-screen relative">
-      <SidebarProvider>{children}</SidebarProvider>
+      {children}
     </main>
   );
 }

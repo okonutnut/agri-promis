@@ -10,7 +10,7 @@ import CustomPageLayout, {
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllTravelOrdersByUserIDAction } from "@/app/actions/TravelOrderAction";
 import IssueTravelOrderForm from "./components/travel-order-form";
-import ViewDraftsSheet from "./components/view-drafts-sheet";
+import ViewDraftsSheet from "@/components/custom/drafts/view-drafts-sheet";
 
 function TravelOrderContent({ data }: { data: TravelOrderType[] | undefined }) {
   const { openSheet } = useSheet();
@@ -48,7 +48,19 @@ function TravelOrderContent({ data }: { data: TravelOrderType[] | undefined }) {
       onRowSelect={handleRowSelect}
       onAdd={handleAdd}
       addButtonLabel="New Travel Order"
-      toolbarContent={<ViewDraftsSheet handleModify={handleModify} />}
+      toolbarContent={
+        <ViewDraftsSheet
+          handleModify={handleModify}
+          draftType="travel-order"
+          getTitle={(d) => d.travel_order_no || "Untitled"}
+          getSearchTerms={(d) => [
+            d.travel_order_no ?? "",
+            d.departure_date ?? "",
+            d.return_date ?? "",
+            d.mode_of_transport ?? "",
+          ]}
+        />
+      }
     />
   );
 }
@@ -63,6 +75,7 @@ export default function FieldTechnicianPage() {
   return (
     <CustomPageLayout
       pageTitle="Travel Orders"
+      pageDescription="View and manage your travel orders."
       isLoading={isLoading}
       error={error}
       navItems={getUserDashboardNavItems()}

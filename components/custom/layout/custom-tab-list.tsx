@@ -25,7 +25,7 @@ export function CustomTabList({ tabs, defaultTab }: CustomTabListProps) {
             <TabsTrigger
               key={tab.title}
               value={tab.title}
-              className="rounded-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium whitespace-nowrap flex-shrink-0 min-w-fit"
+              className="rounded-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium whitespace-nowrap shrink-0 min-w-fit"
             >
               {tab.title}
             </TabsTrigger>
@@ -33,11 +33,7 @@ export function CustomTabList({ tabs, defaultTab }: CustomTabListProps) {
         </TabsList>
       </div>
       {tabs.map((tab) => (
-        <TabsContent 
-          key={tab.title} 
-          value={tab.title} 
-          className="p-0 mt-4 sm:mt-6"
-        >
+        <TabsContent key={tab.title} value={tab.title} className="p-0 mb-4">
           {tab.content}
         </TabsContent>
       ))}

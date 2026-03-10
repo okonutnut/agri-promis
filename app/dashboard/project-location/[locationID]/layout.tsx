@@ -1,4 +1,3 @@
-import { SidebarProvider } from "@/components/ui/sidebar";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -11,5 +10,5 @@ export default function ProjectLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <SidebarProvider>{children}</SidebarProvider>;
+  return <>{children}</>;
 }

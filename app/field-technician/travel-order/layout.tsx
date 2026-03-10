@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { SidebarProvider } from "@/components/ui/sidebar";
 
 export const metadata: Metadata = {
   title: "Agri-ProMIS | Travel Order",
@@ -11,5 +10,5 @@ export default function TravelOrderLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <SidebarProvider>{children}</SidebarProvider>;
+  return <>{children}</>;
 }

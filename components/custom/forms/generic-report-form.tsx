@@ -93,6 +93,7 @@ export type GenericReportFormProps = {
   onRemarkReview?: () => void;
   remarkReviewIsPending?: boolean;
   showRemarkReviewButton?: boolean;
+  renderBeforeFields?: React.ReactNode;
 };
 
 export function GenericReportForm({
@@ -119,6 +120,7 @@ export function GenericReportForm({
   onRemarkReview,
   remarkReviewIsPending = false,
   showRemarkReviewButton = false,
+  renderBeforeFields,
 }: GenericReportFormProps) {
   const params = useParams();
   const { closeSheet } = useSheet();
@@ -299,6 +301,9 @@ export function GenericReportForm({
           id="generic-report-form"
           onSubmit={form.handleSubmit(onSubmit, onInvalidSubmit)}
         >
+          {/* Optional content rendered before form fields (e.g. program selector) */}
+          {renderBeforeFields}
+
           {/* Travel Order and Date Selection */}
           {isAddMode || isDraft ? (
             <>

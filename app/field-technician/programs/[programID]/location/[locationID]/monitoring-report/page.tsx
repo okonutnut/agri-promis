@@ -15,7 +15,7 @@ import { SelectProjectDetailsByProjectLocationIDAction } from "@/app/actions/Pro
 import { CheckUserAssignedToProgramByProjectLocationAction } from "@/app/actions/AssignedProgramAction";
 import SkeletonLoading from "@/components/custom/layout/skeleton-loading";
 import UploadFieldReportForm from "./form/monitoring-report-form";
-import ViewDraftsSheet from "./components/view-drafts-sheet";
+import ViewDraftsSheet from "@/components/custom/drafts/view-drafts-sheet";
 
 type MonitoringReportContentType = {
   data: MonitoringReportType[] | undefined;
@@ -106,7 +106,12 @@ function MonitoringReportContent({
       addButtonLabel="New Report"
       toolbarContent={
         isEnabledReports ? (
-          <ViewDraftsSheet handleModify={handleModify} />
+          <ViewDraftsSheet
+            handleModify={handleModify}
+            filterFn={(d) => d.project_location_id === projectID}
+            getTitle={(d) => d.purpose || "Untitled"}
+            getSearchTerms={(d) => [d.purpose ?? "", d.travel_order_no ?? ""]}
+          />
         ) : undefined
       }
     />

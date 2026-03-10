@@ -165,33 +165,28 @@ export default function IssueTravelOrderForm({
             {
               title: "Travel Order Info",
               content: (
-                <div className="space-y-4 overflow-y-auto p-4 h-full">
-                  <FormInput
-                    label="Travel Order No:"
-                    name="travel_order_no"
-                    form={form}
-                    readOnly={!isAddMode && !isDraft}
-                  />
+                <div className="space-y-4 overflow-y-auto px-2 h-full">
                   {isAddMode || isDraft ? (
                     <>
-                      <NonFormInput
-                        label="Issued To:"
-                        defaultValue={userProfile?.fullname || "You"}
-                        readOnly
-                      />
                       <AssignedProgramDropdown
                         onChange={(program) =>
                           form.setValue("program_id", program)
                         }
                       />
+                      <FormInput
+                        label="Travel Order No:"
+                        name="travel_order_no"
+                        form={form}
+                        readOnly={!isAddMode && !isDraft}
+                      />
+                      <NonFormInput
+                        label="Issued To:"
+                        defaultValue={userProfile?.fullname || "You"}
+                        readOnly
+                      />
                     </>
                   ) : (
                     <>
-                      <NonFormInput
-                        label="Issued To:"
-                        defaultValue={values?.user?.fullname}
-                        readOnly={!isAddMode}
-                      />
                       {values?.program_id && (
                         <NonFormInput
                           label="Program:"
@@ -199,6 +194,11 @@ export default function IssueTravelOrderForm({
                           readOnly
                         />
                       )}
+                      <NonFormInput
+                        label="Issued To:"
+                        defaultValue={values?.user?.fullname}
+                        readOnly={!isAddMode}
+                      />
                     </>
                   )}
                   <FormInput
@@ -235,7 +235,7 @@ export default function IssueTravelOrderForm({
             {
               title: "Itinerary of Travel",
               content: (
-                <div className="h-full p-4">
+                <div className="h-full px-2">
                   <ItineraryOfTravel
                     isAddMode={isAddMode || isDraft}
                     itinerary={itinerary}
@@ -259,9 +259,7 @@ export default function IssueTravelOrderForm({
         {(isAddMode || isDraft) && (
           <>
             {/* Delete draft button */}
-            {isDraft && draftKey && (
-              <DeleteDraftButton draftKey={draftKey} />
-            )}
+            {isDraft && draftKey && <DeleteDraftButton draftKey={draftKey} />}
 
             {/* Save draft button */}
             <SaveDraftButton

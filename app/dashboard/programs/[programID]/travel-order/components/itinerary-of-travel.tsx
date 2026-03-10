@@ -13,6 +13,7 @@ import {
 import { useModal } from "@/components/custom/layout/custom-page-layout";
 import ItineraryForm from "./ItineraryForm";
 import { format } from "date-fns";
+import { Trash2 } from "lucide-react";
 
 type ItineraryOfTravelProps = {
   isAddMode?: boolean;
@@ -72,6 +73,27 @@ export default function ItineraryOfTravel({
     );
   };
 
+  const handleDelete = (
+    e: React.MouseEvent,
+    index: number,
+  ) => {
+    e.stopPropagation();
+    openModal(
+      "Remove Entry",
+      "Are you sure you want to remove this itinerary entry?",
+      <Button
+        className="w-full"
+        variant="destructive"
+        onClick={() => {
+          setItinerary((prev) => prev.filter((_, i) => i !== index));
+          closeModal();
+        }}
+      >
+        Remove
+      </Button>,
+    );
+  };
+
   const formatDate = (dateStr?: string, endDateStr?: string) => {
     if (!dateStr) return "-";
     try {
@@ -114,7 +136,8 @@ export default function ItineraryOfTravel({
                 <TableRow>
                   <TableHead className="w-12.5">#</TableHead>
                   <TableHead>Date / Period</TableHead>
-                  <TableHead className="text-end">Destination</TableHead>
+                  <TableHead className={isAddMode ? "" : "text-end"}>Destination</TableHead>
+                  {isAddMode && <TableHead className="w-12" />}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -128,9 +151,22 @@ export default function ItineraryOfTravel({
                     <TableCell>
                       {formatDate(item.date, item.end_date)}
                     </TableCell>
-                    <TableCell className="max-w-50 truncate text-end">
+                    <TableCell className={`max-w-50 truncate ${isAddMode ? "" : "text-end"}`}>
                       {item.destination || "-"}
                     </TableCell>
+                    {isAddMode && (
+                      <TableCell className="text-end pr-2">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={(e) => handleDelete(e, index)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>
