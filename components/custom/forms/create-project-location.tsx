@@ -140,7 +140,7 @@ export default function CreateProjectLocationForm() {
           variant={isPending ? "ghost" : "default"}
           disabled={isPending || disabled}
         >
-          {isPending ? <Spinner /> : "Create Project"}
+          {isPending ? <Spinner /> : "Create Location"}
         </Button>
         <Button
           variant={"outline"}
@@ -148,7 +148,10 @@ export default function CreateProjectLocationForm() {
           disabled={isPending || disabled}
           asChild
         >
-          <Link href={`/dashboard/programs/${programUID}`} prefetch={true}>
+          <Link
+            href={`/dashboard/programs/${programUID}/projects/${projectID}/locations`}
+            prefetch={true}
+          >
             Cancel
           </Link>
         </Button>

@@ -100,7 +100,10 @@ export default function CreateProjectForm() {
           disabled={isPending || disabled}
           asChild
         >
-          <Link href={`/dashboard/programs/${programUID}`} prefetch={true}>
+          <Link
+            href={`/dashboard/programs/${programUID}/projects`}
+            prefetch={true}
+          >
             Cancel
           </Link>
         </Button>
