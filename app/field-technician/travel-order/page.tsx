@@ -10,7 +10,6 @@ import CustomPageLayout, {
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllTravelOrdersByUserIDAction } from "@/app/actions/TravelOrderAction";
 import IssueTravelOrderForm from "./components/travel-order-form";
-import ViewDraftsSheet from "@/components/custom/drafts/view-drafts-sheet";
 
 function TravelOrderContent({ data }: { data: TravelOrderType[] | undefined }) {
   const { openSheet } = useSheet();
@@ -29,18 +28,6 @@ function TravelOrderContent({ data }: { data: TravelOrderType[] | undefined }) {
     );
   };
 
-  const handleModify = (row: any) => {
-    openSheet(
-      "Modify Travel Order Draft",
-      <IssueTravelOrderForm
-        isAddMode={true}
-        isDraft={true}
-        values={row}
-        key={`draft-${row?.key}`}
-      />,
-    );
-  };
-
   return (
     <DataTable
       columns={columns}
@@ -48,19 +35,6 @@ function TravelOrderContent({ data }: { data: TravelOrderType[] | undefined }) {
       onRowSelect={handleRowSelect}
       onAdd={handleAdd}
       addButtonLabel="New Travel Order"
-      toolbarContent={
-        <ViewDraftsSheet
-          handleModify={handleModify}
-          draftType="travel-order"
-          getTitle={(d) => d.travel_order_no || "Untitled"}
-          getSearchTerms={(d) => [
-            d.travel_order_no ?? "",
-            d.departure_date ?? "",
-            d.return_date ?? "",
-            d.mode_of_transport ?? "",
-          ]}
-        />
-      }
     />
   );
 }

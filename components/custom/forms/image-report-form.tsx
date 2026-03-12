@@ -29,7 +29,7 @@ const ImageCarousel = dynamic(
   () => import("@/components/custom/images/image-carousel"),
   {
     ssr: false,
-  }
+  },
 );
 
 type ImageCaptureFormProps = {
@@ -52,12 +52,20 @@ export default function ImageCaptureForm({
   programID: propProgramID,
 }: ImageCaptureFormProps) {
   const params = useParams();
-  const projectID = propProjectID || (Array.isArray(params?.projectID) ? params.projectID[0] : params?.projectID as string);
-  const programID = propProgramID || (Array.isArray(params?.programID) ? params.programID[0] : params?.programID as string);
+  const projectID =
+    propProjectID ||
+    (Array.isArray(params?.projectID)
+      ? params.projectID[0]
+      : (params?.projectID as string));
+  const programID =
+    propProgramID ||
+    (Array.isArray(params?.programID)
+      ? params.programID[0]
+      : (params?.programID as string));
 
   const [isCompressing, setIsCompressing] = useState(false);
   const [fullScreenImage, setFullScreenImage] = useState<ImageData | null>(
-    null
+    null,
   );
 
   const { data: userProfile } = useRealtimeQuery({
@@ -100,11 +108,15 @@ export default function ImageCaptureForm({
         try {
           locationData = await getLongtitudeLatitudeFromGPS();
           if (locationData.error) {
-            toast.warning(`Location unavailable: ${locationData.error}. Images will be saved without location data.`);
+            toast.warning(
+              `Location unavailable: ${locationData.error}. Images will be saved without location data.`,
+            );
           }
         } catch (error) {
           console.error("Error getting GPS location:", error);
-          toast.warning("Failed to get location. Images will be saved without location data.");
+          toast.warning(
+            "Failed to get location. Images will be saved without location data.",
+          );
         }
       }
 
@@ -131,16 +143,19 @@ export default function ImageCaptureForm({
             locationName: undefined,
             error: undefined,
           };
-          
+
           // Use project name if available, otherwise use program name
-          const displayName = project?.projects?.project_name || program?.program_name || "Unknown";
-          
+          const displayName =
+            project?.projects?.project_name ||
+            program?.program_name ||
+            "Unknown";
+
           const overlayedFile = await addOverlayToImage(
             file,
             dateTimeCaptured,
             location,
             userProfile?.fullname || "Unknown User",
-            displayName
+            displayName,
           );
 
           processedFile =
@@ -234,7 +249,7 @@ export default function ImageCaptureForm({
           <>
             <div className="space-y-2">
               <div className="flex gap-4 justify-start overflow-x-auto pb-4">
-                <div className="min-w-[128px] max-w-[200px] h-50">
+                <div className="min-w-32 max-w-50 h-50">
                   <Card
                     className={`h-full w-full flex flex-col items-center justify-center border-2 border-dashed shadow-none transition-colors cursor-pointer relative overflow-hidden ${
                       isLoading ? "opacity-50 pointer-events-none" : ""
@@ -258,7 +273,7 @@ export default function ImageCaptureForm({
                   </Card>
                 </div>
 
-                <div className="min-w-[128px] max-w-[200px] h-50">
+                <div className="min-w-32 max-w-50 h-50">
                   <Card
                     className={`h-full w-full flex flex-col items-center justify-center border-2 border-dashed shadow-none transition-colors cursor-pointer relative overflow-hidden ${
                       isLoading ? "opacity-50 pointer-events-none" : ""
@@ -284,7 +299,7 @@ export default function ImageCaptureForm({
                 {images.map((image) => (
                   <div
                     key={image.id}
-                    className="relative min-w-[128px] max-w-[200px] group"
+                    className="relative min-w-32 max-w-50 group"
                   >
                     <div
                       className="relative cursor-pointer h-50"

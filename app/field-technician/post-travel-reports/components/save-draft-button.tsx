@@ -11,7 +11,7 @@ import { upsertDraft } from "@/hooks/use-draft";
 import { useSheet } from "@/components/custom/layout/custom-page-layout";
 
 interface SaveDraftButtonProps {
-  draftKey: string;
+  draftKey?: string;
   form: UseFormReturn<any>;
   images: ImageData[];
   isPending: boolean;

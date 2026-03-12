@@ -397,7 +397,6 @@ export async function InsertMonitoringReportAction({
   remarks,
   travel_order_id,
   travel_date_id,
-  project_location,
 }: MonitoringReportType) {
   // Remove the image requirement check
   // if (!images?.length) throw new Error("No images provided");

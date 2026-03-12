@@ -24,9 +24,6 @@ import { toast } from "sonner";
 import { CustomTabList } from "@/components/custom/layout/custom-tab-list";
 import { SoftDeleteAction } from "@/app/actions/DeleteAction";
 import { Spinner } from "@/components/ui/spinner";
-import { deleteDraft } from "@/hooks/use-draft";
-import SaveDraftButton from "@/app/field-technician/travel-order/components/save-draft-button";
-import DeleteDraftButton from "@/app/field-technician/travel-order/components/delete-draft-button";
 
 const formSchema = z
   .object({
@@ -75,20 +72,16 @@ type TravelOrderSchema = z.infer<typeof formSchema>;
 
 type IssueTravelOrderFormProps = {
   isAddMode?: boolean;
-  isDraft?: boolean;
   values?: TravelOrderType | null;
 };
 
 export default function IssueTravelOrderForm({
   isAddMode,
-  isDraft,
   values,
 }: IssueTravelOrderFormProps) {
   const { programID } = useParams();
   const { openModal, closeModal } = useModal();
   const { closeSheet } = useSheet();
-
-  const draftKey = (values as any)?.key as string | undefined;
 
   const form = useForm<TravelOrderSchema>({
     resolver: zodResolver(formSchema),
@@ -149,9 +142,6 @@ export default function IssueTravelOrderForm({
 
     mutate(data, {
       onSuccess: async () => {
-        if (isDraft && draftKey) {
-          await deleteDraft(draftKey);
-        }
         toast.success("Travel order inserted successfully.");
         closeSheet();
       },
@@ -194,9 +184,9 @@ export default function IssueTravelOrderForm({
                     label="Travel Order No:"
                     name="travel_order_no"
                     form={form}
-                    readOnly={!isAddMode && !isDraft}
+                    readOnly={!isAddMode}
                   />
-                  {isAddMode || isDraft ? (
+                  {isAddMode ? (
                     <UserComboBox form={form} />
                   ) : (
                     <NonFormInput
@@ -230,16 +220,16 @@ export default function IssueTravelOrderForm({
                     type="datetime-local"
                     name="departure_date"
                     form={form}
-                    readOnly={!isAddMode && !isDraft}
+                    readOnly={!isAddMode}
                   />
                   <FormInput
                     label="Date of Return:"
                     type="datetime-local"
                     name="return_date"
                     form={form}
-                    readOnly={!isAddMode && !isDraft}
+                    readOnly={!isAddMode}
                   />
-                  {isAddMode || isDraft ? (
+                  {isAddMode ? (
                     <FormSelect
                       options={modeOfTransportOptions}
                       label="Mode of Transportation:"
@@ -261,7 +251,7 @@ export default function IssueTravelOrderForm({
               content: (
                 <div className="h-full p-4">
                   <ItineraryOfTravel
-                    isAddMode={isAddMode || isDraft}
+                    isAddMode={isAddMode}
                     itinerary={itinerary}
                     setItinerary={setItinerary}
                     isPending={isPending}
@@ -280,20 +270,8 @@ export default function IssueTravelOrderForm({
         />
       </div>
       <CustomSheetFooter isPending={isPending || isDeletePending}>
-        {isAddMode || isDraft ? (
+        {isAddMode ? (
           <>
-            {/* Delete draft button */}
-            {isDraft && draftKey && (
-              <DeleteDraftButton draftKey={draftKey} />
-            )}
-
-            {/* Save draft button */}
-            <SaveDraftButton
-              draftKey={draftKey}
-              form={form}
-              itinerary={itinerary}
-              isPending={isPending}
-            />
 
             <Button
               variant={isPending ? "ghost" : "default"}

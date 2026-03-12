@@ -374,7 +374,9 @@ export function GenericReportForm({
               <>
                 <NonFormInput
                   label="Project Title / Activity:"
-                  defaultValue={(values as any)?.project_title_activity || "N/A"}
+                  defaultValue={
+                    (values as any)?.project_title_activity || "N/A"
+                  }
                   readOnly
                 />
                 <NonFormInput
@@ -609,17 +611,14 @@ export function GenericReportForm({
           )}
 
           {/* Save draft button */}
-          {(isAddMode || isDraft) &&
-            showDrafts &&
-            SaveDraftComponent &&
-            draftKey && (
-              <SaveDraftComponent
-                draftKey={draftKey}
-                form={form}
-                images={images ?? []}
-                isPending={isPending}
-              />
-            )}
+          {(isAddMode || isDraft) && showDrafts && SaveDraftComponent && (
+            <SaveDraftComponent
+              draftKey={draftKey}
+              form={form}
+              images={images ?? []}
+              isPending={isPending}
+            />
+          )}
 
           {/* Submit button */}
           {(isAddMode || isDraft) && (

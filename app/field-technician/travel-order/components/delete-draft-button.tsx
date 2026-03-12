@@ -1,1 +1,0 @@
-export { default } from "@/components/custom/drafts/delete-draft-button";

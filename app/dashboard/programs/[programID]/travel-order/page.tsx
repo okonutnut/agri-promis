@@ -11,7 +11,6 @@ import { getProgramNavItems } from "@/components/sidebar/navitems";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
 import { SelectAllTravelOrdersByProgramIDAction } from "@/app/actions/TravelOrderAction";
 import IssueTravelOrderForm from "./components/travel-order-form";
-import ViewDraftsSheet from "@/components/custom/drafts/view-drafts-sheet";
 
 type TravelOrderContentProps = {
   values: TravelOrderType[] | undefined;
@@ -26,26 +25,14 @@ function TravelOrderContent({ values }: TravelOrderContentProps) {
         isAddMode={false}
         values={row}
         key={`view-${row.id}`}
-      />
+      />,
     );
   };
 
   const handleAdd = () => {
     openSheet(
       "Issue Travel Order",
-      <IssueTravelOrderForm isAddMode={true} values={null} key="add-mode" />
-    );
-  };
-
-  const handleModify = (row: any) => {
-    openSheet(
-      "Modify Travel Order Draft",
-      <IssueTravelOrderForm
-        isAddMode={true}
-        isDraft={true}
-        values={row}
-        key={`draft-${row?.key}`}
-      />
+      <IssueTravelOrderForm isAddMode={true} values={null} key="add-mode" />,
     );
   };
 
@@ -58,19 +45,6 @@ function TravelOrderContent({ values }: TravelOrderContentProps) {
       onRowSelect={handleRowSelect}
       onAdd={handleAdd}
       addButtonLabel="New Travel Order"
-      toolbarContent={
-        <ViewDraftsSheet
-          handleModify={handleModify}
-          draftType="travel-order"
-          getTitle={(d) => d.travel_order_no || "Untitled"}
-          getSearchTerms={(d) => [
-            d.travel_order_no ?? "",
-            d.departure_date ?? "",
-            d.return_date ?? "",
-            d.mode_of_transport ?? "",
-          ]}
-        />
-      }
     />
   );
 }

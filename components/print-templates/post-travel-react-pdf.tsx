@@ -572,6 +572,7 @@ type PhotoDocumentPageProps = {
   preparedBy?: string;
   preparedByRole?: string;
   photoUrls?: string[];
+  printSettings?: PostTravelPrintSettingsType | undefined;
 };
 const PhotoDocumentPage = ({
   projectTitle,
@@ -580,6 +581,7 @@ const PhotoDocumentPage = ({
   preparedBy,
   preparedByRole,
   photoUrls,
+  printSettings,
 }: PhotoDocumentPageProps) => (
   <Page
     size="FOLIO"
@@ -605,7 +607,7 @@ const PhotoDocumentPage = ({
         fontWeight: "bold",
       }}
     >
-      POST TRAVEL REPORT
+      POST ACTIVITY REPORT
     </Text>
 
     {/* MAIN TABLE */}
@@ -755,9 +757,9 @@ const PhotoDocumentPage = ({
             borderBottomWidth: 1,
           }}
         >
-          JONATHAN L. ARGONIA
+          {printSettings?.reviewer?.toUpperCase() || ""}
         </Text>
-        <Text>Agri II/APCO</Text>
+        <Text>{printSettings?.reviewerPosition?.toUpperCase() || ""}</Text>
       </View>
       <View
         style={{
@@ -777,9 +779,11 @@ const PhotoDocumentPage = ({
             borderBottomWidth: 1,
           }}
         >
-          MARVIN B. LUIS, DPA
+          {printSettings?.recommendationApproval?.toUpperCase() || ""}
         </Text>
-        <Text>OIC-Chief, Field Operations Division</Text>
+        <Text>
+          {printSettings?.recommendationApprovalPosition?.toUpperCase() || ""}
+        </Text>
       </View>
       <View
         style={{
@@ -798,9 +802,9 @@ const PhotoDocumentPage = ({
             borderBottomWidth: 1,
           }}
         >
-          ROBERTO C. BUSANIA, DVM
+          {printSettings?.approver?.toUpperCase() || ""}
         </Text>
-        <Text>RTD for Operations and Extension</Text>
+        <Text>{printSettings?.approverPosition?.toUpperCase() || ""}</Text>
       </View>
     </View>
   </Page>
