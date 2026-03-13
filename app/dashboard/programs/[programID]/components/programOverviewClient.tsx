@@ -12,56 +12,21 @@ import {
 import { useParams, useSearchParams } from "next/navigation";
 import { getProgramNavItems } from "@/components/sidebar/navitems";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
-import { SelectAllProjectsByProgramIDAction } from "@/app/actions/ProjectAction";
-import { SelectProgramByIdAction } from "@/app/actions/ProgramAction";
-import { SelectAllTravelOrdersByProgramIDAction } from "@/app/actions/TravelOrderAction";
-import { SelectAllPostTravelReportsByProgramIDAction } from "@/app/actions/PostTravelAction";
+import { SelectProgramDashboardDataAction } from "@/app/actions/ProgramAction";
 import CustomPageLayout from "@/components/custom/layout/custom-page-layout";
 import SummaryCard from "@/components/custom/card/summary-cards";
-import { SelectAllMonitoringReportsByProgramIDAction } from "@/app/actions/MonitoringAction";
 
 export default function ProgramOverviewClient() {
   const { programID } = useParams();
   const searchParams = useSearchParams();
 
-  const { data: programData, isLoading: programLoading } = useRealtimeQuery({
-    queryKey: ["programDetails", programID as string],
-    queryFn: () => SelectProgramByIdAction(programID as string),
-    table: "programs",
-  });
-
+  // Single optimized query instead of 5 separate queries
   const { data, isLoading, error } = useRealtimeQuery({
-    queryKey: ["allProjectsByProgramId", programID as string],
-    queryFn: () => {
-      return SelectAllProjectsByProgramIDAction(programID as string);
-    },
-    table: "projects",
+    queryKey: ["programDashboardData", programID as string],
+    queryFn: () => SelectProgramDashboardDataAction(programID as string),
+    table: "programs",
+    staleTime: 60000, // Cache for 1 minute since this is summary data
   });
-
-  const { data: monitoringData, isLoading: monitoringLoading } =
-    useRealtimeQuery({
-      queryKey: ["allMonitoringReports", programID as string],
-      queryFn: () => {
-        return SelectAllMonitoringReportsByProgramIDAction(programID as string);
-      },
-      table: "monitoring",
-    });
-
-  const { data: travelOrders, isLoading: travelOrdersLoading } =
-    useRealtimeQuery({
-      queryKey: ["travelOrdersByProgramId", programID as string],
-      queryFn: () =>
-        SelectAllTravelOrdersByProgramIDAction(programID as string),
-      table: "travel_order",
-    });
-
-  const { data: postTravelReports, isLoading: postTravelLoading } =
-    useRealtimeQuery({
-      queryKey: ["postTravelReportsByProgramId", programID as string],
-      queryFn: () =>
-        SelectAllPostTravelReportsByProgramIDAction(programID as string),
-      table: "post_travel",
-    });
 
   const stats = useMemo(() => {
     if (!data)
@@ -72,16 +37,28 @@ export default function ProgramOverviewClient() {
         totalPostTravels: 0,
         upcomingPostTravels: 0,
         totalTravelOrders: 0,
+        totalMonitoringReports: 0,
+        programName: "",
+        programDescription: "",
       };
 
-    const totalProjects = data.length;
+    const {
+      program,
+      projects,
+      travelOrders,
+      postTravelReports,
+      monitoringReports
+    } = data;
+
+    const totalProjects = projects?.length || 0;
 
     let totalLocations = 0;
     let activeLocations = 0;
-    data.forEach((project) => {
+
+    projects?.forEach((project: any) => {
       const locations = project.project_location || [];
       totalLocations += locations.length;
-      activeLocations += locations.filter((loc) => loc.status === 1).length;
+      activeLocations += locations.filter((loc: any) => loc.status === 1).length;
     });
 
     const filteredTravelOrders = travelOrders || [];
@@ -89,32 +66,25 @@ export default function ProgramOverviewClient() {
     const totalTravelOrders = filteredTravelOrders.length;
     let upcomingPostTravels = 0;
 
-    filteredTravelOrders.forEach((to) => {
-      const isActive =
-        to.is_active === 1 ||
-        to.is_active === true ||
-        to.is_active === "1" ||
-        Boolean(to.is_active);
+    filteredTravelOrders.forEach((to: any) => {
+      const isActive = to.is_active === 1 ||
+                      to.is_active === true ||
+                      to.is_active === "1" ||
+                      Boolean(to.is_active);
 
       if (isActive) {
-        const hasFutureDeparture =
-          to.departure_date && new Date(to.departure_date) > now;
-        const hasFutureReturn =
-          to.return_date && new Date(to.return_date) > now;
+        const hasFutureDeparture = to.departure_date && new Date(to.departure_date) > now;
+        const hasFutureReturn = to.return_date && new Date(to.return_date) > now;
 
         const hasFutureItinerary = to.travel_itinerary?.some(
           (itinerary: { date?: string; end_date?: string }) => {
-            const itineraryDate = itinerary.date
-              ? new Date(itinerary.date)
-              : null;
-            const itineraryEndDate = itinerary.end_date
-              ? new Date(itinerary.end_date)
-              : null;
+            const itineraryDate = itinerary.date ? new Date(itinerary.date) : null;
+            const itineraryEndDate = itinerary.end_date ? new Date(itinerary.end_date) : null;
             return (
               (itineraryDate && itineraryDate > now) ||
               (itineraryEndDate && itineraryEndDate > now)
             );
-          },
+          }
         );
 
         if (hasFutureDeparture || hasFutureReturn || hasFutureItinerary) {
@@ -124,7 +94,7 @@ export default function ProgramOverviewClient() {
     });
 
     const totalPostTravels = postTravelReports?.length || 0;
-    const totalMonitoringReports = monitoringData?.length || 0;
+    const totalMonitoringReports = monitoringReports?.length || 0;
 
     return {
       totalProjects,
@@ -134,23 +104,25 @@ export default function ProgramOverviewClient() {
       upcomingPostTravels,
       totalTravelOrders,
       totalMonitoringReports,
+      programName: program?.program_name || "",
+      programDescription: program?.description || "",
     };
-  }, [data, travelOrders, postTravelReports, monitoringData]);
+  }, [data]);
 
   return (
     <CustomPageLayout
       pageTitle={
-        searchParams?.get("i") && data
-          ? data[Number(searchParams.get("i"))]?.project_name
-          : programData?.program_name || "Program Dashboard"
+        searchParams?.get("i") && data?.projects
+          ? data.projects[Number(searchParams.get("i"))]?.project_name
+          : stats.programName || "Program Dashboard"
       }
       pageDescription={
         searchParams?.get("i")
           ? "Project locations and details."
-          : programData?.description ||
+          : stats.programDescription ||
             "Overview of program projects and statistics."
       }
-      isLoading={isLoading || programLoading}
+      isLoading={isLoading}
       error={error}
       navItems={getProgramNavItems(programID as string)}
     >
@@ -189,7 +161,7 @@ export default function ProgramOverviewClient() {
           title="Travel Orders"
           description="Total Travel Orders Issued"
           icon={FileText}
-          isLoading={travelOrdersLoading}
+          isLoading={isLoading}
         >
           <strong className="text-3xl sm:text-4xl">
             {stats.totalTravelOrders}
@@ -199,7 +171,7 @@ export default function ProgramOverviewClient() {
           title="Travel Reports"
           description="Total Post Travel Reports"
           icon={Plane}
-          isLoading={postTravelLoading}
+          isLoading={isLoading}
         >
           <strong className="text-3xl sm:text-4xl">
             {stats.totalPostTravels}
@@ -209,7 +181,7 @@ export default function ProgramOverviewClient() {
           title="Monitoring"
           description="Total Monitoring Reports"
           icon={Cctv}
-          isLoading={monitoringLoading}
+          isLoading={isLoading}
         >
           <strong className="text-3xl sm:text-4xl">
             {stats.totalMonitoringReports}

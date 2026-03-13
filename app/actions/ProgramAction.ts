@@ -238,3 +238,104 @@ export async function SelectAllProgramsWithProjectsAction() {
 
   return data;
 }
+
+export async function SelectProgramDashboardDataAction(programId: string) {
+  const supabase = await createClient();
+
+  try {
+    // Fetch program with projects and locations in one query
+    const { data: programData, error: programError } = await supabase
+      .from("programs")
+      .select(`
+        *,
+        projects (
+          *,
+          project_location (*)
+        )
+      `)
+      .eq("id", programId)
+      .single();
+
+    if (programError) {
+      throw programError;
+    }
+
+    // Fetch related travel orders
+    const { data: travelOrders, error: travelError } = await supabase
+      .from("travel_order")
+      .select(`
+        *,
+        user:user_profile!travel_order_user_id_fkey(fullname),
+        created_by:user_profile!travel_order_created_by_fkey(fullname),
+        travel_itinerary:travel_order_itinerary_items(*)
+      `)
+      .eq("program_id", programId)
+      .order("created_at", { ascending: false });
+
+    if (travelError) {
+      throw travelError;
+    }
+
+    // Fetch related post travel reports
+    const { data: postTravelReports, error: postTravelError } = await supabase
+      .from("post_travel_with_order")
+      .select(`*`)
+      .eq("program_id", programId)
+      .order("created_at", { ascending: false });
+
+    if (postTravelError) {
+      throw postTravelError;
+    }
+
+    // Fetch related monitoring reports
+    let monitoringReports = [];
+    if (programData.projects && programData.projects.length > 0) {
+      const projectIds = programData.projects.map((p: any) => p.id);
+
+      if (projectIds.length > 0) {
+        // Get project locations for these projects
+        const { data: projectLocations, error: locError } = await supabase
+          .from("project_location")
+          .select("id")
+          .in("project_id", projectIds);
+
+        if (locError) {
+          throw locError;
+        }
+
+        const projectLocationIds = projectLocations?.map((loc: any) => loc.id) || [];
+
+        if (projectLocationIds.length > 0) {
+          const { data: monitoringData, error: monitoringError } = await supabase
+            .from("monitoring")
+            .select(`
+              *,
+              project_location:project_location(*, projects(*)),
+              travel_order:travel_order(travel_order_no, travel_itinerary:travel_order_itinerary_items(*)),
+              reporter:user_profile!monitoring_reporter_id_fkey(fullname),
+              reviewedBy:user_profile!monitoring_reviewed_by_id_fkey(fullname)
+            `)
+            .in("project_location_id", projectLocationIds)
+            .order("created_at", { ascending: false });
+
+          if (monitoringError) {
+            throw monitoringError;
+          }
+
+          monitoringReports = monitoringData || [];
+        }
+      }
+    }
+
+    return {
+      program: programData,
+      projects: programData.projects || [],
+      travelOrders: travelOrders || [],
+      postTravelReports: postTravelReports || [],
+      monitoringReports: monitoringReports
+    };
+  } catch (error) {
+    console.error("Error fetching program dashboard data:", error);
+    throw error;
+  }
+}
