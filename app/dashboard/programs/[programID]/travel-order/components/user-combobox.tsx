@@ -49,7 +49,7 @@ export function UserComboBox({ form }: UserComboBoxProps) {
             <ChevronsUpDown className="opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+        <PopoverContent className="w-(--radix-popover-trigger-width) p-0">
           <Command>
             <CommandInput placeholder="Search users..." className="h-9" />
             <CommandList>
@@ -69,7 +69,7 @@ export function UserComboBox({ form }: UserComboBoxProps) {
                     <Check
                       className={cn(
                         "ml-auto",
-                        value === user.id ? "opacity-100" : "opacity-0"
+                        value === user.id ? "opacity-100" : "opacity-0",
                       )}
                     />
                   </CommandItem>

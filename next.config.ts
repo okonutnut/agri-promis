@@ -3,12 +3,25 @@
 import type { NextConfig } from "next";
 import withBundleAnalyzer from "@next/bundle-analyzer";
 import path from "path";
+import nextPWA from "@ducanh2912/next-pwa";
 
-const withPWA = require("@ducanh2912/next-pwa").default({
+type ExtendedPWAOptions = {
+  register?: boolean;
+  skipWaiting?: boolean;
+  fallbacks?: {
+    document?: string;
+  };
+  dest: string;
+  workboxOptions?: Record<string, unknown>;
+};
+
+const withPWA = nextPWA({
   dest: "public",
   register: true,
   skipWaiting: true,
-  disable: process.env.NODE_ENV === "development",
+  fallbacks: {
+    document: "/~offline",
+  },
   workboxOptions: {
     disableDevLogs: true,
     runtimeCaching: [
@@ -76,7 +89,7 @@ const withPWA = require("@ducanh2912/next-pwa").default({
       },
     ],
   },
-});
+} as ExtendedPWAOptions);
 
 const nextConfig: NextConfig = {
   productionBrowserSourceMaps: true,
@@ -102,6 +115,13 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withBundleAnalyzer({ enabled: !!process.env.ANALYZE })(
-  withPWA(nextConfig),
-);
+const isDev = process.env.NODE_ENV === "development";
+const isPWADev = !!process.env.ENABLE_PWA_DEV;
+const analyzed = withBundleAnalyzer({ enabled: !!process.env.ANALYZE });
+
+// In normal dev (Turbopack): skip withPWA entirely to avoid webpack/Turbopack conflict.
+// In dev:pwa (ENABLE_PWA_DEV=true, no Turbopack): apply withPWA so the SW is generated.
+// In production: always apply withPWA.
+export default isDev && !isPWADev
+  ? analyzed(nextConfig)
+  : analyzed(withPWA(nextConfig));

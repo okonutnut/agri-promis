@@ -1,6 +1,7 @@
 "use client";
 
 import { MonitoringReportType } from "@/components/types";
+import { Badge } from "@/components/ui/badge";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 
@@ -16,6 +17,25 @@ export const columns: ColumnDef<MonitoringReportType>[] = [
   {
     accessorKey: "travel_order.travel_order_no",
     header: "Travel Order No",
+  },
+  {
+    id: "photo_docs",
+    header: "Photo Docs",
+    accessorFn: (row) => row.photo_url,
+    cell: ({ row }) => {
+      const photos = row.original.photo_url;
+      const hasPhoto =
+        Array.isArray(photos) &&
+        photos.some(
+          (photo) => typeof photo === "string" && photo.trim().length > 0,
+        );
+
+      return (
+        <Badge variant={hasPhoto ? "default" : "secondary"}>
+          {hasPhoto ? "w/ photo" : "no photo"}
+        </Badge>
+      );
+    },
   },
   {
     accessorKey: "purpose",
@@ -49,9 +69,9 @@ export const columns: ColumnDef<MonitoringReportType>[] = [
       <div className="text-end">
         {format(
           new Date(
-            new Date(getValue() as string).getTime() + 8 * 60 * 60 * 1000
+            new Date(getValue() as string).getTime() + 8 * 60 * 60 * 1000,
           ),
-          "PPp"
+          "PPp",
         )}
       </div>
     ),

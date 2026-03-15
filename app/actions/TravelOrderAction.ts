@@ -144,3 +144,86 @@ export async function SelectAllTravelOrdersByProgramIDAction(
 
   return data;
 }
+
+export async function CheckTravelOrderLinkedAction(travelOrderId: string) {
+  const supabase = await createClient();
+
+  const { count: monitoringCount, error: monitoringError } = await supabase
+    .from("monitoring")
+    .select("id", { count: "exact", head: true })
+    .eq("travel_order_no", travelOrderId);
+
+  if (monitoringError) throw monitoringError;
+
+  const { count: postTravelCount, error: postTravelError } = await supabase
+    .from("post_travel")
+    .select("id", { count: "exact", head: true })
+    .eq("travel_order_id", travelOrderId);
+
+  if (postTravelError) throw postTravelError;
+
+  const linkedTo: string[] = [];
+  if ((monitoringCount ?? 0) > 0) linkedTo.push("Monitoring Report");
+  if ((postTravelCount ?? 0) > 0) linkedTo.push("Travel Report");
+
+  return {
+    isLinked: linkedTo.length > 0,
+    linkedTo,
+  };
+}
+
+export async function UpdateTravelOrderAction(
+  id: string,
+  data: TravelOrderType,
+) {
+  const supabase = await createClient();
+
+  const { travel_itinerary, ...rest } = data;
+
+  const { data: updated, error } = await supabase
+    .from("travel_order")
+    .update({ ...rest })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  // Replace itinerary: delete old items then insert latest items
+  const { error: deleteItineraryError } = await supabase
+    .from("travel_order_itinerary_items")
+    .delete()
+    .eq("travel_order_id", id);
+
+  if (deleteItineraryError) throw deleteItineraryError;
+
+  if (travel_itinerary && travel_itinerary.length > 0) {
+    const payload = travel_itinerary.map((item) => ({
+      date: item.date,
+      end_date: item.end_date,
+      destination: item.destination,
+      purpose: item.purpose,
+      departure_time: item.departure_time,
+      arrival_time: item.arrival_time,
+      travel_order_id: id,
+    }));
+
+    const { error: insertItineraryError } = await supabase
+      .from("travel_order_itinerary_items")
+      .insert(payload);
+
+    if (insertItineraryError) throw insertItineraryError;
+  }
+
+  // Activity log is non-critical
+  try {
+    await InsertActivityLogAction(
+      "Updated a Travel Order",
+      `Travel order ${data.travel_order_no} has been updated.`,
+    );
+  } catch (error) {
+    console.error("Failed to log activity:", error);
+  }
+
+  return updated;
+}

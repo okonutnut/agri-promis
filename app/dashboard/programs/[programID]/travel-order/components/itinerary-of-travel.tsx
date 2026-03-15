@@ -17,21 +17,27 @@ import { Trash2 } from "lucide-react";
 
 type ItineraryOfTravelProps = {
   isAddMode?: boolean;
-  setItinerary: React.Dispatch<React.SetStateAction<TravelOrderProjectsType[]>>;
+  isEditMode?: boolean;
+  setItineraryAction: React.Dispatch<
+    React.SetStateAction<TravelOrderProjectsType[]>
+  >;
   itinerary: TravelOrderProjectsType[];
   isPending?: boolean;
   departureDate?: string;
   returnDate?: string;
 };
+
 export default function ItineraryOfTravel({
   isAddMode,
-  setItinerary,
+  isEditMode,
+  setItineraryAction,
   itinerary,
   isPending,
   departureDate,
   returnDate,
 }: ItineraryOfTravelProps) {
   const { openModal, closeModal } = useModal();
+  const isEditable = isAddMode || isEditMode;
 
   const openAddModal = () => {
     openModal(
@@ -39,7 +45,7 @@ export default function ItineraryOfTravel({
       "",
       <ItineraryForm
         onSubmit={(form) => {
-          setItinerary((prev) => [...prev, form]);
+          setItineraryAction((prev) => [...prev, form]);
           closeModal();
         }}
         departureDate={departureDate}
@@ -51,12 +57,12 @@ export default function ItineraryOfTravel({
 
   const openEditModal = (item: TravelOrderProjectsType, index: number) => {
     openModal(
-      isAddMode ? "Edit Itinerary Entry" : "View Itinerary Entry",
+      isEditable ? "Edit Itinerary Entry" : "View Itinerary Entry",
       "",
       <ItineraryForm
         onSubmit={(form) => {
-          if (isAddMode) {
-            setItinerary((prev) => {
+          if (isEditable) {
+            setItineraryAction((prev) => {
               const updated = [...prev];
               updated[index] = form;
               return updated;
@@ -67,16 +73,13 @@ export default function ItineraryOfTravel({
         departureDate={departureDate}
         returnDate={returnDate}
         initialValues={item}
-        isEditMode={isAddMode}
-        readOnly={!isAddMode}
+        isEditMode={isEditable}
+        readOnly={!isEditable}
       />,
     );
   };
 
-  const handleDelete = (
-    e: React.MouseEvent,
-    index: number,
-  ) => {
+  const handleDelete = (e: React.MouseEvent, index: number) => {
     e.stopPropagation();
     openModal(
       "Remove Entry",
@@ -85,7 +88,7 @@ export default function ItineraryOfTravel({
         className="w-full"
         variant="destructive"
         onClick={() => {
-          setItinerary((prev) => prev.filter((_, i) => i !== index));
+          setItineraryAction((prev) => prev.filter((_, i) => i !== index));
           closeModal();
         }}
       >
@@ -113,10 +116,10 @@ export default function ItineraryOfTravel({
 
   return (
     <section className="flex flex-col h-full">
-      {isAddMode && (
+      {isEditable && (
         <Button
           type="button"
-          size={"sm"}
+          size="sm"
           className="px-10 mb-4"
           disabled={isPending}
           onClick={openAddModal}
@@ -127,7 +130,9 @@ export default function ItineraryOfTravel({
       <div className="flex-1 overflow-y-auto min-h-0">
         {itinerary.length === 0 ? (
           <div className="text-center text-muted-foreground py-8">
-            No itinerary entries yet. Click &quot;Add&quot; to create one.
+            {isEditable
+              ? `No itinerary entries yet. Click "Add" to create one.`
+              : "No itinerary entries."}
           </div>
         ) : (
           <div className="rounded-md border">
@@ -136,8 +141,10 @@ export default function ItineraryOfTravel({
                 <TableRow>
                   <TableHead className="w-12.5">#</TableHead>
                   <TableHead>Date / Period</TableHead>
-                  <TableHead className={isAddMode ? "" : "text-end"}>Destination</TableHead>
-                  {isAddMode && <TableHead className="w-12" />}
+                  <TableHead className={isEditable ? "" : "text-end"}>
+                    Destination
+                  </TableHead>
+                  {isEditable && <TableHead className="w-12" />}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -151,10 +158,14 @@ export default function ItineraryOfTravel({
                     <TableCell>
                       {formatDate(item.date, item.end_date)}
                     </TableCell>
-                    <TableCell className={`max-w-50 truncate ${isAddMode ? "" : "text-end"}`}>
+                    <TableCell
+                      className={`max-w-50 truncate ${
+                        isEditable ? "" : "text-end"
+                      }`}
+                    >
                       {item.destination || "-"}
                     </TableCell>
-                    {isAddMode && (
+                    {isEditable && (
                       <TableCell className="text-end pr-2">
                         <Button
                           type="button"

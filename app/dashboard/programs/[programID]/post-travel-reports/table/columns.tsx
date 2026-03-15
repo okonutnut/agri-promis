@@ -22,6 +22,24 @@ export const columns: ColumnDef<PostTravelWithDetails>[] = [
     header: "Reporter Name",
   },
   {
+    id: "photo_docs",
+    header: "Photo Docs",
+    cell: ({ row }) => {
+      const photos = row.original.photo_url;
+      const hasPhoto =
+        Array.isArray(photos) &&
+        photos.some(
+          (photo) => typeof photo === "string" && photo.trim().length > 0,
+        );
+
+      return (
+        <Badge variant={hasPhoto ? "default" : "secondary"}>
+          {hasPhoto ? "w/ photo" : "no photo"}
+        </Badge>
+      );
+    },
+  },
+  {
     accessorKey: "reviewed_at",
     header: ({ column }) => {
       return (

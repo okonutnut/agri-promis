@@ -4,6 +4,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { MonitoringReportType } from "@/components/types";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { ArrowUpDown } from "lucide-react";
 
 export const columns: ColumnDef<MonitoringReportType>[] = [
@@ -31,6 +32,26 @@ export const columns: ColumnDef<MonitoringReportType>[] = [
       );
     },
     enableSorting: true,
+  },
+  {
+    id: "photo_docs",
+    header: "Photo Docs",
+    cell: ({ row }) => {
+      const photoUrl = row.original.photo_url;
+      const hasPhoto =
+        Array.isArray(photoUrl) &&
+        photoUrl.some(
+          (item) => typeof item === "string" && item.trim().length > 0,
+        );
+
+      return (
+        <Badge variant={hasPhoto ? "default" : "secondary"}>
+          {hasPhoto ? "w/ Photo" : "No Photo"}
+        </Badge>
+      );
+    },
+    enableSorting: false,
+    enableColumnFilter: false,
   },
   {
     accessorKey: "reviewedBy.fullname",
