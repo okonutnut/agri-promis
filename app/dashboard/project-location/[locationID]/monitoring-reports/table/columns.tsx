@@ -4,14 +4,53 @@ import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { MonitoringReportType } from "@/components/types";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ArrowUpDown } from "lucide-react";
+import {
+  ArrowUpDown,
+  Image as ImageIcon,
+  ImageOff as ImageOffIcon,
+} from "lucide-react";
+import ViewSummaryButton from "@/components/custom/reports/view-summary-button";
 
 export const columns: ColumnDef<MonitoringReportType>[] = [
   {
-    id: "count",
-    header: "#",
-    cell: ({ row }) => row.index + 1,
+    id: "view_summary",
+    header: "",
+    cell: ({ row }) => {
+      const photos = row.original.photo_url;
+      const hasPhoto =
+        Array.isArray(photos) &&
+        photos.some(
+          (photo) => typeof photo === "string" && photo.trim().length > 0,
+        );
+
+      return (
+        <div className="w-14 flex items-center gap-1">
+          <ViewSummaryButton
+            reportType="monitoring"
+            reportId={row.original.id}
+            title="Monitoring Report Summary"
+            className="h-8 w-8 p-0"
+            iconOnly
+            buttonVariant="ghost"
+          />
+          {hasPhoto ? (
+            <ImageIcon
+              className="h-4 w-4 text-primary"
+              aria-hidden="true"
+              focusable="false"
+            />
+          ) : (
+            <ImageOffIcon
+              className="h-4 w-4 text-muted-foreground"
+              aria-hidden="true"
+              focusable="false"
+            />
+          )}
+        </div>
+      );
+    },
+    enableSorting: false,
+    enableColumnFilter: false,
   },
   {
     accessorKey: "travel_order.travel_order_no",
@@ -33,26 +72,7 @@ export const columns: ColumnDef<MonitoringReportType>[] = [
     },
     enableSorting: true,
   },
-  {
-    id: "photo_docs",
-    header: "Photo Docs",
-    cell: ({ row }) => {
-      const photoUrl = row.original.photo_url;
-      const hasPhoto =
-        Array.isArray(photoUrl) &&
-        photoUrl.some(
-          (item) => typeof item === "string" && item.trim().length > 0,
-        );
 
-      return (
-        <Badge variant={hasPhoto ? "default" : "secondary"}>
-          {hasPhoto ? "w/ Photo" : "No Photo"}
-        </Badge>
-      );
-    },
-    enableSorting: false,
-    enableColumnFilter: false,
-  },
   {
     accessorKey: "reviewedBy.fullname",
     header: "Reviewed By",

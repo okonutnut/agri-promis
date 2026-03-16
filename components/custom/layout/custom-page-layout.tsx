@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import { AppSidebar } from "@/components/sidebar/appSidebar";
 import { NavigationItemType } from "@/components/types";
 import {
-  Suspense,
   createContext,
   useContext,
   useState,
@@ -129,7 +128,7 @@ export function SheetFooterSlot({ children }: { children: ReactNode }) {
   useEffect(() => {
     setFooter(() => children);
     return () => clearFooter();
-  }, [setFooter, clearFooter]);
+  }, [setFooter, clearFooter, children]);
 
   return null;
 }

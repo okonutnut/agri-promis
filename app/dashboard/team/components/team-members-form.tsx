@@ -87,9 +87,11 @@ export function TeamMemberForm({ isAddMode, data }: TeamMemberFormProps) {
 
   // CURRENT USER SESSION
   const { data: userData } = useSupabaseSession();
-  const isUserProfile = useMemo(() => {
-    return userData?.user.id == data?.id;
-  }, [data, userData?.user.id]);
+  const isUserProfileOrAdmin = useMemo(() => {
+    return (
+      userData?.user.id == data?.id || userData?.user.user_metadata?.role === 1
+    );
+  }, [data, userData?.user.id, userData?.user.user_metadata?.role]);
 
   const isPending = isInsertPending || isUpdatePending;
 
@@ -127,19 +129,14 @@ export function TeamMemberForm({ isAddMode, data }: TeamMemberFormProps) {
           form={form}
           name="fullname"
           label="Fullname"
-          readOnly={!isAddMode}
+          readOnly={!isAddMode && !isUserProfileOrAdmin}
         />
-        <FormInput
-          form={form}
-          name="email"
-          label="Email"
-          readOnly={!isAddMode}
-        />
+        <FormInput form={form} name="email" label="Email" readOnly={true} />
         <FormInput
           form={form}
           name="position"
           label="Position"
-          readOnly={!isAddMode}
+          readOnly={!isAddMode && !isUserProfileOrAdmin}
         />
         <FormSelect
           options={roles.map((role) => ({
@@ -152,7 +149,7 @@ export function TeamMemberForm({ isAddMode, data }: TeamMemberFormProps) {
         />
       </form>
       <CustomSheetFooter isPending={isPending || pageState === "loading"}>
-        {!isAddMode && !isUserProfile && (
+        {!isAddMode && !isUserProfileOrAdmin && (
           <ChangeStatusButton
             pageState={pageState}
             setPageState={setPageState}

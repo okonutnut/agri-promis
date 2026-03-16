@@ -40,9 +40,7 @@ interface DataTableProps<TData, TValue> {
 
   // Search & toolbar
   hideSearch?: boolean;
-  topComponent?: (
-    setGlobalFilter: (value: string) => void,
-  ) => React.ReactNode;
+  topComponent?: (setGlobalFilter: (value: string) => void) => React.ReactNode;
   toolbarContent?: React.ReactNode;
 
   // Loading state
@@ -91,7 +89,7 @@ export function DataTable<TData, TValue>({
         data.filter((_, index) => selectedKeys.includes(index.toString())),
       );
     }
-  }, [rowSelection, data]);
+  }, [rowSelection, data, onRowSelectionChange]);
 
   const table = useReactTable({
     data,
@@ -168,11 +166,7 @@ export function DataTable<TData, TValue>({
             disabled={isAddDisabled}
             variant={isPending ? "ghost" : "default"}
           >
-            {isPending ? (
-              <Loader2 className="animate-spin" />
-            ) : (
-              addButtonLabel
-            )}
+            {isPending ? <Loader2 className="animate-spin" /> : addButtonLabel}
           </Button>
         )}
       </div>

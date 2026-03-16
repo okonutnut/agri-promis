@@ -1,17 +1,54 @@
 "use client";
 
 import { PostTravelWithDetails } from "@/app/types";
+import ViewSummaryButton from "@/components/custom/reports/view-summary-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { ArrowUpDown } from "lucide-react";
+import {
+  ArrowUpDown,
+  Image as ImageIcon,
+  ImageOff as ImageOffIcon,
+} from "lucide-react";
 
 export const columns: ColumnDef<PostTravelWithDetails>[] = [
   {
-    id: "count",
-    header: "#",
-    cell: ({ row }) => <span className="text-center">{row.index + 1}</span>,
+    id: "view_summary",
+    header: "",
+    cell: ({ row }) => {
+      const photos = row.original.photo_url;
+      const hasPhoto =
+        Array.isArray(photos) &&
+        photos.some(
+          (photo) => typeof photo === "string" && photo.trim().length > 0,
+        );
+
+      return (
+        <div
+          className="w-14 flex items-center gap-1"
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          <ViewSummaryButton
+            reportType="post-travel"
+            reportId={row.original.id}
+            buttonLabel="View summary"
+            className="h-8 w-8 p-0"
+            iconOnly
+            buttonVariant="ghost"
+          />
+          {hasPhoto ? (
+            <ImageIcon className="h-4 w-4 text-muted-foreground" />
+          ) : (
+            <ImageOffIcon className="h-4 w-4 text-muted-foreground" />
+          )}
+        </div>
+      );
+    },
+    enableSorting: false,
+    enableColumnFilter: false,
   },
   {
     accessorKey: "travel_order_no",
@@ -22,23 +59,27 @@ export const columns: ColumnDef<PostTravelWithDetails>[] = [
     header: "Reporter Name",
   },
   {
-    id: "photo_docs",
-    header: "Photo Docs",
-    cell: ({ row }) => {
-      const photos = row.original.photo_url;
-      const hasPhoto =
-        Array.isArray(photos) &&
-        photos.some(
-          (photo) => typeof photo === "string" && photo.trim().length > 0,
-        );
+    accessorKey: "activities_undertaken",
+    header: "Activities Undertaken",
+    cell: ({ getValue }) => {
+      const value = (getValue() as string) || "N/A";
+      const maxLength = 40;
+      const isTruncated = value.length > maxLength;
+      const displayValue = isTruncated
+        ? value.slice(0, maxLength) + "..."
+        : value;
 
       return (
-        <Badge variant={hasPhoto ? "default" : "secondary"}>
-          {hasPhoto ? "w/ photo" : "no photo"}
-        </Badge>
+        <div
+          title={isTruncated ? value : undefined}
+          className="truncate max-w-full whitespace-nowrap"
+        >
+          {displayValue}
+        </div>
       );
     },
   },
+
   {
     accessorKey: "reviewed_at",
     header: ({ column }) => {
@@ -63,18 +104,8 @@ export const columns: ColumnDef<PostTravelWithDetails>[] = [
   },
   {
     accessorKey: "created_at",
-    header: ({ column }) => {
-      return (
-        <div className="text-end">
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Date Created
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
-      );
+    header: () => {
+      return <div className="text-end">Date Created</div>;
     },
     cell: ({ getValue }) => (
       <div className="text-end">

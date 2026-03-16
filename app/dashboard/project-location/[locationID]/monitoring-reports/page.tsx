@@ -34,16 +34,16 @@ function MonitoringReportContent({
     );
   };
 
-  // Helper function to check if a date falls within the selected year
-  const isInSelectedYear = (dateString: string | undefined | null): boolean => {
-    if (!dateString) return false;
-    if (yearFilter === "all") return true;
-    const date = new Date(dateString);
-    return date.getFullYear().toString() === yearFilter;
-  };
-
   // Filter data by year
   const filteredData = useMemo(() => {
+    const isInSelectedYear = (
+      dateString: string | undefined | null,
+    ): boolean => {
+      if (!dateString) return false;
+      if (yearFilter === "all") return true;
+      const date = new Date(dateString);
+      return date.getFullYear().toString() === yearFilter;
+    };
     if (!data) return [];
     return data.filter((report) => isInSelectedYear(report.created_at));
   }, [data, yearFilter]);

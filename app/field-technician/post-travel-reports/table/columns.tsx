@@ -3,15 +3,46 @@
 import { PostTravelWithDetails } from "@/app/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import ViewSummaryButton from "@/components/custom/reports/view-summary-button";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, Image, ImageOff } from "lucide-react";
 
 export const columns: ColumnDef<PostTravelWithDetails>[] = [
   {
-    id: "count",
-    header: "#",
-    cell: ({ row }) => <span className="text-center">{row.index + 1}</span>,
+    id: "view_summary",
+    header: "",
+    cell: ({ row }) => {
+      const photos = row.original.photo_url;
+      const hasPhoto =
+        Array.isArray(photos) &&
+        photos.some((url) => typeof url === "string" && url.trim().length > 0);
+
+      return (
+        <div className="w-14 flex items-center gap-1">
+          <ViewSummaryButton
+            reportType="post-travel"
+            reportId={row.original.id}
+            className="h-8 w-8 p-0"
+            iconOnly
+            buttonVariant="ghost"
+          />
+          {hasPhoto ? (
+            <Image
+              className="h-4 w-4 text-muted-foreground"
+              aria-label="Has photo documentation"
+            />
+          ) : (
+            <ImageOff
+              className="h-4 w-4 text-muted-foreground"
+              aria-label="No photo documentation"
+            />
+          )}
+        </div>
+      );
+    },
+    enableSorting: false,
+    enableColumnFilter: false,
   },
   {
     accessorKey: "travel_order_no",
@@ -22,21 +53,27 @@ export const columns: ColumnDef<PostTravelWithDetails>[] = [
     header: "Reporter Name",
   },
   {
-    id: "photo_docs",
-    header: "Photo Docs",
-    cell: ({ row }) => {
-      const photos = row.original.photo_url;
-      const hasPhoto =
-        Array.isArray(photos) &&
-        photos.some((url) => typeof url === "string" && url.trim().length > 0);
+    accessorKey: "activities_undertaken",
+    header: "Activities Undertaken",
+    cell: ({ getValue }) => {
+      const value = (getValue() as string) || "N/A";
+      const maxLength = 50;
+      const isTruncated = value.length > maxLength;
+      const displayValue = isTruncated
+        ? value.slice(0, maxLength) + "..."
+        : value;
 
       return (
-        <Badge variant={hasPhoto ? "default" : "secondary"}>
-          {hasPhoto ? "w/ photo" : "no photo"}
-        </Badge>
+        <div
+          title={isTruncated ? value : undefined}
+          className="truncate max-w-full whitespace-nowrap"
+        >
+          {displayValue}
+        </div>
       );
     },
   },
+
   {
     accessorKey: "reviewed_at",
     header: ({ column }) => {
