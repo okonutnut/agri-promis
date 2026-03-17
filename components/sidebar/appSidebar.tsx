@@ -13,23 +13,56 @@ import {
 import { usePathname } from "next/navigation";
 import { NavigationItemType } from "../types";
 import Link from "next/link";
-import { useRealtimeQuery } from "@/hooks/use-realtime";
+import { createClient } from "@/utils/supabase/client";
+import { useEffect, useRef, useState } from "react";
 
 type AppSidebarProps = {
   navItems: NavigationItemType[];
 };
 
+type ConnectionStatus = "connecting" | "connected" | "disconnected" | "error";
+
 const ConnectionStatus = () => {
-  const { connectionStatus } = useRealtimeQuery<unknown[]>({
-    queryKey: ["connection-status-check"],
-    table: "programs",
-    queryFn: async () => {
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      return [];
-    },
-    staleTime: Infinity,
-    retryAttempts: 0,
-  });
+  const [status, setStatus] = useState<ConnectionStatus>("connecting");
+  const isUnmounted = useRef(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    
+    const supabase = createClient();
+    const channel = supabase.channel("connection-check");
+
+    channel
+      .on("presence", { event: "sync" }, () => {
+        if (!isUnmounted.current) {
+          setStatus("connected");
+        }
+      })
+      .subscribe((state) => {
+        if (isUnmounted.current) return;
+        
+        if (state === "SUBSCRIBED") {
+          setStatus("connected");
+        } else if (state === "CHANNEL_ERROR" || state === "TIMED_OUT") {
+          setStatus("error");
+        } else if (state === "CLOSED") {
+          setStatus("disconnected");
+        }
+      });
+
+    const handleOnline = () => setStatus("connecting");
+    const handleOffline = () => setStatus("disconnected");
+    
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      isUnmounted.current = true;
+      supabase.removeChannel(channel);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
   const statusConfig = {
     connected: { color: "bg-green-500", label: "Live" },
@@ -38,12 +71,12 @@ const ConnectionStatus = () => {
     error: { color: "bg-red-500", label: "Error" },
   };
 
-  const status = statusConfig[connectionStatus] || statusConfig.disconnected;
+  const currentStatus = statusConfig[status] || statusConfig.disconnected;
 
   return (
     <div className="flex items-center gap-2 px-2 py-1.5 text-xs text-muted-foreground">
-      <span className={`w-2 h-2 rounded-full ${status.color} ${connectionStatus === "connected" ? "animate-pulse" : ""}`} />
-      <span>{status.label}</span>
+      <span className={`w-2 h-2 rounded-full ${currentStatus.color} ${status === "connected" ? "animate-pulse" : ""}`} />
+      <span>{currentStatus.label}</span>
     </div>
   );
 };
