@@ -76,29 +76,24 @@ export function useRealtimeQuery<T>({
         .on("postgres_changes", { event: "*", schema, table }, (payload) => {
           console.log(`[Realtime] ${table}:`, payload.eventType, payload.new);
           
-          queryClient.setQueryData<T | T[]>(queryKey, (old) => {
-            if (!old) return old;
-
-            if (Array.isArray(old)) {
-              switch (payload.eventType) {
-                case "INSERT":
-                  return [...old, payload.new] as T[];
-                case "UPDATE":
-                  return old.map((row: any) =>
-                    row.id === payload.new.id ? payload.new : row,
-                  ) as T[];
-                case "DELETE":
-                  return old.filter(
-                    (row: any) => row.id !== payload.old.id,
-                  ) as T[];
-                default:
-                  return old;
-              }
-            }
-
+          const eventType = payload.eventType as string;
+          
+          // For UPDATE/INSERT events, refetch to ensure RLS compliance
+          if (eventType === "UPDATE" || eventType === "INSERT") {
             queryClient.invalidateQueries({ queryKey: stableQueryKey });
-            return old;
-          });
+            return;
+          }
+          
+          // For DELETE, update cache directly
+          if (eventType === "DELETE") {
+            queryClient.setQueryData<T | T[]>(queryKey, (old) => {
+              if (!old || !Array.isArray(old)) return old;
+              const oldId = (payload.old as any)?.id;
+              if (!oldId) return old;
+              return old.filter((row: any) => row.id !== oldId) as T[];
+            });
+            return;
+          }
         })
         .subscribe((status) => {
           if (isUnmountedRef.current) return;
