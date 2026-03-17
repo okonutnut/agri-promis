@@ -35,7 +35,7 @@ export default function DeleteProgramCard({ data }: DeleteProgramCardProps) {
     ],
     onSuccess: () => {
       toast.success("Program deleted successfully!");
-      router.replace("/dashboard/programs");
+      router.push("/dashboard/programs");
     },
     onError: () => {
       toast.error("Failed to delete program. Please try again.");
