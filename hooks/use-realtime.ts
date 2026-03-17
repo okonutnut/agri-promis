@@ -74,13 +74,10 @@ export function useRealtimeQuery<T>({
       channelRef.current = supabase
         .channel(`${table}-changes`)
         .on("postgres_changes", { event: "*", schema, table }, (payload) => {
-          console.log(`[Realtime] ${table}:`, payload.eventType, payload.new);
-          
           const eventType = payload.eventType as string;
           
           // For UPDATE/INSERT/DELETE events, refetch to ensure RLS compliance
           if (eventType === "UPDATE" || eventType === "INSERT" || eventType === "DELETE") {
-            console.log(`[Realtime] Refetching with key:`, stableQueryKey);
             queryClient.refetchQueries({ queryKey: stableQueryKey });
             return;
           }

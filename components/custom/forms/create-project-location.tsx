@@ -61,7 +61,7 @@ export default function CreateProjectLocationForm() {
   const { mutate, isPending } = useUniversalMutation({
     mutationFn: async (data: ProjectLocationType) =>
       await InsertProjectLocationAction(data),
-    invalidateKeys: ["allProjectsByProgramId"],
+    invalidateKeys: ["project", "project_location", "allProjectsByProgramId", "location", "dashboard_items"],
   });
   const handleSubmit = (data: FormData) =>
     mutate(

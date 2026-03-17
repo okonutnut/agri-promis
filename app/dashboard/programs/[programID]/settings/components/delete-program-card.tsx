@@ -27,7 +27,12 @@ export default function DeleteProgramCard({ data }: DeleteProgramCardProps) {
         tableName: data.tableName,
         recordId: data.recordId,
       }),
-    invalidateKeys: ["programs"],
+    invalidateKeys: [
+      "programs",
+      "allProgramsByUserIDForNavbar",
+      "assigned-programs",
+      "assigned-programs-navbar",
+    ],
     onSuccess: () => {
       toast.success("Program deleted successfully!");
       router.replace("/dashboard/programs");

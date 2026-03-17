@@ -171,6 +171,7 @@ export default function ProjectSettingsPage() {
         project_name: data.project_name,
         description: data.project_description,
       }),
+    invalidateKeys: ["project", "project_location", "allProjectsByProgramId", "location", "dashboard_items"],
     onSuccess: () => {
       toast.success("Project updated successfully!");
     },
@@ -188,6 +189,7 @@ export default function ProjectSettingsPage() {
           tableName: data.tableName,
           recordId: data.recordId,
         }),
+      invalidateKeys: ["project", "project_location", "allProjectsByProgramId", "location", "dashboard_items"],
       onSuccess: () => {
         toast.success("Project deleted successfully!");
         router.replace(`/dashboard/programs/${programID}/projects`);

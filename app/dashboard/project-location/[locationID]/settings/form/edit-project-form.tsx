@@ -67,6 +67,7 @@ export default function EditProjectNameForm({
         total_alloted_area: data.total_alloted_area,
         status: data.status,
       }),
+    invalidateKeys: ["project", "project_location", "location", "dashboard_items"],
     onSuccess: () => {
       toast.success("Project updated successfully");
     },

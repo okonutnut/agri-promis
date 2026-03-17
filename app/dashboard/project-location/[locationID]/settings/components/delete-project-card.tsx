@@ -25,6 +25,7 @@ export default function DeleteProjectLocationCard({
   const { mutate, isPending } = useUniversalMutation({
     mutationFn: async (data: { tableName: string; recordId: string }) =>
       await SoftDeleteAction(data),
+    invalidateKeys: ["project", "project_location", "allProjectsByProgramId", "location", "dashboard_items"],
     onSuccess: () => {
       toast.success("Location deleted successfully.");
       router.replace(

@@ -20,8 +20,19 @@ export function useUniversalMutation<TBody, TResponse>({
     mutationFn,
     onSuccess: (data) => {
       invalidateKeys.forEach((key) => {
-        queryClient.invalidateQueries({ queryKey: [key], exact: false });
+        queryClient.invalidateQueries({ 
+          queryKey: [key],
+          exact: false,
+        });
       });
+      setTimeout(() => {
+        invalidateKeys.forEach((key) => {
+          queryClient.invalidateQueries({ 
+            queryKey: [key],
+            exact: false,
+          });
+        });
+      }, 100);
       if (onSuccess) {
         onSuccess(data);
       }

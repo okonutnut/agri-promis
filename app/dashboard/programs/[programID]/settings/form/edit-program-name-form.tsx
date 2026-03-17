@@ -58,7 +58,12 @@ export default function EditProgramNameForm({
     onError: () => {
       toast.error("Failed to update program details. Please try again.");
     },
-    invalidateKeys: ["programs", `"programById", ${programData.id}`],
+    invalidateKeys: [
+      "programs",
+      "allProgramsByUserIDForNavbar",
+      "assigned-programs",
+      "assigned-programs-navbar",
+    ],
   });
   const handleSubmit = (data: z.infer<typeof formSchema>) => mutate(data);
 
