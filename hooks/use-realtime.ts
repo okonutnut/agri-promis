@@ -74,6 +74,8 @@ export function useRealtimeQuery<T>({
       channelRef.current = supabase
         .channel(`${table}-changes`)
         .on("postgres_changes", { event: "*", schema, table }, (payload) => {
+          console.log(`[Realtime] ${table}:`, payload.eventType, payload.new);
+          
           queryClient.setQueryData<T | T[]>(queryKey, (old) => {
             if (!old) return old;
 
