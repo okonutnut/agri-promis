@@ -16,12 +16,11 @@ export function useUniversalMutation<TBody, TResponse>({
   onError,
 }: UseUniversalMutationProps<TBody, TResponse>) {
   const queryClient = useQueryClient();
-
   const mutation = useMutation({
     mutationFn,
     onSuccess: (data) => {
       invalidateKeys.forEach((key) => {
-        queryClient.invalidateQueries({ queryKey: [key] });
+        queryClient.invalidateQueries({ queryKey: [key], exact: false });
       });
       if (onSuccess) {
         onSuccess(data);
@@ -33,7 +32,6 @@ export function useUniversalMutation<TBody, TResponse>({
       }
     },
   });
-
   return {
     mutate: mutation.mutate,
     mutateAsync: mutation.mutateAsync,
