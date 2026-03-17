@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient, NetworkMode } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
+
+export type ConnectionStatus = "connecting" | "connected" | "disconnected" | "error";
 
 type UseRealtimeQueryProps<T> = {
   queryKey: (string | number)[];
@@ -12,6 +14,8 @@ type UseRealtimeQueryProps<T> = {
   staleTime?: number;
   refetchInterval?: number;
   networkMode?: NetworkMode;
+  retryAttempts?: number;
+  retryDelay?: number;
 };
 
 export function useRealtimeQuery<T>({
@@ -22,6 +26,8 @@ export function useRealtimeQuery<T>({
   staleTime = 30_000,
   refetchInterval,
   networkMode = "online",
+  retryAttempts = 5,
+  retryDelay = 1000,
 }: UseRealtimeQueryProps<T>) {
   const queryClient = useQueryClient();
   const supabase = useMemo(() => createClient(), []);
@@ -30,6 +36,12 @@ export function useRealtimeQuery<T>({
     [queryKey],
   );
   const stableQueryKey = useMemo(() => queryKey, [queryKeySerialized]);
+
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>("disconnected");
+  const retryCountRef = useRef(0);
+  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const isUnmountedRef = useRef(false);
 
   const query = useQuery<T>({
     queryKey: stableQueryKey,
@@ -44,19 +56,19 @@ export function useRealtimeQuery<T>({
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    isUnmountedRef.current = false;
 
-    let channel: ReturnType<typeof supabase.channel> | null = null;
+    function attemptSubscribe() {
+      if (channelRef.current || !navigator.onLine) return;
 
-    function subscribe() {
-      if (!navigator.onLine || channel) return;
+      setConnectionStatus("connecting");
 
-      channel = supabase
+      channelRef.current = supabase
         .channel(`${table}-changes`)
         .on("postgres_changes", { event: "*", schema, table }, (payload) => {
           queryClient.setQueryData<T | T[]>(queryKey, (old) => {
             if (!old) return old;
 
-            // If old is an array → patch snappily
             if (Array.isArray(old)) {
               switch (payload.eventType) {
                 case "INSERT":
@@ -74,34 +86,69 @@ export function useRealtimeQuery<T>({
               }
             }
 
-            // If old is a single object → safer to refetch
             queryClient.invalidateQueries({ queryKey: stableQueryKey });
             return old;
           });
         })
-        .subscribe();
+        .subscribe((status) => {
+          if (isUnmountedRef.current) return;
+
+          if (status === "SUBSCRIBED") {
+            setConnectionStatus("connected");
+            retryCountRef.current = 0;
+          } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+            setConnectionStatus("error");
+            reconnect();
+          } else if (status === "CLOSED") {
+            setConnectionStatus("disconnected");
+          }
+        });
+    }
+
+    function reconnect() {
+      if (retryCountRef.current >= retryAttempts) {
+        setConnectionStatus("error");
+        return;
+      }
+
+      const delay = retryDelay * Math.pow(2, retryCountRef.current);
+      retryCountRef.current += 1;
+      setConnectionStatus("connecting");
+
+      retryTimeoutRef.current = setTimeout(() => {
+        if (!isUnmountedRef.current && navigator.onLine) {
+          setConnectionStatus("disconnected");
+          attemptSubscribe();
+        }
+      }, delay);
     }
 
     function unsubscribe() {
-      if (channel) {
-        supabase.removeChannel(channel);
-        channel = null;
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
+        retryTimeoutRef.current = null;
+      }
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
       }
     }
 
-    // Subscribe when online
     if (navigator.onLine) {
-      subscribe();
+      attemptSubscribe();
+    } else {
+      setConnectionStatus("disconnected");
     }
 
-    // Handle online/offline events
     const handleOnline = () => {
-      // Refetch when coming back online
       queryClient.invalidateQueries({ queryKey: stableQueryKey });
-      subscribe();
+      unsubscribe();
+      retryCountRef.current = 0;
+      attemptSubscribe();
     };
 
     const handleOffline = () => {
+      setConnectionStatus("disconnected");
       unsubscribe();
     };
 
@@ -109,11 +156,12 @@ export function useRealtimeQuery<T>({
     window.addEventListener("offline", handleOffline);
 
     return () => {
+      isUnmountedRef.current = true;
       unsubscribe();
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
     };
-  }, [queryClient, stableQueryKey, table, schema, supabase]);
+  }, [queryClient, stableQueryKey, table, schema, supabase, retryAttempts, retryDelay]);
 
-  return query;
+  return { ...query, connectionStatus };
 }

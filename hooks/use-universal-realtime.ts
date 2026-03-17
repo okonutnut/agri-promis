@@ -2,14 +2,18 @@
 
 import { createClient } from "@/utils/supabase/client";
 import { NetworkMode, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+export type ConnectionStatus = "connecting" | "connected" | "disconnected" | "error";
 
 type UseUniversalRealtimeOptions<T> = {
   queryKey: (string | number)[];
-  queryFn: () => Promise<T>; // usually your server action
-  tables: string[]; // tables to subscribe to
+  queryFn: () => Promise<T>;
+  tables: string[];
   staleTime?: number;
   networkMode?: NetworkMode;
+  retryAttempts?: number;
+  retryDelay?: number;
 };
 
 /**
@@ -21,6 +25,8 @@ export function useUniversalRealtime<T>({
   tables,
   staleTime = 30_000,
   networkMode = "online",
+  retryAttempts = 5,
+  retryDelay = 1000,
 }: UseUniversalRealtimeOptions<T>) {
   const supabase = useMemo(() => createClient(), []);
   const queryClient = useQueryClient();
@@ -32,6 +38,12 @@ export function useUniversalRealtime<T>({
   const stableTables = useMemo(() => tables, [realtimeTablesKey]);
   const stableQueryKey = useMemo(() => queryKey, [queryKeySerialized]);
 
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>("disconnected");
+  const retryCountRef = useRef(0);
+  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const channelsRef = useRef<ReturnType<typeof supabase.channel>[]>([]);
+  const isUnmountedRef = useRef(false);
+
   // Main query
   const query = useQuery<T>({
     queryKey,
@@ -41,17 +53,24 @@ export function useUniversalRealtime<T>({
     networkMode,
   });
 
+  const clearRetryTimeout = useCallback(() => {
+    if (retryTimeoutRef.current) {
+      clearTimeout(retryTimeoutRef.current);
+      retryTimeoutRef.current = null;
+    }
+  }, []);
+
   // Realtime + network awareness
   useEffect(() => {
     if (typeof window === "undefined") return;
+    isUnmountedRef.current = false;
 
-    let channels: ReturnType<typeof supabase.channel>[] = [];
+    function attemptSubscribe() {
+      if (channelsRef.current.length > 0) return;
 
-    function subscribe() {
-      // Don't subscribe if already subscribed
-      if (channels.length > 0) return;
+      setConnectionStatus("connecting");
 
-      channels = stableTables.map((table) =>
+      channelsRef.current = stableTables.map((table) =>
         supabase
           .channel(`realtime:${table}`)
           .on(
@@ -61,27 +80,61 @@ export function useUniversalRealtime<T>({
               queryClient.invalidateQueries({ queryKey: stableQueryKey });
             },
           )
-          .subscribe(),
+          .subscribe((status) => {
+            if (isUnmountedRef.current) return;
+            
+            if (status === "SUBSCRIBED") {
+              setConnectionStatus("connected");
+              retryCountRef.current = 0;
+            } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+              setConnectionStatus("error");
+              reconnect();
+            } else if (status === "CLOSED") {
+              setConnectionStatus("disconnected");
+            }
+          }),
       );
     }
 
+    function reconnect() {
+      if (retryCountRef.current >= retryAttempts) {
+        setConnectionStatus("error");
+        return;
+      }
+
+      const delay = retryDelay * Math.pow(2, retryCountRef.current);
+      retryCountRef.current += 1;
+      setConnectionStatus("connecting");
+
+      retryTimeoutRef.current = setTimeout(() => {
+        if (!isUnmountedRef.current && navigator.onLine) {
+          setConnectionStatus("disconnected");
+          attemptSubscribe();
+        }
+      }, delay);
+    }
+
     function unsubscribe() {
-      channels.forEach((ch) => supabase.removeChannel(ch));
-      channels = [];
+      clearRetryTimeout();
+      channelsRef.current.forEach((ch) => supabase.removeChannel(ch));
+      channelsRef.current = [];
     }
 
-    // Subscribe when online
     if (navigator.onLine) {
-      subscribe();
+      attemptSubscribe();
+    } else {
+      setConnectionStatus("disconnected");
     }
 
-    // Handle network changes
     const handleOnline = () => {
-      queryClient.invalidateQueries({ queryKey: stableQueryKey }); // refresh on reconnect
-      subscribe();
+      queryClient.invalidateQueries({ queryKey: stableQueryKey });
+      unsubscribe();
+      retryCountRef.current = 0;
+      attemptSubscribe();
     };
 
     const handleOffline = () => {
+      setConnectionStatus("disconnected");
       unsubscribe();
     };
 
@@ -89,6 +142,7 @@ export function useUniversalRealtime<T>({
     window.addEventListener("offline", handleOffline);
 
     return () => {
+      isUnmountedRef.current = true;
       unsubscribe();
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
@@ -100,7 +154,10 @@ export function useUniversalRealtime<T>({
     stableTables,
     queryKeySerialized,
     realtimeTablesKey,
+    retryAttempts,
+    retryDelay,
+    clearRetryTimeout,
   ]);
 
-  return query;
+  return { ...query, connectionStatus };
 }
