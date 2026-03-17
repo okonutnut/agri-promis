@@ -12,9 +12,7 @@ import { useModal } from "@/components/custom/layout/custom-page-layout";
 import { useUniversalMutation } from "@/hooks/use-universal-mutation";
 import { toast } from "sonner";
 import { EditProgramNameAction } from "@/app/actions/ProgramAction";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-
 const FormInput = dynamic(
   () => import("@/components/custom/input/form-input"),
   {
@@ -54,6 +52,7 @@ export default function EditProgramNameForm({
       await EditProgramNameAction(data),
     onSuccess: () => {
       toast.success("Program details updated successfully!");
+      router.refresh();
     },
     onError: () => {
       toast.error("Failed to update program details. Please try again.");
