@@ -78,9 +78,10 @@ export function useRealtimeQuery<T>({
           
           const eventType = payload.eventType as string;
           
-          // For UPDATE/INSERT events, refetch to ensure RLS compliance
-          if (eventType === "UPDATE" || eventType === "INSERT") {
-            queryClient.invalidateQueries({ queryKey: stableQueryKey });
+          // For UPDATE/INSERT/DELETE events, refetch to ensure RLS compliance
+          if (eventType === "UPDATE" || eventType === "INSERT" || eventType === "DELETE") {
+            console.log(`[Realtime] Refetching with key:`, stableQueryKey);
+            queryClient.refetchQueries({ queryKey: stableQueryKey });
             return;
           }
           
