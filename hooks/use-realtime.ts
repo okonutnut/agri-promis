@@ -40,6 +40,7 @@ export function useRealtimeQuery<T>({
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>("disconnected");
   const retryCountRef = useRef(0);
   const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const connectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const isUnmountedRef = useRef(false);
 
@@ -62,6 +63,13 @@ export function useRealtimeQuery<T>({
       if (channelRef.current || !navigator.onLine) return;
 
       setConnectionStatus("connecting");
+
+      connectionTimeoutRef.current = setTimeout(() => {
+        if (!channelRef.current && !isUnmountedRef.current) {
+          setConnectionStatus("error");
+          reconnect();
+        }
+      }, 10000);
 
       channelRef.current = supabase
         .channel(`${table}-changes`)
@@ -93,6 +101,11 @@ export function useRealtimeQuery<T>({
         .subscribe((status) => {
           if (isUnmountedRef.current) return;
 
+          if (connectionTimeoutRef.current) {
+            clearTimeout(connectionTimeoutRef.current);
+            connectionTimeoutRef.current = null;
+          }
+
           if (status === "SUBSCRIBED") {
             setConnectionStatus("connected");
             retryCountRef.current = 0;
@@ -101,6 +114,9 @@ export function useRealtimeQuery<T>({
             reconnect();
           } else if (status === "CLOSED") {
             setConnectionStatus("disconnected");
+          } else if (status === "SYNC_ERROR") {
+            setConnectionStatus("error");
+            reconnect();
           }
         });
     }
@@ -127,6 +143,10 @@ export function useRealtimeQuery<T>({
       if (retryTimeoutRef.current) {
         clearTimeout(retryTimeoutRef.current);
         retryTimeoutRef.current = null;
+      }
+      if (connectionTimeoutRef.current) {
+        clearTimeout(connectionTimeoutRef.current);
+        connectionTimeoutRef.current = null;
       }
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current);

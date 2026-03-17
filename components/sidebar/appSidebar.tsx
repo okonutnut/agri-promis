@@ -14,7 +14,6 @@ import { usePathname } from "next/navigation";
 import { NavigationItemType } from "../types";
 import Link from "next/link";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
-import { SelectAllProgramsWithProjectsAction } from "@/app/actions/ProgramAction";
 
 type AppSidebarProps = {
   navItems: NavigationItemType[];
@@ -24,22 +23,26 @@ const ConnectionStatus = () => {
   const { connectionStatus } = useRealtimeQuery<unknown[]>({
     queryKey: ["connection-status-check"],
     table: "programs",
-    queryFn: () => SelectAllProgramsWithProjectsAction(),
+    queryFn: async () => {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      return [];
+    },
     staleTime: Infinity,
+    retryAttempts: 0,
   });
 
   const statusConfig = {
-    connected: { color: "bg-green-500", text: "Connected", label: "Live" },
-    connecting: { color: "bg-yellow-500", text: "Connecting...", label: "Connecting" },
-    disconnected: { color: "bg-gray-400", text: "Offline", label: "Offline" },
-    error: { color: "bg-red-500", text: "Connection Error", label: "Error" },
+    connected: { color: "bg-green-500", label: "Live" },
+    connecting: { color: "bg-yellow-500", label: "Syncing" },
+    disconnected: { color: "bg-gray-400", label: "Offline" },
+    error: { color: "bg-red-500", label: "Error" },
   };
 
   const status = statusConfig[connectionStatus] || statusConfig.disconnected;
 
   return (
     <div className="flex items-center gap-2 px-2 py-1.5 text-xs text-muted-foreground">
-      <span className={`w-2 h-2 rounded-full ${status.color} animate-pulse`} />
+      <span className={`w-2 h-2 rounded-full ${status.color} ${connectionStatus === "connected" ? "animate-pulse" : ""}`} />
       <span>{status.label}</span>
     </div>
   );
