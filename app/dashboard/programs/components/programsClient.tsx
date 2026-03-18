@@ -16,7 +16,7 @@ import { format } from "date-fns";
 export default function ProgramsClient() {
   const { data, isLoading, error } = useRealtimeQuery({
     queryKey: ["programs"],
-    queryFn: SelectAllProgramsAction,
+    queryFn: () => SelectAllProgramsAction(),
     table: "programs",
   });
 
