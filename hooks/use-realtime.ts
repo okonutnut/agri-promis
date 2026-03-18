@@ -16,7 +16,7 @@ type UseRealtimeQueryProps<T> = {
   networkMode?: NetworkMode;
   retryAttempts?: number;
   retryDelay?: number;
-  enabled?: boolean; // NEW
+  enabled?: boolean;
 };
 
 export function useRealtimeQuery<T>({
@@ -29,7 +29,7 @@ export function useRealtimeQuery<T>({
   networkMode = "online",
   retryAttempts = 5,
   retryDelay = 1000,
-  enabled = true, // NEW
+  enabled = true,
 }: UseRealtimeQueryProps<T>) {
   const queryClient = useQueryClient();
   const supabase = useMemo(() => createClient(), []);
@@ -55,11 +55,11 @@ export function useRealtimeQuery<T>({
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
-    enabled, // NEW
+    enabled,
   });
 
   useEffect(() => {
-    if (!enabled) return; // NEW — skip realtime subscription if disabled
+    if (!enabled) return;
     if (typeof window === "undefined") return;
     isUnmountedRef.current = false;
 
@@ -77,25 +77,9 @@ export function useRealtimeQuery<T>({
 
       channelRef.current = supabase
         .channel(`${table}-changes`)
-        .on("postgres_changes", { event: "*", schema, table }, (payload) => {
-          const eventType = payload.eventType as string;
-
-          // For UPDATE/INSERT/DELETE events, refetch to ensure RLS compliance
-          if (eventType === "UPDATE" || eventType === "INSERT" || eventType === "DELETE") {
-            queryClient.refetchQueries({ queryKey: stableQueryKey });
-            return;
-          }
-
-          // For DELETE, update cache directly
-          if (eventType === "DELETE") {
-            queryClient.setQueryData<T | T[]>(queryKey, (old) => {
-              if (!old || !Array.isArray(old)) return old;
-              const oldId = (payload.old as any)?.id;
-              if (!oldId) return old;
-              return old.filter((row: any) => row.id !== oldId) as T[];
-            });
-            return;
-          }
+        .on("postgres_changes", { event: "*", schema, table }, () => {
+          // invalidateQueries — only refetches if the query is actively observed
+          queryClient.invalidateQueries({ queryKey: stableQueryKey });
         })
         .subscribe((status) => {
           if (isUnmountedRef.current) return;
@@ -181,7 +165,7 @@ export function useRealtimeQuery<T>({
       window.removeEventListener("offline", handleOffline);
     };
   }, [
-    enabled, // NEW
+    enabled,
     supabase,
     queryClient,
     stableQueryKey,
