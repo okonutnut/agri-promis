@@ -54,7 +54,7 @@ export default function FCAProjects({ assignedProjects }: FCAProjectsProps) {
               <div className="flex flex-col gap-2">
                 <Badge className="w-full rounded-md">PROJECT</Badge>
                 <Link
-                  href={`/dashboard/projects/${project.id}`}
+                  href={`/dashboard/projects-location/${project.id}`}
                   prefetch={true}
                   className="cursor-pointer"
                 >
