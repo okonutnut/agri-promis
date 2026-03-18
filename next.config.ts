@@ -27,7 +27,7 @@ const withPWA = nextPWA({
     runtimeCaching: [
       // Cache pages (HTML) - NetworkFirst: try network, fallback to cache
       {
-        urlPattern: /^https?:\/\/.*\/.*$/,
+        urlPattern: ({ request }: { request: Request }) => request.mode === "navigate",
         handler: "NetworkFirst",
         options: {
           cacheName: "pages-cache",
@@ -36,19 +36,6 @@ const withPWA = nextPWA({
             maxAgeSeconds: 24 * 60 * 60, // 24 hours
           },
           networkTimeoutSeconds: 3, // Try network for 3 seconds, then use cache
-        },
-      },
-      // API calls - NetworkFirst: always try network first, only use cache if offline
-      {
-        urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
-        handler: "NetworkFirst",
-        options: {
-          cacheName: "supabase-api-cache",
-          expiration: {
-            maxEntries: 50,
-            maxAgeSeconds: 5 * 60, // 5 minutes - short cache for API data
-          },
-          networkTimeoutSeconds: 10,
         },
       },
       // Static assets - CacheFirst: cache forever, update in background
