@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function GoogleSignInButton() {
   const supabase = createClient();
@@ -23,6 +24,7 @@ export default function GoogleSignInButton() {
 
     if (error) {
       console.error("Error during Google sign-in:", error);
+      toast.error("Unable to sign in. Please try again.");
       setIsLoading(false);
     }
   };
