@@ -74,7 +74,6 @@ export default function NotificationRequest() {
       return;
     }
 
-    // Check if service worker is already registered
     let registration = await navigator.serviceWorker.getRegistration();
 
     try {
@@ -87,26 +86,18 @@ export default function NotificationRequest() {
       }
 
       if (!registration) {
-        // Register the service worker
         registration = await navigator.serviceWorker.register("/sw.js", {
           scope: "/",
         });
-
-        // Wait for the service worker to be ready
         await navigator.serviceWorker.ready;
       }
 
-      // Ensure service worker is activated
       if (registration.waiting) {
-        // If there's a waiting service worker, skip waiting and activate it
         registration.waiting.postMessage({ type: "SKIP_WAITING" });
-        // Wait a bit for activation
         await new Promise((resolve) => setTimeout(resolve, 1000));
-        // Get the updated registration
         registration = await navigator.serviceWorker.getRegistration();
       }
 
-      // Ensure registration is available
       if (!registration) {
         toast.error(
           "Service worker registration failed. Please refresh the page and try again.",
@@ -114,7 +105,6 @@ export default function NotificationRequest() {
         return;
       }
 
-      // Wait for the service worker to be ready/activated
       if (registration.installing) {
         await new Promise<void>((resolve) => {
           const installingWorker = registration?.installing;
@@ -130,13 +120,11 @@ export default function NotificationRequest() {
         });
       }
 
-      // Double-check that pushManager is available
       if (!registration.pushManager) {
         toast.error("Push Manager is not available. Please try again.");
         return;
       }
 
-      // Subscribe to push notifications
       await generateSubscribeEndPoint(registration);
     } catch (error: any) {
       console.error("Error during service worker registration:", error);
@@ -151,7 +139,6 @@ export default function NotificationRequest() {
     newRegistration: ServiceWorkerRegistration,
   ) => {
     try {
-      // Check if VAPID key is available
       if (!process.env.NEXT_PUBLIC_VAPID_KEY) {
         console.error("VAPID key is not configured");
         toast.error(
@@ -160,7 +147,6 @@ export default function NotificationRequest() {
         return;
       }
 
-      // Check if pushManager is available
       if (!newRegistration.pushManager) {
         console.error("PushManager is not available");
         toast.error(
@@ -169,21 +155,21 @@ export default function NotificationRequest() {
         return;
       }
 
-      // Check if already subscribed
+      // Force unsubscribe any existing stale subscription before re-subscribing
       const existingPushSubscription =
         await newRegistration.pushManager.getSubscription();
-      let subscription = existingPushSubscription;
-
-      if (!subscription) {
-        const applicationServerKey = urlBase64ToUint8Array(
-          process.env.NEXT_PUBLIC_VAPID_KEY,
-        );
-        const options = {
-          applicationServerKey,
-          userVisibleOnly: true,
-        };
-        subscription = await newRegistration.pushManager.subscribe(options);
+      if (existingPushSubscription) {
+        await existingPushSubscription.unsubscribe();
       }
+
+      // Always create a fresh subscription with the current VAPID key
+      const applicationServerKey = urlBase64ToUint8Array(
+        process.env.NEXT_PUBLIC_VAPID_KEY,
+      );
+      const subscription = await newRegistration.pushManager.subscribe({
+        applicationServerKey,
+        userVisibleOnly: true,
+      });
 
       const supabase = createClient();
       const { data: userData } = await supabase.auth.getUser();
@@ -210,19 +196,17 @@ export default function NotificationRequest() {
       if (primarySubscriptionId) {
         const { error } = await supabase
           .from("push_subscriptions")
-          .update({
-            subscription: JSON.stringify(subscription),
-          })
+          .update({ subscription: JSON.stringify(subscription) })
           .eq("id", primarySubscriptionId);
 
         if (error) {
           toast.error(error.message);
         } else {
+          // Clean up duplicates
           if ((existingSubscriptions?.length ?? 0) > 1) {
             const duplicateIds = existingSubscriptions!
               .slice(1)
               .map((row) => row.id);
-
             await supabase
               .from("push_subscriptions")
               .delete()
@@ -230,12 +214,9 @@ export default function NotificationRequest() {
           }
 
           toast.success("Notification subscription updated successfully!");
-          qc.invalidateQueries({
-            queryKey: ["notification"],
-          });
+          qc.invalidateQueries({ queryKey: ["notification"] });
         }
       } else {
-        // Insert new subscription
         const { error } = await supabase.from("push_subscriptions").insert({
           user_id: userData.user.id,
           subscription: JSON.stringify(subscription),
@@ -245,15 +226,12 @@ export default function NotificationRequest() {
           toast.error(error.message);
         } else {
           toast.success("Notification subscription created successfully!");
-          qc.invalidateQueries({
-            queryKey: ["notification"],
-          });
+          qc.invalidateQueries({ queryKey: ["notification"] });
         }
       }
     } catch (error: any) {
       console.error("Error generating subscription:", error);
 
-      // Provide more specific error messages
       if (error.name === "NotAllowedError") {
         toast.error(
           "Notification permission was denied. Please enable notifications in your browser settings.",
