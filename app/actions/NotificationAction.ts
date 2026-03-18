@@ -39,7 +39,7 @@ export const sendNotificationToUser = async (
     data.map(async (subscriptionRow) => {
       try {
         await webpush.sendNotification(
-          subscriptionRow.subscription,
+          JSON.parse(subscriptionRow.subscription),
           JSON.stringify({
             title: "New Notification",
             icon: "/favicon.ico",

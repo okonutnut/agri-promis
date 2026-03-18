@@ -74,6 +74,9 @@ export default function NotificationRequest() {
       return;
     }
 
+    // Check if service worker is already registered
+    let registration = await navigator.serviceWorker.getRegistration();
+
     try {
       const swCheck = await fetch("/sw.js", { cache: "no-store" });
       if (!swCheck.ok) {
@@ -82,9 +85,6 @@ export default function NotificationRequest() {
         );
         return;
       }
-
-      // Check if service worker is already registered
-      let registration = await navigator.serviceWorker.getRegistration();
 
       if (!registration) {
         // Register the service worker
@@ -117,7 +117,7 @@ export default function NotificationRequest() {
       // Wait for the service worker to be ready/activated
       if (registration.installing) {
         await new Promise<void>((resolve) => {
-          const installingWorker = registration.installing;
+          const installingWorker = registration?.installing;
           if (installingWorker) {
             installingWorker.addEventListener("statechange", () => {
               if (installingWorker.state === "activated") {

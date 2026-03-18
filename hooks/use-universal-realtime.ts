@@ -18,6 +18,7 @@ type UseUniversalRealtimeOptions<T> = {
 
 /**
  * Universal hook: fetch via Server Action + sync via Supabase Realtime + handle network mode
+ * Uses a single channel with multiple .on() listeners instead of one channel per table.
  */
 export function useUniversalRealtime<T>({
   queryKey,
@@ -31,20 +32,17 @@ export function useUniversalRealtime<T>({
   const supabase = useMemo(() => createClient(), []);
   const queryClient = useQueryClient();
   const realtimeTablesKey = useMemo(() => tables.join("|"), [tables]);
-  const queryKeySerialized = useMemo(
-    () => JSON.stringify(queryKey),
-    [queryKey],
-  );
+  const queryKeySerialized = useMemo(() => JSON.stringify(queryKey), [queryKey]);
   const stableTables = useMemo(() => tables, [realtimeTablesKey]);
   const stableQueryKey = useMemo(() => queryKey, [queryKeySerialized]);
 
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>("disconnected");
   const retryCountRef = useRef(0);
   const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const channelsRef = useRef<ReturnType<typeof supabase.channel>[]>([]);
+  // Single channel ref instead of array
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const isUnmountedRef = useRef(false);
 
-  // Main query
   const query = useQuery<T>({
     queryKey,
     queryFn,
@@ -60,40 +58,42 @@ export function useUniversalRealtime<T>({
     }
   }, []);
 
-  // Realtime + network awareness
   useEffect(() => {
     if (typeof window === "undefined") return;
     isUnmountedRef.current = false;
 
     function attemptSubscribe() {
-      if (channelsRef.current.length > 0) return;
+      if (channelRef.current || !navigator.onLine) return;
 
       setConnectionStatus("connecting");
 
-      channelsRef.current = stableTables.map((table) =>
-        supabase
-          .channel(`realtime:${table}`)
-          .on(
-            "postgres_changes",
-            { event: "*", schema: "public", table },
-            () => {
-              queryClient.invalidateQueries({ queryKey: stableQueryKey });
-            },
-          )
-          .subscribe((status) => {
-            if (isUnmountedRef.current) return;
-            
-            if (status === "SUBSCRIBED") {
-              setConnectionStatus("connected");
-              retryCountRef.current = 0;
-            } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-              setConnectionStatus("error");
-              reconnect();
-            } else if (status === "CLOSED") {
-              setConnectionStatus("disconnected");
-            }
-          }),
-      );
+      // Build a single channel and attach one .on() listener per table
+      const channelName = `realtime:${stableTables.join("+")}`;
+      let channel = supabase.channel(channelName);
+
+      stableTables.forEach((table) => {
+        channel = channel.on(
+          "postgres_changes",
+          { event: "*", schema: "public", table },
+          () => {
+            queryClient.invalidateQueries({ queryKey: stableQueryKey });
+          },
+        );
+      });
+
+      channelRef.current = channel.subscribe((status) => {
+        if (isUnmountedRef.current) return;
+
+        if (status === "SUBSCRIBED") {
+          setConnectionStatus("connected");
+          retryCountRef.current = 0;
+        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          setConnectionStatus("error");
+          reconnect();
+        } else if (status === "CLOSED") {
+          setConnectionStatus("disconnected");
+        }
+      });
     }
 
     function reconnect() {
@@ -116,8 +116,10 @@ export function useUniversalRealtime<T>({
 
     function unsubscribe() {
       clearRetryTimeout();
-      channelsRef.current.forEach((ch) => supabase.removeChannel(ch));
-      channelsRef.current = [];
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
     }
 
     if (navigator.onLine) {
