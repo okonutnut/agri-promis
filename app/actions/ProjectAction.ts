@@ -46,6 +46,7 @@ export async function SelectAllProjectsByProgramIDAction(programID: string) {
       project_location (*)
     `,
     )
+    .is("deleted_at", null)
     .eq("program_id", programID);
 
   if (error) throw error;
@@ -74,6 +75,7 @@ export async function SelectAllProjectsByUserIDAction(userID: string) {
       "id",
       assignedProjects.map((project) => project.project_id),
     )
+    .is("deleted_at", null)
     .order("created_at", { ascending: true });
 
   if (error) {

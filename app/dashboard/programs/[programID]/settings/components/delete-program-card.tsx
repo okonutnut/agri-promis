@@ -13,12 +13,14 @@ import { SoftDeleteAction } from "@/app/actions/DeleteAction";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
+import { useQueryClient } from "@tanstack/react-query";
 
 type DeleteProgramCardProps = {
   data: ProgramType;
 };
 export default function DeleteProgramCard({ data }: DeleteProgramCardProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { openModal, closeModal } = useModal();
 
   const { mutate, isPending } = useUniversalMutation({
@@ -35,6 +37,7 @@ export default function DeleteProgramCard({ data }: DeleteProgramCardProps) {
     ],
     onSuccess: () => {
       toast.success("Program deleted successfully!");
+      queryClient.removeQueries({ queryKey: ["programs"] });
       router.push("/dashboard/programs");
     },
     onError: () => {

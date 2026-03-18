@@ -83,7 +83,6 @@ export async function SelectUserDashboardItemsAction() {
 
 export async function SelectAdminDashboardItemsAction() {
   const supabase = await createClient();
-
   const nowDate = new Date().toISOString().split("T")[0]; // e.g. "2025-09-18"
 
   // Optimize: Run all independent queries in parallel for better performance
@@ -96,8 +95,8 @@ export async function SelectAdminDashboardItemsAction() {
     { data: activityLogs },
   ] = await Promise.all([
     supabase.from("user_profile").select("*", { count: "exact", head: true }),
-    supabase.from("programs").select("*", { count: "exact", head: true }),
-    supabase.from("projects").select("*", { count: "exact", head: true }),
+    supabase.from("programs").select("*", { count: "exact", head: true }).is("deleted_at", null),
+    supabase.from("projects").select("*", { count: "exact", head: true }).is("deleted_at", null),
     supabase.from("farmers").select("*", { count: "exact", head: true }),
     supabase
       .from("travel_order_itinerary_items")

@@ -100,6 +100,7 @@ export async function SelectAllProgramsByAgriculturistAction() {
       project_count:projects(count)
     `,
     )
+    .is("deleted_at", null)
     .order("created_at", { ascending: true });
 
   if (error) throw error;
@@ -118,6 +119,7 @@ export async function SelectAllProgramsByUserIDAction(userID: string) {
   const { data, error } = await supabase
     .from("programs")
     .select("*, project_count:projects(count)")
+    .is("deleted_at", null)
     .eq("admin_id", userID)
     .order("created_at", { ascending: true });
 
@@ -178,6 +180,7 @@ export async function SelectAllProgramsAction() {
       user_profile:admin_id(fullname)
     `,
     )
+    .is("deleted_at", null)
     .order("created_at", { ascending: true });
 
   if (error) {
@@ -232,6 +235,7 @@ export async function SelectAllProgramsWithProjectsAction() {
       )
     `,
     )
+    .is("deleted_at", null)
     .order("created_at", { ascending: true });
 
   if (error) throw error;
@@ -253,6 +257,7 @@ export async function SelectProgramDashboardDataAction(programId: string) {
           project_location (*)
         )
       `)
+      .is("deleted_at", null)
       .eq("id", programId)
       .single();
 
