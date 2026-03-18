@@ -16,6 +16,7 @@ type UseRealtimeQueryProps<T> = {
   networkMode?: NetworkMode;
   retryAttempts?: number;
   retryDelay?: number;
+  enabled?: boolean; // NEW
 };
 
 export function useRealtimeQuery<T>({
@@ -28,6 +29,7 @@ export function useRealtimeQuery<T>({
   networkMode = "online",
   retryAttempts = 5,
   retryDelay = 1000,
+  enabled = true, // NEW
 }: UseRealtimeQueryProps<T>) {
   const queryClient = useQueryClient();
   const supabase = useMemo(() => createClient(), []);
@@ -53,9 +55,11 @@ export function useRealtimeQuery<T>({
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
+    enabled, // NEW
   });
 
   useEffect(() => {
+    if (!enabled) return; // NEW — skip realtime subscription if disabled
     if (typeof window === "undefined") return;
     isUnmountedRef.current = false;
 
@@ -75,13 +79,13 @@ export function useRealtimeQuery<T>({
         .channel(`${table}-changes`)
         .on("postgres_changes", { event: "*", schema, table }, (payload) => {
           const eventType = payload.eventType as string;
-          
+
           // For UPDATE/INSERT/DELETE events, refetch to ensure RLS compliance
           if (eventType === "UPDATE" || eventType === "INSERT" || eventType === "DELETE") {
             queryClient.refetchQueries({ queryKey: stableQueryKey });
             return;
           }
-          
+
           // For DELETE, update cache directly
           if (eventType === "DELETE") {
             queryClient.setQueryData<T | T[]>(queryKey, (old) => {
@@ -176,7 +180,17 @@ export function useRealtimeQuery<T>({
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
     };
-  }, [queryClient, stableQueryKey, table, schema, supabase, retryAttempts, retryDelay]);
+  }, [
+    enabled, // NEW
+    supabase,
+    queryClient,
+    stableQueryKey,
+    table,
+    schema,
+    queryKeySerialized,
+    retryAttempts,
+    retryDelay,
+  ]);
 
   return { ...query, connectionStatus };
 }

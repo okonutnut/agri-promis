@@ -162,40 +162,27 @@ const ProjectLocationDropdown = memo(
   }) => {
     const pathname = usePathname();
     const projects = program.projects ?? [];
-    const currentProject = projects.find((p: ProjectType) =>
-      p.project_location?.some((location) => location.id === locationID),
-    );
-    const currentProjectLocation = currentProject?.project_location?.find(
-      (location) => location.id === locationID,
-    );
+
+    const currentProject = useMemo(() => {
+      return projects.find((p: ProjectType) =>
+        p.project_location?.some(
+          (loc: ProjectLocationType) => loc.id === locationID,
+        ),
+      );
+    }, [projects, locationID]);
+
+    const currentLocation = useMemo(() => {
+      return currentProject?.project_location?.find(
+        (loc: ProjectLocationType) => loc.id === locationID,
+      );
+    }, [currentProject, locationID]);
+
     const [open, setOpen] = useState(false);
-    const [value, setValue] = useState<string | undefined>(currentProject?.id);
+    const [value, setValue] = useState<string | undefined>(locationID);
     const [locationOpen, setLocationOpen] = useState(false);
     const [locationValue, setLocationValue] = useState<string | undefined>(
       locationID,
     );
-
-    const currentProjectLocations = currentProject?.project_location ?? [];
-
-    const locationPathSuffix = useMemo(() => {
-      if (!pathname) return "";
-
-      const segments = pathname.split("/").filter(Boolean);
-      const locationSegmentIndex = segments.findIndex(
-        (segment, index) =>
-          segment === "project-location" && index + 1 < segments.length,
-      );
-
-      if (
-        locationSegmentIndex === -1 ||
-        locationSegmentIndex + 2 >= segments.length
-      ) {
-        return "";
-      }
-
-      const suffix = segments.slice(locationSegmentIndex + 2).join("/");
-      return suffix ? `/${suffix}` : "";
-    }, [pathname]);
 
     useEffect(() => {
       setValue(currentProject?.id);
@@ -205,151 +192,142 @@ const ProjectLocationDropdown = memo(
       setLocationValue(locationID);
     }, [locationID]);
 
+    const locationPathSuffix = useMemo(() => {
+      const pathParts = pathname?.split("/").filter(Boolean) ?? [];
+      const locationIndex = pathParts.findIndex((p) => p === locationID);
+      return locationIndex !== -1
+        ? "/" + pathParts.slice(locationIndex + 1).join("/")
+        : "";
+    }, [pathname, locationID]);
+
     return (
-      <div className="flex items-center gap-2 whitespace-nowrap">
-        <Archive className="h-4 w-4 text-[#707070]" />
-        <span className="min-w-37.5 truncate">
-          {currentProject ? (
-            <span className="flex items-center gap-2">
-              <Popover open={open} onOpenChange={setOpen}>
+      <span className="flex flex-1 gap-2 items-center">
+        {currentProject ? (
+          <span className="flex items-center gap-2">
+            <Box className="h-4 w-4 text-[#707070]" />
+            <Popover open={open} onOpenChange={setOpen}>
+              <span className="min-w-37.5 truncate">
+                {currentProject.project_name}
+              </span>
+              <PopoverTrigger asChild>
+                <Button className="ml-2 h-7 w-4 text-[#707070]" variant="ghost">
+                  <ChevronsUpDown />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="m-1 p-0 w-75">
+                <Command>
+                  <CommandInput placeholder="Search projects..." />
+                  <CommandList>
+                    <CommandEmpty>No project found.</CommandEmpty>
+                    <CommandGroup>
+                      {projects.map((project: ProjectType) => (
+                        <CommandItem
+                          key={project.id}
+                          value={project.id}
+                          onSelect={() => {
+                            setValue(project.id);
+                            setOpen(false);
+                          }}
+                        >
+                          <Link
+                            href={`/dashboard/programs/${program.id}/projects/${project.id}`}
+                            prefetch={true}
+                            className="flex items-center justify-between w-full"
+                          >
+                            <span>{project.project_name}</span>
+                            {project.id === value && (
+                              <Check className="ml-2 h-4 w-4" />
+                            )}
+                          </Link>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+                <Separator />
                 <Link
                   href={`/dashboard/programs/${program.id}/projects`}
                   prefetch={true}
-                  className="flex items-center gap-1 hover:underline"
                 >
-                  {currentProject?.project_name}
-                </Link>
-                <PopoverTrigger asChild>
                   <Button
-                    className="h-7 w-4 text-[#707070] p-0"
                     variant="ghost"
+                    size="sm"
+                    className="w-full justify-start font-medium"
                   >
-                    <ChevronsUpDown className="h-3 w-3" />
+                    All Projects
                   </Button>
-                </PopoverTrigger>
+                </Link>
+                {role === "admin" && (
+                  <>
+                    <Separator />
+                    <Link
+                      href={`/dashboard/new/${program.id}`}
+                      prefetch={true}
+                    >
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full justify-start"
+                      >
+                        <Plus className="h-4 w-4 mr-1" /> New Project
+                      </Button>
+                    </Link>
+                  </>
+                )}
+              </PopoverContent>
+            </Popover>
 
-                <PopoverContent align="start" className="m-1 p-0 w-75">
-                  <Command>
-                    <CommandInput placeholder="Search projects..." />
-                    <CommandList>
-                      <CommandEmpty>No project found.</CommandEmpty>
-                      <CommandGroup>
-                        {projects.map((project: ProjectType) => (
+            <BreadcrumbSeparator />
+            <MapPin className="h-4 w-4 text-[#707070]" />
+
+            <Popover open={locationOpen} onOpenChange={setLocationOpen}>
+              <span className="min-w-37.5 truncate">
+                {currentLocation?.location}
+              </span>
+              <PopoverTrigger asChild>
+                <Button className="ml-2 h-7 w-4 text-[#707070]" variant="ghost">
+                  <ChevronsUpDown />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="m-1 p-0 w-75">
+                <Command>
+                  <CommandInput placeholder="Search locations..." />
+                  <CommandList>
+                    <CommandEmpty>No location found.</CommandEmpty>
+                    <CommandGroup>
+                      {(currentProject.project_location ?? []).map(
+                        (location: ProjectLocationType) => (
                           <CommandItem
-                            key={project.id}
-                            value={project.id}
+                            key={location.id}
+                            value={location.id}
                             onSelect={() => {
-                              setValue(project.id);
-                              setOpen(false);
+                              setLocationValue(location.id);
+                              setLocationOpen(false);
                             }}
                           >
                             <Link
-                              href={`/dashboard/programs/${program.id}/projects/${project.id}`}
+                              href={`/dashboard/project-location/${location.id}${locationPathSuffix}`}
                               prefetch={true}
                               className="flex items-center justify-between w-full"
                             >
-                              <span>{project.project_name}</span>
-                              {project.id === value && (
+                              <span>{location.location}</span>
+                              {location.id === locationValue && (
                                 <Check className="ml-2 h-4 w-4" />
                               )}
                             </Link>
                           </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                  <Separator />
-
-                  <Link
-                    href={`/dashboard/programs/${program.id}/projects`}
-                    prefetch={true}
-                  >
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-full justify-start font-medium"
-                    >
-                      All Projects
-                    </Button>
-                  </Link>
-
-                  {role === "admin" && (
-                    <>
-                      <Separator />
-                      <Link
-                        href={`/dashboard/new/${program.id}`}
-                        prefetch={true}
-                      >
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full justify-start"
-                        >
-                          <Plus className="h-4 w-4 mr-1" /> New Project
-                        </Button>
-                      </Link>
-                    </>
-                  )}
-                </PopoverContent>
-              </Popover>
-              <Slash className="mx-1 h-3 w-3 text-gray-400" />
-              <Link
-                href={`/dashboard/programs/${program.id}/projects/${currentProject.id}`}
-                className="flex items-center gap-1 hover:underline"
-              >
-                <MapPin className="h-4 w-4 text-[#707070]" />
-                <span>{currentProjectLocation?.location}</span>
-              </Link>
-              <Popover open={locationOpen} onOpenChange={setLocationOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    className="h-7 w-4 text-[#707070] p-0"
-                    variant="ghost"
-                  >
-                    <ChevronsUpDown className="h-3 w-3" />
-                  </Button>
-                </PopoverTrigger>
-
-                <PopoverContent align="start" className="m-1 p-0 w-75">
-                  <Command>
-                    <CommandInput placeholder="Search locations..." />
-                    <CommandList>
-                      <CommandEmpty>No location found.</CommandEmpty>
-                      <CommandGroup>
-                        {currentProjectLocations.map(
-                          (location: ProjectLocationType) => (
-                            <CommandItem
-                              key={location.id}
-                              value={location.id}
-                              onSelect={() => {
-                                setLocationValue(location.id);
-                                setLocationOpen(false);
-                              }}
-                            >
-                              <Link
-                                href={`/dashboard/project-location/${location.id}${locationPathSuffix}`}
-                                prefetch={true}
-                                className="flex items-center justify-between w-full"
-                              >
-                                <span>{location.location}</span>
-                                {location.id === locationValue && (
-                                  <Check className="ml-2 h-4 w-4" />
-                                )}
-                              </Link>
-                            </CommandItem>
-                          ),
-                        )}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </span>
-          ) : (
-            <Skeleton className="w-full h-5" />
-          )}
-        </span>
-      </div>
+                        ),
+                      )}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </span>
+        ) : (
+          <Skeleton className="w-full h-5" />
+        )}
+      </span>
     );
   },
 );
@@ -551,7 +529,6 @@ const UserProjectsDropdown = memo(function UserProjectsDropdown() {
     table: "projects",
   });
 
-  // Find the project that contains the location with matching locationID
   const currentProjectData = useMemo(() => {
     if (!data || !locationID) return null;
     for (const project of data) {
@@ -827,12 +804,12 @@ const UserProjectDetailsDropdown = memo(function UserProjectDetailsDropdown({
   );
 });
 
+// Fix 2: Removed unused `navbarTitle` prop from interface
 interface CustomNavbarProps {
   role: "admin" | "user";
   noSidebar?: boolean;
   navItems?: any[];
   pageTitle?: string;
-  navbarTitle?: string;
 }
 
 function getProgramIDProjectLocationID(
@@ -861,19 +838,23 @@ export default function CustomNavbar({
   const { programID, projectID, locationID } = useParams();
   const pathname = usePathname();
 
+  const isAdmin = role === "admin";
+
+  // Fix 1: Only fetch what's needed per role using `enabled`
   const { data: programs } = useRealtimeQuery({
     table: "programs",
     queryKey: ["allProgramsByUserIDForNavbar"],
     queryFn: SelectAllProgramsWithProjectsAction,
+    enabled: isAdmin,
   });
 
   const { data: userPrograms } = useRealtimeQuery({
     table: "assigned_fieldtechnicians",
     queryKey: ["assigned-programs-navbar"],
     queryFn: SelectAllProgramsAssignedToCurrentUserAction,
+    enabled: !isAdmin,
   });
 
-  // Determine if we're on a project details page or project location page
   const isProjectDetailsPage = useMemo(() => {
     return (
       pathname?.includes("/programs/") &&
@@ -891,18 +872,8 @@ export default function CustomNavbar({
       !programID &&
       !projectID
     );
-  }, [pathname, projectID, programID, locationID]);
+  }, [pathname, locationID, programID, projectID]);
 
-  // const isProjectsListPage = useMemo(() => {
-  //   return (
-  //     pathname?.includes("/programs/") &&
-  //     pathname?.endsWith("/projects") &&
-  //     !projectID &&
-  //     !pathname?.startsWith("/field-technician/programs/")
-  //   );
-  // }, [pathname, projectID]);
-
-  // Field technician route detection
   const isFieldTechnicianProgramsPage = useMemo(() => {
     return (
       pathname?.startsWith("/field-technician/programs") &&
@@ -914,12 +885,9 @@ export default function CustomNavbar({
 
   const isFieldTechnicianProgramProjectsPage = useMemo(() => {
     if (!pathname?.startsWith("/field-technician/programs/")) return false;
-    // Path should be like /field-technician/programs/[programID] (without /projects/ or /location/)
-    // Check pathname structure first, then verify params match
     const hasProjectsInPath = pathname.includes("/projects/");
     const hasLocationInPath = pathname.includes("/location/");
     if (hasProjectsInPath || hasLocationInPath) return false;
-    // Path should match pattern: /field-technician/programs/[programID]
     const pathParts = pathname.split("/").filter(Boolean);
     return (
       pathParts.length === 3 &&
@@ -930,12 +898,9 @@ export default function CustomNavbar({
 
   const isFieldTechnicianProjectLocationsPage = useMemo(() => {
     if (!pathname?.startsWith("/field-technician/programs/")) return false;
-    // Path should be like /field-technician/programs/[programID]/projects/[projectID]
-    // Check pathname structure first
     const hasProjectsInPath = pathname.includes("/projects/");
     const hasLocationInPath = pathname.includes("/location/");
     if (!hasProjectsInPath || hasLocationInPath) return false;
-    // Path should match pattern: /field-technician/programs/[programID]/projects/[projectID]
     const pathParts = pathname.split("/").filter(Boolean);
     return (
       pathParts.length === 5 &&
@@ -947,7 +912,6 @@ export default function CustomNavbar({
 
   const isFieldTechnicianLocationPage = useMemo(() => {
     if (!pathname?.startsWith("/field-technician/programs/")) return false;
-    // Path should match pattern: /field-technician/programs/[programID]/location/[locationID]
     const hasLocationInPath = pathname.includes("/location/");
     if (!hasLocationInPath) return false;
     const pathParts = pathname.split("/").filter(Boolean);
@@ -970,7 +934,6 @@ export default function CustomNavbar({
       return getProgramIDProjectLocationID(locationID as string, programs);
     }
     if (projectID && programs && isProjectDetailsPage) {
-      // Find program that contains this project
       return programs.find((p: ProgramType) =>
         p.projects?.some((project: ProjectType) => project.id === projectID),
       );
@@ -1013,9 +976,9 @@ export default function CustomNavbar({
             {!programID && !projectID && !locationID ? (
               <span className="text-black whitespace-nowrap">{pageTitle}</span>
             ) : (
-              // ADMIN VIEW
               <>
                 {role === "admin" ? (
+                  // ADMIN VIEW
                   <>
                     <ProgramDropdown
                       programID={(programID as string) ?? currentProgram?.id}
@@ -1024,22 +987,6 @@ export default function CustomNavbar({
 
                     {currentProgram && (
                       <>
-                        {/* Show "Projects" link when on projects list page */}
-                        {/* {isProjectsListPage && (
-                          <>
-                            <BreadcrumbSeparator />
-                            <Link
-                              href={`/dashboard/programs/${currentProgram.id}/projects`}
-                              className="text-black whitespace-nowrap"
-                            >
-                              <span className="w-37.5 flex items-center gap-2">
-                                <Box className="h-4 w-4 text-[#707070]" />
-                                Projects
-                              </span>
-                            </Link>
-                          </>
-                        )} */}
-
                         {/* Show project name when on project details page */}
                         {isProjectDetailsPage && projectID && (
                           <>
@@ -1114,8 +1061,6 @@ export default function CustomNavbar({
                         <UserProjectsDropdown />
                       </>
                     )}
-
-                    {}
 
                     {/* Fallback for other field technician pages */}
                     {!isFieldTechnicianProgramsPage &&
