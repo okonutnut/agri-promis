@@ -1,6 +1,12 @@
 self.addEventListener('push', function (event) {
   if (event.data) {
-    const data = event.data.json();
+    let data;
+    try {
+      data = event.data.json();
+    } catch (e) {
+      data = { title: 'Notification', body: event.data.text() };
+    }
+    
     const options = {
       body: data.body,
       icon: data.icon || '/icon.png',
