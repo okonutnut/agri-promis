@@ -2,14 +2,19 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import { useModal } from "@/components/custom/layout/custom-page-layout";
 
 type ReportType = "post-travel" | "monitoring";
 
 type ViewSummaryButtonProps = {
   reportId?: string;
+  reportData?: Record<string, unknown>;
   reportType: ReportType;
   buttonLabel?: string;
   title?: string;
@@ -29,21 +34,13 @@ type SummarizeResponse = {
   error?: string;
 };
 
-const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
+const CACHE_TTL_MS = 30 * 60 * 1000;
 
-function getCacheKey(reportType: ReportType, reportId: string) {
-  return `report-summary:${reportType}:${reportId}`;
-}
-
-function readSummaryCache(
-  reportType: ReportType,
-  reportId: string,
-): string | null {
+function readSummaryCache(cacheKey: string): string | null {
   if (typeof window === "undefined") return null;
 
   try {
-    const key = getCacheKey(reportType, reportId);
-    const raw = window.sessionStorage.getItem(key);
+    const raw = window.sessionStorage.getItem(cacheKey);
     if (!raw) return null;
 
     const parsed = JSON.parse(raw) as { summary: string; timestamp: number };
@@ -51,7 +48,7 @@ function readSummaryCache(
 
     const isExpired = Date.now() - parsed.timestamp > CACHE_TTL_MS;
     if (isExpired) {
-      window.sessionStorage.removeItem(key);
+      window.sessionStorage.removeItem(cacheKey);
       return null;
     }
 
@@ -63,15 +60,14 @@ function readSummaryCache(
 
 function writeSummaryCache(
   reportType: ReportType,
-  reportId: string,
+  cacheKey: string,
   summary: string,
 ) {
   if (typeof window === "undefined") return;
 
   try {
-    const key = getCacheKey(reportType, reportId);
     window.sessionStorage.setItem(
-      key,
+      cacheKey,
       JSON.stringify({
         summary,
         timestamp: Date.now(),
@@ -84,75 +80,70 @@ function writeSummaryCache(
 
 export default function ViewSummaryButton({
   reportId,
+  reportData,
   reportType,
   buttonLabel = "View Summary",
   className,
   iconOnly = false,
   buttonVariant = "outline",
 }: ViewSummaryButtonProps) {
-  const { openModal, closeModal } = useModal();
   const [isLoading, setIsLoading] = useState(false);
   const [summary, setSummary] = useState<string>("");
 
-  const modalTitle = "Report Summary";
+  const getCacheKey = () => {
+    if (reportData) {
+      return `report-summary:${reportType}:${JSON.stringify(reportData).slice(0, 50)}`;
+    }
+    if (reportId) {
+      return `report-summary:${reportType}:${reportId}`;
+    }
+    return null;
+  };
 
-  const getModalBody = (
-    text: string,
-    loading: boolean,
-    attemptedFetch: boolean,
-  ) => (
-    <div className="rounded-md border bg-muted/30 p-4 text-sm leading-relaxed min-h-24">
-      {loading ? (
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          Summarizing report...
+  const getTooltipContent = (isLoading: boolean, text: string) => {
+    if (isLoading) {
+      return (
+        <div className="flex items-center gap-2">
+          <Loader2 className="h-3 w-3 animate-spin" />
+          Summarizing...
         </div>
-      ) : text ? (
-        text
-      ) : attemptedFetch ? (
-        "Summary is currently unavailable. Please try again."
-      ) : (
-        "Click View Summary to generate a short report context."
-      )}
-    </div>
-  );
+      );
+    }
+    if (text) {
+      return text;
+    }
+    return "Click to generate summary";
+  };
 
   const fetchSummary = async () => {
-    if (!reportId) {
-      toast.error("Cannot summarize this report because report ID is missing.");
-      setSummary("Summary is currently unavailable. Please try again.");
-      openModal(
-        modalTitle,
-        "",
-        getModalBody(
-          "Summary is currently unavailable. Please try again.",
-          false,
-          true,
-        ),
-      );
+    const cacheKey = getCacheKey();
+    if (!cacheKey) {
+      toast.error("Cannot summarize: missing report data.");
       return;
     }
 
-    const cached = readSummaryCache(reportType, reportId);
+    const cached = readSummaryCache(cacheKey);
     if (cached) {
       setSummary(cached);
-      openModal(modalTitle, "", getModalBody(cached, false, true));
       return;
     }
 
     setIsLoading(true);
-    openModal(modalTitle, "", getModalBody("", true, true));
 
     try {
+      const payload: Record<string, unknown> = { reportType };
+      if (reportData) {
+        payload.reportData = reportData;
+      } else if (reportId) {
+        payload.reportId = reportId;
+      }
+
       const response = await fetch("/api/reports/summarize", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          reportType,
-          reportId,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = (await response.json()) as SummarizeResponse;
@@ -167,8 +158,7 @@ export default function ViewSummaryButton({
       }
 
       setSummary(text);
-      writeSummaryCache(reportType, reportId, text);
-      openModal(modalTitle, "", getModalBody(text, false, true));
+      writeSummaryCache(reportType, cacheKey, text);
     } catch (error: unknown) {
       console.error("view-summary-button error:", error);
       const message =
@@ -176,37 +166,40 @@ export default function ViewSummaryButton({
           ? error.message
           : "Failed to generate summary. Please try again.";
       toast.error(message);
-      const fallback = "Summary is currently unavailable. Please try again.";
-      setSummary(fallback);
-      openModal(modalTitle, "", getModalBody(fallback, false, true));
+      setSummary("Summary unavailable");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    closeModal();
-    if (summary) {
-      openModal(modalTitle, "", getModalBody(summary, false, true));
-      return;
+    if (!summary) {
+      void fetchSummary();
     }
-    void fetchSummary();
   };
 
+  const tooltipContent = getTooltipContent(isLoading, summary);
+
   return (
-    <Button
-      type="button"
-      size="sm"
-      variant={buttonVariant}
-      className={className}
-      onClick={handleButtonClick}
-      disabled={isLoading}
-      aria-label={buttonLabel}
-      title={buttonLabel}
-    >
-      <Sparkles className={iconOnly ? "h-4 w-4" : "mr-2 h-4 w-4"} />
-      {!iconOnly ? buttonLabel : null}
-    </Button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          type="button"
+          size="sm"
+          variant={buttonVariant}
+          className={className}
+          onClick={handleClick}
+          disabled={isLoading}
+          aria-label={buttonLabel}
+        >
+          <Sparkles className={iconOnly ? "h-4 w-4" : "mr-2 h-4 w-4"} />
+          {!iconOnly ? buttonLabel : null}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent className="max-w-sm" side="right">
+        {tooltipContent}
+      </TooltipContent>
+    </Tooltip>
   );
 }

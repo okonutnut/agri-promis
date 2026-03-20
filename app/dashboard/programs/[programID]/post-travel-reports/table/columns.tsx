@@ -33,7 +33,7 @@ export const columns: ColumnDef<PostTravelWithDetails>[] = [
         >
           <ViewSummaryButton
             reportType="post-travel"
-            reportId={row.original.id}
+            reportData={row.original}
             buttonLabel="View summary"
             className="h-8 w-8 p-0"
             iconOnly

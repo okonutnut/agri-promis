@@ -7,6 +7,7 @@ type ReportType = "post-travel" | "monitoring";
 type SummarizeRequestBody = {
   reportType?: ReportType;
   reportId?: string;
+  reportData?: Record<string, unknown>;
 };
 
 function normalizeText(value: unknown): string {
@@ -19,6 +20,47 @@ function normalizeText(value: unknown): string {
   }
   if (typeof value === "string") return value.trim();
   return String(value);
+}
+
+function extractPostTravelFields(data: Record<string, unknown>) {
+  return {
+    title: normalizeText(data.project_title_activity),
+    location: normalizeText(data.icc_fca_lgu_name),
+    placesVisited: normalizeText(data.projects_places_visited),
+    activities: normalizeText(data.activities_undertaken),
+    issues: normalizeText(data.issues_concern),
+    remarks: normalizeText(data.remarks),
+    travelOrderNo: normalizeText(data.travel_order_no),
+    reporterName: normalizeText(data.fullname),
+    date: normalizeText(data.date),
+  };
+}
+
+function extractMonitoringFields(data: Record<string, unknown>) {
+  const projectLocation = data.project_location as Record<string, unknown> | undefined;
+  const reporter = data.reporter as Record<string, unknown> | undefined;
+  const travelOrder = data.travel_order as Record<string, unknown> | undefined;
+
+  const locationText = [
+    normalizeText(projectLocation?.name),
+    normalizeText(projectLocation?.barangay),
+    normalizeText(projectLocation?.municipality),
+    normalizeText(projectLocation?.province),
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  return {
+    purpose: normalizeText(data.purpose),
+    findings: normalizeText(data.findings),
+    issues: normalizeText(data.issues_concern),
+    remarks: normalizeText(data.remarks),
+    observation: normalizeText(data.observation),
+    reporterName: normalizeText(reporter?.fullname),
+    travelOrderNo: normalizeText(travelOrder?.travel_order_no),
+    location: locationText,
+    submittedAt: normalizeText(data.created_at),
+  };
 }
 
 function truncate(input: string, max = 1200): string {
@@ -205,11 +247,12 @@ export async function POST(req: Request) {
   try {
     const body = (await req.json()) as SummarizeRequestBody;
     const reportType = body?.reportType;
+    const reportData = body?.reportData;
     const reportId = body?.reportId;
 
-    if (!reportType || !reportId) {
+    if (!reportType) {
       return NextResponse.json(
-        { error: "reportType and reportId are required." },
+        { error: "reportType is required." },
         { status: 400 },
       );
     }
@@ -231,10 +274,24 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
-    const context =
-      reportType === "post-travel"
-        ? await fetchPostTravelSummaryContext(supabase, reportId)
-        : await fetchMonitoringSummaryContext(supabase, reportId);
+    let context: Record<string, string>;
+
+    if (reportData) {
+      context =
+        reportType === "post-travel"
+          ? extractPostTravelFields(reportData)
+          : extractMonitoringFields(reportData);
+    } else if (reportId) {
+      context =
+        reportType === "post-travel"
+          ? await fetchPostTravelSummaryContext(supabase, reportId)
+          : await fetchMonitoringSummaryContext(supabase, reportId);
+    } else {
+      return NextResponse.json(
+        { error: "Either reportData or reportId is required." },
+        { status: 400 },
+      );
+    }
 
     const prompt = buildPrompt(reportType, context);
     const summary = await summarizeWithNvidiaMinimax(prompt);

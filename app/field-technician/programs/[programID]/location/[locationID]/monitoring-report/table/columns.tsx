@@ -22,7 +22,7 @@ export const columns: ColumnDef<MonitoringReportType>[] = [
         <div className="w-14 flex items-center gap-1">
           <ViewSummaryButton
             reportType="monitoring"
-            reportId={row.original.id}
+            reportData={row.original}
             className="h-8 w-8 p-0"
             iconOnly
             buttonVariant="ghost"
