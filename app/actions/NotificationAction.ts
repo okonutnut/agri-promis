@@ -126,9 +126,7 @@ export async function SelectCurrentUserSubscription() {
     .from("push_subscriptions")
     .select("*")
     .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .order("created_at", { ascending: false });
 
   if (error) {
     return null;

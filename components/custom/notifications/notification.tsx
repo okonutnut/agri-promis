@@ -191,43 +191,17 @@ export default function NotificationRequest() {
         return;
       }
 
-      const primarySubscriptionId = existingSubscriptions?.[0]?.id;
+      // Always insert a new subscription for this device
+      const { error } = await supabase.from("push_subscriptions").insert({
+        user_id: userData.user.id,
+        subscription: JSON.stringify(subscription),
+      });
 
-      if (primarySubscriptionId) {
-        const { error } = await supabase
-          .from("push_subscriptions")
-          .update({ subscription: JSON.stringify(subscription) })
-          .eq("id", primarySubscriptionId);
-
-        if (error) {
-          toast.error(error.message);
-        } else {
-          // Clean up duplicates
-          if ((existingSubscriptions?.length ?? 0) > 1) {
-            const duplicateIds = existingSubscriptions!
-              .slice(1)
-              .map((row) => row.id);
-            await supabase
-              .from("push_subscriptions")
-              .delete()
-              .in("id", duplicateIds);
-          }
-
-          toast.success("Notification subscription updated successfully!");
-          qc.invalidateQueries({ queryKey: ["notification"] });
-        }
+      if (error) {
+        toast.error(error.message);
       } else {
-        const { error } = await supabase.from("push_subscriptions").insert({
-          user_id: userData.user.id,
-          subscription: JSON.stringify(subscription),
-        });
-
-        if (error) {
-          toast.error(error.message);
-        } else {
-          toast.success("Notification subscription created successfully!");
-          qc.invalidateQueries({ queryKey: ["notification"] });
-        }
+        toast.success("Notification subscription created successfully!");
+        qc.invalidateQueries({ queryKey: ["notification"] });
       }
     } catch (error: any) {
       console.error("Error generating subscription:", error);
@@ -262,7 +236,7 @@ export default function NotificationRequest() {
 
   return (
     <div className="hover:scale-110 cursor-pointer transition-all rounded-full p-2">
-      {notificationPermission === "granted" && subscription != null ? (
+      {notificationPermission === "granted" && subscription && subscription.length > 0 ? (
         <BellRing onClick={removeNotification} />
       ) : (
         <BellOff onClick={showNotification} />
