@@ -24,8 +24,8 @@ const withPWA = nextPWA({
   },
   workboxOptions: {
     disableDevLogs: true,
+    importScripts: ["push-handler.js"],
     runtimeCaching: [
-      // Cache pages (HTML) - NetworkFirst: try network, fallback to cache
       {
         urlPattern: ({ request }: { request: Request }) => request.mode === "navigate",
         handler: "NetworkFirst",
@@ -33,12 +33,11 @@ const withPWA = nextPWA({
           cacheName: "pages-cache",
           expiration: {
             maxEntries: 50,
-            maxAgeSeconds: 24 * 60 * 60, // 24 hours
+            maxAgeSeconds: 24 * 60 * 60,
           },
-          networkTimeoutSeconds: 3, // Try network for 3 seconds, then use cache
+          networkTimeoutSeconds: 3,
         },
       },
-      // Static assets - CacheFirst: cache forever, update in background
       {
         urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/,
         handler: "CacheFirst",
@@ -46,11 +45,10 @@ const withPWA = nextPWA({
           cacheName: "static-images",
           expiration: {
             maxEntries: 100,
-            maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+            maxAgeSeconds: 30 * 24 * 60 * 60,
           },
         },
       },
-      // Fonts - CacheFirst
       {
         urlPattern: /\.(?:woff|woff2|ttf|otf)$/,
         handler: "CacheFirst",
@@ -58,11 +56,10 @@ const withPWA = nextPWA({
           cacheName: "static-fonts",
           expiration: {
             maxEntries: 20,
-            maxAgeSeconds: 365 * 24 * 60 * 60, // 1 year
+            maxAgeSeconds: 365 * 24 * 60 * 60,
           },
         },
       },
-      // JS/CSS bundles - StaleWhileRevalidate: serve from cache, update in background
       {
         urlPattern: /\/_next\/static\/.*/i,
         handler: "StaleWhileRevalidate",
@@ -70,7 +67,7 @@ const withPWA = nextPWA({
           cacheName: "next-static",
           expiration: {
             maxEntries: 64,
-            maxAgeSeconds: 365 * 24 * 60 * 60, // 1 year
+            maxAgeSeconds: 365 * 24 * 60 * 60,
           },
         },
       },

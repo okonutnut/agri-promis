@@ -3,22 +3,22 @@
 import { createClient } from "@/utils/supabase/server";
 import webpush from "web-push";
 
+const vapidKeys = {
+  publicKey: process.env.NEXT_PUBLIC_VAPID_KEY!,
+  privateKey: process.env.VAPID_PRIVATE_KEY!,
+  vapidEmail: process.env.VAPID_ADMIN_EMAIL!,
+};
+
+webpush.setVapidDetails(
+  `mailto:${vapidKeys.vapidEmail}`,
+  vapidKeys.publicKey,
+  vapidKeys.privateKey,
+);
+
 export const sendNotificationToUser = async (
   message: string,
   user_id: string,
 ) => {
-  const vapidKeys = {
-    publicKey: process.env.NEXT_PUBLIC_VAPID_KEY!,
-    privateKey: process.env.VAPID_PRIVATE_KEY!,
-    vapidEmail: process.env.VAPID_ADMIN_EMAIL!,
-  };
-
-  webpush.setVapidDetails(
-    `mailto:${vapidKeys.vapidEmail}`,
-    vapidKeys.publicKey,
-    vapidKeys.privateKey,
-  );
-
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -63,18 +63,6 @@ export const sendNotificationToUser = async (
 };
 
 export const sendNotificationToAll = async (message: string) => {
-  const vapidKeys = {
-    publicKey: process.env.NEXT_PUBLIC_VAPID_KEY!,
-    privateKey: process.env.VAPID_PRIVATE_KEY!,
-    vapidEmail: process.env.VAPID_ADMIN_EMAIL!,
-  };
-
-  webpush.setVapidDetails(
-    `mailto:${vapidKeys.vapidEmail}`,
-    vapidKeys.publicKey,
-    vapidKeys.privateKey,
-  );
-
   const supabase = await createClient();
 
   const { data, error } = await supabase
