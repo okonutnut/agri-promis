@@ -522,13 +522,11 @@ export async function InsertMonitoringReportAction({
 export async function InsertRemarksInMonitoringReportAction(reportId: string) {
   const supabase = await createClient();
 
-  // auth check
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("User not authenticated");
 
-  // Fix N+1: Combine queries using a join to fetch travel_order_no in one query
   const { data, error } = await supabase
     .from("monitoring")
     .update({
@@ -538,7 +536,9 @@ export async function InsertRemarksInMonitoringReportAction(reportId: string) {
     .eq("id", reportId)
     .select(
       `
+      id,
       project_location_id,
+      reporter_id,
       travel_order_no,
       travel_order:travel_order!monitoring_travel_order_no_fkey(travel_order_no)
     `,
@@ -549,21 +549,8 @@ export async function InsertRemarksInMonitoringReportAction(reportId: string) {
     throw error;
   }
 
-  // If travel_order_no is not directly on the monitoring table, try to get it from the joined travel_order relationship
-  const { data: travelOrderData, error: travelOrderError } = await supabase
-    .from("travel_order")
-    .select("travel_order_no")
-    .eq("id", data?.travel_order_no)
-    .single();
+  const travelOrderNo = data?.travel_order?.[0]?.travel_order_no || "Unknown";
 
-  if (travelOrderError) {
-    throw travelOrderError;
-  }
-
-  // Extract travel_order_no from the nested travel_order relationship
-  const travelOrderNo = travelOrderData?.travel_order_no || "Unknown";
-
-  // Log the activity
   await InsertActivityLogAction(
     "Reviewed a Monitoring Report",
     `Monitoring report with T.O no ${travelOrderNo} has been reviewed.`,
@@ -571,19 +558,10 @@ export async function InsertRemarksInMonitoringReportAction(reportId: string) {
   );
 
   try {
-    const { data: reportOwner, error: reportOwnerError } = await supabase
-      .from("monitoring")
-      .select(`reporter_id`)
-      .eq("id", reportId)
-      .single();
-    if (reportOwnerError) throw reportOwnerError;
-
-    const reportOwnerId = reportOwner?.reporter_id;
-
-    if (reportOwnerId) {
+    if (data?.reporter_id) {
       await sendNotificationToUser(
         `Your monitoring report for T.O no ${travelOrderNo} has been reviewed.`,
-        reportOwnerId,
+        data.reporter_id,
       );
     }
   } catch (notificationError) {

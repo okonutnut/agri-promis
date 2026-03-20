@@ -219,51 +219,38 @@ export async function InsertPostTravelReportAction({
 export async function ReviewPostTravelAction(postTravelID: string) {
   const supabase = await createClient();
 
-  // Get the current user
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError || !userData?.user) {
     throw new Error("Failed to retrieve the current user.");
   }
 
-  // Update the post_travel record
   const { data, error } = await supabase
     .from("post_travel")
     .update({
-      reviewer_id: userData.user.id, // Ensure this matches the schema
+      reviewer_id: userData.user.id,
       reviewed_at: new Date().toISOString(),
     })
     .eq("id", postTravelID)
     .select(
       `
       *,
-      travel_order(travel_order_no)
+      travel_order(travel_order_no),
+      post_travel_owner(user_id)
     `,
     )
     .single();
 
   if (error) throw error;
 
-  // Validate the returned data
-  const travelOrderNo = data?.travel_order?.travel_order_no || "Unknown";
+  const travelOrderNo = data?.travel_order?.[0]?.travel_order_no || "Unknown";
+  const reportOwnerId = data?.post_travel_owner?.[0]?.user_id;
 
-  // Log the activity
   await InsertActivityLogAction(
     "Reviewed a Post Travel Report",
     `Reviewed a Post travel report submitted for travel order ${travelOrderNo}.`,
   );
 
   try {
-    const { data: postTravelOwner, error: postTravelOwnerError } =
-      await supabase
-        .from("post_travel_owner")
-        .select(`*`)
-        .eq("id", postTravelID)
-        .single();
-
-    if (postTravelOwnerError) throw postTravelOwnerError;
-
-    const reportOwnerId = postTravelOwner?.user_id;
-
     if (reportOwnerId) {
       await sendNotificationToUser(
         `Your post-travel report for travel order ${travelOrderNo} has been reviewed.`,

@@ -86,13 +86,14 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
 
 export async function SelectAllTravelOrdersByUserIDAction(userID?: string) {
   const supabase = await createClient();
-  const user = (await supabase.auth.getUser()).data.user;
-  let user_id = userID ? userID : user?.id;
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+
+  if (userError) throw userError;
+
+  const user_id = userID || userData.user?.id;
 
   if (!user_id) {
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    if (userError) throw userError;
-    user_id = userData.user.id;
+    throw new Error("User not authenticated or user ID not provided");
   }
 
   const { data, error } = await supabase

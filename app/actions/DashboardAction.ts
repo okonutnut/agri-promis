@@ -7,21 +7,20 @@ import { createClient } from "@/utils/supabase/server";
 export async function SelectDashboardItemsAction(projectLocationID: string) {
   const supabase = await createClient();
 
-  // 2. total monitoring reports
-  const { data: MData, error: MError } = await supabase
-    .from("monitoring")
-    .select("*")
-    .eq("project_location_id", projectLocationID);
+  const [{ data: MData, error: MError }, { data: PData, error: projectError }] =
+    await Promise.all([
+      supabase
+        .from("monitoring")
+        .select("*")
+        .eq("project_location_id", projectLocationID),
+      supabase
+        .from("project_location")
+        .select("progress_indicator")
+        .eq("id", projectLocationID)
+        .single(),
+    ]);
 
   if (MError) throw MError;
-
-  // 3. project progress indicator
-  const { data: PData, error: projectError } = await supabase
-    .from("project_location")
-    .select("progress_indicator")
-    .eq("id", projectLocationID)
-    .single();
-
   if (projectError) throw projectError;
 
   return {
@@ -38,45 +37,37 @@ export async function SelectUserDashboardItemsAction() {
     throw userError;
   }
 
-  // Get travel orders
-  const { data: TData, error: TError } = await supabase
-    .from("travel_order")
-    .select("*")
-    .eq("user_id", userData.user.id)
-    .gte("return_date", new Date().toISOString())
-    .order("created_at", { ascending: false });
+  const userId = userData.user.id;
 
-  if (TError) {
-    throw TError;
-  }
+  const [
+    { data: TData, error: TError },
+    { data: MData, error: MError },
+    { data: APData, error: APError },
+    { data: ALData, error: ALError },
+  ] = await Promise.all([
+    supabase
+      .from("travel_order")
+      .select("*")
+      .eq("user_id", userId)
+      .gte("return_date", new Date().toISOString())
+      .order("created_at", { ascending: false }),
+    supabase.from("monitoring").select("*").eq("reporter_id", userId),
+    supabase
+      .from("assigned_fieldtechnicians")
+      .select("*")
+      .eq("user_id", userId),
+    supabase
+      .from("activity_logs")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(10),
+  ]);
 
-  // Get monitoring reports
-  const { data: MData, error: MError } = await supabase
-    .from("monitoring")
-    .select("*")
-    .eq("reporter_id", userData.user.id);
-  if (MError) {
-    throw MError;
-  }
-
-  // Get assigned programs
-  const { data: APData, error: APError } = await supabase
-    .from("assigned_fieldtechnicians")
-    .select("*")
-    .eq("user_id", userData.user.id);
-
+  if (TError) throw TError;
+  if (MError) throw MError;
   if (APError) throw APError;
-
-  // Get activity logs
-  const { data: ALData, error: ALError } = await supabase
-    .from("activity_logs")
-    .select("*")
-    .eq("user_id", userData.user.id)
-    .order("created_at", { ascending: false })
-    .limit(10);
-  if (ALError) {
-    throw ALError;
-  }
+  if (ALError) throw ALError;
 
   return { ap: APData, m: MData, to: TData, al: ALData };
 }
