@@ -41,7 +41,7 @@ export const sendNotificationToUser = async (
         await webpush.sendNotification(
           JSON.parse(subscriptionRow.subscription),
           JSON.stringify({
-            title: "New Notification",
+            message: "Agri-Promis",
             icon: "/favicon.ico",
             body: message,
           }),
@@ -84,7 +84,7 @@ export const sendNotificationToAll = async (message: string) => {
         await webpush.sendNotification(
           JSON.parse(subscription.subscription),
           JSON.stringify({
-            title: "New Notification",
+            message: "Agri-Promis",
             icon: "/favicon.ico",
             body: message,
           }),

@@ -16,6 +16,11 @@ export default function PWA() {
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
+    // Register service worker
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js");
+    }
+
     // Check if app is already installed
     if (window.matchMedia("(display-mode: standalone)").matches) {
       setIsInstalled(true);

@@ -1,35 +1,25 @@
 self.addEventListener('push', function (event) {
-  if (event.data) {
-    let data;
-    try {
-      data = event.data.json()
-    } catch (e) {
-      data = { title: 'Notification', body: event.data.text() }
-    }
-    
-    const options = {
-      body: data.body,
-      icon: data.icon || '/icon.png',
-      badge: '/badge.png',
-      vibrate: [100, 50, 100],
-      data: {
-        dateOfArrival: Date.now(),
-        primaryKey: '2',
-      },
-    }
-    event.waitUntil(self.registration.showNotification(data.title, options))
-  }
-})
- 
-self.addEventListener('notificationclick', function (event) {
-  event.notification.close()
-  // Use the current origin instead of hardcoded localhost
-  event.waitUntil(clients.openWindow(self.location.origin))
-})
+  let title = 'New Notification';
+  let body = 'You have a new notification';
 
-// Handle messages from the client to skip waiting
-self.addEventListener('message', function (event) {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting()
+  if (event.data) {
+    try {
+      const data = event.data.json();
+      title = data.title || title;
+      body = data.body || body;
+    } catch (e) {
+      body = event.data.text() || body;
+    }
   }
-})
+
+  const options = {
+    body,
+    icon: '/icons/web-app-manifest-192x192.png',
+    badge: '/icons/favicon-96x96.png',
+    vibrate: [100, 50, 100],
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
+});

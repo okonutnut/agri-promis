@@ -24,7 +24,6 @@ const withPWA = nextPWA({
   },
   workboxOptions: {
     disableDevLogs: true,
-    importScripts: ["push-handler.js"],
     runtimeCaching: [
       {
         urlPattern: ({ request }: { request: Request }) => request.mode === "navigate",
@@ -99,13 +98,8 @@ const nextConfig: NextConfig = {
   },
 };
 
-const isDev = process.env.NODE_ENV === "development";
-const isPWADev = !!process.env.ENABLE_PWA_DEV;
 const analyzed = withBundleAnalyzer({ enabled: !!process.env.ANALYZE });
 
-// In normal dev (Turbopack): skip withPWA entirely to avoid webpack/Turbopack conflict.
-// In dev:pwa (ENABLE_PWA_DEV=true, no Turbopack): apply withPWA so the SW is generated.
 // In production: always apply withPWA.
-export default isDev && !isPWADev
-  ? analyzed(nextConfig)
-  : analyzed(withPWA(nextConfig));
+// In dev: always apply withPWA.
+export default analyzed(withPWA(nextConfig));
