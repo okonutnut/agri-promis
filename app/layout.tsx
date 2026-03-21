@@ -19,7 +19,6 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   title: "Agri-ProMIS",
   description: "Login page for Agri-ProMIS",
-  manifest: "/manifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -52,6 +51,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Agri-ProMIS" />
+        <link rel="manifest" href="/manifest.json" />
       </head>
       <body className={`${outfit.className} antialiased`}>
         <ReactQueryProvider>

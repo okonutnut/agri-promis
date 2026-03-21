@@ -1,5 +1,3 @@
-// @ts-check
-// next.config.ts
 import type { NextConfig } from "next";
 import withBundleAnalyzer from "@next/bundle-analyzer";
 import path from "path";
@@ -100,6 +98,4 @@ const nextConfig: NextConfig = {
 
 const analyzed = withBundleAnalyzer({ enabled: !!process.env.ANALYZE });
 
-// In production: always apply withPWA.
-// In dev: always apply withPWA.
 export default analyzed(withPWA(nextConfig));
