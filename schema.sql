@@ -100,6 +100,7 @@ CREATE TABLE public.project_location (
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   deleted_at timestamp with time zone,
+  contact_persons jsonb,
   CONSTRAINT project_location_pkey PRIMARY KEY (id),
   CONSTRAINT project_location_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.user_profile(id),
   CONSTRAINT project_location_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id)

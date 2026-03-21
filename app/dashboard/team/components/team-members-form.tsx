@@ -1,15 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import FormSelect from "@/components/custom/select/form-select";
-import { Loader2, Send } from "lucide-react";
-import { useUpdateMemberHook } from "@/components/hooks";
-import { UserProfileType } from "@/components/types";
-import { Label } from "@/components/ui/label";
-import ChangeStatusButton from "./change-status-button";
+import { UpdateMemberAction, InsertMemberAction } from "@/app/actions/MemberAction";
+import { useUniversalMutation } from "@/hooks/use-universal-mutation";
 import { useMemo, useState } from "react";
 import { useSupabaseSession } from "@/hooks/use-session";
 import CustomSheetFooter from "@/components/custom/layout/custom-sheet-footer";
@@ -17,10 +9,18 @@ import {
   useModal,
   useSheet,
 } from "@/components/custom/layout/custom-page-layout";
-import { useUniversalMutation } from "@/hooks/use-universal-mutation";
-import { InsertMemberAction } from "@/app/actions/MemberAction";
 import FormInput from "@/components/custom/input/form-input";
 import dynamic from "next/dynamic";
+import { UserProfileType } from "@/components/types";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { Loader2, Send } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import FormSelect from "@/components/custom/select/form-select";
+import ChangeStatusButton from "./change-status-button";
+import { Button } from "@/components/ui/button";
 const FTGPSCard = dynamic(
   () =>
     import("../../project-location/[locationID]/field-technicians/components/gps/gps-card"),
@@ -72,8 +72,6 @@ export function TeamMemberForm({ isAddMode, data }: TeamMemberFormProps) {
   });
 
   // INSERT MEMBER HOOK
-  // const { mutate: insertMutate, isPending: isInsertPending } =
-  //   useInsertMemberHook();
   const { mutate: insertMutate, isPending: isInsertPending } =
     useUniversalMutation({
       mutationFn: async (data: TeamMemberType) =>
@@ -83,7 +81,17 @@ export function TeamMemberForm({ isAddMode, data }: TeamMemberFormProps) {
 
   // UPDATE MEMBER HOOK
   const { mutate: updateMutate, isPending: isUpdatePending } =
-    useUpdateMemberHook();
+    useUniversalMutation({
+      mutationFn: async (data: TeamMemberType) =>
+        await UpdateMemberAction(data.id as string, data),
+      invalidateKeys: ["team-members"],
+      onSuccess: () => {
+        toast("Member updated successfully!");
+      },
+      onError: () => {
+        toast.error("Something went wrong. Please try again.");
+      },
+    });
 
   // CURRENT USER SESSION
   const { data: userData } = useSupabaseSession();

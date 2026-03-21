@@ -23,7 +23,9 @@ export async function SelectSettings(settingsName: string) {
     .from("settings")
     .select("*")
     .eq("settings_name", settingsName)
-    .single();
+    .maybeSingle();
+
+  console.log("SelectSettings", { data, error });
 
   if (error) throw error;
   return data ? JSON.parse(data.form_schema) : null;

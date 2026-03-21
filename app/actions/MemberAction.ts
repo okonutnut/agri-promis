@@ -7,6 +7,7 @@ import {
   sendNotificationToAll,
   sendNotificationToUser,
 } from "./NotificationAction";
+import { createAdminClient } from "@/utils/supabase/server-admin";
 
 // MEMBERS ACTIONS
 
@@ -56,7 +57,7 @@ export async function UpdateMemberAction(
   userId: string,
   data: Partial<UserProfileType>,
 ) {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   const { error: userError } = await supabase
     .from("user_profile")
@@ -102,7 +103,7 @@ export async function UpdateActiveStatusMemberAction(
   userId: string,
   status: number,
 ) {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   const { data, error: userError } = await supabase
     .from("user_profile")
