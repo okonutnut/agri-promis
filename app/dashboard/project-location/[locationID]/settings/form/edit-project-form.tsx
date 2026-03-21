@@ -13,6 +13,7 @@ import z from "zod";
 import FormInput from "@/components/custom/input/form-input";
 import FormTextarea from "@/components/custom/input/form-textarea";
 import FCASelector from "@/components/custom/dropdown/fca-selector";
+import ContactPersonsInput from "@/components/custom/input/contact-persons-input";
 import { useParams } from "next/navigation";
 import { useUniversalMutation } from "@/hooks/use-universal-mutation";
 import { toast } from "sonner";
@@ -26,6 +27,7 @@ const formSchema = z.object({
     .number()
     .min(1, "Progress indicator is required"),
   fca_ids: z.array(z.string()).optional(),
+  contact_persons: z.array(z.object({ name: z.string(), position: z.string() })).optional(),
   total_alloted_area: z.coerce.number().optional(),
   status: z
     .number()
@@ -52,6 +54,7 @@ export default function EditProjectNameForm({
       description: project.description || "",
       progress_indicator: project.progress_indicator || 1,
       fca_ids: project.fca_ids || [],
+      contact_persons: project.contact_persons || [],
       total_alloted_area: project.total_alloted_area || 0,
       status: project.status || 0,
     },
@@ -64,6 +67,7 @@ export default function EditProjectNameForm({
         description: data.description,
         progress_indicator: data.progress_indicator,
         fca_ids: data.fca_ids,
+        contact_persons: data.contact_persons,
         total_alloted_area: data.total_alloted_area,
         status: data.status,
       }),
@@ -96,6 +100,11 @@ export default function EditProjectNameForm({
           onChange={(value) => form.setValue("fca_ids", value)}
           defaultValue={project.fca_ids || []}
           readOnly={isPending}
+        />
+        <ContactPersonsInput
+          label="Contact Persons"
+          value={form.watch("contact_persons") || []}
+          onChange={(contacts) => form.setValue("contact_persons", contacts)}
         />
         <FormInput
           label="Total Allotment Area (in hectares)"

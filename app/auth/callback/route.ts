@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { ratelimit } from "@/lib/rate-limiter";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -7,6 +8,13 @@ export async function GET(request: Request) {
   let next = searchParams.get("next") ?? "/";
   if (!next.startsWith("/")) {
     next = "/";
+  }
+
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0] ?? "anonymous";
+  const { success } = await ratelimit.limit(ip);
+
+  if (!success) {
+    return NextResponse.redirect(`${origin}/?error=rate_limited`);
   }
 
   if (code) {

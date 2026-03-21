@@ -40,7 +40,7 @@ function MonitoringReportContent({
       dateString: string | undefined | null,
     ): boolean => {
       if (!dateString) return false;
-      if (yearFilter === "all") return true;
+      if (!yearFilter || yearFilter === "all") return true;
       const date = new Date(dateString);
       return date.getFullYear().toString() === yearFilter;
     };
@@ -73,9 +73,7 @@ function MonitoringReportContent({
 
 export default function MonitoringReportPage() {
   const { locationID } = useParams();
-  const [yearFilter, setYearFilter] = useState(
-    new Date().getFullYear().toString(),
-  );
+  const [yearFilter, setYearFilter] = useState("all");
 
   const { data, isLoading, error } = useRealtimeQuery({
     queryKey: ["monitoring-reports", locationID as string],

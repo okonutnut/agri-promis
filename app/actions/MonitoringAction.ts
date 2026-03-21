@@ -20,7 +20,7 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
       *,
       project_location:project_location(*, projects(*)),
       travel_order:travel_order(travel_order_no, travel_itinerary:travel_order_itinerary_items(*)),
-      reporter:user_profile!monitoring_reporter_id_fkey(fullname),
+      reporter:user_profile!monitoring_reporter_id_fkey(fullname, position),
       reviewedBy:user_profile!monitoring_reviewed_by_id_fkey(fullname)
     `,
     )
@@ -134,7 +134,7 @@ export async function SelectAllMonitoringReportsByProgramIDAction(
       *,
       project_location:project_location(*, projects(*)),
       travel_order:travel_order(travel_order_no, travel_itinerary:travel_order_itinerary_items(*)),
-      reporter:user_profile!monitoring_reporter_id_fkey(fullname),
+      reporter:user_profile!monitoring_reporter_id_fkey(fullname, position),
       reviewedBy:user_profile!monitoring_reviewed_by_id_fkey(fullname)
     `,
     )
@@ -220,7 +220,7 @@ export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
       *,
       project_location:project_location(*, projects(*)),
       travel_order:travel_order(travel_order_no, travel_itinerary:travel_order_itinerary_items(*)),
-      reporter:user_profile!monitoring_reporter_id_fkey(fullname),
+      reporter:user_profile!monitoring_reporter_id_fkey(fullname, position),
       reviewedBy:user_profile!monitoring_reviewed_by_id_fkey(fullname)
     `,
     )
@@ -308,7 +308,7 @@ export async function SelectAllMonitoringReportsByCurrentUserAction() {
       `*, 
       project:projects(project_name, fca_ids),
       travel_order:travel_order(travel_order_no, purpose),
-      reporter:user_profile!monitoring_reporter_id_fkey(fullname),
+      reporter:user_profile!monitoring_reporter_id_fkey(fullname, position),
       reviewedBy:user_profile!monitoring_reviewed_by_id_fkey(fullname)`,
     )
     .eq("reporter_id", userData.user.id)

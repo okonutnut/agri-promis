@@ -1,0 +1,1 @@
+self.addEventListener("push",function(t){let i="New Notification",a="You have a new notification";if(t.data)try{let e=t.data.json();i=e.title||i,a=e.body||a}catch(i){a=t.data.text()||a}let e={body:a,icon:"/icons/web-app-manifest-192x192.png",badge:"/icons/favicon-96x96.png",vibrate:[100,50,100]};t.waitUntil(self.registration.showNotification(i,e))});

@@ -73,6 +73,8 @@ export type ProjectLocationType = {
   total_alloted_area?: number;
   progress_indicator?: number;
   fca_ids?: string[];
+  fcaDetails?: FCAType[];
+  contact_persons?: { name: string; position: string }[];
   status?: number;
   programs?: ProgramType;
   locationData?: LocationType;

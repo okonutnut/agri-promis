@@ -14,11 +14,11 @@ import { format } from "date-fns";
 // Register the Cambria font
 Font.register({
   family: "Cambria",
-  src: "/fonts/cambria.ttf",
+  src: "/fonts/Cambria.woff",
 });
 Font.register({
   family: "Cambria",
-  src: "/fonts/cambriab.ttf",
+  src: "/fonts/Cambriab.woff",
   fontWeight: "bold",
 });
 
@@ -26,7 +26,7 @@ Font.register({
 const styles = StyleSheet.create({
   page: {
     paddingTop: 100,
-    paddingHorizontal: 30,
+    paddingHorizontal: 40,
     paddingBottom: 50,
     fontSize: 11,
     lineHeight: 1.5,
@@ -92,6 +92,7 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   label: { width: 120 },
+  purpose: { width: 300 },
   text: { marginBottom: 4 },
   subheading: { fontSize: 12, fontWeight: "bold", marginVertical: 6 },
   signature: { marginTop: 10, textAlign: "left" },
@@ -137,35 +138,54 @@ export default function MonitoringReportDocument({
 
         {/* DOCUMENT TITLE */}
         <View style={styles.section}>
-          <Text style={styles.heading}>MONITORING AND EVALUATION REPORT</Text>
+          <Text style={styles.heading}>MONITORING REPORT</Text>
         </View>
 
         {/* CONTACT */}
         <View style={styles.section}>
-          <View style={styles.row}>
-            <Text style={styles.label}>Municipality:</Text>
-            <Text>Bagabag, Nueva Vizcaya</Text>
-          </View>
-          <View style={styles.rowIndent}>
-            <Text style={styles.label}>Contact Person:</Text>
-            <Text>Charles S. Fernandez Jr. (Municipal Agriculturist)</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}></Text>
-            <Text>Helen S. Apolonio (Agricultural Extension Worker)</Text>
-          </View>
+          {(() => {
+            const locationParts = (data?.project_location?.location || "").split(", ");
+            const barangay = locationParts[0] || "N/A";
+            const municipality = locationParts[1] || "N/A";
+            return (
+              <>
+                <View style={styles.row}>
+                  <Text style={styles.label}>Municipality:</Text>
+                  <Text>{municipality}</Text>
+                </View>
+                <View style={styles.rowIndent}>
+                  <Text style={styles.label}>Barangay:</Text>
+                  <Text>{barangay}</Text>
+                </View>
+              </>
+            );
+          })()}
+          {data?.project_location?.contact_persons &&
+          data.project_location.contact_persons.length > 0 ? (
+            data.project_location.contact_persons.map((contact, index) => (
+              <View style={styles.row} key={index}>
+                <Text style={styles.label}>
+                  {index === 0 ? "Contact Person:" : ""}
+                </Text>
+                <Text>
+                  {contact.name}
+                  {contact.position ? ` (${contact.position})` : ""}
+                </Text>
+              </View>
+            ))
+          ) : null}
           <View
             style={[
               styles.rowIndent,
-              data?.project?.fcaDetails?.length === 1
+              (data?.project_location?.fcaDetails?.length ?? data?.project?.fcaDetails?.length ?? 0) === 1
                 ? { marginBottom: 8 }
                 : {},
             ]}
           >
             <Text style={styles.label}>FCA:</Text>
-            <Text>{data?.project?.fcaDetails?.[0]?.description ?? ""}</Text>
+            <Text>{data?.project_location?.fcaDetails?.[0]?.description ?? data?.project?.fcaDetails?.[0]?.description ?? ""}</Text>
           </View>
-          {data?.project?.fcaDetails?.slice(1).map((fca, index) => (
+          {(data?.project_location?.fcaDetails?.slice(1) ?? data?.project?.fcaDetails?.slice(1) ?? []).map((fca, index) => (
             <View style={styles.row} key={index}>
               <Text style={styles.label}></Text>
               <Text>{fca.description}</Text>
@@ -173,7 +193,7 @@ export default function MonitoringReportDocument({
           ))}
           <View style={styles.row}>
             <Text style={styles.label}>Purpose:</Text>
-            <Text>{data?.purpose ?? ""}</Text>
+            <Text style={styles.purpose}>{data?.purpose ?? ""}</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.label}>Date Monitored:</Text>
@@ -218,24 +238,47 @@ export default function MonitoringReportDocument({
         </View>
 
         {/* REMARKS */}
-        <View style={styles.section}>
-          <Text style={styles.subheading}>Remarks:</Text>
-          {data?.remarks && <Text>{data.remarks}</Text>}
-        </View>
-
-        {/* PHOTO DOCS */}
-        <View style={[styles.section, { marginTop: 20 }]}>
-          <Text style={styles.heading}>PHOTO DOCUMENTATION</Text>
-          <View style={styles.imageGrid}>
-            {data?.photo_url?.map((url, index) => (
-              <View key={index} style={styles.imageWrapper}>
-                <Image src={url} style={styles.image} />
-              </View>
-            ))}
+        {data?.remarks && (
+          <View style={styles.section}>
+            <Text style={styles.subheading}>Remarks:</Text>
+            <Text>{data.remarks}</Text>
           </View>
-        </View>
+        )}
 
-        <View style={[styles.section, { marginTop: 20 }]}>
+        <Image src="/assets/footer.jpg" style={styles.footerImage} fixed />
+      </Page>
+
+      {/* PHOTO DOCUMENTATION PAGE */}
+      {data?.photo_url && data.photo_url.length > 0 && (
+        <Page size="A4" style={styles.page}>
+          <Image src="/assets/header.jpg" style={styles.headerImage} fixed />
+          <Text style={styles.headerNumber} fixed>
+            DA-RF02.NVES.124.21
+          </Text>
+
+          <View style={[styles.section, { marginTop: 80 }]}>
+            <Text style={styles.heading}>PHOTO DOCUMENTATION</Text>
+            <View style={styles.imageGrid}>
+              {data.photo_url.map((url, index) => (
+                <View key={index} style={styles.imageWrapper}>
+                  <Image src={url} style={styles.image} />
+                </View>
+              ))}
+            </View>
+          </View>
+
+          <Image src="/assets/footer.jpg" style={styles.footerImage} fixed />
+        </Page>
+      )}
+
+      {/* SIGNATURE PAGE */}
+      <Page size="A4" style={styles.page}>
+        <Image src="/assets/header.jpg" style={styles.headerImage} fixed />
+        <Text style={styles.headerNumber} fixed>
+          DA-RF02.NVES.124.21
+        </Text>
+
+        <View style={styles.section}>
           <View
             style={{ borderBottom: "3px solid black", marginVertical: 10 }}
           ></View>

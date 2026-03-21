@@ -15,6 +15,7 @@ import FormInput from "../input/form-input";
 import FormTextarea from "../input/form-textarea";
 import LocationSelector from "@/components/custom/dropdown/location-selector";
 import FCASelector from "../dropdown/fca-selector";
+import ContactPersonsInput from "../input/contact-persons-input";
 import { toast } from "sonner";
 import { useModal } from "../layout/custom-page-layout";
 import Link from "next/link";
@@ -24,6 +25,7 @@ const formSchema = z.object({
   description: z.string().optional(),
   location: z.string().min(1, "Location is required"),
   fca_ids: z.array(z.string()).optional(),
+  contact_persons: z.array(z.object({ name: z.string(), position: z.string() })).optional(),
   total_alloted_area: z.coerce
     .number()
     .min(1, "At least one hectare per person is required"),
@@ -53,6 +55,7 @@ export default function CreateProjectLocationForm() {
       description: "",
       location: "",
       fca_ids: [],
+      contact_persons: [],
       total_alloted_area: 1,
       start_date: new Date().toISOString().slice(0, 10),
     },
@@ -105,6 +108,11 @@ export default function CreateProjectLocationForm() {
           {(form.formState.errors["location"] as { message?: string })?.message}
         </p>
         <FCASelector onChange={(fca) => form.setValue("fca_ids", fca)} />
+        <ContactPersonsInput
+          label="Contact Persons"
+          value={form.watch("contact_persons") || []}
+          onChange={(contacts) => form.setValue("contact_persons", contacts)}
+        />
         <FormInput
           label="Total Alloted Area (Hectares)"
           name="total_alloted_area"

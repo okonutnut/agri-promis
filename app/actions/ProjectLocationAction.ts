@@ -116,6 +116,7 @@ export async function EditProjectLocationAction(data: ProjectLocationType) {
       progress_indicator: data.progress_indicator,
       status: data.status,
       fca_ids: data.fca_ids,
+      contact_persons: data.contact_persons,
       total_alloted_area: data.total_alloted_area,
     })
     .eq("id", data.id);
