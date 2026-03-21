@@ -69,8 +69,7 @@ const withPWA = nextPWA({
         },
       },
     ],
-  },
-  buildExcludes: [/middleware-manifest\.json$/],
+  }
 } as ExtendedPWAOptions);
 
 const nextConfig: NextConfig = {

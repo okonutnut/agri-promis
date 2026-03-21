@@ -1,6 +1,6 @@
 "use client";
 
-import MonitoringReportReactPDF from "@/components/print-templates/monitoring-report-react-pdf";
+import MonitoringReportDocument from "@/components/print-templates/monitoring-reports-document";
 import { MonitoringReportType } from "@/components/types";
 import PrintDownloadButton from "@/components/custom/print/print-download-button";
 
@@ -25,7 +25,7 @@ export default function PrintMonitoringReportButton({
 }: PrintMonitoringReportButtonProps) {
   return (
     <PrintDownloadButton
-      document={<MonitoringReportReactPDF data={data} />}
+      document={<MonitoringReportDocument data={data} />}
       fileNamePrefix="monitoring-report"
       printBtnName={btnName}
       variant={variant}
