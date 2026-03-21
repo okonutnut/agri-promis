@@ -19,7 +19,7 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   title: "Agri-ProMIS",
   description: "Login page for Agri-ProMIS",
-  manifest: "/manifest.json",
+  manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
