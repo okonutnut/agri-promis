@@ -4,7 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { FCAType, MonitoringReportType } from "../../components/types";
 import { CheckUserAssignedToProgramByProjectLocationAction } from "@/app/actions/AssignedProgramAction";
-import { sendNotificationToUser } from "./NotificationAction";
+import { sendNotificationToAll, sendNotificationToUser } from "./NotificationAction";
 
 // MONITORING REPORT ACTIONS
 export async function SelectAllMonitoringReportsByProjectIDAction(
@@ -67,16 +67,16 @@ export async function SelectAllMonitoringReportsByProjectIDAction(
   const reportsWithExtras = data.map((report) => {
     const signedPhotoUrls = report.photo_url
       ? report.photo_url
-          .map((path: string) => signedUrlMap.get(path))
-          .filter((url: string | null): url is string => url !== null)
+        .map((path: string) => signedUrlMap.get(path))
+        .filter((url: string | null): url is string => url !== null)
       : [];
 
     const fcaDetails = report.project_location?.fca_ids
       ? report.project_location.fca_ids
-          .map((id: string) => fcaMap.get(id))
-          .filter((fca: FCAType): fca is (typeof fcaData)[number] =>
-            Boolean(fca),
-          )
+        .map((id: string) => fcaMap.get(id))
+        .filter((fca: FCAType): fca is (typeof fcaData)[number] =>
+          Boolean(fca),
+        )
       : [];
 
     return {
@@ -178,16 +178,16 @@ export async function SelectAllMonitoringReportsByProgramIDAction(
   const reportsWithExtras = data.map((report) => {
     const signedPhotoUrls = report.photo_url
       ? report.photo_url
-          .map((path: string) => signedUrlMap.get(path))
-          .filter((url: string | null): url is string => url !== null)
+        .map((path: string) => signedUrlMap.get(path))
+        .filter((url: string | null): url is string => url !== null)
       : [];
 
     const fcaDetails = report.project_location?.fca_ids
       ? report.project_location.fca_ids
-          .map((id: string) => fcaMap.get(id))
-          .filter((fca: FCAType): fca is (typeof fcaData)[number] =>
-            Boolean(fca),
-          )
+        .map((id: string) => fcaMap.get(id))
+        .filter((fca: FCAType): fca is (typeof fcaData)[number] =>
+          Boolean(fca),
+        )
       : [];
 
     return {
@@ -268,16 +268,16 @@ export async function SelectAllMonitoringReportsByProjectIDAndUserAction(
   const reportsWithExtras = data.map((report) => {
     const signedPhotoUrls = report.photo_url
       ? report.photo_url
-          .map((path: string) => signedUrlMap.get(path))
-          .filter((url: string | null): url is string => url !== null)
+        .map((path: string) => signedUrlMap.get(path))
+        .filter((url: string | null): url is string => url !== null)
       : [];
 
     const fcaDetails = report.project_location?.fca_ids
       ? report.project_location.fca_ids
-          .map((id: string) => fcaMap.get(id))
-          .filter((fca: FCAType): fca is (typeof fcaData)[number] =>
-            Boolean(fca),
-          )
+        .map((id: string) => fcaMap.get(id))
+        .filter((fca: FCAType): fca is (typeof fcaData)[number] =>
+          Boolean(fca),
+        )
       : [];
 
     return {
@@ -358,16 +358,16 @@ export async function SelectAllMonitoringReportsByCurrentUserAction() {
   const reportsWithExtras = data.map((report) => {
     const signedPhotoUrls = report.photo_url
       ? report.photo_url
-          .map((path: string) => signedUrlMap.get(path))
-          .filter((url: string | null): url is string => url !== null)
+        .map((path: string) => signedUrlMap.get(path))
+        .filter((url: string | null): url is string => url !== null)
       : [];
 
     const fcaDetails = report.project?.fca_ids
       ? report.project.fca_ids
-          .map((id: string) => fcaMap.get(id))
-          .filter((fca: FCAType): fca is (typeof fcaData)[number] =>
-            Boolean(fca),
-          )
+        .map((id: string) => fcaMap.get(id))
+        .filter((fca: FCAType): fca is (typeof fcaData)[number] =>
+          Boolean(fca),
+        )
       : [];
 
     return {
@@ -479,36 +479,9 @@ export async function InsertMonitoringReportAction({
   );
 
   try {
-    const { data: projectData, error: projectError } = await supabase
-      .from("project_location")
-      .select("project_id")
-      .eq("id", project_location_id)
-      .single();
-
-    if (projectError) throw projectError;
-
-    const { data: programData, error: programError } = await supabase
-      .from("projects")
-      .select("program_id")
-      .eq("id", projectData.project_id)
-      .single();
-
-    if (programError) throw programError;
-
-    const { data: adminData, error: adminError } = await supabase
-      .from("programs")
-      .select("admin_id")
-      .eq("id", programData.program_id)
-      .single();
-
-    if (adminError) throw adminError;
-
-    if (adminData?.admin_id) {
-      await sendNotificationToUser(
-        `New monitoring report submitted for ${project_location_data?.projects[0]?.project_name ?? "a project"}, ${project_location_data?.location ?? "location"}.`,
-        adminData.admin_id,
-      );
-    }
+    await sendNotificationToAll(
+      `New monitoring report submitted for ${project_location_data?.location ?? "location"}.`,
+    );
   } catch (notificationError) {
     console.error(
       "Failed to send monitoring submission notification:",

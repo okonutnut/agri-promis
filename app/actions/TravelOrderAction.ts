@@ -3,7 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { InsertActivityLogAction } from "@/app/actions/ActivityLogAction";
 import { TravelOrderType } from "../../components/types";
-import { sendNotificationToUser } from "./NotificationAction";
+import { sendNotificationToAll, sendNotificationToUser } from "./NotificationAction";
 
 // TRAVEL ORDER ACTIONS
 export async function InsertTravelOrderAction(data: TravelOrderType) {
@@ -72,9 +72,8 @@ export async function InsertTravelOrderAction(data: TravelOrderType) {
 
   // Send Notification (non-critical, don't fail if this errors)
   try {
-    await sendNotificationToUser(
+    await sendNotificationToAll(
       `Your travel order has been created successfully.`,
-      user!.id,
     );
   } catch (error) {
     // Log error but don't fail the operation
