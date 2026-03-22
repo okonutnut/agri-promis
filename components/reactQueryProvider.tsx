@@ -12,7 +12,7 @@ export default function ReactQueryProvider({
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 30 * 1000,        // 30s — realtime handles freshness
+            staleTime: 0,
             gcTime: 5 * 60 * 1000,       // Keep in cache for 5 minutes
             refetchOnWindowFocus: false,  // Realtime handles this
             refetchOnReconnect: true,     // Refetch when network reconnects

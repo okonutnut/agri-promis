@@ -24,7 +24,7 @@ export function useUniversalRealtime<T>({
   queryKey,
   queryFn,
   tables,
-  staleTime = 30_000,
+  staleTime = 0,
   networkMode = "online",
   retryAttempts = 5,
   retryDelay = 1000,

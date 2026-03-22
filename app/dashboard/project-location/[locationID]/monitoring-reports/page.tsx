@@ -51,6 +51,9 @@ function MonitoringReportContent({
 
   if (!data) return null;
 
+  // Ensure YearsDropdown defaults to "all"
+  // (Handled in parent: useState("all") and YearsDropdown onChange)
+
   return (
     <div className="space-y-4">
       <DataTable

@@ -24,7 +24,7 @@ export function useRealtimeQuery<T>({
   table,
   queryFn,
   schema = "public",
-  staleTime = 30_000,
+  staleTime = 0,
   refetchInterval,
   networkMode = "online",
   retryAttempts = 5,

@@ -15,7 +15,7 @@ export function useSupabaseSession() {
       const { data } = await supabase.auth.getSession();
       return data.session;
     },
-    staleTime: Infinity, // session doesn't "expire" in cache
+    staleTime: 0,
   });
 
   useEffect(() => {

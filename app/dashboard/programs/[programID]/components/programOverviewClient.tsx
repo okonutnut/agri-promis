@@ -25,7 +25,7 @@ export default function ProgramOverviewClient() {
     queryKey: ["programDashboardData", programID as string],
     queryFn: () => SelectProgramDashboardDataAction(programID as string),
     table: "programs",
-    staleTime: 60000, // Cache for 1 minute since this is summary data
+    staleTime: 0,
   });
 
   const stats = useMemo(() => {

@@ -26,20 +26,16 @@ interface LocationSelectorProps {
 export default function ProjectYearsDropdown({
   onChange,
 }: LocationSelectorProps) {
-  // Set default to current year if available
-  const currentYear = new Date().getFullYear().toString();
-  const defaultYear = years.some((m) => m.value === currentYear)
-    ? currentYear
-    : years[0]?.value || "";
+  // Default to "all"
+  const defaultYear = "all";
   const [year, setYear] = useState<string>(defaultYear);
   const [openYear, setOpenYear] = useState(false);
 
   // Call onChange with default year on mount to initialize parent state
   useEffect(() => {
-    if (defaultYear) {
-      onChange?.(defaultYear);
-    }
-  }, []); // Empty dependency array - only run on mount
+    onChange?.(defaultYear);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run on mount
 
   function handleYearChange(value: string) {
     setYear(value);
