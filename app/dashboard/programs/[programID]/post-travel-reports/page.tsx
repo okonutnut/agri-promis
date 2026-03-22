@@ -8,6 +8,7 @@ import CustomPageLayout, {
 import { useParams } from "next/navigation";
 import { getProgramNavItems } from "@/components/sidebar/navitems";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
+import { usePreGenerateSummaries } from "@/hooks/use-pre-generate-summaries";
 import { PostTravelForm } from "./components/post-travel-form";
 import { SelectAllPostTravelReportsByProgramIDAction } from "@/app/actions/PostTravelAction";
 import { CreatePostTravelForm } from "@/app/field-technician/post-travel-reports/components/create-post-travel-form";
@@ -80,6 +81,11 @@ export default function PostTravelReportsPage() {
     queryFn: () =>
       SelectAllPostTravelReportsByProgramIDAction(programID as string),
     table: "post_travel",
+  });
+
+  usePreGenerateSummaries({
+    reportType: "post-travel",
+    reports: data,
   });
 
   return (

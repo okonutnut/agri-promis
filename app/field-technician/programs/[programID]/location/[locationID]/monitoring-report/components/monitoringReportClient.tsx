@@ -10,6 +10,7 @@ import CustomPageLayout, {
 } from "@/components/custom/layout/custom-page-layout";
 import { useMemo, useState } from "react";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
+import { usePreGenerateSummaries } from "@/hooks/use-pre-generate-summaries";
 import { SelectAllMonitoringReportsByProjectIDAndUserAction } from "@/app/actions/MonitoringAction";
 import { SelectProjectDetailsByProjectLocationIDAction } from "@/app/actions/ProjectAction";
 import { CheckUserAssignedToProgramByProjectLocationAction } from "@/app/actions/AssignedProgramAction";
@@ -113,19 +114,25 @@ function MonitoringReportContent({
 
 export default function MonitoringReportClient() {
   const { programID, locationID } = useParams();
-  
-  const { data: isAssignedToProgram, isLoading: isCheckingAccess } = useRealtimeQuery({
-    queryKey: ["user-program-assignment-page", locationID as string],
-    queryFn: () =>
-      CheckUserAssignedToProgramByProjectLocationAction(locationID as string),
-    table: "assigned_fieldtechnicians",
-  });
+
+  const { data: isAssignedToProgram, isLoading: isCheckingAccess } =
+    useRealtimeQuery({
+      queryKey: ["user-program-assignment-page", locationID as string],
+      queryFn: () =>
+        CheckUserAssignedToProgramByProjectLocationAction(locationID as string),
+      table: "assigned_fieldtechnicians",
+    });
 
   const { data, isLoading, error } = useRealtimeQuery({
     queryKey: ["monitoring-report", locationID as string],
     queryFn: () =>
       SelectAllMonitoringReportsByProjectIDAndUserAction(locationID as string),
     table: "monitoring",
+  });
+
+  usePreGenerateSummaries({
+    reportType: "monitoring",
+    reports: data,
   });
 
   if (isAssignedToProgram === false && !isCheckingAccess) {

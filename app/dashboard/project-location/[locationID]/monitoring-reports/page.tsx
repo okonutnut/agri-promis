@@ -11,6 +11,7 @@ import { useParams } from "next/navigation";
 import { getProjectLocationNavItems } from "@/components/sidebar/navitems";
 import { MonitoringReportType } from "@/components/types";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
+import { usePreGenerateSummaries } from "@/hooks/use-pre-generate-summaries";
 import { SelectAllMonitoringReportsByProjectIDAction } from "@/app/actions/MonitoringAction";
 import YearsDropdown from "@/components/custom/dropdown/years-dropdown";
 import SearchInput from "@/components/custom/input/search-input";
@@ -80,6 +81,11 @@ export default function MonitoringReportPage() {
     queryFn: () =>
       SelectAllMonitoringReportsByProjectIDAction(locationID as string),
     table: "monitoring",
+  });
+
+  usePreGenerateSummaries({
+    reportType: "monitoring",
+    reports: data,
   });
 
   console.log("Monitoring reports data:", data);

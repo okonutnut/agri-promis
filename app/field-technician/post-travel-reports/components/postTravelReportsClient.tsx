@@ -7,6 +7,7 @@ import CustomPageLayout, {
 } from "@/components/custom/layout/custom-page-layout";
 import { getUserDashboardNavItems } from "@/components/sidebar/navitems";
 import { useRealtimeQuery } from "@/hooks/use-realtime";
+import { usePreGenerateSummaries } from "@/hooks/use-pre-generate-summaries";
 import { CreatePostTravelForm } from "./create-post-travel-form";
 import { SelectAllPostTravelReportsByCurrentUserAction } from "@/app/actions/PostTravelAction";
 import { PostTravelWithDetails } from "@/app/types";
@@ -82,6 +83,11 @@ export default function PostTravelReportsClient() {
     queryKey: ["post_travel_reports"],
     queryFn: () => SelectAllPostTravelReportsByCurrentUserAction(),
     table: "post_travel",
+  });
+
+  usePreGenerateSummaries({
+    reportType: "post-travel",
+    reports: data,
   });
 
   return (
